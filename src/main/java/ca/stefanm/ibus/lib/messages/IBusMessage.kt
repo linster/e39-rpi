@@ -16,6 +16,11 @@ open class IBusMessage(
     val data: UByteArray
 ) {
 
+    override fun toString(): String {
+        return "IBusMessage( sourceDevice=${sourceDevice.name}, destDevice=${destinationDevice.name}, " +
+                "data=${data.map { it.toInt().toString(16) }}"
+    }
+
     companion object {
         fun UByteArray.toIbusMessage() : IBusMessage? {
             val buffer = Buffer().write(this.toByteArray())

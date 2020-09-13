@@ -5,7 +5,6 @@ import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.lib.platform.LongRunningService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
 import okio.Buffer
 import javax.inject.Inject
 import javax.inject.Named
@@ -16,15 +15,25 @@ class IBusInputMessageParser @Inject constructor(
     @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher,
-    private val indexSelectedMessageParser: IndexSelectedMessageParser
+    indexSelectedMessageParser: IndexSelectedMessageParser,
+    mflKeyMessageParser: MflKeyMessageParser,
+    rtButtonKeyMessageParser: RtButtonKeyMessageParser
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
+
+    private val messageMatchers = listOf(
+        indexSelectedMessageParser,
+        mflKeyMessageParser,
+        rtButtonKeyMessageParser
+    )
 
     @ExperimentalCoroutinesApi
     override suspend fun doWork() {
         inputChannel.poll()?.let {
-            if (indexSelectedMessageParser.rawMessageMatches(it)){
-                indexSelectedMessageParser.messageToInputEvent(it)?.let {
-                    inputEventChannel.send(it)
+            messageMatchers.forEach { matcher ->
+                if (matcher.rawMessageMatches(it)){
+                    matcher.messageToInputEvent(it)?.let {event ->
+                        inputEventChannel.send(event)
+                    }
                 }
             }
         }
@@ -34,11 +43,11 @@ class IBusInputMessageParser @Inject constructor(
         fun rawMessageMatches(message: IBusMessage) : Boolean
         fun messageToInputEvent(message: IBusMessage) : InputEvent?
 
-        fun ByteArray.startsWith(vararg bytes: Byte) : Boolean {
+        fun UByteArray.startsWith(vararg bytes: Int) : Boolean {
             var startsWith = false
 
             bytes.forEachIndexed { i , byte ->
-                if (this.getOrNull(i) == byte) {
+                if (this.getOrNull(i) == byte.toUByte()) {
                     startsWith = startsWith && true
                 }
             }
@@ -50,7 +59,7 @@ class IBusInputMessageParser @Inject constructor(
         override fun rawMessageMatches(message: IBusMessage): Boolean {
             return message.sourceDevice == IBusDevice.NAV_VIDEOMODULE
                     && message.destinationDevice == IBusDevice.RADIO
-                    &&  message.data.toByteArray().startsWith(0x23, 0x62, 0x30)
+                    &&  message.data.startsWith(0x23, 0x62, 0x30)
         }
 
         override fun messageToInputEvent(message: IBusMessage): InputEvent? {
@@ -80,5 +89,34 @@ class IBusInputMessageParser @Inject constructor(
             }
         }
         enum class EventType { SELECTED, RELEASE }
+    }
+
+    class MflKeyMessageParser @Inject constructor() : InputMessageMatcher {
+        override fun rawMessageMatches(message: IBusMessage): Boolean {
+            return message.sourceDevice == IBusDevice.MFL
+                    && message.destinationDevice == IBusDevice.RADIO
+        }
+
+        override fun messageToInputEvent(message: IBusMessage): InputEvent? {
+            return when (message.data.toList().map { it.toInt() }) {
+                listOf(0x3B, 0x01) -> InputEvent.NextTrack
+                listOf(0x3B, 0x08) -> InputEvent.PrevTrack
+                else -> null
+            }
+        }
+    }
+
+    class RtButtonKeyMessageParser @Inject constructor() : InputMessageMatcher {
+        override fun rawMessageMatches(message: IBusMessage): Boolean {
+            return message.sourceDevice == IBusDevice.MFL
+                    && message.destinationDevice == IBusDevice.TELEPHONE
+        }
+
+        override fun messageToInputEvent(message: IBusMessage): InputEvent? {
+            return when (message.data.toList().map { it.toInt() }) {
+                listOf(0x3B, 0x40) -> InputEvent.RTButton
+                else -> null
+            }
+        }
     }
 }

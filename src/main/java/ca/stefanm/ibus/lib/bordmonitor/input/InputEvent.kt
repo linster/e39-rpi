@@ -4,6 +4,7 @@ sealed class InputEvent {
 
     object PrevTrack : InputEvent()
     object NextTrack : InputEvent()
+    object RTButton : InputEvent()
 
     object BMBTMenuPressed : InputEvent()
     object BMBTPhonePressed : InputEvent()

@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.lib.platform
 
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
+import ca.stefanm.ibus.lib.cli.debugPrinters.IbusInputEventCliPrinter
 import ca.stefanm.ibus.lib.cli.debugPrinters.PlatformMetronomeLogger
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.cli.debugPrinters.IncomingIbusMessageCliPrinter
@@ -52,16 +53,18 @@ class PlatformServiceRunner @Inject constructor(
     platformMetronomeLogger: PlatformMetronomeLogger,
     incomingIbusMessageCliPrinter: IncomingIbusMessageCliPrinter,
     serialPublisherService: SerialPublisherService,
-    serialListenerService: SerialListenerService
+    serialListenerService: SerialListenerService,
+    ibusInputEventCliPrinter: IbusInputEventCliPrinter
 ) : Service {
 
     private val services = listOf<Service>(
         coolingFanController,
         iBusInputMessageParser,
         incomingIbusMessageCliPrinter,
-        platformMetronomeLogger,
+//        platformMetronomeLogger,
         serialPublisherService,
-        serialListenerService
+        serialListenerService,
+        ibusInputEventCliPrinter
     )
 
     override fun onCreate() {
