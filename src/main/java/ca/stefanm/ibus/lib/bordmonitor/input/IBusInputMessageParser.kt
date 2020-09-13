@@ -50,12 +50,12 @@ class IBusInputMessageParser @Inject constructor(
         override fun rawMessageMatches(message: IBusMessage): Boolean {
             return message.sourceDevice == IBusDevice.NAV_VIDEOMODULE
                     && message.destinationDevice == IBusDevice.RADIO
-                    &&  message.data.startsWith(0x23, 0x62, 0x30)
+                    &&  message.data.toByteArray().startsWith(0x23, 0x62, 0x30)
         }
 
         override fun messageToInputEvent(message: IBusMessage): InputEvent? {
             with(Buffer()) {
-                write(message.data)
+                write(message.data.toByteArray())
 
                 assert(readByte() == 0x23.toByte())
                 assert(readByte() == 0x62.toByte())

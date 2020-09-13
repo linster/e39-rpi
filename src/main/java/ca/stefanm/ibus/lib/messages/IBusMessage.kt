@@ -3,32 +3,41 @@ package ca.stefanm.ibus.lib.messages
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusDevice
 import okio.Buffer
 
+
+fun UByte.toDeviceIdString() : String = IBusDevice.values()
+    .firstOrNull { it.deviceId == this.toInt() }?.name ?: this.toString(16).capitalize()
+
+fun UByte.toDevice() : IBusDevice? =
+    IBusDevice.values().firstOrNull { it.deviceId.toUByte() == this }
+
 open class IBusMessage(
     val sourceDevice: IBusDevice,
     val destinationDevice: IBusDevice,
-    val data: ByteArray
+    val data: UByteArray
 ) {
 
     companion object {
-        fun ByteArray.toIbusMessage() : IBusMessage? {
-            val buffer = Buffer().write(this)
+        fun UByteArray.toIbusMessage() : IBusMessage? {
+            val buffer = Buffer().write(this.toByteArray())
 
-            val sourceDeviceRaw = buffer.readByte()
-            val packetLength = buffer.readByte()
-            val destDeviceRaw = buffer.readByte()
-            // subtract 2 because length includes checksum and dest address
-            val data = buffer.readByteArray(packetLength.toLong() - 2)
+            val sourceDeviceRaw = buffer.readByte().toUByte()
+            val packetLength = buffer.readByte().toUByte().toInt()
+            val destDeviceRaw = buffer.readByte().toUByte()
 
-            var checksum = 0x00
-            forEach { byte -> checksum = checksum xor byte.toInt() }
-            //https://github.com/tedsalmon/DroidIBus/blob/master/app/src/main/java/com/ibus/droidibus/ibus/IBusMessageService.java#L242
-            if (checksum.toByte() != 0x00.toByte()) {
+            val data = if (packetLength <= 2) {
+                ubyteArrayOf()
+            } else {
+                // subtract 2 because length includes checksum and dest address
+                buffer.readByteArray(packetLength.toLong() - 2).toUByteArray()
+            }
+
+            if (sourceDeviceRaw.toDevice() == null || destDeviceRaw.toDevice() == null) {
                 return null
             }
 
             return IBusMessage(
-                sourceDevice = IBusDevice.values().first { it.deviceId == sourceDeviceRaw.toInt() },
-                destinationDevice = IBusDevice.values().first { it.deviceId == destDeviceRaw.toInt() },
+                sourceDevice = sourceDeviceRaw.toDevice()!!,
+                destinationDevice = destDeviceRaw.toDevice()!!,
                 data = data
             )
         }
@@ -48,7 +57,7 @@ open class IBusMessage(
             writeByte(length)
 
             writeByte(destinationDevice.deviceId)
-            writeBytes(*data)
+            writeBytes(*data.toByteArray())
             //Xor checksum byte goes here.
             var checksum = 0x00
             this.clone().readByteArray().forEach { byte -> checksum = checksum xor byte.toInt() }

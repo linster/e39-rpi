@@ -23,7 +23,7 @@ class Title0Message(
         writeByte(0x62)
         writeByte(0x30)
         appendString(label)
-    }.readByteArray()
+    }.readByteArray().toUByteArray()
 ), LengthConstraintValidator {
     override fun isLabelLengthValid()
             = label.length <= lengthConstraints.AREA_0
@@ -50,7 +50,7 @@ class TitleNMessage(
             else -> throw IllegalArgumentException("Invalid title")
         })
         appendString(label)
-    }.readByteArray()
+    }.readByteArray().toUByteArray()
 ), LengthConstraintValidator {
     override fun isLabelLengthValid()
             = label.length <= lengthConstraints.getAllowedLength(n)
@@ -76,7 +76,7 @@ class IndexMessage(
             4 to 0x44, 9 to 0x49
         )[n] ?: throw IllegalArgumentException("Invalid n selected"))
         appendString(label)
-    }.readByteArray()
+    }.readByteArray().toUByteArray()
 ), LengthConstraintValidator {
     override fun isLabelLengthValid()
             = label.length <= lengthConstraints.INDEX_0_9
@@ -91,5 +91,5 @@ object IndexRefreshMessage : IBusMessage(
         writeByte(0x01)
         writeByte(0x00)
         writeByte(0x09)
-    }.readByteArray()
+    }.readByteArray().toUByteArray()
 )

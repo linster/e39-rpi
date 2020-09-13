@@ -1,8 +1,9 @@
 package ca.stefanm.ibus.lib.platform
 
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
+import ca.stefanm.ibus.lib.cli.debugPrinters.PlatformMetronomeLogger
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IncomingIbusMessageCliPrinter
+import ca.stefanm.ibus.lib.cli.debugPrinters.IncomingIbusMessageCliPrinter
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
 import ca.stefanm.ibus.lib.logging.Logger
@@ -41,6 +42,8 @@ abstract class LongRunningService constructor(
 
     abstract suspend fun doWork()
 }
+
+interface CliPrinterService
 
 class PlatformServiceRunner @Inject constructor(
     private val coroutineScope: CoroutineScope,

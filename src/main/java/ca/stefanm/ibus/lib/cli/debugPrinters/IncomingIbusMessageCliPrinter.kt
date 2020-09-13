@@ -1,8 +1,9 @@
-package ca.stefanm.ibus.lib.hardwareDrivers.ibus
+package ca.stefanm.ibus.lib.cli.debugPrinters
 
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
+import ca.stefanm.ibus.lib.platform.CliPrinterService
 import ca.stefanm.ibus.lib.platform.LongRunningService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +16,7 @@ class IncomingIbusMessageCliPrinter @Inject constructor(
     private val logger : Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) {
+) : LongRunningService(coroutineScope, parsingDispatcher), CliPrinterService {
 
     override suspend fun doWork() {
         inputChannel.poll()?.let {

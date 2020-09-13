@@ -35,7 +35,7 @@ class TelephoneLedManager @Inject constructor(
     ) : IBusMessage(
         sourceDevice = IBusDevice.MID,
         destinationDevice = IBusDevice.RADIO,
-        data = arrayOf(ledStatuses.toByte()).toByteArray()
+        data = arrayOf(ledStatuses.toUByte()).toUByteArray()
     )
 
     suspend fun setTelephoneLeds(redStatus : LedState, orangeStatus : LedState, greenStatus : LedState) {
@@ -61,7 +61,7 @@ class TelephoneLedManager @Inject constructor(
 }
 
 @ExperimentalStdlibApi
-fun Array<TelephoneLedManager.LedStatus>.toByte() : Byte {
+fun Array<TelephoneLedManager.LedStatus>.toUByte() : UByte {
     var result = 0x00.toByte()
     this.forEach {
         val nibble = when(it.state) {
@@ -77,5 +77,5 @@ fun Array<TelephoneLedManager.LedStatus>.toByte() : Byte {
             }
         )
     }
-    return result
+    return result.toUByte()
 }
