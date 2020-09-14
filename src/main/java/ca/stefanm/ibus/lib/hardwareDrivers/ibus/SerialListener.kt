@@ -3,7 +3,7 @@ package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import ca.stefanm.ibus.lib.platform.LongRunningService
+import ca.stefanm.ibus.lib.platform.LongRunningLoopingService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +17,7 @@ class SerialListenerService @Inject constructor(
     private val serialPortReader: SerialPortReader,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) {
+) : LongRunningLoopingService(coroutineScope, parsingDispatcher) {
     override suspend fun doWork() {
         serialPortReader.readMessages().collect {
             logger.d("SerialListenerService", "Broadcasting received message: $it")

@@ -1,15 +1,5 @@
 package ca.stefanm.ibus.lib.bordmonitor.clock
 
-import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.lib.bordmonitor.input.IBusDevice
-import ca.stefanm.ibus.lib.messages.IBusMessage
-import ca.stefanm.ibus.lib.platform.LongRunningService
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import javax.inject.Inject
-import javax.inject.Named
-
 
 //class ClockUpdateManager @Inject constructor(
 //    @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) private val messagesOut : Channel<IBusMessage>,

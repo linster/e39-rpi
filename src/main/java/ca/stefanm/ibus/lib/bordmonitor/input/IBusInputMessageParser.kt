@@ -1,10 +1,14 @@
 package ca.stefanm.ibus.lib.bordmonitor.input
 
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
+import ca.stefanm.ibus.lib.platform.LongRunningLoopingService
 import ca.stefanm.ibus.lib.platform.LongRunningService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
 import okio.Buffer
 import javax.inject.Inject
 import javax.inject.Named
@@ -13,22 +17,25 @@ import javax.inject.Named
 class IBusInputMessageParser @Inject constructor(
     @Named(ApplicationModule.IBUS_MESSAGE_INPUT_CHANNEL) private val inputChannel : Channel<IBusMessage>,
     @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
+    private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher,
     indexSelectedMessageParser: IndexSelectedMessageParser,
     mflKeyMessageParser: MflKeyMessageParser,
-    rtButtonKeyMessageParser: RtButtonKeyMessageParser
+    rtButtonKeyMessageParser: RtButtonKeyMessageParser,
+    bmBtSeekButtonMessageParser: BmBtSeekButtonMessageParser
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     private val messageMatchers = listOf(
         indexSelectedMessageParser,
         mflKeyMessageParser,
-        rtButtonKeyMessageParser
+        rtButtonKeyMessageParser,
+        bmBtSeekButtonMessageParser
     )
 
     @ExperimentalCoroutinesApi
     override suspend fun doWork() {
-        inputChannel.poll()?.let {
+        inputChannel.consumeAsFlow().collect {
             messageMatchers.forEach { matcher ->
                 if (matcher.rawMessageMatches(it)){
                     matcher.messageToInputEvent(it)?.let {event ->
@@ -115,6 +122,21 @@ class IBusInputMessageParser @Inject constructor(
         override fun messageToInputEvent(message: IBusMessage): InputEvent? {
             return when (message.data.toList().map { it.toInt() }) {
                 listOf(0x3B, 0x40) -> InputEvent.RTButton
+                else -> null
+            }
+        }
+    }
+
+    class BmBtSeekButtonMessageParser @Inject constructor() : InputMessageMatcher {
+        override fun rawMessageMatches(message: IBusMessage): Boolean {
+            return message.sourceDevice == IBusDevice.BOARDMONITOR_BUTTONS
+                    && message.destinationDevice == IBusDevice.RADIO
+        }
+
+        override fun messageToInputEvent(message: IBusMessage): InputEvent? {
+            return when (message.data.toList().map { it.toInt() }) {
+                listOf(0x48, 0x00) -> InputEvent.NextTrack
+                listOf(0x48, 0x10) -> InputEvent.PrevTrack
                 else -> null
             }
         }

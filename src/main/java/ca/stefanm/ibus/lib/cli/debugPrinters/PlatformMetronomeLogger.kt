@@ -2,7 +2,7 @@ package ca.stefanm.ibus.lib.cli.debugPrinters
 
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.platform.CliPrinterService
-import ca.stefanm.ibus.lib.platform.LongRunningService
+import ca.stefanm.ibus.lib.platform.LongRunningLoopingService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -13,7 +13,7 @@ class PlatformMetronomeLogger @Inject constructor(
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher),
+) : LongRunningLoopingService(coroutineScope, parsingDispatcher),
     CliPrinterService {
 
     var prevTime : Long = 0L

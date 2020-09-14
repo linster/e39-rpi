@@ -4,10 +4,13 @@ import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.platform.CliPrinterService
+import ca.stefanm.ibus.lib.platform.LongRunningLoopingService
 import ca.stefanm.ibus.lib.platform.LongRunningService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -19,7 +22,7 @@ class IbusInputEventCliPrinter @Inject constructor(
 ) : LongRunningService(coroutineScope, parsingDispatcher), CliPrinterService {
 
     override suspend fun doWork() {
-        inputEventChannel.poll()?.let {
+        inputEventChannel.consumeAsFlow().collect {
             logger.d("INPUT", "Got Input event: $it")
         }
     }

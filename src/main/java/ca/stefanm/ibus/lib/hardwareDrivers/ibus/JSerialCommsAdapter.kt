@@ -131,14 +131,17 @@ class JSerialCommsReader @Inject constructor(
 
             val reAssembledPacket = ubyteArrayOf(sourceDevice, packetLength.toUByte(), destDevice, *data, givenCrc)
 
-            logger.v("BYTE READER",
-                "Read raw packet : " +
-                        "[${sourceDevice.toDeviceIdString()}] " +
-                        "[${packetLength.toString(10)}] " +
-                        "[${destDevice.toDeviceIdString()}] " +
-                        "<${data.size} bytes data> " +
-                        "[CRC g/a : $givenCrc / $actualCrc ]")
-
+            if (false) {
+                logger.v(
+                    "BYTE READER",
+                    "Read raw packet : " +
+                            "[${sourceDevice.toDeviceIdString()}] " +
+                            "[${packetLength.toString(10)}] " +
+                            "[${destDevice.toDeviceIdString()}] " +
+                            "<${data.size} bytes data> " +
+                            "[CRC g/a : $givenCrc / $actualCrc ]"
+                )
+            }
 
             if (packetLength != data.size + 2) {
                 logger.w("BYTE READER", "Data size mismatch. [e/a] ${packetLength - 2}/${data.size}")

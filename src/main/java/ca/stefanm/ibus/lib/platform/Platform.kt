@@ -8,6 +8,7 @@ import ca.stefanm.ibus.lib.cli.debugPrinters.IncomingIbusMessageCliPrinter
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
 import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.stefane39.StefanE39Application
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -22,6 +23,26 @@ interface JoinableService : Service {
 }
 
 abstract class LongRunningService constructor(
+    private val coroutineScope: CoroutineScope,
+    private val parsingDispatcher: CoroutineDispatcher
+) : JoinableService {
+
+    override var jobToJoin : Job? = null
+
+    override fun onCreate() {
+        jobToJoin = coroutineScope.launch(parsingDispatcher) {
+            doWork()
+        }
+    }
+
+    override fun onShutdown() {
+        jobToJoin?.cancel(cause = Platform.PlatformShutdownCancellationException())
+    }
+
+    abstract suspend fun doWork()
+}
+
+abstract class LongRunningLoopingService constructor(
     private val coroutineScope: CoroutineScope,
     private val parsingDispatcher: CoroutineDispatcher
 ) : JoinableService {
@@ -54,7 +75,8 @@ class PlatformServiceRunner @Inject constructor(
     incomingIbusMessageCliPrinter: IncomingIbusMessageCliPrinter,
     serialPublisherService: SerialPublisherService,
     serialListenerService: SerialListenerService,
-    ibusInputEventCliPrinter: IbusInputEventCliPrinter
+    ibusInputEventCliPrinter: IbusInputEventCliPrinter,
+    stefanE39Application: StefanE39Application
 ) : Service {
 
     private val services = listOf<Service>(
@@ -64,7 +86,8 @@ class PlatformServiceRunner @Inject constructor(
 //        platformMetronomeLogger,
         serialPublisherService,
         serialListenerService,
-        ibusInputEventCliPrinter
+        ibusInputEventCliPrinter,
+        stefanE39Application
     )
 
     override fun onCreate() {

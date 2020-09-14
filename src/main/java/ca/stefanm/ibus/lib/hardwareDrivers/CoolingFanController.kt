@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.lib.hardwareDrivers
 
 import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.lib.platform.LongRunningService
+import ca.stefanm.ibus.lib.platform.LongRunningLoopingService
 import com.pi4j.system.SystemInfo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +15,7 @@ class CoolingFanController @Inject constructor(
     private val logger : Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) {
+) : LongRunningLoopingService(coroutineScope, parsingDispatcher) {
 
     private fun getCpuTemp() : Float {
         return try {
