@@ -21,7 +21,7 @@ internal class IBusMessageTest {
                 writeByte(0x60)
                 writeByte(0x01)
                 writeByte(0x00)
-            }.readByteArray()
+            }.readByteArray().toUByteArray()
         ).toWireBytes()
 
         val expectedMessage = with(Buffer()) {
@@ -49,7 +49,7 @@ internal class IBusMessageTest {
             writeByte(0x01)
             writeByte(0x00)
             writeByte(0x91)
-        }.readByteArray().toIbusMessage()
+        }.readByteArray().toUByteArray().toIbusMessage()
 
         val expectedMessage = IBusMessage(
             sourceDevice = IBusDevice.RADIO,
@@ -59,11 +59,11 @@ internal class IBusMessageTest {
                 writeByte(0x60)
                 writeByte(0x01)
                 writeByte(0x00)
-            }.readByteArray()
+            }.readByteArray().toUByteArray()
         )
 
-        Assert.assertEquals(expectedMessage.sourceDevice, givenMessage.sourceDevice)
+        Assert.assertEquals(expectedMessage.sourceDevice, givenMessage!!.sourceDevice)
         Assert.assertEquals(expectedMessage.destinationDevice, givenMessage.destinationDevice)
-        Assert.assertArrayEquals(expectedMessage.data, givenMessage.data)
+        Assert.assertArrayEquals(expectedMessage.data.toByteArray(), givenMessage.data.toByteArray())
     }
 }

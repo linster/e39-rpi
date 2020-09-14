@@ -1,6 +1,9 @@
 package ca.stefanm.ibus.di
 
+import ca.stefanm.ibus.lib.bluetooth.CliTrackInfoPrinter
+import ca.stefanm.ibus.lib.bluetooth.TrackInfoPrinter
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.lib.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TvModuleTextLengthConstraints
 import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
@@ -70,7 +73,13 @@ class ApplicationModule {
     fun provideCoroutineDispatcher() : CoroutineDispatcher = Dispatchers.IO
 
     @Provides
-    fun provideTextLengthConstraints() : TextLengthConstraints = TvModuleTextLengthConstraints
+    fun provideTextLengthConstraints(deviceConfiguration: DeviceConfiguration) : TextLengthConstraints {
+        return if (deviceConfiguration.displayDriver == DeviceConfiguration.DisplayDriver.TV_MODULE) {
+            TvModuleTextLengthConstraints
+        } else {
+            Mk4NavTextLengthConstraints
+        }
+    }
 
     @Provides
     fun provideRelayReaderWriter(
@@ -87,15 +96,19 @@ class ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideSerialPortReader(
-        jSerialCommsAdapter: JSerialCommsAdapter
-    ) : SerialPortReader = jSerialCommsAdapter
+    fun provideSerialPortReader(jSerialCommsAdapter: JSerialCommsAdapter) : SerialPortReader = jSerialCommsAdapter
 
     @Provides
     @Singleton
-    fun provideSerialPortWriter(
-        jSerialCommsAdapter: JSerialCommsAdapter
-    ) : SerialPortWriter = jSerialCommsAdapter
+    fun provideSerialPortWriter(jSerialCommsAdapter: JSerialCommsAdapter) : SerialPortWriter = jSerialCommsAdapter
+
+    @Provides
+    @Singleton
+    fun providePairedPhone(deviceConfiguration: DeviceConfiguration) : DeviceConfiguration.PairedPhone = deviceConfiguration.pairedPhone
+
+    @Provides
+    @Singleton
+    fun provideTrackPrinter(cliTrackInfoPrinter: CliTrackInfoPrinter) : TrackInfoPrinter = cliTrackInfoPrinter
 
     @Provides
     @Singleton

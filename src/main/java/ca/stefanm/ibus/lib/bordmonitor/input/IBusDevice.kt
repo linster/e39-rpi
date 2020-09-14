@@ -28,5 +28,7 @@ enum class IBusDevice(val deviceId: Int) {
     /* GPS Feed from nav unit */
     NAV_LOCATION(0xD0),
     /* Board monitor buttons that aren't the radio buttons */
-    BOARDMONITOR_BUTTONS(0xF0)
+    BOARDMONITOR_BUTTONS(0xF0),
+
+    DIS(0x3f)
 }

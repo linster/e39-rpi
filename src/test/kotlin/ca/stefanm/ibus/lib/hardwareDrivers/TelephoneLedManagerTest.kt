@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.lib.hardwareDrivers
 
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.TelephoneLedManager
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.toByte
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.toUByte
 import org.junit.Assert
 import org.junit.Test
 
@@ -14,7 +14,7 @@ internal class TelephoneLedManagerTest {
             arrayOf(
                 TelephoneLedManager.LedStatus(
                     TelephoneLedManager.Led.RED, TelephoneLedManager.LedState.ON))
-                .toByte()
+                .toUByte()
                 .toString(2)
         )
     }
@@ -25,7 +25,7 @@ internal class TelephoneLedManagerTest {
             arrayOf(
                 TelephoneLedManager.LedStatus(
                     TelephoneLedManager.Led.RED, TelephoneLedManager.LedState.BLINK))
-                .toByte()
+                .toUByte()
                 .toString(2)
         )
     }
@@ -36,7 +36,7 @@ internal class TelephoneLedManagerTest {
             arrayOf(
                 TelephoneLedManager.LedStatus(
                     TelephoneLedManager.Led.ORANGE, TelephoneLedManager.LedState.ON))
-                .toByte()
+                .toUByte()
                 .toString(2)
         )
     }
@@ -47,7 +47,7 @@ internal class TelephoneLedManagerTest {
             arrayOf(
                 TelephoneLedManager.LedStatus(
                     TelephoneLedManager.Led.ORANGE, TelephoneLedManager.LedState.BLINK))
-                .toByte()
+                .toUByte()
                 .toString(2)
         )
     }
@@ -58,7 +58,7 @@ internal class TelephoneLedManagerTest {
             arrayOf(
                 TelephoneLedManager.LedStatus(
                     TelephoneLedManager.Led.GREEN, TelephoneLedManager.LedState.ON))
-                .toByte()
+                .toUByte()
                 .toString(2)
         )
     }
@@ -69,7 +69,7 @@ internal class TelephoneLedManagerTest {
             arrayOf(
                 TelephoneLedManager.LedStatus(
                     TelephoneLedManager.Led.GREEN, TelephoneLedManager.LedState.BLINK))
-                .toByte()
+                .toUByte()
                 .toString(2)
         )
     }
@@ -85,7 +85,7 @@ internal class TelephoneLedManagerTest {
                 TelephoneLedManager.LedStatus(
                     TelephoneLedManager.Led.GREEN, TelephoneLedManager.LedState.BLINK)
             )
-                .toByte()
+                .toUByte()
                 .toString(2)
         )
     }
