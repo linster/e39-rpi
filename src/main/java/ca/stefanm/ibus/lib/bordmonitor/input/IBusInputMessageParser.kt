@@ -24,7 +24,9 @@ class IBusInputMessageParser @Inject constructor(
     mflKeyMessageParser: MflKeyMessageParser,
     rtButtonKeyMessageParser: RtButtonKeyMessageParser,
     bmBtSeekButtonMessageParser: BmBtSeekButtonMessageParser,
-    bmBtShowRadioStatusMessageParser: BmBtShowRadioStatusMessageParser
+    bmBtShowRadioStatusMessageParser: BmBtShowRadioStatusMessageParser,
+    bmBtMenuPressedMessageParser: BmBtMenuPressedMessageParser,
+    bmBtPhonePressedMessageParser: BmBtPhonePressedMessageParser
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     private val messageMatchers = listOf(
@@ -32,7 +34,9 @@ class IBusInputMessageParser @Inject constructor(
         mflKeyMessageParser,
         rtButtonKeyMessageParser,
         bmBtSeekButtonMessageParser,
-        bmBtShowRadioStatusMessageParser
+        bmBtShowRadioStatusMessageParser,
+        bmBtMenuPressedMessageParser,
+        bmBtPhonePressedMessageParser
     )
 
     @ExperimentalCoroutinesApi
@@ -51,24 +55,13 @@ class IBusInputMessageParser @Inject constructor(
     interface InputMessageMatcher {
         fun rawMessageMatches(message: IBusMessage) : Boolean
         fun messageToInputEvent(message: IBusMessage) : InputEvent?
-
-        fun UByteArray.startsWith(vararg bytes: Int) : Boolean {
-            var startsWith = false
-
-            bytes.forEachIndexed { i , byte ->
-                if (this.getOrNull(i) == byte.toUByte()) {
-                    startsWith = startsWith && true
-                }
-            }
-            return startsWith
-        }
     }
 
     class IndexSelectedMessageParser @Inject constructor() : InputMessageMatcher {
         override fun rawMessageMatches(message: IBusMessage): Boolean {
             return message.sourceDevice == IBusDevice.NAV_VIDEOMODULE
                     && message.destinationDevice == IBusDevice.RADIO
-                    &&  message.data.startsWith(0x23, 0x62, 0x30)
+                    &&  message.data.toList().map { it.toInt() }.subList(0, 3) == listOf(0x23, 0x62, 0x30)
         }
 
         override fun messageToInputEvent(message: IBusMessage): InputEvent? {
@@ -146,7 +139,7 @@ class IBusInputMessageParser @Inject constructor(
 
     class BmBtShowRadioStatusMessageParser @Inject constructor() : InputMessageMatcher {
         override fun messageToInputEvent(message: IBusMessage): InputEvent? {
-            return if (message.data.startsWith(0x48, 0x30)) {
+            return if (message.data.toList().map { it.toInt() } == listOf(0x48, 0x30)) {
                 InputEvent.ShowRadioStatusScreen
             } else null
         }
@@ -154,6 +147,30 @@ class IBusInputMessageParser @Inject constructor(
         override fun rawMessageMatches(message: IBusMessage): Boolean {
             return message.sourceDevice == IBusDevice.BOARDMONITOR_BUTTONS
                     && message.destinationDevice == IBusDevice.RADIO
+        }
+    }
+
+    class BmBtMenuPressedMessageParser @Inject constructor() : InputMessageMatcher {
+        override fun messageToInputEvent(message: IBusMessage): InputEvent? {
+            return InputEvent.BMBTMenuPressed
+        }
+
+        override fun rawMessageMatches(message: IBusMessage): Boolean {
+            return message.sourceDevice == IBusDevice.BOARDMONITOR_BUTTONS
+                    && message.destinationDevice == IBusDevice.BROADCAST
+                    && message.data.toList().map { it.toInt() } == listOf(0x48, 0x34)
+        }
+    }
+
+    class BmBtPhonePressedMessageParser @Inject constructor() : InputMessageMatcher {
+        override fun messageToInputEvent(message: IBusMessage): InputEvent? {
+            return InputEvent.BMBTPhonePressed
+        }
+
+        override fun rawMessageMatches(message: IBusMessage): Boolean {
+            return message.sourceDevice == IBusDevice.BOARDMONITOR_BUTTONS
+                    && message.destinationDevice == IBusDevice.BROADCAST
+                    && message.data.toList().map { it.toInt() } == listOf(0x48, 0x08)
         }
     }
 }

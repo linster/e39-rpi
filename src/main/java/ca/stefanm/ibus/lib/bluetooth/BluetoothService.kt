@@ -23,6 +23,7 @@ import org.bluez.MediaControl1
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.DBusMap
 import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.errors.UnknownObject
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.interfaces.Properties
 import java.lang.NullPointerException
@@ -72,7 +73,7 @@ class BluetoothService @Inject constructor(
         val btPhone = dbusConnector.getDevice(pairedPhone.macAddress)
         logger.d("BT", "have phone.")
 
-        val player = btPhone?.dbusConnection?.getRemoteObject("org.bluez", btPhone?.dbusPath + "/player0", MediaPlayer1::class.java)
+        val player = btPhone?.dbusConnection?.getRemoteObject("org.bluez", btPhone.dbusPath + "/player0", MediaPlayer1::class.java)
         bluetoothEventDispatcherService.mediaPlayer1 = player
 
         dBusTrackInfoFetcher.dbusConnection = dbusConnector.connection
@@ -133,6 +134,7 @@ class DBusTrackInfoFetcher @Inject constructor(
 
 class BluetoothEventDispatcherService @Inject constructor(
     @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
+    private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
@@ -146,9 +148,13 @@ class BluetoothEventDispatcherService @Inject constructor(
     }
 
     private fun dispatchInputEvent(event: InputEvent) {
-        when (event) {
-            InputEvent.PrevTrack -> mediaPlayer1?.Previous()
-            InputEvent.NextTrack -> mediaPlayer1?.Next()
+        try {
+            when (event) {
+                InputEvent.PrevTrack -> mediaPlayer1?.Previous()
+                InputEvent.NextTrack -> mediaPlayer1?.Next()
+            }
+        } catch (e : UnknownObject) {
+            logger.w("BT Dispatcher", "Attempting to dispatch to MediaPlayer where it doesn't exist.")
         }
     }
 }

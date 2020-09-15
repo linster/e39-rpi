@@ -7,6 +7,7 @@ import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.getAllowedLength
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
+import ca.stefanm.ibus.lib.platform.DeviceConfiguration
 import ca.stefanm.ibus.lib.platform.LongRunningService
 import ca.stefanm.ibus.lib.platform.Service
 import kotlinx.coroutines.CoroutineDispatcher
@@ -35,6 +36,7 @@ class CliTrackInfoPrinter @Inject constructor(
 
 class ScreenTrackInfoPrinter @Inject constructor(
     private val cliTrackInfoPrinter: CliTrackInfoPrinter,
+    private val deviceConfiguration: DeviceConfiguration,
     private val textLengthConstraints: TextLengthConstraints,
     @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) private val messagesOut : Channel<IBusMessage>,
     @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel: Channel<InputEvent>,
@@ -49,7 +51,7 @@ class ScreenTrackInfoPrinter @Inject constructor(
     companion object {
         const val TRACK_FIELD = 6
         const val ARTIST_FIELD = 5
-        const val  ALBUM_FIELD = 3
+        const val ALBUM_FIELD = 3
     }
 
     override suspend fun onNewTrackInfo(track: String, artist: String, album: String) {
@@ -59,9 +61,15 @@ class ScreenTrackInfoPrinter @Inject constructor(
         currentArtist = artist
         currentAlbum = album
 
-        printMessage(track, TRACK_FIELD)
-        printMessage(artist, ARTIST_FIELD)
-        printMessage(album, ALBUM_FIELD)
+        if (deviceConfiguration.displayDriver == DeviceConfiguration.DisplayDriver.MK4) {
+            printMessage(track, 5)
+            printMessage(artist, 6)
+        }
+
+        if (deviceConfiguration.displayDriver == DeviceConfiguration.DisplayDriver.TV_MODULE) {
+            printMessage(track, 6)
+            printMessage(artist, 7)
+        }
     }
 
     private suspend fun printMessage(label : String, n : Int) {
@@ -72,7 +80,9 @@ class ScreenTrackInfoPrinter @Inject constructor(
         )
 
         val writeMessage = TitleNMessage(
-            label = label.padEnd(length = textLengthConstraints.getAllowedLength(n), padChar = ' '),
+            label = label
+                .take(textLengthConstraints.getAllowedLength(n))
+                .padEnd(length = textLengthConstraints.getAllowedLength(n), padChar = ' '),
             n = n,
             lengthConstraints = textLengthConstraints
         )

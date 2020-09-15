@@ -218,6 +218,7 @@ class JSerialCommsWriter @Inject constructor(
             //Wait 2ms to ensure previous message send went out. Realistically we only need to wait 1.2ms.
             delay(2)
 
+
             //We're doing non-blocking IO for the serial port because we don't want to block the coroutine..
             var offset = 0L
             while (offset < bytes.size - 1) {
