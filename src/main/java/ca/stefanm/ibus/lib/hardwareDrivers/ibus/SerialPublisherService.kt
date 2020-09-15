@@ -8,6 +8,7 @@ import ca.stefanm.ibus.lib.platform.LongRunningService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import javax.inject.Inject
@@ -21,7 +22,7 @@ class SerialPublisherService @Inject constructor(
     parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
     override suspend fun doWork() {
-        messagesOut.consumeAsFlow().collect {
+        messagesOut.consumeEach {
             logger.d("SerialPublisherService", "Writing message to serial port: $it")
             serialPortWriter.writeRawBytes(it.toWireBytes())
         }

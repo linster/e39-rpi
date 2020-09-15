@@ -40,10 +40,4 @@ class DbusConnector @Inject constructor(
                         .joinToString(separator = ":") { it.toString(16) }.toUpperCase()
             }
     }
-//
-//    fun getMediaPlayer1(device: BluetoothDevice) : MediaPlayer1 {
-//
-//
-//    }
-
 }

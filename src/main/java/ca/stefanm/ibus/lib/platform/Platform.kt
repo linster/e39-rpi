@@ -3,6 +3,7 @@ package ca.stefanm.ibus.lib.platform
 import ca.stefanm.ibus.lib.bluetooth.BluetoothEventDispatcherService
 import ca.stefanm.ibus.lib.bluetooth.BluetoothService
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
+import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.lib.cli.debugPrinters.IbusInputEventCliPrinter
 import ca.stefanm.ibus.lib.cli.debugPrinters.PlatformMetronomeLogger
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
@@ -10,8 +11,11 @@ import ca.stefanm.ibus.lib.cli.debugPrinters.IncomingIbusMessageCliPrinter
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
 import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.stefane39.StefanE39Application
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import javax.inject.Inject
 
 
@@ -43,6 +47,15 @@ abstract class LongRunningService constructor(
 
     abstract suspend fun doWork()
 }
+
+interface IBusMessageListenerService : Service {
+    val incomingIBusMessageMailbox : Channel<IBusMessage>
+}
+
+interface IBusInputEventListenerService : Service {
+    val incomingIbusInputEvents : Channel<InputEvent>
+}
+
 
 abstract class LongRunningLoopingService constructor(
     private val coroutineScope: CoroutineScope,

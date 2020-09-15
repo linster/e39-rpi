@@ -19,14 +19,13 @@ import ca.stefanm.ibus.lib.platform.DeviceConfiguration
 import ca.stefanm.ibus.lib.platform.LaptopDeviceConfiguration
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import javax.inject.Named
 import javax.inject.Singleton
 
+@ExperimentalCoroutinesApi
 @Module
 class ApplicationModule {
 
@@ -34,13 +33,8 @@ class ApplicationModule {
     //TODO https://arunkumar.dev/introducing-scabbard-a-tool-to-visualize-dagger-2-dependency-graphs/
 
     companion object {
-        const val CHANNEL_INPUT_EVENTS = "InputEvents"
-
         //Messages sent to rest of car
         const val IBUS_MESSAGE_OUTPUT_CHANNEL = "IbusOutput"
-
-        //Messages received from rest of car
-        const val IBUS_MESSAGE_INPUT_CHANNEL = "IbusInput"
     }
 
     @Provides
@@ -51,18 +45,8 @@ class ApplicationModule {
 
     @Provides
     @Singleton
-    @Named(CHANNEL_INPUT_EVENTS)
-    fun provideInputEventChannel() : Channel<InputEvent> = Channel()
-
-    @Provides
-    @Singleton
     @Named(IBUS_MESSAGE_OUTPUT_CHANNEL)
-    fun provideIbusOuptutChannel() : Channel<IBusMessage> = Channel()
-
-    @Provides
-    @Singleton
-    @Named(IBUS_MESSAGE_INPUT_CHANNEL)
-    fun provideIbusInputChannel() : Channel<IBusMessage> = Channel()
+    fun provideIbusOuptutChannel() : Channel<IBusMessage> = Channel(capacity = Channel.UNLIMITED)
 
     @Provides
     @Singleton

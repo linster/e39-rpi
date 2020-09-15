@@ -25,7 +25,6 @@ object TvModuleTextLengthConstraints : TextLengthConstraints {
     override val INDEX_0_9 = 14
 }
 
-//TODO check these.
 object Mk4NavTextLengthConstraints : TextLengthConstraints {
     override val AREA_0 = 11
     override val AREA_1 = 4

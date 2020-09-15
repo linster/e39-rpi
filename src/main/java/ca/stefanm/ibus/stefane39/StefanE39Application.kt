@@ -4,6 +4,7 @@ import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.bluetooth.BluetoothService
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusConnector
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.ScreenTrackInfoPrinter
+import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.lib.hardwareDrivers.SunroofOpener
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.TelephoneLedManager
@@ -21,7 +22,7 @@ class StefanE39Application @ExperimentalStdlibApi
     private val sunroofOpener: SunroofOpener,
     private val bluetoothService: BluetoothService,
     private val trackInfoPrinter: ScreenTrackInfoPrinter,
-    @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
+    private val inputEventParser: IBusInputMessageParser,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
 ): LongRunningLoopingService(coroutineScope, parsingDispatcher) {
@@ -41,12 +42,12 @@ class StefanE39Application @ExperimentalStdlibApi
         trackInfoPrinter.onCreate()
 
         delay(50)
-        inputEventChannel.send(InputEvent.NextTrack)
+        inputEventParser.debugSend(InputEvent.NextTrack)
         delay(100)
-        inputEventChannel.send(InputEvent.NextTrack)
+        inputEventParser.debugSend(InputEvent.NextTrack)
 
         if (!sunRoofIsOpen) {
-//            sunroofOpener.openSunroof()
+            sunroofOpener.openSunroof()
 
 
             trackInfoPrinter.onNewTrackInfo("123456789", "Dole", "Wat")

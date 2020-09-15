@@ -47,6 +47,7 @@ class TitleNMessage(
             4 -> 0x04
             5 -> 0x05
             6 -> 0x06
+            7 -> 0x07
             else -> throw IllegalArgumentException("Invalid title")
         })
         appendString(label)

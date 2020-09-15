@@ -1,22 +1,29 @@
 package ca.stefanm.ibus.lib.bordmonitor.input
 
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.lib.cli.debugPrinters.IbusInputEventCliPrinter
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
+import ca.stefanm.ibus.lib.platform.IBusInputEventListenerService
+import ca.stefanm.ibus.lib.platform.IBusMessageListenerService
 import ca.stefanm.ibus.lib.platform.LongRunningLoopingService
 import ca.stefanm.ibus.lib.platform.LongRunningService
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import okio.Buffer
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 @ExperimentalCoroutinesApi
+@Singleton
 class IBusInputMessageParser @Inject constructor(
-    @Named(ApplicationModule.IBUS_MESSAGE_INPUT_CHANNEL) private val inputChannel : Channel<IBusMessage>,
-    @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
+    private val serialListenerService: SerialListenerService,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher,
@@ -27,7 +34,7 @@ class IBusInputMessageParser @Inject constructor(
     bmBtShowRadioStatusMessageParser: BmBtShowRadioStatusMessageParser,
     bmBtMenuPressedMessageParser: BmBtMenuPressedMessageParser,
     bmBtPhonePressedMessageParser: BmBtPhonePressedMessageParser
-) : LongRunningService(coroutineScope, parsingDispatcher) {
+) : LongRunningService(coroutineScope, parsingDispatcher), IBusMessageListenerService {
 
     private val messageMatchers = listOf(
         indexSelectedMessageParser,
@@ -39,29 +46,56 @@ class IBusInputMessageParser @Inject constructor(
         bmBtPhonePressedMessageParser
     )
 
+    private val mailboxes = mutableListOf<IBusInputEventListenerService>()
+
+    fun addMailbox(serviceWithMailbox: IBusInputEventListenerService) {
+        mailboxes.add(serviceWithMailbox)
+    }
+
+    fun removeMailbox(serviceWithMailbox: IBusInputEventListenerService) {
+        mailboxes.remove(serviceWithMailbox)
+    }
+
+
+    override fun onCreate() {
+        super.onCreate()
+        serialListenerService.addMailbox(this)
+    }
+
+    override fun onShutdown() {
+        serialListenerService.removeMailbox(this)
+        super.onShutdown()
+    }
+
+    override val incomingIBusMessageMailbox: Channel<IBusMessage> = Channel(capacity = Channel.UNLIMITED)
+
     @ExperimentalCoroutinesApi
     override suspend fun doWork() {
-        inputChannel.consumeAsFlow().collect {
+        incomingIBusMessageMailbox.consumeEach { message ->
             messageMatchers.forEach { matcher ->
-                if (matcher.rawMessageMatches(it)){
-                    matcher.messageToInputEvent(it)?.let {event ->
-                        inputEventChannel.send(event)
+                if (matcher.rawMessageMatches(message)) {
+                    matcher.messageToInputEvent(message)?.let { event ->
+                        mailboxes.forEach { mailbox -> mailbox.incomingIbusInputEvents.send(event) }
                     }
                 }
             }
         }
     }
 
+    suspend fun debugSend(inputEvent: InputEvent) {
+        mailboxes.forEach { mailbox -> mailbox.incomingIbusInputEvents.send(inputEvent) }
+    }
+
     interface InputMessageMatcher {
-        fun rawMessageMatches(message: IBusMessage) : Boolean
-        fun messageToInputEvent(message: IBusMessage) : InputEvent?
+        fun rawMessageMatches(message: IBusMessage): Boolean
+        fun messageToInputEvent(message: IBusMessage): InputEvent?
     }
 
     class IndexSelectedMessageParser @Inject constructor() : InputMessageMatcher {
         override fun rawMessageMatches(message: IBusMessage): Boolean {
             return message.sourceDevice == IBusDevice.NAV_VIDEOMODULE
                     && message.destinationDevice == IBusDevice.RADIO
-                    &&  message.data.toList().map { it.toInt() }.subList(0, 3) == listOf(0x23, 0x62, 0x30)
+                    && message.data.toList().map { it.toInt() }.subList(0, 3) == listOf(0x23, 0x62, 0x30)
         }
 
         override fun messageToInputEvent(message: IBusMessage): InputEvent? {
@@ -90,6 +124,7 @@ class IBusInputMessageParser @Inject constructor(
                 return InputEvent.IndexSelectEvent(indexSelected)
             }
         }
+
         enum class EventType { SELECTED, RELEASE }
     }
 

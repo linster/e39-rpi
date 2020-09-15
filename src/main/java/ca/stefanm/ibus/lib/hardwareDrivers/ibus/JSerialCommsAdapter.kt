@@ -25,6 +25,7 @@ interface SerialPortWriter {
     suspend fun writeRawBytes(bytes : ByteArray)
 }
 
+@Singleton
 class JSerialCommsAdapter @Inject constructor(
     private val writer : JSerialCommsWriter,
     private val reader : JSerialCommsReader
@@ -214,7 +215,7 @@ class JSerialCommsWriter @Inject constructor(
     private val port = serialPortProvider.serialPort
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
-        coroutineScope.launch(serialOutCoroutineDispatcher) {
+        withContext(coroutineScope.coroutineContext + serialOutCoroutineDispatcher) {
             //Wait 2ms to ensure previous message send went out. Realistically we only need to wait 1.2ms.
             delay(2)
 
@@ -226,11 +227,10 @@ class JSerialCommsWriter @Inject constructor(
                 val bytesWritten = port.writeBytes(bytes, bytesToAttemptWrite, offset)
 
                 if (bytesWritten == -1) {
-                    logger.e("SERIAL WRITER", "Error writing to port")
-                    return@launch
+//                    logger.e("SERIAL WRITER", "Error writing to port")
+                } else {
+                    offset += bytesWritten + 1
                 }
-
-                offset += bytesWritten + 1
             }
         }
     }

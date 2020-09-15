@@ -3,12 +3,14 @@ package ca.stefanm.ibus.lib.bluetooth
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusConnector
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.TrackInfoPrinter
+import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.getAllowedLength
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
+import ca.stefanm.ibus.lib.platform.IBusInputEventListenerService
 import ca.stefanm.ibus.lib.platform.JoinableService
 import ca.stefanm.ibus.lib.platform.LongRunningService
 import ca.stefanm.ibus.lib.platform.Service
@@ -34,7 +36,6 @@ import javax.inject.Named
 //https://github.com/aguedes/bluez/blob/master/doc/media-api.txt
 
 class BluetoothService @Inject constructor(
-    @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
     private val onScreenSetupManager: BluetoothOnScreenSetupManager,
     private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,
     private val trackInfoPrinter: TrackInfoPrinter,
@@ -78,17 +79,28 @@ class BluetoothService @Inject constructor(
 
         dBusTrackInfoFetcher.dbusConnection = dbusConnector.connection
         dBusTrackInfoFetcher.player = player
-
     }
 }
 
 class DBusTrackInfoFetcher @Inject constructor(
-    @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
+    private val iBusInputMessageParser: IBusInputMessageParser,
     private val trackInfoPrinter: TrackInfoPrinter,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) {
+) : LongRunningService(coroutineScope, parsingDispatcher) , IBusInputEventListenerService {
+
+    override fun onCreate() {
+        iBusInputMessageParser.addMailbox(this)
+        super.onCreate()
+    }
+
+    override fun onShutdown() {
+        super.onShutdown()
+        iBusInputMessageParser.removeMailbox(this)
+    }
+
+    override val incomingIbusInputEvents: Channel<InputEvent> = Channel(capacity = Channel.UNLIMITED)
 
     private val TAG = "Track Fetcher"
 
@@ -96,7 +108,7 @@ class DBusTrackInfoFetcher @Inject constructor(
     var player : MediaPlayer1? = null
 
     override suspend fun doWork() {
-        inputEventChannel.receiveAsFlow().collect {
+        incomingIbusInputEvents.receiveAsFlow().collect {
             if (it == InputEvent.PrevTrack || it == InputEvent.NextTrack) {
                 val (track, artist, album) = fetchNewTrackInfo()
                 trackInfoPrinter.onNewTrackInfo(track, artist, album)
@@ -133,16 +145,28 @@ class DBusTrackInfoFetcher @Inject constructor(
 }
 
 class BluetoothEventDispatcherService @Inject constructor(
-    @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
+    private val iBusInputMessageParser: IBusInputMessageParser,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) {
+) : LongRunningService(coroutineScope, parsingDispatcher) , IBusInputEventListenerService {
+
+    override fun onCreate() {
+        super.onCreate()
+        iBusInputMessageParser.addMailbox(this)
+    }
+
+    override fun onShutdown() {
+        iBusInputMessageParser.removeMailbox(this)
+        super.onShutdown()
+    }
+
+    override val incomingIbusInputEvents: Channel<InputEvent> = Channel(capacity = Channel.UNLIMITED)
 
     var mediaPlayer1: MediaPlayer1? = null
 
     override suspend fun doWork() {
-        inputEventChannel.receiveAsFlow().collect {
+        incomingIbusInputEvents.receiveAsFlow().collect {
             dispatchInputEvent(it)
         }
     }
