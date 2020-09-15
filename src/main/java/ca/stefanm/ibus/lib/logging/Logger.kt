@@ -33,7 +33,7 @@ class StdOutLogger : Logger {
     }
 
     override fun e(tag: String, msg: String, e: Throwable) {
-        TODO("Not yet implemented")
+        e(tag, "$msg exception: ${e.printStackTrace()}")
     }
 
 }

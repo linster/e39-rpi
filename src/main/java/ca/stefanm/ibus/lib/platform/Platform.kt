@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.lib.platform
 
+import ca.stefanm.ibus.lib.bluetooth.BluetoothEventDispatcherService
+import ca.stefanm.ibus.lib.bluetooth.BluetoothService
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.lib.cli.debugPrinters.IbusInputEventCliPrinter
 import ca.stefanm.ibus.lib.cli.debugPrinters.PlatformMetronomeLogger
@@ -76,7 +78,9 @@ class PlatformServiceRunner @Inject constructor(
     serialPublisherService: SerialPublisherService,
     serialListenerService: SerialListenerService,
     ibusInputEventCliPrinter: IbusInputEventCliPrinter,
-    stefanE39Application: StefanE39Application
+    stefanE39Application: StefanE39Application,
+    bluetoothEventDispatcherService: BluetoothEventDispatcherService,
+    bluetoothService: BluetoothService
 ) : Service {
 
     private val services = listOf<Service>(
@@ -87,7 +91,10 @@ class PlatformServiceRunner @Inject constructor(
         serialPublisherService,
         serialListenerService,
         ibusInputEventCliPrinter,
-        stefanE39Application
+
+
+        stefanE39Application,
+        bluetoothService
     )
 
     override fun onCreate() {

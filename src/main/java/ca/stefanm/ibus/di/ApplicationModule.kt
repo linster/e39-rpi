@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.di
 
-import ca.stefanm.ibus.lib.bluetooth.CliTrackInfoPrinter
-import ca.stefanm.ibus.lib.bluetooth.TrackInfoPrinter
+import ca.stefanm.ibus.lib.bluetooth.blueZdbus.CliTrackInfoPrinter
+import ca.stefanm.ibus.lib.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TextLengthConstraints

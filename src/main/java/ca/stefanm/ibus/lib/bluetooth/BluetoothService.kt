@@ -2,13 +2,17 @@ package ca.stefanm.ibus.lib.bluetooth
 
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusConnector
+import ca.stefanm.ibus.lib.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.getAllowedLength
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
+import ca.stefanm.ibus.lib.platform.JoinableService
 import ca.stefanm.ibus.lib.platform.LongRunningService
+import ca.stefanm.ibus.lib.platform.Service
+import jnr.ffi.annotations.In
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -17,6 +21,11 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.bluez.MediaControl1
 import org.bluez.MediaPlayer1
+import org.freedesktop.dbus.DBusMap
+import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.interfaces.DBusInterface
+import org.freedesktop.dbus.interfaces.Properties
+import java.lang.NullPointerException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -26,6 +35,9 @@ import javax.inject.Named
 class BluetoothService @Inject constructor(
     @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
     private val onScreenSetupManager: BluetoothOnScreenSetupManager,
+    private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,
+    private val trackInfoPrinter: TrackInfoPrinter,
+    private val dBusTrackInfoFetcher: DBusTrackInfoFetcher,
     private val dbusConnector: DbusConnector,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
@@ -34,11 +46,17 @@ class BluetoothService @Inject constructor(
 
     override fun onCreate() {
         dbusConnector.onCreate()
+        trackInfoPrinter.onCreate()
+        dBusTrackInfoFetcher.onCreate()
+        bluetoothEventDispatcherService.onCreate()
         super.onCreate()
     }
 
     override fun onShutdown() {
         dbusConnector.onShutdown()
+        dBusTrackInfoFetcher.onShutdown()
+        trackInfoPrinter.onShutdown()
+        bluetoothEventDispatcherService.onShutdown()
         super.onShutdown()
     }
 
@@ -55,30 +73,71 @@ class BluetoothService @Inject constructor(
         logger.d("BT", "have phone.")
 
         val player = btPhone?.dbusConnection?.getRemoteObject("org.bluez", btPhone?.dbusPath + "/player0", MediaPlayer1::class.java)
+        bluetoothEventDispatcherService.mediaPlayer1 = player
 
-        player?.Next()
-        player?.Next()
-        player?.Play()
-    }
+        dBusTrackInfoFetcher.dbusConnection = dbusConnector.connection
+        dBusTrackInfoFetcher.player = player
 
-    private fun dispatchInputEvent(event: InputEvent) {
-        when (event) {
-            InputEvent.PrevTrack -> TODO()
-            InputEvent.NextTrack -> TODO()
-        }
     }
 }
 
+class DBusTrackInfoFetcher @Inject constructor(
+    @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
+    private val trackInfoPrinter: TrackInfoPrinter,
+    private val logger: Logger,
+    coroutineScope: CoroutineScope,
+    parsingDispatcher: CoroutineDispatcher
+) : LongRunningService(coroutineScope, parsingDispatcher) {
 
+    private val TAG = "Track Fetcher"
 
+    var dbusConnection : DBusConnection? = null
+    var player : MediaPlayer1? = null
 
-internal class BluetoothEventDispatcherService @Inject constructor(
+    override suspend fun doWork() {
+        inputEventChannel.receiveAsFlow().collect {
+            if (it == InputEvent.PrevTrack || it == InputEvent.NextTrack) {
+                val (track, artist, album) = fetchNewTrackInfo()
+                trackInfoPrinter.onNewTrackInfo(track, artist, album)
+            }
+        }
+    }
+
+    private fun fetchNewTrackInfo() : Triple<String, String, String> {
+
+        val rawMap = if (dbusConnection != null && player != null) {
+            try {
+                getRawTrackInfo(dbusConnection!!, player!!)
+            } catch (e : NullPointerException) {
+                logger.e(TAG, "Dbus connection and player changed on us to null?!", e)
+                mapOf<String, String>()
+            }
+        } else {
+            logger.d(TAG, "dbus connection and player not set yet")
+            mapOf()
+        }
+
+        val track = rawMap.getOrElse("Title") { logger.d(TAG, "No track name") ; ""}
+        val artist = rawMap.getOrElse("Artist"){ logger.d(TAG, "No artist name") ; ""}
+        val album = rawMap.getOrElse("Album"){ logger.d(TAG, "No album name") ; ""}
+
+        return Triple(track, artist, album)
+    }
+
+    private fun getRawTrackInfo(dBusConnection: DBusConnection, mediaPlayer: MediaPlayer1) : Map<String, String>{
+        return dBusConnection
+            .getRemoteObject("org.bluez", mediaPlayer.objectPath, Properties::class.java)
+            .Get<DBusMap<String, String>>("org.bluez.MediaPlayer1", "Track")
+    }
+}
+
+class BluetoothEventDispatcherService @Inject constructor(
     @Named(ApplicationModule.CHANNEL_INPUT_EVENTS) private val inputEventChannel : Channel<InputEvent>,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
-    var mediaPlayer1 : MediaPlayer1? = null
+    var mediaPlayer1: MediaPlayer1? = null
 
     override suspend fun doWork() {
         inputEventChannel.receiveAsFlow().collect {
@@ -91,52 +150,5 @@ internal class BluetoothEventDispatcherService @Inject constructor(
             InputEvent.PrevTrack -> mediaPlayer1?.Previous()
             InputEvent.NextTrack -> mediaPlayer1?.Next()
         }
-    }
-}
-
-
-
-
-
-interface TrackInfoPrinter {
-    suspend fun onNewTrackInfo(track : String, artist : String, album : String)
-}
-
-class CliTrackInfoPrinter @Inject constructor(
-    private val logger: Logger
-) : TrackInfoPrinter {
-    override suspend fun onNewTrackInfo(track: String, artist: String, album: String) {
-        logger.i("TrackInfo", "New track: $track, $artist, $album")
-    }
-}
-
-class ScreenTrackInfoPrinter @Inject constructor(
-    private val cliTrackInfoPrinter: CliTrackInfoPrinter,
-    private val textLengthConstraints: TextLengthConstraints,
-    @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) private val messagesOut : Channel<IBusMessage>
-) : TrackInfoPrinter {
-    override suspend fun onNewTrackInfo(track: String, artist: String, album: String) {
-        cliTrackInfoPrinter.onNewTrackInfo(track, artist, album)
-
-        printMessage(track, 3)
-        printMessage(artist, 4)
-        printMessage(album, 5)
-    }
-
-    private suspend fun printMessage(label : String, n : Int) {
-        val clearMessage = TitleNMessage(
-            label = "".padEnd(length = textLengthConstraints.getAllowedLength(n), padChar = ' '),
-            n = n,
-            lengthConstraints = textLengthConstraints
-        )
-
-        val writeMessage = TitleNMessage(
-            label = label.padEnd(length = textLengthConstraints.getAllowedLength(n), padChar = ' '),
-            n = n,
-            lengthConstraints = textLengthConstraints
-        )
-
-        messagesOut.send(clearMessage)
-        messagesOut.send(writeMessage)
     }
 }

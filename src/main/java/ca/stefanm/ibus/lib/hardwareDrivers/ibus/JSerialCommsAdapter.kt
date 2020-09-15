@@ -1,6 +1,5 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
-import ca.stefanm.ibus.lib.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
@@ -13,6 +12,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import okio.Buffer
+import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,7 +31,7 @@ class JSerialCommsAdapter @Inject constructor(
 ) : SerialPortWriter, SerialPortReader {
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
-        writer.writeRawBytes(bytes)
+            writer.writeRawBytes(bytes)
     }
 
     override fun readMessages(): Flow<IBusMessage> {
@@ -44,7 +44,8 @@ class JSerialCommsReader @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,
     private val coroutineScope: CoroutineScope,
-    private val flowDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val flowDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val readerDispatcher : CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 ) : SerialPortReader{
 
     private companion object {
@@ -77,7 +78,7 @@ class JSerialCommsReader @Inject constructor(
         //for a data available listener. Then,
         logger.v(TAG, "Setting up jSerialComm read coroutine.")
 
-        readerJob = coroutineScope.launch(flowDispatcher) {
+        readerJob = coroutineScope.launch(readerDispatcher) {
             while (true) {
                 val bytesAvailable = port.bytesAvailable()
                 if (bytesAvailable == 0) { yield() }
@@ -204,27 +205,32 @@ class JSerialCommsSerialPortProvider @Inject constructor(
 
 class JSerialCommsWriter @Inject constructor(
     private val logger: Logger,
-    serialPortProvider: JSerialCommsSerialPortProvider
+    serialPortProvider: JSerialCommsSerialPortProvider,
+    private val coroutineScope: CoroutineScope
 ) : SerialPortWriter {
+
+    private val serialOutCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     private val port = serialPortProvider.serialPort
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
-        //Wait 2ms to ensure previous message send went out. Realistically we only need to wait 1.2ms.
-        delay(2)
+        coroutineScope.launch(serialOutCoroutineDispatcher) {
+            //Wait 2ms to ensure previous message send went out. Realistically we only need to wait 1.2ms.
+            delay(2)
 
-        //We're doing non-blocking IO for the serial port because we don't want to block the coroutine..
-        var offset = 0L
-        while (offset < bytes.size -1) {
-            val bytesToAttemptWrite = bytes.size - offset
-            val bytesWritten = port.writeBytes(bytes, bytesToAttemptWrite, offset)
+            //We're doing non-blocking IO for the serial port because we don't want to block the coroutine..
+            var offset = 0L
+            while (offset < bytes.size - 1) {
+                val bytesToAttemptWrite = bytes.size - offset
+                val bytesWritten = port.writeBytes(bytes, bytesToAttemptWrite, offset)
 
-            if (bytesWritten == -1) {
-                logger.e("SERIAL WRITER", "Error writing to port")
-                return
+                if (bytesWritten == -1) {
+                    logger.e("SERIAL WRITER", "Error writing to port")
+                    return@launch
+                }
+
+                offset += bytesWritten + 1
             }
-
-            offset += bytesWritten + 1
         }
     }
 }

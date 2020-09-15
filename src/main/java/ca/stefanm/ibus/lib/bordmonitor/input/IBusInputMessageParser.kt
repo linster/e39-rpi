@@ -23,14 +23,16 @@ class IBusInputMessageParser @Inject constructor(
     indexSelectedMessageParser: IndexSelectedMessageParser,
     mflKeyMessageParser: MflKeyMessageParser,
     rtButtonKeyMessageParser: RtButtonKeyMessageParser,
-    bmBtSeekButtonMessageParser: BmBtSeekButtonMessageParser
+    bmBtSeekButtonMessageParser: BmBtSeekButtonMessageParser,
+    bmBtShowRadioStatusMessageParser: BmBtShowRadioStatusMessageParser
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     private val messageMatchers = listOf(
         indexSelectedMessageParser,
         mflKeyMessageParser,
         rtButtonKeyMessageParser,
-        bmBtSeekButtonMessageParser
+        bmBtSeekButtonMessageParser,
+        bmBtShowRadioStatusMessageParser
     )
 
     @ExperimentalCoroutinesApi
@@ -139,6 +141,19 @@ class IBusInputMessageParser @Inject constructor(
                 listOf(0x48, 0x10) -> InputEvent.PrevTrack
                 else -> null
             }
+        }
+    }
+
+    class BmBtShowRadioStatusMessageParser @Inject constructor() : InputMessageMatcher {
+        override fun messageToInputEvent(message: IBusMessage): InputEvent? {
+            return if (message.data.startsWith(0x48, 0x30)) {
+                InputEvent.ShowRadioStatusScreen
+            } else null
+        }
+
+        override fun rawMessageMatches(message: IBusMessage): Boolean {
+            return message.sourceDevice == IBusDevice.BOARDMONITOR_BUTTONS
+                    && message.destinationDevice == IBusDevice.RADIO
         }
     }
 }
