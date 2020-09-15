@@ -41,9 +41,9 @@ class StefanE39Application @ExperimentalStdlibApi
 //
         trackInfoPrinter.onCreate()
 
-        delay(50)
+        delay(5000)
         inputEventParser.debugSend(InputEvent.NextTrack)
-        delay(100)
+        delay(2000)
         inputEventParser.debugSend(InputEvent.NextTrack)
 
         if (!sunRoofIsOpen) {

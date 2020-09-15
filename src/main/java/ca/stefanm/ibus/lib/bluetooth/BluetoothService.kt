@@ -2,6 +2,7 @@ package ca.stefanm.ibus.lib.bluetooth
 
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusConnector
+import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusReconnector
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
@@ -18,6 +19,8 @@ import jnr.ffi.annotations.In
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -29,6 +32,7 @@ import org.freedesktop.dbus.errors.UnknownObject
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.interfaces.Properties
 import java.lang.NullPointerException
+import java.rmi.activation.UnknownObjectException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -41,6 +45,7 @@ class BluetoothService @Inject constructor(
     private val trackInfoPrinter: TrackInfoPrinter,
     private val dBusTrackInfoFetcher: DBusTrackInfoFetcher,
     private val dbusConnector: DbusConnector,
+    private val dbusReconnector: DbusReconnector,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
@@ -74,16 +79,21 @@ class BluetoothService @Inject constructor(
         val btPhone = dbusConnector.getDevice(pairedPhone.macAddress)
         logger.d("BT", "have phone.")
 
-        val player = btPhone?.dbusConnection?.getRemoteObject("org.bluez", btPhone.dbusPath + "/player0", MediaPlayer1::class.java)
+        val player = dbusConnector.getPlayer(btPhone)
         bluetoothEventDispatcherService.mediaPlayer1 = player
 
         dBusTrackInfoFetcher.dbusConnection = dbusConnector.connection
         dBusTrackInfoFetcher.player = player
+
+        dbusReconnector.previouslyPairedPhone = pairedPhone
     }
+
+
 }
 
 class DBusTrackInfoFetcher @Inject constructor(
     private val iBusInputMessageParser: IBusInputMessageParser,
+    private val dbusReconnector: DbusReconnector,
     private val trackInfoPrinter: TrackInfoPrinter,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
@@ -116,17 +126,34 @@ class DBusTrackInfoFetcher @Inject constructor(
         }
     }
 
-    private fun fetchNewTrackInfo() : Triple<String, String, String> {
+    private suspend fun fetchNewTrackInfo() : Triple<String, String, String> {
 
         val rawMap = if (dbusConnection != null && player != null) {
             try {
                 getRawTrackInfo(dbusConnection!!, player!!)
-            } catch (e : NullPointerException) {
-                logger.e(TAG, "Dbus connection and player changed on us to null?!", e)
+            } catch (e : Throwable) {
+                if (e is NullPointerException) {
+                    logger.e(TAG, "Dbus connection and player changed on us to null?!", e)
+                }
+
+                val (newConnection, newPlayer) = dbusReconnector.reconnect()
+                dbusConnection = newConnection
+                player = newPlayer
+
+                if (e is UnknownObjectException) {
+                    logger.w(TAG,"We tried reconnecting but we're too quick. ")
+                    delay(500)
+                }
+
                 mapOf<String, String>()
             }
         } else {
             logger.d(TAG, "dbus connection and player not set yet")
+
+            val (newConnection, newPlayer) = dbusReconnector.reconnect()
+            dbusConnection = newConnection
+            player = newPlayer
+
             mapOf()
         }
 
@@ -145,6 +172,7 @@ class DBusTrackInfoFetcher @Inject constructor(
 }
 
 class BluetoothEventDispatcherService @Inject constructor(
+    private val dbusReconnector: DbusReconnector,
     private val iBusInputMessageParser: IBusInputMessageParser,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
@@ -166,19 +194,24 @@ class BluetoothEventDispatcherService @Inject constructor(
     var mediaPlayer1: MediaPlayer1? = null
 
     override suspend fun doWork() {
-        incomingIbusInputEvents.receiveAsFlow().collect {
+        incomingIbusInputEvents.consumeEach {
             dispatchInputEvent(it)
         }
     }
 
     private fun dispatchInputEvent(event: InputEvent) {
+        if (mediaPlayer1 == null) {
+            logger.w("BT Dispatcher", "Attempting to dispatch to MediaPlayer where it doesn't exist.")
+            mediaPlayer1 = dbusReconnector.reconnect().second
+        }
         try {
             when (event) {
                 InputEvent.PrevTrack -> mediaPlayer1?.Previous()
                 InputEvent.NextTrack -> mediaPlayer1?.Next()
             }
         } catch (e : UnknownObject) {
-            logger.w("BT Dispatcher", "Attempting to dispatch to MediaPlayer where it doesn't exist.")
+            logger.e("BT Dispatcher", "Unknown object?", e)
         }
+
     }
 }
