@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.di
 
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.CliTrackInfoPrinter
+import ca.stefanm.ibus.lib.bluetooth.blueZdbus.ScreenTrackInfoPrinter
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.lib.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
@@ -92,7 +93,8 @@ class ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideTrackPrinter(cliTrackInfoPrinter: CliTrackInfoPrinter) : TrackInfoPrinter = cliTrackInfoPrinter
+    fun provideTrackPrinter(screenTrackInfoPrinter: ScreenTrackInfoPrinter) : TrackInfoPrinter = screenTrackInfoPrinter
+//    fun provideTrackPrinter(cliTrackInfoPrinter: CliTrackInfoPrinter) : TrackInfoPrinter = cliTrackInfoPrinter
 
     @Provides
     @Singleton

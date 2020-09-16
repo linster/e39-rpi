@@ -12,6 +12,7 @@ import ca.stefanm.ibus.lib.platform.LongRunningService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -34,7 +35,7 @@ class IBusInputMessageParser @Inject constructor(
     bmBtShowRadioStatusMessageParser: BmBtShowRadioStatusMessageParser,
     bmBtMenuPressedMessageParser: BmBtMenuPressedMessageParser,
     bmBtPhonePressedMessageParser: BmBtPhonePressedMessageParser
-) : LongRunningService(coroutineScope, parsingDispatcher), IBusMessageListenerService {
+) : LongRunningLoopingService(coroutineScope, parsingDispatcher), IBusMessageListenerService {
 
     private val messageMatchers = listOf(
         indexSelectedMessageParser,
@@ -56,7 +57,6 @@ class IBusInputMessageParser @Inject constructor(
         mailboxes.remove(serviceWithMailbox)
     }
 
-
     override fun onCreate() {
         super.onCreate()
         serialListenerService.addMailbox(this)
@@ -71,10 +71,11 @@ class IBusInputMessageParser @Inject constructor(
 
     @ExperimentalCoroutinesApi
     override suspend fun doWork() {
-        incomingIBusMessageMailbox.consumeEach { message ->
+        incomingIBusMessageMailbox.poll()?.let { message ->
             messageMatchers.forEach { matcher ->
                 if (matcher.rawMessageMatches(message)) {
                     matcher.messageToInputEvent(message)?.let { event ->
+//                        logger.d("WAT", "THE FUCK")
                         mailboxes.forEach { mailbox -> mailbox.incomingIbusInputEvents.send(event) }
                     }
                 }

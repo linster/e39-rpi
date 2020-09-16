@@ -58,4 +58,4 @@ fun TextLengthConstraints.getAllowedLength(area_n : Int) : Int = when(area_n) {
     6 -> AREA_6
     7 -> AREA_7
     else -> throw IllegalArgumentException("Invalid area")
-}
+}.let { it - 1 }

@@ -192,7 +192,7 @@ class JSerialCommsSerialPortProvider @Inject constructor(
         )
 
         port.setComPortTimeouts(
-            SerialPort.TIMEOUT_READ_BLOCKING,
+            SerialPort.TIMEOUT_READ_BLOCKING or SerialPort.TIMEOUT_WRITE_BLOCKING,
             READ_TIMEOUT_NO_DATA_MS,
             SEND_TIMEOUT_MS
         )
@@ -204,34 +204,40 @@ class JSerialCommsSerialPortProvider @Inject constructor(
     }
 }
 
+@Singleton
 class JSerialCommsWriter @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,
     private val coroutineScope: CoroutineScope
 ) : SerialPortWriter {
 
-    private val serialOutCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val serialOutCoroutineDispatcher = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
 
     private val port = serialPortProvider.serialPort
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
         withContext(coroutineScope.coroutineContext + serialOutCoroutineDispatcher) {
             //Wait 2ms to ensure previous message send went out. Realistically we only need to wait 1.2ms.
-            delay(2)
+//            delay(200)
+            delay((bytes.size * 8).toLong()) //Experimentally found to give the BMBT enough time to respond to long packets.
+
+            port.writeBytes(bytes, bytes.size.toLong())
 
 
-            //We're doing non-blocking IO for the serial port because we don't want to block the coroutine..
-            var offset = 0L
-            while (offset < bytes.size - 1) {
-                val bytesToAttemptWrite = bytes.size - offset
-                val bytesWritten = port.writeBytes(bytes, bytesToAttemptWrite, offset)
+//            //We're doing non-blocking IO for the serial port because we don't want to block the coroutine..
+//            var offset = 0L
+//            while (offset < bytes.size - 1) {
+//                val bytesToAttemptWrite = bytes.size - offset
+//                val bytesWritten = port.writeBytes(bytes, bytesToAttemptWrite, offset)
+//
+//                if (bytesWritten == -1) {
+////                    logger.e("SERIAL WRITER", "Error writing to port")
+//                } else {
+//                    offset += bytesWritten + 1
+//                }
+//            }
 
-                if (bytesWritten == -1) {
-//                    logger.e("SERIAL WRITER", "Error writing to port")
-                } else {
-                    offset += bytesWritten + 1
-                }
-            }
+            logger.d("TAG", "Awaiting write: ${port.bytesAwaitingWrite()}")
         }
     }
 }

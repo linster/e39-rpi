@@ -22,7 +22,7 @@ class SerialListenerService @Inject constructor(
 ) : LongRunningLoopingService(coroutineScope, parsingDispatcher) {
     override suspend fun doWork() {
         serialPortReader.readMessages().collect {
-            logger.d("SerialListenerService", "Broadcasting received message: $it")
+//            logger.d("SerialListenerService", "Broadcasting received message: $it")
 
             for (service in mailboxes) {
                 service.incomingIBusMessageMailbox.send(it)

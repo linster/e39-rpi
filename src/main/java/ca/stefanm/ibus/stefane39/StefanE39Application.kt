@@ -39,18 +39,20 @@ class StefanE39Application @ExperimentalStdlibApi
 //
 //        delay(3 * 1000)
 //
-        trackInfoPrinter.onCreate()
 
-        delay(5000)
-        inputEventParser.debugSend(InputEvent.NextTrack)
-        delay(2000)
-        inputEventParser.debugSend(InputEvent.NextTrack)
+//        delay(5000)
+//        inputEventParser.debugSend(InputEvent.NextTrack)
+//        delay(2000)
+//        inputEventParser.debugSend(InputEvent.NextTrack)
 
         if (!sunRoofIsOpen) {
-            sunroofOpener.openSunroof()
+//            sunroofOpener.openSunroof()
+
+            //TODO DUMMY Don't call this more than once.
+            trackInfoPrinter.onCreate()
 
 
-            trackInfoPrinter.onNewTrackInfo("123456789", "Dole", "Wat")
+            trackInfoPrinter.onNewTrackInfo("1234567890123456789", "Dole", "Wat")
 
             sunRoofIsOpen = true
         }

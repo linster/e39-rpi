@@ -38,7 +38,7 @@ class IncomingIbusMessageCliPrinter @Inject constructor(
 
     override suspend fun doWork() {
         incomingIBusMessageMailbox.consumeEach {
-            logger.d("INPUT", "Got IBusMessage: $it")
+//            logger.d("INPUT", "Got IBusMessage: $it")
         }
     }
 }

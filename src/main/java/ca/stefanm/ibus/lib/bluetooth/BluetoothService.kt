@@ -128,6 +128,10 @@ class DBusTrackInfoFetcher @Inject constructor(
 
     private suspend fun fetchNewTrackInfo() : Triple<String, String, String> {
 
+        //Wait here so that we can actually switch to the next track.
+        //TODO this a race condition with the piece that calls MediaPlayer1 below.
+        delay(1000)
+
         val rawMap = if (dbusConnection != null && player != null) {
             try {
                 getRawTrackInfo(dbusConnection!!, player!!)
