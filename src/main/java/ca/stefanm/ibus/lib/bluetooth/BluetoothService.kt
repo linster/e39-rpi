@@ -3,6 +3,7 @@ package ca.stefanm.ibus.lib.bluetooth
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusConnector
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusReconnector
+import ca.stefanm.ibus.lib.bluetooth.blueZdbus.DbusTrackListenerService
 import ca.stefanm.ibus.lib.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
@@ -44,6 +45,7 @@ class BluetoothService @Inject constructor(
     private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,
     private val trackInfoPrinter: TrackInfoPrinter,
     private val dBusTrackInfoFetcher: DBusTrackInfoFetcher,
+    private val dbusTrackListenerService: DbusTrackListenerService,
     private val dbusConnector: DbusConnector,
     private val dbusReconnector: DbusReconnector,
     private val logger: Logger,
@@ -55,12 +57,14 @@ class BluetoothService @Inject constructor(
         dbusConnector.onCreate()
         trackInfoPrinter.onCreate()
         dBusTrackInfoFetcher.onCreate()
+        dbusTrackListenerService.onCreate()
         bluetoothEventDispatcherService.onCreate()
         super.onCreate()
     }
 
     override fun onShutdown() {
         dbusConnector.onShutdown()
+        dbusTrackListenerService.onShutdown()
         dBusTrackInfoFetcher.onShutdown()
         trackInfoPrinter.onShutdown()
         bluetoothEventDispatcherService.onShutdown()
@@ -86,6 +90,10 @@ class BluetoothService @Inject constructor(
         dBusTrackInfoFetcher.player = player
 
         dbusReconnector.previouslyPairedPhone = pairedPhone
+
+        dbusTrackListenerService.btPhone = btPhone
+        dbusTrackListenerService.dbusConnection = dbusConnector.connection
+        dbusTrackListenerService.mediaPlayer1 = player
     }
 
 

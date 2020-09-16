@@ -223,20 +223,6 @@ class JSerialCommsWriter @Inject constructor(
 
             port.writeBytes(bytes, bytes.size.toLong())
 
-
-//            //We're doing non-blocking IO for the serial port because we don't want to block the coroutine..
-//            var offset = 0L
-//            while (offset < bytes.size - 1) {
-//                val bytesToAttemptWrite = bytes.size - offset
-//                val bytesWritten = port.writeBytes(bytes, bytesToAttemptWrite, offset)
-//
-//                if (bytesWritten == -1) {
-////                    logger.e("SERIAL WRITER", "Error writing to port")
-//                } else {
-//                    offset += bytesWritten + 1
-//                }
-//            }
-
             logger.d("TAG", "Awaiting write: ${port.bytesAwaitingWrite()}")
         }
     }
