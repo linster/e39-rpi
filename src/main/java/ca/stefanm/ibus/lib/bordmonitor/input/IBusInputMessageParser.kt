@@ -75,7 +75,6 @@ class IBusInputMessageParser @Inject constructor(
             messageMatchers.forEach { matcher ->
                 if (matcher.rawMessageMatches(message)) {
                     matcher.messageToInputEvent(message)?.let { event ->
-//                        logger.d("WAT", "THE FUCK")
                         mailboxes.forEach { mailbox -> mailbox.incomingIbusInputEvents.send(event) }
                     }
                 }

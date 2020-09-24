@@ -1,6 +1,5 @@
 package ca.stefanm.ibus.lib.platform
 
-import ca.stefanm.ibus.lib.bluetooth.BluetoothEventDispatcherService
 import ca.stefanm.ibus.lib.bluetooth.BluetoothService
 import ca.stefanm.ibus.lib.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.lib.bordmonitor.input.InputEvent
@@ -13,9 +12,9 @@ import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.stefane39.StefanE39Application
+import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
 import javax.inject.Inject
 
 
@@ -92,8 +91,8 @@ class PlatformServiceRunner @Inject constructor(
     serialListenerService: SerialListenerService,
     ibusInputEventCliPrinter: IbusInputEventCliPrinter,
     stefanE39Application: StefanE39Application,
-    bluetoothEventDispatcherService: BluetoothEventDispatcherService,
-    bluetoothService: BluetoothService
+    bluetoothService: BluetoothService,
+    telephoneButtonVideoSwitcherService: TelephoneButtonVideoSwitcherService
 ) : Service {
 
     private val services = listOf<Service>(
@@ -104,10 +103,9 @@ class PlatformServiceRunner @Inject constructor(
         serialPublisherService,
         serialListenerService,
         ibusInputEventCliPrinter,
-
-
         stefanE39Application,
-        bluetoothService
+        bluetoothService,
+        telephoneButtonVideoSwitcherService
     )
 
     override fun onCreate() {
@@ -135,6 +133,7 @@ class PlatformServiceRunner @Inject constructor(
 }
 
 class Platform @Inject constructor(
+    private val deviceConfiguration: DeviceConfiguration,
     private val platformServiceRunner: PlatformServiceRunner,
     private val logger: Logger
 ) {
@@ -146,6 +145,8 @@ class Platform @Inject constructor(
             logger.i("Platform", "Shutting down platform.")
             platformServiceRunner.onShutdown()
         })
+
+        println("Starting platform with device configuration: $deviceConfiguration")
 
         platformServiceRunner.onCreate()
     }

@@ -52,7 +52,9 @@ class StefanE39Application @ExperimentalStdlibApi
             trackInfoPrinter.onCreate()
 
 
-            trackInfoPrinter.onNewTrackInfo("1234567890123456789", "Dole", "Wat")
+//            trackInfoPrinter.onNewTrackInfo("1234567890123456789", "Dole", "Wat")
+
+
 
             sunRoofIsOpen = true
         }

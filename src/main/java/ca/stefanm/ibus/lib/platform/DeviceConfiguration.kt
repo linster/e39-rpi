@@ -14,6 +14,14 @@ interface DeviceConfiguration {
         val friendlyName : String,
         val macAddress : List<Int>
     )
+
+    fun toDebugString() : String {
+        return "DeviceConfiguration(" +
+                "isPi: $isPi," +
+                "iBusInterfaceUri: $iBusInterfaceUri," +
+                "displayDriver: $displayDriver," +
+                "pairedPhone : $pairedPhone"
+    }
 }
 
 class Pi3BPlusDeviceConfiguration() : DeviceConfiguration {
@@ -25,6 +33,8 @@ class Pi3BPlusDeviceConfiguration() : DeviceConfiguration {
         friendlyName = "Stefan's Pixel 2",
         macAddress = listOf(0x40, 0x4E, 0x36, 0xB9, 0x47, 0x3E)
     )
+
+    override fun toString() = toDebugString()
 }
 
 class LaptopDeviceConfiguration : DeviceConfiguration {
@@ -36,4 +46,6 @@ class LaptopDeviceConfiguration : DeviceConfiguration {
         friendlyName = "Stefan's Pixel 2",
         macAddress = listOf(0x40, 0x4E, 0x36, 0xB9, 0x47, 0x3E)
     )
+
+    override fun toString() = toDebugString()
 }
