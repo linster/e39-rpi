@@ -103,7 +103,7 @@ class PlatformServiceRunner @Inject constructor(
         serialPublisherService,
         serialListenerService,
         ibusInputEventCliPrinter,
-        stefanE39Application,
+//        stefanE39Application,
         bluetoothService,
         telephoneButtonVideoSwitcherService
     )

@@ -95,7 +95,7 @@ class IBusInputMessageParser @Inject constructor(
         override fun rawMessageMatches(message: IBusMessage): Boolean {
             return message.sourceDevice == IBusDevice.NAV_VIDEOMODULE
                     && message.destinationDevice == IBusDevice.RADIO
-                    && message.data.toList().map { it.toInt() }.subList(0, 3) == listOf(0x23, 0x62, 0x30)
+                    && message.data.toList().map { it.toInt() }.take(3) == listOf(0x23, 0x62, 0x30)
         }
 
         override fun messageToInputEvent(message: IBusMessage): InputEvent? {
