@@ -22,6 +22,12 @@ interface DeviceConfiguration {
                 "displayDriver: $displayDriver," +
                 "pairedPhone : $pairedPhone"
     }
+
+    enum class SerialPortReadMode { NON_BLOCKING, BLOCKING }
+    enum class SerialPortWriteMode { NON_BLOCKING, BLOCKING }
+
+    val serialPortReadMode : SerialPortReadMode
+    val serialPortWriteMode : SerialPortWriteMode
 }
 
 class Pi3BPlusDeviceConfiguration() : DeviceConfiguration {
@@ -35,6 +41,9 @@ class Pi3BPlusDeviceConfiguration() : DeviceConfiguration {
     )
 
     override fun toString() = toDebugString()
+
+    override val serialPortReadMode = DeviceConfiguration.SerialPortReadMode.BLOCKING
+    override val serialPortWriteMode = DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING
 }
 
 class LaptopDeviceConfiguration : DeviceConfiguration {
@@ -48,4 +57,8 @@ class LaptopDeviceConfiguration : DeviceConfiguration {
     )
 
     override fun toString() = toDebugString()
+
+
+    override val serialPortReadMode = DeviceConfiguration.SerialPortReadMode.BLOCKING
+    override val serialPortWriteMode = DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING
 }

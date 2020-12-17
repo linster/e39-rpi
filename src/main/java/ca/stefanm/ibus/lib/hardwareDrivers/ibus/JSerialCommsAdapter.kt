@@ -12,6 +12,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import okio.Buffer
+import okio.Source
+import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,23 +27,32 @@ interface SerialPortWriter {
     suspend fun writeRawBytes(bytes : ByteArray)
 }
 
+@ExperimentalCoroutinesApi
 @Singleton
 class JSerialCommsAdapter @Inject constructor(
-    private val writer : JSerialCommsWriter,
-    private val reader : JSerialCommsReader
+    private val deviceConfiguration: DeviceConfiguration,
+    private val blockingWriter : BlockingJSerialCommsWriter,
+    private val nonBlockingWriter : NonBlockingJSerialCommsWriter,
+    private val blockingReader : BlockingJSerialCommsReader
 ) : SerialPortWriter, SerialPortReader {
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
-            writer.writeRawBytes(bytes)
+        when (deviceConfiguration.serialPortWriteMode) {
+            DeviceConfiguration.SerialPortWriteMode.BLOCKING -> blockingWriter
+            DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING -> nonBlockingWriter
+        }.writeRawBytes(bytes)
     }
 
     override fun readMessages(): Flow<IBusMessage> {
-        return reader.readMessages()
+        return when (deviceConfiguration.serialPortReadMode) {
+            DeviceConfiguration.SerialPortReadMode.BLOCKING -> blockingReader.readMessages()
+            else -> error("Not supported")
+        }
     }
 }
 
 @ExperimentalCoroutinesApi
-class JSerialCommsReader @Inject constructor(
+class BlockingJSerialCommsReader @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,
     private val coroutineScope: CoroutineScope,
@@ -74,9 +85,6 @@ class JSerialCommsReader @Inject constructor(
     private var readerJob : Job? = null
 
     private suspend fun setupJSerialComm() {
-        //Add a listener here
-        //https://fazecast.github.io/jSerialComm/javadoc/com/fazecast/jSerialComm/SerialPortDataListener.html
-        //for a data available listener. Then,
         logger.v(TAG, "Setting up jSerialComm read coroutine.")
 
         readerJob = coroutineScope.launch(readerDispatcher) {
@@ -191,11 +199,29 @@ class JSerialCommsSerialPortProvider @Inject constructor(
             9600, 8, 1, SerialPort.EVEN_PARITY
         )
 
-        port.setComPortTimeouts(
-            SerialPort.TIMEOUT_READ_BLOCKING or SerialPort.TIMEOUT_WRITE_BLOCKING,
-            READ_TIMEOUT_NO_DATA_MS,
-            SEND_TIMEOUT_MS
-        )
+        if (deviceConfiguration.serialPortReadMode == DeviceConfiguration.SerialPortReadMode.BLOCKING
+            && deviceConfiguration.serialPortWriteMode == DeviceConfiguration.SerialPortWriteMode.BLOCKING) {
+            //We know this works experimentally.
+            port.setComPortTimeouts(
+                SerialPort.TIMEOUT_READ_BLOCKING or SerialPort.TIMEOUT_WRITE_BLOCKING,
+                READ_TIMEOUT_NO_DATA_MS,
+                SEND_TIMEOUT_MS
+            )
+        } else {
+            var timeoutMode = 0
+
+            timeoutMode = timeoutMode or when (deviceConfiguration.serialPortReadMode) {
+                DeviceConfiguration.SerialPortReadMode.NON_BLOCKING -> SerialPort.TIMEOUT_NONBLOCKING
+                DeviceConfiguration.SerialPortReadMode.BLOCKING -> SerialPort.TIMEOUT_READ_BLOCKING
+            }
+
+            timeoutMode = timeoutMode or when (deviceConfiguration.serialPortWriteMode) {
+                DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING -> SerialPort.TIMEOUT_NONBLOCKING
+                DeviceConfiguration.SerialPortWriteMode.BLOCKING -> SerialPort.TIMEOUT_WRITE_BLOCKING
+            }
+
+            serialPort.setComPortTimeouts(timeoutMode, READ_TIMEOUT_NO_DATA_MS, SEND_TIMEOUT_MS)
+        }
 
         if (!port.isOpen) {
             port.openPort()
@@ -205,7 +231,24 @@ class JSerialCommsSerialPortProvider @Inject constructor(
 }
 
 @Singleton
-class JSerialCommsWriter @Inject constructor(
+class NonBlockingJSerialCommsWriter @Inject constructor(
+    private val logger: Logger,
+    serialPortProvider: JSerialCommsSerialPortProvider
+) : SerialPortWriter {
+
+    private val port = serialPortProvider.serialPort
+
+    override suspend fun writeRawBytes(bytes: ByteArray) {
+        var bytesWritten = 0L
+        while (bytesWritten < bytes.size) {
+            bytesWritten += port.writeBytes(bytes, 1, bytesWritten)
+            yield()
+        }
+    }
+}
+
+@Singleton
+class BlockingJSerialCommsWriter @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,
     private val coroutineScope: CoroutineScope
