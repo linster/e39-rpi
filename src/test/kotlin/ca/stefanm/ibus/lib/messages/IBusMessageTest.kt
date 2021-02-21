@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.lib.messages
 
-import ca.stefanm.ibus.lib.bordmonitor.input.IBusDevice
+import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
 import okio.Buffer
 import org.junit.Assert
