@@ -15,11 +15,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class KeyEventSimulator @Inject constructor(
+    private val logger: Logger,
     private val iBusInputMessageParser: IBusInputMessageParser
 ) {
 
@@ -122,6 +124,7 @@ class KeyEventSimulator @Inject constructor(
     private fun sendInputEvent(inputEvent : InputEvent) {
         GlobalScope.launch {
             iBusInputMessageParser.debugSend(inputEvent)
+            logger.d("KeyEventSimulator", "Sending event: $inputEvent")
         }
     }
 }

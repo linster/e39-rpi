@@ -1,4 +1,4 @@
-package ca.stefanm.ibus.gui.menu
+package ca.stefanm.ibus.gui.menu.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

@@ -6,7 +6,7 @@ plugins {
         // __KOTLIN_COMPOSE_VERSION__
         kotlin("jvm") version "1.4.30"
         kotlin("kapt") version "1.4.30"
-        id("org.jetbrains.compose") version "0.3.0-build152"
+        id("org.jetbrains.compose") version "0.3.1"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"
@@ -53,6 +53,11 @@ dependencies {
 
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
 
+
+    implementation("com.arkivanov.decompose:decompose:0.1.9")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.1.9")
+    implementation("com.ginsberg:cirkle:1.0.1")
+
     api("com.google.dagger:dagger:2.28.1")
     kapt("com.google.dagger:dagger-compiler:2.28.1")
 
@@ -62,6 +67,13 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
     testImplementation("junit:junit:4.12")
+
+
+    //Web
+    implementation("io.ktor:ktor:1.5.1")
+    implementation("io.ktor:ktor-server-netty:1.5.1")
+    implementation("io.ktor:ktor-html-builder:1.5.1")
+
 }
 
 compose.desktop {

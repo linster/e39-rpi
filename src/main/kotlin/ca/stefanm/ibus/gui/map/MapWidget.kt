@@ -2,9 +2,11 @@ package ca.stefanm.ibus.gui.map
 
 import androidx.compose.desktop.AppWindow
 import androidx.compose.desktop.LocalAppWindow
+import androidx.compose.desktop.SwingPanel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import org.jxmapviewer.JXMapViewer
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -55,7 +58,16 @@ class MapWidget @Inject constructor(){
                 )
         ) {
             Text("Foo")
-            SwingPanel(mapViewer())
+            SwingPanel(
+                background = Color.White,
+                modifier = Modifier.fillMaxSize(),
+                factory = {
+                    JPanel().apply {
+                        layout = BorderLayout(0, 0)
+                        add(mapViewer())
+                    }
+                }
+            )
         }
     }
 
@@ -81,85 +93,4 @@ class MapWidget @Inject constructor(){
 
     //https://github.com/Dynamium/OKSM-Desktop/blob/master/src/main/kotlin/org/dynamium/oksm/ui/components/editor/Editor.kt#L87
 
-}
-
-/**
- * Wraps a Swing component in a Compose hierarchy. The Swing component is placed on top
- * of the Compose layer.
- * @param component Swing component
- * @param background Background color of SwingPanel
- */
-@Composable
-public fun SwingPanel(
-    component: Component,
-    background: Color = Color.White
-) {
-    val layout = remember { SwingPanelLayout(component, background) }
-    val density = 1.0
-
-    var l_x by remember { mutableStateOf(0) }
-    var l_y by remember { mutableStateOf(0) }
-    var l_w by remember { mutableStateOf(0) }
-    var l_h by remember { mutableStateOf(0) }
-
-    Box(
-        modifier = Modifier.onGloballyPositioned { childCoordinates ->
-            val coordinates = childCoordinates.parentCoordinates!!
-//            val coordinates = childCoordinates
-            val location = coordinates.localToWindow(Offset.Zero).round()
-            val size = coordinates.size
-
-            l_x = (location.x / density).toInt()
-            l_y = (location.y / density).toInt()
-            l_w = (size.width / density).toInt()
-            l_h = (size.height / density).toInt()
-
-            layout.density = density.toFloat()
-            layout.validate()
-            layout.repaint()
-        },
-
-    ) {
-        SideEffect {
-            layout.setBounds(
-                l_x,
-                l_y,
-                l_w,
-                l_h
-            )
-            layout.validate()
-            layout.repaint()
-        }
-    }
-
-    LocalAppWindow.current.window.rootPane.contentPane.components[0].let {
-        it.validate()
-        it.repaint()
-        it.isVisible = false
-        GlobalScope.launch {
-            while (true) {
-                delay(800)
-                it.isVisible = !it.isVisible
-            }
-        }
-    }
-    LocalAppWindow.current.window.rootPane.contentPane.add(layout)
-}
-
-internal class SwingPanelLayout(component: Component, background: Color) : JPanel() {
-    var density = 1f
-    init {
-        setBackground(parseColor(background))
-        setLayout(BorderLayout(0, 0))
-        add(component)
-    }
-
-    private fun parseColor(color: Color): java.awt.Color {
-        return java.awt.Color(
-            color.component1(),
-            color.component2(),
-            color.component3(),
-            color.component4()
-        )
-    }
 }

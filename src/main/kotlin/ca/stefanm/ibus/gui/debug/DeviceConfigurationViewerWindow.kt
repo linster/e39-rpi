@@ -23,7 +23,6 @@ class DeviceConfigurationViewerWindow @Inject constructor(
             title = "Device Configuration Viewer",
             size = IntSize(300, 600),
         ) {
-            val stateVertical = rememberScrollState(0f)
 
             Column(
                 modifier = Modifier.fillMaxSize(),

@@ -18,8 +18,6 @@ import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.debug.KeyEventSimulator
 import ca.stefanm.ibus.gui.debug.MenuDebug
 import ca.stefanm.ibus.gui.map.MapDebug
-import ca.stefanm.ibus.gui.menu.BmwFullScreenMenu
-import ca.stefanm.ibus.gui.menu.BmwFullScreenMenuItem
 import javax.inject.Inject
 
 fun main() {
@@ -39,6 +37,9 @@ class GuiMain {
 
     @Inject
     lateinit var mapDebug: MapDebug
+
+    @Inject
+    lateinit var menuDebug: MenuDebug
 
     init {
         DaggerApplicationComponent.builder().build().inject(this)
@@ -85,13 +86,9 @@ class GuiMain {
                         Text("Map Debug")
                     }
 
-                    Button(onClick = { MenuDebug().show()}) {
+                    Button(onClick = { menuDebug.show()}) {
                         Text("Menu Debug")
                     }
-
-//                    BmwFullScreenMenu {
-                        BmwFullScreenMenuItem("Foo")
-//                    }
                 }
             }
         }

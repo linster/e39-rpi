@@ -3,18 +3,24 @@ package ca.stefanm.ibus.gui.menu
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ibus.gui.menu.widgets.ScrollListener
+import ca.stefanm.ibus.gui.menu.widgets.ScrollListenerOnClickListener
 import kotlin.math.E
 
 //A "Chip" is the little nubbin shown to indicate a scrollable item
@@ -37,24 +43,15 @@ object ChipItemColors {
     val TEXT_RED = Color.Red
 
     val MenuBackground = Color(48, 72, 107, 255)
-}
 
-@Composable
-fun ScrollableSelectable(
-    isSelected : Boolean = false,
-    onSelectedTo : () -> Unit = {},
-    onSelectedFrom : () -> Unit = {},
-    onKnobClick : () -> Unit = {},
-    content : @Composable () -> Unit
-) {
-    //This composable holds the state needed for the
-    //circular linked list of selection + knob click events.
-    content()
+    val SelectedColor = Color(240, 189, 176, 255)
 }
 
 @Composable
 fun EmptyMenuItem() {
-    MenuItem()
+    MenuItem(
+        scrollListenerOnClickListener = {}
+    )
 }
 
 @Composable
@@ -62,7 +59,8 @@ fun MenuItem(
     label : String = " ",
     labelColor : Color = ChipItemColors.TEXT_WHITE,
     chipOrientation: ItemChipOrientation = ItemChipOrientation.NONE,
-    isSelected: Boolean = false
+    isSelected: Boolean = false,
+    scrollListenerOnClickListener: ScrollListenerOnClickListener
 ) {
 
     val chipWidth = 16.0F
@@ -70,7 +68,8 @@ fun MenuItem(
     val chipHighlights = Color.White
     val highlightWidth = 4.0f
 
-    val selected = remember(isSelected) {}
+//    val selected = remember { isSelected }
+    val selected = isSelected
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -78,7 +77,7 @@ fun MenuItem(
             color = labelColor,
             fontSize = 36.sp,
             modifier = Modifier
-                .border(3.dp, Color.Red)
+                .clickable { scrollListenerOnClickListener() }
                 .then(
                     when (chipOrientation) {
                         ItemChipOrientation.NW,
@@ -111,10 +110,9 @@ fun MenuItem(
                     this.drawLine(
                         brush = SolidColor(chipColor),
                         start = Offset(chipWidth, 0.0f),
-                        end = Offset(chipWidth, this.size.height),
+                        end = Offset(chipWidth, this.size.height - highlightWidth),
                         strokeWidth = 2 * chipWidth
                     )
-                    //Line for top here
                 }
                 ItemChipOrientation.NE -> {
                     this.drawLine(
@@ -126,7 +124,7 @@ fun MenuItem(
                     this.drawLine(
                         brush = SolidColor(chipColor),
                         start = Offset(this.size.width - chipWidth, 0.0f),
-                        end = Offset(this.size.width - chipWidth, this.size.height),
+                        end = Offset(this.size.width - chipWidth, this.size.height - highlightWidth),
                         strokeWidth = 2 * chipWidth
                     )
                 }
@@ -199,6 +197,52 @@ fun MenuItem(
                     )
                 }
             }
+
+            if (selected) {
+                //Selected
+
+                val highlightWidth = 8.0f
+
+                val rectY = if (chipOrientation == ItemChipOrientation.NW || chipOrientation == ItemChipOrientation.NE) {
+                    highlightWidth / 2.0F + (2 * chipWidth)
+                } else {
+                    highlightWidth / 2.0F
+                }
+
+                val rectHeight = if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
+                    this.size.height - rectY - (2 * chipWidth)
+                } else {
+                    this.size.height - rectY
+                }
+
+                this.drawRect(
+                    color = ChipItemColors.SelectedColor,
+                    topLeft = Offset(x = highlightWidth / 2.0F,
+                        y = rectY
+                    ),
+                    style = Stroke(width = highlightWidth),
+                    size = Size(this.size.width - highlightWidth, rectHeight)
+                )
+
+                this.drawRect(
+                    color = ChipItemColors.SelectedColor,
+                    topLeft = Offset( x =
+                        if (chipOrientation == ItemChipOrientation.E ||
+                            chipOrientation == ItemChipOrientation.SE ||
+                            chipOrientation == ItemChipOrientation.NE) {
+                            this.size.width - (2 * chipWidth)
+                        } else {
+                            0.0F
+                       }, y = rectY),
+                    style = Fill,
+                    size = Size(chipWidth * 2F,
+                        if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
+                            this.size.height - (chipWidth * 2)
+                        } else {
+                            this.size.height
+                        }),
+                )
+            }
         })
 
     }
@@ -208,8 +252,9 @@ fun MenuItem(
 
 @Composable
 fun BmwChipMenu(
-    contentLeft : @Composable () -> Unit,
-    contentRight : @Composable () -> Unit
+    scrollListener: ScrollListener,
+    contentLeft : @Composable (scrollListener : ScrollListener) -> Unit,
+    contentRight : @Composable (scrollListener : ScrollListener) -> Unit
 ) {
     Box (Modifier
         .background(ChipItemColors.MenuBackground)
@@ -217,10 +262,10 @@ fun BmwChipMenu(
     ){
         Row(Modifier.fillMaxWidth().wrapContentHeight()) {
             Column(Modifier.weight(0.5f, true)) {
-                contentLeft()
+                contentLeft(scrollListener)
             }
             Column(Modifier.weight(0.5f, true)) {
-                contentRight()
+                contentRight(scrollListener)
             }
         }
     }
