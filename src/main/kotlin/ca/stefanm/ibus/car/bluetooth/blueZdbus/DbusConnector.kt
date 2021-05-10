@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.configuration.DeviceConfiguration
 import ca.stefanm.ibus.car.platform.Service
@@ -8,9 +9,8 @@ import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@ConfiguredCarModuleScope
 class DbusConnector @Inject constructor(
     private val logger: Logger
 ) : Service {
@@ -54,7 +54,7 @@ class DbusConnector @Inject constructor(
 }
 
 //This is a hack because I haven't thought through the design for the multiple-phone pairing yet.
-@Singleton
+@ConfiguredCarModuleScope
 class DbusReconnector @Inject constructor(
     private val deviceConfiguration: DeviceConfiguration,
     private val dbusConnector: DbusConnector,

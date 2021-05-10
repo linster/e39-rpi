@@ -6,7 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
-import ca.stefanm.ibus.car.platform.IBusInputEventListenerService
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.lib.logging.Logger
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -16,16 +16,24 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 
 @ExperimentalCoroutinesApi
 class ScrollListener @Inject constructor(
-    private val inputEvents : Channel<InputEvent>,
+//    @Named(ConfiguredCarModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
+
     maxIndex : Int
 ) {
+
+    //TODO make a bridge between modules for this kinda stuff.
+    private val inputEvents : SharedFlow<InputEvent> = MutableSharedFlow()
+
     private var _currentSelectedIndex = mutableStateOf(0)
     val currentSelectedIndex : State<Int> = _currentSelectedIndex
 
@@ -41,7 +49,7 @@ class ScrollListener @Inject constructor(
 
     private suspend fun listenForKnob() {
         println("KNOB SCROLL : INIT")
-        inputEvents.consumeEach {
+        inputEvents.collect {
             println("KNOB SCROLL : $it")
             if (it == InputEvent.NavKnobPressed) {
                 _isClickProcessing.value = true
@@ -85,40 +93,17 @@ typealias ScrollListenerOnClickListener = () -> Unit
 //TODO foo(isSelected = scrollListener.currentSelectedIndex == 4, onClicked = ScrollListenerOnClick(4) { /* stuff */})
 //TODO then inside a widget, take the onClicked, and jam it in a Modifier.onClick.
 
-@Singleton
+
 class MenuKnobListenerService @Inject constructor(
     private val logger: Logger,
-    private val inputParser : IBusInputMessageParser
-) : IBusInputEventListenerService {
-
-    override val incomingIbusInputEvents: Channel<InputEvent> = Channel(Channel.UNLIMITED)
-
-    override fun onCreate() {
-        logger.d("MenuKnobListenerService", "subscribe")
-        inputParser.addMailbox(this)
-    }
-
-    override fun onShutdown() {
-        logger.d("MenuKnobListenerService", "unsubsribe")
-        inputParser.removeMailbox(this)
-    }
-
-    init {
-//        AppManager.setEvents(
-//            onAppStart = {
-//                onCreate()
-//            },
-//            onAppExit = {
-//                onShutdown()
-//            }
-//        )
-        onCreate()
-    }
+//    @Named(ConfiguredCarModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent?>,
+) {
 
     fun toScrollListener(maxIndex : Int) : ScrollListener {
-        return ScrollListener(
-            incomingIbusInputEvents,
-            maxIndex
-        )
+        TODO()
+//        return ScrollListener(
+//            inputEvents,
+//            maxIndex
+//        )
     }
 }

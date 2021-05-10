@@ -1,7 +1,6 @@
 package ca.stefanm.ibus.car.bordmonitor.input
 
 sealed class InputEvent {
-
     object PrevTrack : InputEvent()
     object NextTrack : InputEvent()
     object RTButton : InputEvent()

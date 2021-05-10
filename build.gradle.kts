@@ -4,9 +4,9 @@ plugins {
 
     if (true) {
         // __KOTLIN_COMPOSE_VERSION__
-        kotlin("jvm") version "1.4.30"
-        kotlin("kapt") version "1.4.30"
-        id("org.jetbrains.compose") version "0.3.1"
+        kotlin("jvm") version "1.4.31"
+        kotlin("kapt") version "1.4.31"
+        id("org.jetbrains.compose") version "0.3.2"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"
@@ -26,7 +26,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    jcenter()
     google()
     maven("https://kotlin.bintray.com/kotlinx")
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -44,7 +43,8 @@ dependencies {
     implementation(compose.desktop.currentOs)
 
     implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0")
+    implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+//    implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-flow:1.4.3")
 
     implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
     implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
@@ -54,8 +54,8 @@ dependencies {
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
 
 
-    implementation("com.arkivanov.decompose:decompose:0.1.9")
-    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.1.9")
+    implementation("com.arkivanov.decompose:decompose:0.2.4")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.2.4")
     implementation("com.ginsberg:cirkle:1.0.1")
 
     api("com.google.dagger:dagger:2.28.1")

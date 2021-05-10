@@ -2,39 +2,33 @@ package ca.stefanm.ibus.stefane39
 
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.hardwareDrivers.VideoEnableRelayManager
 import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.car.platform.IBusInputEventListenerService
 import ca.stefanm.ibus.car.platform.LongRunningService
+import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import javax.inject.Named
 
+@ConfiguredCarModuleScope
 class TelephoneButtonVideoSwitcherService @Inject constructor(
+    @Named(ApplicationModule.INPUT_EVENTS)
+    private val inputEvents : SharedFlow<InputEvent>,
+
     private val videoEnableRelayManager: VideoEnableRelayManager,
     private val logger: Logger,
-    private val iBusInputMessageParser: IBusInputMessageParser,
+
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher), IBusInputEventListenerService {
-
-    override val incomingIbusInputEvents: Channel<InputEvent> = Channel()
-
-    override fun onCreate() {
-        super.onCreate()
-        iBusInputMessageParser.addMailbox(this)
-    }
-
-    override fun onShutdown() {
-        iBusInputMessageParser.removeMailbox(this)
-        super.onShutdown()
-    }
+) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     override suspend fun doWork() {
-        incomingIbusInputEvents.receiveAsFlow().collect {
+        inputEvents.collect {
             if (it is InputEvent.BMBTPhonePressed) {
                 val oldState = videoEnableRelayManager.videoEnabled
                 logger.d("TEL", "Old Video Enable state is $oldState. Flipping to new state")

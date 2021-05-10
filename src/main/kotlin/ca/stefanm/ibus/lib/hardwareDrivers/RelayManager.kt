@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers
 
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.pi4j.io.i2c.I2CBus
@@ -19,7 +20,7 @@ interface RelayReaderWriter {
     fun writeRelayState(relay : Relay, enabled : Boolean)
     fun readRelayState(relay: Relay) : Boolean
 }
-
+@ConfiguredCarModuleScope
 class CliRelayReaderWriter @Inject constructor(
     private val logger: Logger
 ) : RelayReaderWriter {
@@ -41,6 +42,7 @@ class CliRelayReaderWriter @Inject constructor(
     }
 }
 
+@ConfiguredCarModuleScope
 class RpiRelayReaderWriter @Inject constructor() : RelayReaderWriter {
 
     //https://github.com/Pi4J/pi4j/blob/master/pi4j-example/src/main/java/I2CWiiMotionPlusExample.java

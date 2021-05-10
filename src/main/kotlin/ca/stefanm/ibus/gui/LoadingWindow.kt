@@ -14,16 +14,24 @@ import androidx.compose.ui.window.KeyStroke
 import androidx.compose.ui.window.Menu
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.MenuItem
+import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.gui.debug.DeviceConfigurationViewerWindow
 import ca.stefanm.ibus.gui.debug.KeyEventSimulator
 import ca.stefanm.ibus.car.platform.BackgroundPlatform
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import javax.inject.Inject
 
 class LoadingWindow @Inject constructor(
-    private val platform: BackgroundPlatform,
     private val deviceConfigurationViewerWindow: DeviceConfigurationViewerWindow,
+    private val configurablePlatform: ConfigurablePlatform,
     private val keyEventSimulator: KeyEventSimulator
 ) {
+
+    companion object {
+        val initialConfiguration = LaptopDeviceConfiguration()
+    }
+
     fun show() = Window(
         title = "BMW E39 Nav",
         size = IntSize(800, 600),
@@ -41,17 +49,17 @@ class LoadingWindow @Inject constructor(
                 name = "Platform",
                 MenuItem(
                     name = "Start Platform",
-                    onClick = { platform.run() },
+                    onClick = { configurablePlatform.run() },
                     shortcut = KeyStroke(Key.S)
                 ),
                 MenuItem(
                     name = "Stop Platform",
-                    onClick = { platform.stop() },
+                    onClick = { configurablePlatform.stop() },
                     shortcut = KeyStroke(Key.E)
                 ),
                 MenuItem(
                     name = "Restart Platform",
-                    onClick = { platform.stop(); platform.run() },
+                    onClick = { configurablePlatform.stop(); configurablePlatform.run() },
                     shortcut = KeyStroke(Key.R)
                 ),
                 MenuItem(
@@ -64,7 +72,7 @@ class LoadingWindow @Inject constructor(
                 name = "Configuration",
                 MenuItem(
                     name = "View Device Configuration",
-                    onClick = { deviceConfigurationViewerWindow.show() }
+                    onClick = { deviceConfigurationViewerWindow.show(configurablePlatform.currentConfiguration) }
                 )
             )
         )

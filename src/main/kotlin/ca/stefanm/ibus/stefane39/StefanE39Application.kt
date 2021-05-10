@@ -3,6 +3,7 @@ package ca.stefanm.ibus.stefane39
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.ScreenTrackInfoPrinter
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.hardwareDrivers.SunroofOpener
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.TelephoneLedManager
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
@@ -10,6 +11,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
+@ConfiguredCarModuleScope
 class StefanE39Application @ExperimentalStdlibApi
 @Inject constructor(
     private val telephoneLedManager: TelephoneLedManager,

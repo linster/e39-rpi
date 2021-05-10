@@ -1,21 +1,31 @@
 package ca.stefanm.ibus.car.bordmonitor.input
 
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import ca.stefanm.ibus.car.platform.IBusInputEventListenerService
-import ca.stefanm.ibus.car.platform.IBusMessageListenerService
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
+import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collect
 import okio.Buffer
 import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.Named
 
 @ExperimentalCoroutinesApi
-@Singleton
+@ConfiguredCarModuleScope
 class IBusInputMessageParser @Inject constructor(
-    private val serialListenerService: SerialListenerService,
+
+    @Named(ApplicationModule.IBUS_MESSAGE_INGRESS)
+    val incomingMessages : MutableSharedFlow<IBusMessage>,
+
+    @Named(ApplicationModule.INPUT_EVENTS_WRITER)
+    private val eventSharedFlow: MutableSharedFlow<InputEvent?>,
+
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher,
@@ -26,7 +36,7 @@ class IBusInputMessageParser @Inject constructor(
     bmBtShowRadioStatusMessageParser: BmBtShowRadioStatusMessageParser,
     bmBtMenuPressedMessageParser: BmBtMenuPressedMessageParser,
     bmBtPhonePressedMessageParser: BmBtPhonePressedMessageParser
-) : LongRunningLoopingService(coroutineScope, parsingDispatcher), IBusMessageListenerService {
+) : LongRunningLoopingService(coroutineScope, parsingDispatcher) {
 
     private val messageMatchers = listOf(
         indexSelectedMessageParser,
@@ -38,35 +48,13 @@ class IBusInputMessageParser @Inject constructor(
         bmBtPhonePressedMessageParser
     )
 
-    private val mailboxes = mutableListOf<IBusInputEventListenerService>()
-
-    fun addMailbox(serviceWithMailbox: IBusInputEventListenerService) {
-        mailboxes.add(serviceWithMailbox)
-    }
-
-    fun removeMailbox(serviceWithMailbox: IBusInputEventListenerService) {
-        mailboxes.remove(serviceWithMailbox)
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        serialListenerService.addMailbox(this)
-    }
-
-    override fun onShutdown() {
-        serialListenerService.removeMailbox(this)
-        super.onShutdown()
-    }
-
-    override val incomingIBusMessageMailbox: Channel<IBusMessage> = Channel(capacity = Channel.UNLIMITED)
-
     @ExperimentalCoroutinesApi
     override suspend fun doWork() {
-        incomingIBusMessageMailbox.poll()?.let { message ->
+        incomingMessages.collect { message ->
             messageMatchers.forEach { matcher ->
                 if (matcher.rawMessageMatches(message)) {
                     matcher.messageToInputEvent(message)?.let { event ->
-                        mailboxes.forEach { mailbox -> mailbox.incomingIbusInputEvents.send(event) }
+                        eventSharedFlow.emit(event)
                     }
                 }
             }
@@ -74,7 +62,7 @@ class IBusInputMessageParser @Inject constructor(
     }
 
     suspend fun debugSend(inputEvent: InputEvent) {
-        mailboxes.forEach { mailbox -> mailbox.incomingIbusInputEvents.send(inputEvent) }
+        eventSharedFlow.emit(inputEvent)
     }
 
     interface InputMessageMatcher {

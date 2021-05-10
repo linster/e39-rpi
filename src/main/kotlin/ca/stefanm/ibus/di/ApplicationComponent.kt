@@ -11,5 +11,4 @@ interface ApplicationComponent {
 
     fun inject(cliMain : CliMain)
     fun inject(guiMain: GuiMain)
-
 }

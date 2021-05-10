@@ -6,14 +6,18 @@ import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.car.platform.IBusInputEventListenerService
 import ca.stefanm.ibus.car.platform.LongRunningService
+import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.bluez.MediaPlayer1
@@ -24,10 +28,12 @@ import org.freedesktop.dbus.interfaces.Properties
 import java.lang.NullPointerException
 import java.rmi.activation.UnknownObjectException
 import javax.inject.Inject
+import javax.inject.Named
 
 
 //https://github.com/aguedes/bluez/blob/master/doc/media-api.txt
 
+@ConfiguredCarModuleScope
 class BluetoothService @Inject constructor(
     private val onScreenSetupManager: BluetoothOnScreenSetupManager,
     private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,
@@ -87,26 +93,16 @@ class BluetoothService @Inject constructor(
 
 }
 
+@ConfiguredCarModuleScope
 class DBusTrackInfoFetcher @Inject constructor(
-    private val iBusInputMessageParser: IBusInputMessageParser,
+    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
+
     private val dbusReconnector: DbusReconnector,
     private val trackInfoPrinter: TrackInfoPrinter,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) , IBusInputEventListenerService {
-
-    override fun onCreate() {
-        iBusInputMessageParser.addMailbox(this)
-        super.onCreate()
-    }
-
-    override fun onShutdown() {
-        super.onShutdown()
-        iBusInputMessageParser.removeMailbox(this)
-    }
-
-    override val incomingIbusInputEvents: Channel<InputEvent> = Channel(capacity = Channel.UNLIMITED)
+) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     private val TAG = "Track Fetcher"
 
@@ -114,7 +110,7 @@ class DBusTrackInfoFetcher @Inject constructor(
     var player : MediaPlayer1? = null
 
     override suspend fun doWork() {
-        incomingIbusInputEvents.receiveAsFlow().collect {
+        inputEvents.collect {
             if (it == InputEvent.PrevTrack || it == InputEvent.NextTrack) {
                 val (track, artist, album) = fetchNewTrackInfo()
                 trackInfoPrinter.onNewTrackInfo(track, artist, album)
@@ -171,30 +167,20 @@ class DBusTrackInfoFetcher @Inject constructor(
     }
 }
 
+@ConfiguredCarModuleScope
 class BluetoothEventDispatcherService @Inject constructor(
+    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
+
     private val dbusReconnector: DbusReconnector,
-    private val iBusInputMessageParser: IBusInputMessageParser,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) , IBusInputEventListenerService {
-
-    override fun onCreate() {
-        super.onCreate()
-        iBusInputMessageParser.addMailbox(this)
-    }
-
-    override fun onShutdown() {
-        iBusInputMessageParser.removeMailbox(this)
-        super.onShutdown()
-    }
-
-    override val incomingIbusInputEvents: Channel<InputEvent> = Channel(capacity = Channel.UNLIMITED)
+) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     var mediaPlayer1: MediaPlayer1? = null
 
     override suspend fun doWork() {
-        incomingIbusInputEvents.consumeEach {
+        inputEvents.collect {
             dispatchInputEvent(it)
         }
     }

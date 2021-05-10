@@ -3,39 +3,34 @@ package ca.stefanm.ibus.car.bordmonitor.menu
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.ScreenPainter
-import ca.stefanm.ibus.car.platform.IBusInputEventListenerService
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.car.platform.LongRunningService
+import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.di.ApplicationModule.Companion.INPUT_EVENTS
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collect
 import java.util.*
-import javax.inject.Singleton
+import javax.inject.Named
 
-@Singleton
+@ConfiguredCarModuleScope
 class ScreenManager(
-    private val iBusInputMessageParser: IBusInputMessageParser,
+    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
+
+//    private val iBusInputMessageParser: IBusInputMessageParser,
     /* The screen we show when entering our menu system */
     private val entryPointScreen : Screen,
     private val screenPainter: ScreenPainter,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher), IBusInputEventListenerService {
-
-    override fun onCreate() {
-        iBusInputMessageParser.addMailbox(this)
-        super.onCreate()
-    }
-
-    override fun onShutdown() {
-        super.onShutdown()
-        iBusInputMessageParser.removeMailbox(this)
-    }
-
-    override val incomingIbusInputEvents: Channel<InputEvent> = Channel(capacity = Channel.UNLIMITED)
+) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     override suspend fun doWork() {
-        incomingIbusInputEvents.consumeEach {
+        inputEvents.collect {
             processInputEvent(it)
         }
     }

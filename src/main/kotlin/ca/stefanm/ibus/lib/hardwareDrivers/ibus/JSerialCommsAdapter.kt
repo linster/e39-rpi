@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
@@ -14,8 +15,6 @@ import kotlinx.coroutines.flow.*
 import okio.Buffer
 import java.util.concurrent.Executors
 import javax.inject.Inject
-import javax.inject.Singleton
-
 
 interface SerialPortReader {
     fun readMessages() : Flow<IBusMessage>
@@ -26,7 +25,7 @@ interface SerialPortWriter {
 }
 
 @ExperimentalCoroutinesApi
-@Singleton
+@ConfiguredCarModuleScope
 class JSerialCommsAdapter @Inject constructor(
     private val deviceConfiguration: DeviceConfiguration,
     private val blockingWriter : BlockingJSerialCommsWriter,
@@ -50,6 +49,7 @@ class JSerialCommsAdapter @Inject constructor(
 }
 
 @ExperimentalCoroutinesApi
+@ConfiguredCarModuleScope
 class BlockingJSerialCommsReader @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,
@@ -163,7 +163,7 @@ class BlockingJSerialCommsReader @Inject constructor(
     //https://github.com/tedsalmon/DroidIBus/blob/master/app/src/main/java/com/ibus/droidibus/ibus/IBusMessageService.java#L156
 }
 
-@Singleton
+@ConfiguredCarModuleScope
 class JSerialCommsSerialPortProvider @Inject constructor(
     private val logger: Logger,
     private val deviceConfiguration: DeviceConfiguration
@@ -228,7 +228,7 @@ class JSerialCommsSerialPortProvider @Inject constructor(
     }
 }
 
-@Singleton
+@ConfiguredCarModuleScope
 class NonBlockingJSerialCommsWriter @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider
@@ -245,7 +245,7 @@ class NonBlockingJSerialCommsWriter @Inject constructor(
     }
 }
 
-@Singleton
+@ConfiguredCarModuleScope
 class BlockingJSerialCommsWriter @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,

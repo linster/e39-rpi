@@ -2,87 +2,29 @@ package ca.stefanm.ibus.car.platform
 
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
-import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.di.ConfiguredCarComponent
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
 import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.lib.logging.cli.CliPrinterService
-import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Provider
+import javax.inject.Singleton
 
-
-interface Service {
-    fun onCreate()
-    fun onShutdown()
-}
-
-interface JoinableService : Service {
-   var jobToJoin : Job?
-}
-
-abstract class LongRunningService constructor(
-    private val coroutineScope: CoroutineScope,
-    private val parsingDispatcher: CoroutineDispatcher
-) : JoinableService {
-
-    override var jobToJoin : Job? = null
-
-    override fun onCreate() {
-        jobToJoin = coroutineScope.launch(parsingDispatcher) {
-            doWork()
-        }
-    }
-
-    override fun onShutdown() {
-        jobToJoin?.cancel(cause = ForegroundPlatform.PlatformShutdownCancellationException())
-    }
-
-    abstract suspend fun doWork()
-}
-
-interface IBusMessageListenerService : Service {
-    val incomingIBusMessageMailbox : Channel<IBusMessage>
-}
-
-interface IBusInputEventListenerService : Service {
-    val incomingIbusInputEvents : Channel<InputEvent>
-}
-
-
-abstract class LongRunningLoopingService constructor(
-    private val coroutineScope: CoroutineScope,
-    private val parsingDispatcher: CoroutineDispatcher
-) : JoinableService {
-
-    override var jobToJoin : Job? = null
-
-    override fun onCreate() {
-        jobToJoin = coroutineScope.launch(parsingDispatcher) {
-            while (true) {
-                doWork()
-                yield()
-            }
-        }
-    }
-
-    override fun onShutdown() {
-        jobToJoin?.cancel(cause = ForegroundPlatform.PlatformShutdownCancellationException())
-    }
-
-    abstract suspend fun doWork()
-}
-
+@ConfiguredCarModuleScope
 class PlatformServiceRunner @Inject constructor(
     private val coroutineScope: CoroutineScope,
     iBusInputMessageParser: IBusInputMessageParser,
     coolingFanController: CoolingFanController,
-    cliPrinterService: CliPrinterService,
     serialPublisherService: SerialPublisherService,
     serialListenerService: SerialListenerService,
     bluetoothService: BluetoothService,
@@ -92,7 +34,6 @@ class PlatformServiceRunner @Inject constructor(
     private val services = listOf<Service>(
         coolingFanController,
         iBusInputMessageParser,
-        cliPrinterService,
         serialPublisherService,
         serialListenerService,
         bluetoothService,
@@ -123,52 +64,71 @@ class PlatformServiceRunner @Inject constructor(
     }
 }
 
+@Singleton
 class ForegroundPlatform @Inject constructor(
-    private val deviceConfiguration: DeviceConfiguration,
-    private val platformServiceRunner: PlatformServiceRunner,
+    @Named(ApplicationModule.INITIAL_CONFIGURATION) private val deviceConfiguration: DeviceConfiguration,
+    private val configuredCarComponentProvider: Provider<ConfiguredCarComponent.Builder>,
     private val logger: Logger
 ) {
 
     class PlatformShutdownCancellationException : CancellationException()
 
-    fun run() {
+    private var platformServiceRunner : PlatformServiceRunner? = null
+
+    fun run(initialConfiguration: DeviceConfiguration = LaptopDeviceConfiguration()) {
         Runtime.getRuntime().addShutdownHook(Thread {
             stop()
         })
 
         println("Starting platform with device configuration: $deviceConfiguration")
 
-        platformServiceRunner.onCreate()
+        platformServiceRunner = configuredCarComponentProvider
+            .get()
+            .configuredCarModule(ConfiguredCarModule(initialConfiguration))
+            .build()
+            .legacyPlatformServiceRunner()
+
+        platformServiceRunner!!.onCreate()
     }
 
     fun stop() {
         logger.i("Platform", "Shutting down platform.")
-        platformServiceRunner.onShutdown()
+        platformServiceRunner!!.onShutdown()
     }
 }
 
+@Singleton
 class BackgroundPlatform @Inject constructor(
     private val coroutineScope: CoroutineScope,
-    private val deviceConfiguration: DeviceConfiguration,
-    private val platformServiceRunner: PlatformServiceRunner,
+    private val configuredCarComponentProvider: Provider<ConfiguredCarComponent.Builder>,
     private val logger: Logger
 ) {
     private var platformJob : Job? = null
 
-    fun run(dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+    private var platformServiceRunner : PlatformServiceRunner? = null
+
+
+    fun run(initialConfiguration: DeviceConfiguration = LaptopDeviceConfiguration(),
+            dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
         Runtime.getRuntime().addShutdownHook(Thread {
             stop()
         })
-        println("Starting platform with device configuration: $deviceConfiguration")
+        println("Starting platform with device configuration: $initialConfiguration")
         platformJob = coroutineScope.launch(dispatcher) {
-            platformServiceRunner.onCreate()
+            platformServiceRunner = configuredCarComponentProvider
+                .get()
+                .configuredCarModule(ConfiguredCarModule(initialConfiguration))
+                .build()
+                .legacyPlatformServiceRunner()
+
+            platformServiceRunner!!.onCreate()
         }
 
     }
 
     fun stop() {
         logger.i("BackgroundPlatform", "Shutting down platform.")
-        platformServiceRunner.onShutdown()
+        platformServiceRunner!!.onShutdown()
         platformJob?.cancel()
     }
 }

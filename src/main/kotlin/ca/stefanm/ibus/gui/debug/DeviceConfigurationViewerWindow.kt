@@ -14,11 +14,9 @@ import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.configuration.DeviceConfiguration
 import javax.inject.Inject
 
-class DeviceConfigurationViewerWindow @Inject constructor(
-    private val deviceConfiguration: DeviceConfiguration
-) {
+class DeviceConfigurationViewerWindow @Inject constructor() {
 
-    fun show() {
+    fun show(deviceConfiguration: DeviceConfiguration?) {
         Window(
             title = "Device Configuration Viewer",
             size = IntSize(300, 600),
@@ -58,7 +56,8 @@ class DeviceConfigurationViewerWindow @Inject constructor(
         }
     }
 
-    fun DeviceConfiguration.parseConfiguration() : List<ConfigurationItem> {
+    private fun DeviceConfiguration?.parseConfiguration() : List<ConfigurationItem> {
+        if (this == null) return listOf()
         return listOf(
             ConfigurationItem("isPi", isPi.toString()),
             ConfigurationItem("iBusInterfaceUri", iBusInterfaceUri),

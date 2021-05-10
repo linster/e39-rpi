@@ -6,15 +6,17 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.getAllowedLength
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.DeviceConfiguration
-import ca.stefanm.ibus.car.platform.IBusInputEventListenerService
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.Service
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import javax.inject.Inject
@@ -25,6 +27,7 @@ interface TrackInfoPrinter : Service {
     suspend fun onNewTrackInfo(track : String, artist : String, album : String)
 }
 
+@ConfiguredCarModuleScope
 class CliTrackInfoPrinter @Inject constructor(
     private val logger: Logger
 ) : TrackInfoPrinter {
@@ -36,15 +39,16 @@ class CliTrackInfoPrinter @Inject constructor(
     }
 }
 
+
 class ScreenTrackInfoPrinter @Inject constructor(
-    private val iBusInputMessageParser: IBusInputMessageParser,
+    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
     private val cliTrackInfoPrinter: CliTrackInfoPrinter,
     private val deviceConfiguration: DeviceConfiguration,
     private val textLengthConstraints: TextLengthConstraints,
     @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) private val messagesOut : Channel<IBusMessage>,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher), TrackInfoPrinter, IBusInputEventListenerService {
+) : LongRunningService(coroutineScope, parsingDispatcher), TrackInfoPrinter {
 
     private var currentTrack = ""
     private var currentArtist = ""
@@ -93,20 +97,8 @@ class ScreenTrackInfoPrinter @Inject constructor(
         messagesOut.send(writeMessage)
     }
 
-    override fun onCreate() {
-        iBusInputMessageParser.addMailbox(this)
-        super.onCreate()
-    }
-
-    override fun onShutdown() {
-        super.onShutdown()
-        iBusInputMessageParser.removeMailbox(this)
-    }
-
-    override val incomingIbusInputEvents: Channel<InputEvent> = Channel(capacity = Channel.UNLIMITED)
-
     override suspend fun doWork() {
-        incomingIbusInputEvents.consumeAsFlow().collect {
+        inputEvents.collect {
             if (it == InputEvent.ShowRadioStatusScreen) {
                 printMessage(currentTrack, TRACK_FIELD)
                 printMessage(currentArtist, ARTIST_FIELD)
