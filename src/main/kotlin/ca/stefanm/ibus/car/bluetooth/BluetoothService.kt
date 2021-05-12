@@ -4,22 +4,16 @@ import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusConnector
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusReconnector
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
-import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
-import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.DBusMap
 import org.freedesktop.dbus.connections.impl.DBusConnection
@@ -33,7 +27,7 @@ import javax.inject.Named
 
 //https://github.com/aguedes/bluez/blob/master/doc/media-api.txt
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class BluetoothService @Inject constructor(
     private val onScreenSetupManager: BluetoothOnScreenSetupManager,
     private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,
@@ -93,7 +87,7 @@ class BluetoothService @Inject constructor(
 
 }
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class DBusTrackInfoFetcher @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
 
@@ -167,7 +161,7 @@ class DBusTrackInfoFetcher @Inject constructor(
     }
 }
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class BluetoothEventDispatcherService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
 

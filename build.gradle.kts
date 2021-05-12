@@ -58,8 +58,8 @@ dependencies {
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.2.4")
     implementation("com.ginsberg:cirkle:1.0.1")
 
-    api("com.google.dagger:dagger:2.28.1")
-    kapt("com.google.dagger:dagger-compiler:2.28.1")
+    api("com.google.dagger:dagger:2.35.1")
+    kapt("com.google.dagger:dagger-compiler:2.35.1")
 
     implementation("com.pi4j:pi4j-core:1.1")
 

@@ -26,8 +26,6 @@ fun main() {
 
 class GuiMain {
 
-//    @Inject
-//    lateinit var platform: Platform
 
     @Inject
     lateinit var loadingWindow: LoadingWindow

@@ -1,9 +1,9 @@
 package ca.stefanm.ibus.lib.hardwareDrivers
 
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import javax.inject.Inject
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class VideoEnableRelayManager @Inject constructor(
     private val relayReaderWriter: RelayReaderWriter
 ) {

@@ -4,10 +4,11 @@ import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.configuration.DeviceConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
@@ -20,7 +21,7 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class PlatformServiceRunner @Inject constructor(
     private val coroutineScope: CoroutineScope,
     iBusInputMessageParser: IBusInputMessageParser,
@@ -64,10 +65,9 @@ class PlatformServiceRunner @Inject constructor(
     }
 }
 
-@Singleton
+@ApplicationScope
 class ForegroundPlatform @Inject constructor(
     @Named(ApplicationModule.INITIAL_CONFIGURATION) private val deviceConfiguration: DeviceConfiguration,
-    private val configuredCarComponentProvider: Provider<ConfiguredCarComponent.Builder>,
     private val logger: Logger
 ) {
 
@@ -82,11 +82,12 @@ class ForegroundPlatform @Inject constructor(
 
         println("Starting platform with device configuration: $deviceConfiguration")
 
-        platformServiceRunner = configuredCarComponentProvider
-            .get()
-            .configuredCarModule(ConfiguredCarModule(initialConfiguration))
-            .build()
-            .legacyPlatformServiceRunner()
+
+//        platformServiceRunner = configuredCarComponentProvider
+//            .get()
+//            .configuredCarModule(ConfiguredCarModule(initialConfiguration))
+//            .build()
+//            .legacyPlatformServiceRunner()
 
         platformServiceRunner!!.onCreate()
     }
@@ -97,10 +98,9 @@ class ForegroundPlatform @Inject constructor(
     }
 }
 
-@Singleton
+@ApplicationScope
 class BackgroundPlatform @Inject constructor(
     private val coroutineScope: CoroutineScope,
-    private val configuredCarComponentProvider: Provider<ConfiguredCarComponent.Builder>,
     private val logger: Logger
 ) {
     private var platformJob : Job? = null
@@ -115,11 +115,11 @@ class BackgroundPlatform @Inject constructor(
         })
         println("Starting platform with device configuration: $initialConfiguration")
         platformJob = coroutineScope.launch(dispatcher) {
-            platformServiceRunner = configuredCarComponentProvider
-                .get()
-                .configuredCarModule(ConfiguredCarModule(initialConfiguration))
-                .build()
-                .legacyPlatformServiceRunner()
+//            platformServiceRunner = configuredCarComponentProvider
+//                .get()
+//                .configuredCarModule(ConfiguredCarModule(initialConfiguration))
+//                .build()
+//                .legacyPlatformServiceRunner()
 
             platformServiceRunner!!.onCreate()
         }

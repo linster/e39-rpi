@@ -1,8 +1,8 @@
 package ca.stefanm.ibus
 
-import ca.stefanm.ibus.car.platform.ConfigurablePlatform
-import ca.stefanm.ibus.di.DaggerApplicationComponent
-import ca.stefanm.ibus.car.platform.ForegroundPlatform
+//import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+//import ca.stefanm.ibus.di.DaggerApplicationComponent
+//import ca.stefanm.ibus.car.platform.ForegroundPlatform
 import javax.inject.Inject
 
 //

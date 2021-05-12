@@ -1,13 +1,11 @@
 package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.getAllowedLength
-import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.DeviceConfiguration
@@ -18,7 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.consumeAsFlow
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -27,7 +24,7 @@ interface TrackInfoPrinter : Service {
     suspend fun onNewTrackInfo(track : String, artist : String, album : String)
 }
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class CliTrackInfoPrinter @Inject constructor(
     private val logger: Logger
 ) : TrackInfoPrinter {
@@ -39,7 +36,7 @@ class CliTrackInfoPrinter @Inject constructor(
     }
 }
 
-
+@ConfiguredCarScope
 class ScreenTrackInfoPrinter @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
     private val cliTrackInfoPrinter: CliTrackInfoPrinter,

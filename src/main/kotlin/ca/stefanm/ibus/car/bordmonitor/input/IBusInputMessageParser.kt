@@ -1,30 +1,24 @@
 package ca.stefanm.ibus.car.bordmonitor.input
 
-import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
 import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import okio.Buffer
 import javax.inject.Inject
 import javax.inject.Named
 
 @ExperimentalCoroutinesApi
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class IBusInputMessageParser @Inject constructor(
 
-    @Named(ApplicationModule.IBUS_MESSAGE_INGRESS)
-    val incomingMessages : MutableSharedFlow<IBusMessage>,
+    @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,
 
-    @Named(ApplicationModule.INPUT_EVENTS_WRITER)
-    private val eventSharedFlow: MutableSharedFlow<InputEvent?>,
+    @Named(ApplicationModule.INPUT_EVENTS_WRITER) private val eventSharedFlow: MutableSharedFlow<InputEvent>,
 
     private val logger: Logger,
     coroutineScope: CoroutineScope,

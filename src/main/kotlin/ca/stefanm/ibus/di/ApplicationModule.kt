@@ -1,25 +1,17 @@
 package ca.stefanm.ibus.di
 
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.CliTrackInfoPrinter
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.ScreenTrackInfoPrinter
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
+import ca.stefanm.ibus.CliMain
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
-import ca.stefanm.ibus.car.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
-import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
-import ca.stefanm.ibus.car.bordmonitor.menu.painter.TvModuleTextLengthConstraints
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
-import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
-import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
-import ca.stefanm.ibus.lib.hardwareDrivers.RpiRelayReaderWriter
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.JSerialCommsAdapter
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortReader
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortWriter
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.DeviceConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
+import ca.stefanm.ibus.gui.GuiMain
+import dagger.Component
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.*
@@ -27,17 +19,32 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import java.lang.annotation.RetentionPolicy
 import javax.inject.Named
+import javax.inject.Scope
 import javax.inject.Singleton
 
-@ExperimentalCoroutinesApi
-@Module(subcomponents = [ConfiguredCarComponent::class])
-class ApplicationModule {
+@Scope
+annotation class ApplicationScope
 
+@Component(modules = [ApplicationModule::class])
+@ApplicationScope
+interface ApplicationComponent {
+
+    fun configuredCarComponent(configuredCarModule: ConfiguredCarModule) : ConfiguredCarComponent
+
+    fun inject(cliMain : CliMain)
+    fun inject(guiMain: GuiMain)
+}
+
+@ExperimentalCoroutinesApi
+@Module
+class ApplicationModule {
 
 
     @Named(INITIAL_CONFIGURATION)
     @Provides
+    @ApplicationScope
     fun provideInitialConfiguration() : DeviceConfiguration = LaptopDeviceConfiguration()
 
 
@@ -52,24 +59,27 @@ class ApplicationModule {
 
     @Provides
     @Named(INPUT_EVENTS_WRITER)
+    @ApplicationScope
     fun provideInputEventWriteStateFlow() : MutableSharedFlow<InputEvent> = MutableSharedFlow()
 
     @Provides
     @Named(INPUT_EVENTS)
-    @Singleton
+    @ApplicationScope
+    @JvmSuppressWildcards(suppress = false)
     fun provideInputEventsStateFlow(
         @Named(INPUT_EVENTS_WRITER) hotFlow : MutableSharedFlow<InputEvent>
     ) : SharedFlow<InputEvent> {
         return hotFlow.asSharedFlow()
     }
 
-
     @Provides
     @Named(IBUS_MESSAGE_INGRESS)
+    @ApplicationScope
     fun provideIbusIngressChannel() : MutableSharedFlow<IBusMessage> = MutableSharedFlow<IBusMessage>()
 
     @Provides
     @Named(IBUS_MESSAGE_OUTPUT_CHANNEL)
+    @ApplicationScope
     fun provideIbusOuptutChannel() : Channel<IBusMessage> = Channel(capacity = Channel.UNLIMITED)
 
 
@@ -79,15 +89,15 @@ class ApplicationModule {
 
 
     @Provides
-    @Singleton
+    @ApplicationScope
     fun provideCoroutineScope() : CoroutineScope = GlobalScope
 
     @Provides
-    @Singleton
+    @ApplicationScope
     fun provideCoroutineDispatcher() : CoroutineDispatcher = Dispatchers.IO
 
     @Provides
-    @Singleton
+    @ApplicationScope
     fun provideLogger() : Logger {
         return StdOutLogger()
     }

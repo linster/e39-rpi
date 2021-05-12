@@ -12,41 +12,37 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunner
 import ca.stefanm.ibus.car.platform.PlatformServiceRunner
 import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.di.ApplicationComponent
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.RpiRelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.JSerialCommsAdapter
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortReader
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortWriter
-import ca.stefanm.ibus.lib.messages.IBusMessage
 import dagger.*
-import io.ktor.utils.io.core.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import java.lang.annotation.RetentionPolicy
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Scope
 
 @Scope
-@Retention
-annotation class ConfiguredCarModuleScope
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ConfiguredCarScope
 
-
+@ConfiguredCarScope
 @Subcomponent(modules = [ConfiguredCarModule::class])
-@ConfiguredCarModuleScope
 interface ConfiguredCarComponent {
 
+    fun inject(configurablePlatform: ConfigurablePlatform)
     fun legacyPlatformServiceRunner() : PlatformServiceRunner
     fun configurablePlatformServiceRunner() : ConfigurablePlatformServiceRunner
     fun ibusInputMessageParser() : IBusInputMessageParser
-
-    @Subcomponent.Builder
-    interface Builder {
-        fun build() : ConfiguredCarComponent
-        fun configuredCarModule(configuredCarModule: ConfiguredCarModule) : Builder
-    }
-
 }
 
 @Module
@@ -56,28 +52,26 @@ class ConfiguredCarModule(
 
 
     @Provides
-//    @ConfiguredCarModuleScope
+    @ConfiguredCarScope
     fun provideDeviceConfiguration() : DeviceConfiguration = deviceConfiguration
-
-
 
     @ExperimentalCoroutinesApi
     @Provides
-    @ConfiguredCarModuleScope
+    @ConfiguredCarScope
     fun provideSerialPortReader(jSerialCommsAdapter: JSerialCommsAdapter) : SerialPortReader = jSerialCommsAdapter
 
     @ExperimentalCoroutinesApi
     @Provides
-    @ConfiguredCarModuleScope
+    @ConfiguredCarScope
     fun provideSerialPortWriter(jSerialCommsAdapter: JSerialCommsAdapter) : SerialPortWriter = jSerialCommsAdapter
 
 
     @Provides
-    @ConfiguredCarModuleScope
+    @ConfiguredCarScope
     fun providePairedPhone(deviceConfiguration: DeviceConfiguration) : DeviceConfiguration.PairedPhone = deviceConfiguration.pairedPhone
 
     @Provides
-    @ConfiguredCarModuleScope
+    @ConfiguredCarScope
     fun provideTrackPrinter(
         deviceConfiguration: DeviceConfiguration,
         screenTrackInfoPrinter: ScreenTrackInfoPrinter,
@@ -90,7 +84,7 @@ class ConfiguredCarModule(
     }
 
     @Provides
-    @ConfiguredCarModuleScope
+    @ConfiguredCarScope
     fun provideTextLengthConstraints(deviceConfiguration: DeviceConfiguration) : TextLengthConstraints {
         return if (deviceConfiguration.displayDriver == DeviceConfiguration.DisplayDriver.TV_MODULE) {
             TvModuleTextLengthConstraints
@@ -100,7 +94,7 @@ class ConfiguredCarModule(
     }
 
     @Provides
-    @ConfiguredCarModuleScope
+    @ConfiguredCarScope
     fun provideRelayReaderWriter(
         deviceConfiguration: DeviceConfiguration,
         cliRelayReaderWriter: CliRelayReaderWriter,

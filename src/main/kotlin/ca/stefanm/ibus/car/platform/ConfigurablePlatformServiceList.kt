@@ -2,7 +2,7 @@ package ca.stefanm.ibus.car.platform
 
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
@@ -20,7 +20,7 @@ data class PlatformServiceGroup(
     val children : List<PlatformService>
 )
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class PlatformServiceList @Inject constructor(
     bluetoothService: BluetoothService,
 

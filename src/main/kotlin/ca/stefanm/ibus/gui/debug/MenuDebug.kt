@@ -5,7 +5,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
-import ca.stefanm.ibus.car.platform.IBusMessageListenerService
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.*
 import ca.stefanm.ibus.gui.menu.widgets.BmwFullScreenMenu

@@ -1,23 +1,18 @@
 package ca.stefanm.ibus.car.bordmonitor.menu
 
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
-import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.ScreenPainter
-import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.di.ApplicationModule.Companion.INPUT_EVENTS
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import java.util.*
 import javax.inject.Named
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class ScreenManager(
     @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
 

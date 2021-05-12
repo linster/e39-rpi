@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
@@ -25,7 +25,7 @@ interface SerialPortWriter {
 }
 
 @ExperimentalCoroutinesApi
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class JSerialCommsAdapter @Inject constructor(
     private val deviceConfiguration: DeviceConfiguration,
     private val blockingWriter : BlockingJSerialCommsWriter,
@@ -49,7 +49,7 @@ class JSerialCommsAdapter @Inject constructor(
 }
 
 @ExperimentalCoroutinesApi
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class BlockingJSerialCommsReader @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,
@@ -163,7 +163,7 @@ class BlockingJSerialCommsReader @Inject constructor(
     //https://github.com/tedsalmon/DroidIBus/blob/master/app/src/main/java/com/ibus/droidibus/ibus/IBusMessageService.java#L156
 }
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class JSerialCommsSerialPortProvider @Inject constructor(
     private val logger: Logger,
     private val deviceConfiguration: DeviceConfiguration
@@ -228,7 +228,7 @@ class JSerialCommsSerialPortProvider @Inject constructor(
     }
 }
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class NonBlockingJSerialCommsWriter @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider
@@ -245,7 +245,7 @@ class NonBlockingJSerialCommsWriter @Inject constructor(
     }
 }
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class BlockingJSerialCommsWriter @Inject constructor(
     private val logger: Logger,
     serialPortProvider: JSerialCommsSerialPortProvider,

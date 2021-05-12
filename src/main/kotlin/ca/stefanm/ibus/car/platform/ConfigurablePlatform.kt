@@ -1,23 +1,27 @@
 package ca.stefanm.ibus.car.platform
 
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.car.di.ConfiguredCarModuleScope
+import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.configuration.DeviceConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
+import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.di.DaggerApplicationComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import javax.inject.Named
 
 @ExperimentalCoroutinesApi
-@Singleton
+@ApplicationScope
 class ConfigurablePlatform @Inject constructor(
-    private val configuredCarComponentProvider: Provider<ConfiguredCarComponent.Builder>
+    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>
 ) {
 
+    var configurablePlatformServiceRunner: ConfigurablePlatformServiceRunner? = null
     var configuredCarComponent : ConfiguredCarComponent? = null
-        private set
 
     var currentConfiguration : DeviceConfiguration? = null
         private set
@@ -27,26 +31,27 @@ class ConfigurablePlatform @Inject constructor(
     }
 
     fun stop() {
-        if (configuredCarComponent != null) {
-            configuredCarComponent?.configurablePlatformServiceRunner()?.stop()
-        }
+        configurablePlatformServiceRunner?.stop()
+        configurablePlatformServiceRunner = null
     }
 
 
     fun onNewDeviceConfiguration(configuration: DeviceConfiguration) {
         //destroy and recreate the Platform.
         stop()
-        configuredCarComponentProvider
-            .get()
-            .configuredCarModule(ConfiguredCarModule(configuration))
-            .build()
-            .configurablePlatformServiceRunner()
-            .run()
+
+        configuredCarComponent = DaggerApplicationComponent.create()
+            .configuredCarComponent(ConfiguredCarModule(configuration))
+
+        configurablePlatformServiceRunner =
+            configuredCarComponent?.configurablePlatformServiceRunner()
+
+        configurablePlatformServiceRunner?.run()
         currentConfiguration = configuration
     }
 }
 
-@ConfiguredCarModuleScope
+@ConfiguredCarScope
 class ConfigurablePlatformServiceRunner @Inject constructor(
     private val list: PlatformServiceList
 ) {
