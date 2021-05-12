@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -26,13 +27,10 @@ import javax.inject.Singleton
 
 @ExperimentalCoroutinesApi
 class ScrollListener @Inject constructor(
-//    @Named(ConfiguredCarModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
+    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
 
     maxIndex : Int
 ) {
-
-    //TODO make a bridge between modules for this kinda stuff.
-    private val inputEvents : SharedFlow<InputEvent> = MutableSharedFlow()
 
     private var _currentSelectedIndex = mutableStateOf(0)
     val currentSelectedIndex : State<Int> = _currentSelectedIndex
@@ -96,14 +94,14 @@ typealias ScrollListenerOnClickListener = () -> Unit
 
 class MenuKnobListenerService @Inject constructor(
     private val logger: Logger,
-//    @Named(ConfiguredCarModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent?>,
+    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
 ) {
 
     fun toScrollListener(maxIndex : Int) : ScrollListener {
-        TODO()
-//        return ScrollListener(
-//            inputEvents,
-//            maxIndex
-//        )
+//        TODO()
+        return ScrollListener(
+            inputEvents,
+            maxIndex
+        )
     }
 }
