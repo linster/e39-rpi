@@ -6,7 +6,8 @@ plugins {
         // __KOTLIN_COMPOSE_VERSION__
         kotlin("jvm") version "1.4.31"
         kotlin("kapt") version "1.4.31"
-        id("org.jetbrains.compose") version "0.3.2"
+//        id("org.jetbrains.compose") version "0.3.2"
+        id("org.jetbrains.compose") version "0.4.0-build177"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"
@@ -54,8 +55,8 @@ dependencies {
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
 
 
-    implementation("com.arkivanov.decompose:decompose:0.2.4")
-    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.2.4")
+    implementation("com.arkivanov.decompose:decompose:0.2.2")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.2.2")
     implementation("com.ginsberg:cirkle:1.0.1")
 
     api("com.google.dagger:dagger:2.35.1")

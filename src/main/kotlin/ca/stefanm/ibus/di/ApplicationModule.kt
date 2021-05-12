@@ -65,7 +65,7 @@ class ApplicationModule {
     @Provides
     @Named(INPUT_EVENTS)
     @ApplicationScope
-    @JvmSuppressWildcards(suppress = false)
+    @JvmSuppressWildcards(suppress = false) //Magic.
     fun provideInputEventsStateFlow(
         @Named(INPUT_EVENTS_WRITER) hotFlow : MutableSharedFlow<InputEvent>
     ) : SharedFlow<InputEvent> {

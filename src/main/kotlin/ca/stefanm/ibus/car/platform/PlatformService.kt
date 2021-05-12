@@ -19,8 +19,6 @@ class PlatformService(
         ZOMBIE //Hasn't watch-dogged in a while.
     }
 
-    private var watchdogJob : Job? = null
-
     override var jobToJoin: Job? = null
 
     var runStatus : RunStatus = RunStatus.STOPPED
@@ -34,40 +32,16 @@ class PlatformService(
 
     override fun onCreate() {
         try {
-            if (baseService is JoinableService) {
-                watchdogJob = watchdogCoroutineScope.launch {
-                    while (true) {
-                        if (baseService.jobToJoin == null) {
-                            //We haven't started the service yet.
-                        } else {
-                            if (baseService.jobToJoin?.isActive != true) {
-                                runStatus = RunStatus.ZOMBIE
-                            }
-                        }
-                        yield()
-                    }
-                }
-
-            }
-            runStatus = RunStatus.STOPPED
-
-            baseService.onCreate()
-            if (baseService is JoinableService) {
-                jobToJoin = baseService.jobToJoin
-            }
-
             runStatus = RunStatus.RUNNING
-
         } catch (e : Throwable) {
             runStatus = RunStatus.ZOMBIE
-            throw e
+            logger.v("PlatformService: $name", e.stackTraceToString())
         }
     }
 
     override fun onShutdown() {
         //Cancel the watchdog job before we shutdown the service so we don't
         //spruiously zombie.
-        watchdogJob?.cancel()
         jobToJoin?.cancel()
         runStatus = RunStatus.STOPPED
     }
@@ -83,19 +57,35 @@ class PlatformService(
         when (old) {
             RunStatus.STOPPED -> when (new) {
                 RunStatus.STOPPED -> {}
-                RunStatus.RUNNING -> onCreate()
+                RunStatus.RUNNING -> startBaseService()
                 RunStatus.ZOMBIE -> {}
             }
             RunStatus.RUNNING -> when (new) {
-                RunStatus.STOPPED -> onShutdown()
+                RunStatus.STOPPED -> stopBaseService()
                 RunStatus.RUNNING -> {}
                 RunStatus.ZOMBIE ->  {}
             }
             RunStatus.ZOMBIE -> when (new) {
-                RunStatus.STOPPED -> onShutdown()
-                RunStatus.RUNNING -> onCreate()
+                RunStatus.STOPPED -> stopBaseService()
+                RunStatus.RUNNING -> startBaseService()
                 RunStatus.ZOMBIE -> {}
             }
         }
+    }
+
+    private fun startBaseService() {
+        GlobalScope.launch {
+            baseService.onCreate()
+            if (baseService is JoinableService) {
+                baseService.jobToJoin?.join()
+            }
+        }
+    }
+
+    private fun stopBaseService() {
+        if (baseService is JoinableService) {
+            baseService.jobToJoin?.cancel()
+        }
+        baseService.onShutdown()
     }
 }
