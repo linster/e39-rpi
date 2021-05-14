@@ -51,7 +51,7 @@ class LoadingWindow @Inject constructor(
     }
 
     private fun openMenuWindow() {
-        menuWindow.show(
+        menuWindow.openWindow(
             AppManager.focusedWindow?.x ?: 0,
             AppManager.focusedWindow?.y ?: 0
         )

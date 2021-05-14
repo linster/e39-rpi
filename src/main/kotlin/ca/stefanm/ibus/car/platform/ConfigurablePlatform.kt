@@ -44,6 +44,7 @@ class ConfigurablePlatform @Inject constructor() {
         configurablePlatformServiceRunner?.stopAll()
         configurablePlatformServiceRunner = null
         serviceListJob?.cancel()
+        _servicesRunning.value = listOf()
     }
 
 

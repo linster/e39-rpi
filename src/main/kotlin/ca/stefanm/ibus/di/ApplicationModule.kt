@@ -11,6 +11,8 @@ import ca.stefanm.ibus.configuration.DeviceConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.gui.GuiMain
 import ca.stefanm.ibus.gui.di.GuiModule
+import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -27,7 +29,8 @@ annotation class ApplicationScope
 
 @Component(modules = [
     ApplicationModule::class,
-    GuiModule::class
+    GuiModule::class,
+    NavigationModule::class
 ])
 @ApplicationScope
 interface ApplicationComponent {
