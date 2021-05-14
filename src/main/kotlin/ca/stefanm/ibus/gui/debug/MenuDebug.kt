@@ -1,24 +1,11 @@
 package ca.stefanm.ibus.gui.debug
 
 import androidx.compose.desktop.Window
-import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
-import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.gui.menu.*
-import ca.stefanm.ibus.gui.menu.widgets.BmwFullScreenMenu
-import ca.stefanm.ibus.gui.menu.widgets.BmwFullScreenTrackInfoHeader
-import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ibus.gui.menu.widgets.MenuKnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.lib.messages.IBusMessage
-import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.extensions.compose.jetbrains.asState
-import kotlinx.coroutines.channels.Channel
 import javax.inject.Inject
-import javax.inject.Named
-
 
 
 class MenuDebug @Inject constructor(
@@ -29,7 +16,7 @@ class MenuDebug @Inject constructor(
     fun show() {
         Window(
             title = "Menu Simulator",
-            size = IntSize(800, 600)
+            size = IntSize(800, 468)
         ) {
             BmwFullScreenMenu(
                 header = {

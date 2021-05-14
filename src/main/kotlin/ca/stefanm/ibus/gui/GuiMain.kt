@@ -19,11 +19,14 @@ import ca.stefanm.ibus.gui.debug.KeyEventSimulator
 import ca.stefanm.ibus.gui.debug.MenuDebug
 import ca.stefanm.ibus.gui.map.MapDebug
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 fun main() {
     GuiMain().main()
 }
 
+@ExperimentalTime
 class GuiMain {
 
 
@@ -48,47 +51,49 @@ class GuiMain {
     }
 
     fun main() {
-        Window(title = "Compose for Desktop", size = IntSize(300, 300)) {
-            val count = remember { mutableStateOf(0) }
-            MaterialTheme {
-                Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
-                    Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = {
-                            count.value++
-                        }) {
-                        Text(if (count.value == 0) "Hello World" else "Clicked ${count.value}!")
-                    }
-                    Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = {
-                            count.value = 0
-                        }) {
-                        Text("Reset")
-                    }
-                    Button(
-                        onClick = {
-                            keyEventSimulator.show()
-                        }
-                    ) {
-                        Text("Simulator")
-                    }
+        loadingWindow.show()
 
-                    Button(
-                        onClick = {
-                            loadingWindow.show()
-                        }
-                    ) {
-                        Text("Loading Window")
-                    }
-
-                    Button(onClick = { mapDebug.show() }) {
-                        Text("Map Debug")
-                    }
-
-                    Button(onClick = { menuDebug.show()}) {
-                        Text("Menu Debug")
-                    }
-                }
-            }
-        }
+//        Window(title = "Compose for Desktop", size = IntSize(300, 300)) {
+//            val count = remember { mutableStateOf(0) }
+//            MaterialTheme {
+//                Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
+//                    Button(modifier = Modifier.align(Alignment.CenterHorizontally),
+//                        onClick = {
+//                            count.value++
+//                        }) {
+//                        Text(if (count.value == 0) "Hello World" else "Clicked ${count.value}!")
+//                    }
+//                    Button(modifier = Modifier.align(Alignment.CenterHorizontally),
+//                        onClick = {
+//                            count.value = 0
+//                        }) {
+//                        Text("Reset")
+//                    }
+//                    Button(
+//                        onClick = {
+//                            keyEventSimulator.show()
+//                        }
+//                    ) {
+//                        Text("Simulator")
+//                    }
+//
+//                    Button(
+//                        onClick = {
+//                            loadingWindow.show()
+//                        }
+//                    ) {
+//                        Text("Loading Window")
+//                    }
+//
+//                    Button(onClick = { mapDebug.show() }) {
+//                        Text("Map Debug")
+//                    }
+//
+//                    Button(onClick = { menuDebug.show()}) {
+//                        Text("Menu Debug")
+//                    }
+//                }
+//            }
+//        }
     }
 }

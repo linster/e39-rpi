@@ -21,7 +21,7 @@ class MainMenu @Inject constructor() {
 
 }
 
-class Root(
+class MainMenuComponent(
     componentContext: ComponentContext
 ) : ComponentContext by componentContext {
 

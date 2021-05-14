@@ -4,13 +4,13 @@ import ca.stefanm.ibus.CliMain
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.DeviceConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.gui.GuiMain
+import ca.stefanm.ibus.gui.di.GuiModule
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -19,15 +19,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import java.lang.annotation.RetentionPolicy
 import javax.inject.Named
 import javax.inject.Scope
-import javax.inject.Singleton
 
 @Scope
 annotation class ApplicationScope
 
-@Component(modules = [ApplicationModule::class])
+@Component(modules = [
+    ApplicationModule::class,
+    GuiModule::class
+])
 @ApplicationScope
 interface ApplicationComponent {
 

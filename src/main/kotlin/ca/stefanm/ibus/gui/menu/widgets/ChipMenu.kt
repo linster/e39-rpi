@@ -1,27 +1,20 @@
-package ca.stefanm.ibus.gui.menu
+package ca.stefanm.ibus.gui.menu.widgets
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ibus.gui.menu.widgets.ScrollListener
-import ca.stefanm.ibus.gui.menu.widgets.ScrollListenerOnClickListener
-import kotlin.math.E
 
 //A "Chip" is the little nubbin shown to indicate a scrollable item
 //https://cdn.shopify.com/s/files/1/0366/7093/products/21c061cb-1bd7-4183-b72e-4a72a4b211a7_zpshihdw7rj.jpg?v=1571438673
@@ -229,7 +222,8 @@ fun MenuItem(
                     topLeft = Offset( x =
                         if (chipOrientation == ItemChipOrientation.E ||
                             chipOrientation == ItemChipOrientation.SE ||
-                            chipOrientation == ItemChipOrientation.NE) {
+                            chipOrientation == ItemChipOrientation.NE
+                        ) {
                             this.size.width - (2 * chipWidth)
                         } else {
                             0.0F

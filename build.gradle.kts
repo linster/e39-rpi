@@ -25,6 +25,10 @@ plugins {
 
 //sourceCompatibility = 1.8
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
+}
+
 repositories {
     mavenCentral()
     google()
