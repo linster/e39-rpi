@@ -15,11 +15,13 @@ import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
 import ca.stefanm.ibus.car.platform.PlatformService
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.GlobalScope
 import javax.inject.Inject
 
 class ServiceStatusViewer @Inject constructor(
-    private val configurablePlatform: ConfigurablePlatform
+    private val configurablePlatform: ConfigurablePlatform,
+    private val logger : Logger
 ) {
 
     fun showWindow() {
@@ -29,11 +31,14 @@ class ServiceStatusViewer @Inject constructor(
         ) {
             val list = configurablePlatform.servicesRunning.collectAsState(GlobalScope.coroutineContext)
 
-//            ServiceStatusList(list)
-            list.value.forEach {
-                    ServiceGroup(it)
-                    Spacer(Modifier.height(10.dp))
-            }
+            logger.d("VIEWER", list.value.toString())
+            ServiceStatusList(list.value)
+//            list.value.forEach {
+//                Row {
+//                    ServiceGroup(it)
+//                    Spacer(Modifier.height(10.dp))
+//                }
+//            }
         }
     }
 
@@ -48,9 +53,11 @@ class ServiceStatusViewer @Inject constructor(
     fun ServiceStatusList(
         list : List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>
     ) {
-        list.forEach {
-            ServiceGroup(it)
-            Spacer(Modifier.height(10.dp))
+        Column {
+            list.forEach {
+                ServiceGroup(it)
+                Spacer(Modifier.height(10.dp))
+            }
         }
     }
 
@@ -58,13 +65,11 @@ class ServiceStatusViewer @Inject constructor(
     fun ServiceGroup(
         group : ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup
     ) {
-        Box(Modifier.background(Color.LightGray).fillMaxWidth().padding(10.dp)) {
-            Column {
-                Text("Name: ${group.name}")
-                Text("Description: ${group.description}")
-                Column(Modifier.padding(start = 32.dp)) {
-                    group.children.forEach { Service(it) }
-                }
+        Column(Modifier.background(Color.LightGray).fillMaxWidth().wrapContentHeight().padding(10.dp)){
+            Text("Name: ${group.name}")
+            Text("Description: ${group.description}")
+            Column(Modifier.padding(start = 32.dp)) {
+                group.children.forEach { Service(it) }
             }
         }
     }
@@ -79,7 +84,8 @@ class ServiceStatusViewer @Inject constructor(
             Text("Description: ${service.description}")
             Spacer(Modifier.height(5.dp))
             Row {
-                Text("Status: ${status.toString()}")
+                Text("Status: ${status.value}")
+                Spacer(Modifier.width(32.dp))
                 Button(onClick = {service.startService()}) { Text("Start")}
                 Button(onClick = {service.stopService()}) { Text("Stop")}
             }

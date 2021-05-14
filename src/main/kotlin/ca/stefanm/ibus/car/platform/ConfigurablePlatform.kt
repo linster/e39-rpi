@@ -64,6 +64,7 @@ class ConfigurablePlatform @Inject constructor() {
             configuredCarComponent!!.platformServiceList()
         )
 
+        runStatusViewer!!.onNewConfiguredCar()
         serviceListJob = GlobalScope.launch {
             runStatusViewer!!.records.collect { _servicesRunning.value = it }
         }
