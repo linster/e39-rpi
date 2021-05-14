@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class PlatformService(
-    private val name : String,
-    private val description : String,
+    val name : String,
+    val description : String,
     val baseService : Service,
     private val watchdogCoroutineScope : CoroutineScope = GlobalScope,
     private val logger : Logger

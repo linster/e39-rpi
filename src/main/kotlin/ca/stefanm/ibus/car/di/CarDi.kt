@@ -10,6 +10,7 @@ import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TvModuleTextLengthConstraints
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunner
+import ca.stefanm.ibus.car.platform.PlatformServiceList
 import ca.stefanm.ibus.car.platform.PlatformServiceRunner
 import ca.stefanm.ibus.configuration.DeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationComponent
@@ -40,6 +41,7 @@ annotation class ConfiguredCarScope
 interface ConfiguredCarComponent {
 
     fun inject(configurablePlatform: ConfigurablePlatform)
+    fun platformServiceList() : PlatformServiceList
     fun legacyPlatformServiceRunner() : PlatformServiceRunner
     fun configurablePlatformServiceRunner() : ConfigurablePlatformServiceRunner
     fun ibusInputMessageParser() : IBusInputMessageParser

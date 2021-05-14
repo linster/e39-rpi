@@ -21,11 +21,12 @@ class DebugLaunchpad @Inject constructor(
     private val mapDebug: MapDebug,
     private val menuDebug: MenuDebug,
     private val keyEventSimulator: KeyEventSimulator,
-    private val paneManagerDebug: PaneManagerDebug
+    private val paneManagerDebug: PaneManagerDebug,
+    private val serviceStatusViewer: ServiceStatusViewer,
 ) {
 
     fun show() {
-        Window(title = "Compose for Desktop", size = IntSize(300, 300), centered = false) {
+        Window(title = "Compose for Desktop", size = IntSize(300, 500), centered = true) {
             val count = remember { mutableStateOf(0) }
             MaterialTheme {
                 Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
@@ -56,6 +57,9 @@ class DebugLaunchpad @Inject constructor(
                     }
                     Button(onClick = { paneManagerDebug.showPalette()}) {
                         Text("Pane Manager Debug")
+                    }
+                    Button(onClick = {serviceStatusViewer.showWindow()}) {
+                        Text("Service Status Viewer")
                     }
                 }
             }

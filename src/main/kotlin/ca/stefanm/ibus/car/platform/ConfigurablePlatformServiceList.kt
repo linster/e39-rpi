@@ -46,7 +46,7 @@ class PlatformServiceList @Inject constructor(
             description = "Services that interface with DBus to interact with the AVRCP",
             children = listOf(
                 PlatformService(
-                    name = "Bluetooth Service",
+                    name = "BluetoothService",
                     description = "Monolithic bluetooth service. TODO Should be split up.",
                     baseService = bluetoothService,
                     logger = logger
