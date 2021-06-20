@@ -5,7 +5,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
@@ -67,7 +67,7 @@ class PlatformServiceRunner @Inject constructor(
 
 @ApplicationScope
 class ForegroundPlatform @Inject constructor(
-    @Named(ApplicationModule.INITIAL_CONFIGURATION) private val deviceConfiguration: DeviceConfiguration,
+    @Named(ApplicationModule.INITIAL_CONFIGURATION) private val deviceConfiguration: CarPlatformConfiguration,
     private val logger: Logger
 ) {
 
@@ -75,7 +75,7 @@ class ForegroundPlatform @Inject constructor(
 
     private var platformServiceRunner : PlatformServiceRunner? = null
 
-    fun run(initialConfiguration: DeviceConfiguration = LaptopDeviceConfiguration()) {
+    fun run(initialConfiguration: CarPlatformConfiguration = LaptopDeviceConfiguration()) {
         Runtime.getRuntime().addShutdownHook(Thread {
             stop()
         })
@@ -108,7 +108,7 @@ class BackgroundPlatform @Inject constructor(
     private var platformServiceRunner : PlatformServiceRunner? = null
 
 
-    fun run(initialConfiguration: DeviceConfiguration = LaptopDeviceConfiguration(),
+    fun run(initialConfiguration: CarPlatformConfiguration = LaptopDeviceConfiguration(),
             dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
         Runtime.getRuntime().addShutdownHook(Thread {
             stop()

@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import javax.inject.Inject
 
 class DeviceConfigurationViewerWindow @Inject constructor() {
 
-    fun show(deviceConfiguration: DeviceConfiguration?) {
+    fun show(deviceConfiguration: CarPlatformConfiguration?) {
         Window(
             title = "Device Configuration Viewer",
             size = IntSize(300, 600),
@@ -56,7 +56,7 @@ class DeviceConfigurationViewerWindow @Inject constructor() {
         }
     }
 
-    private fun DeviceConfiguration?.parseConfiguration() : List<ConfigurationItem> {
+    private fun CarPlatformConfiguration?.parseConfiguration() : List<ConfigurationItem> {
         if (this == null) return listOf()
         return listOf(
             ConfigurationItem("isPi", isPi.toString()),

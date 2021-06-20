@@ -4,10 +4,10 @@ plugins {
 
     if (true) {
         // __KOTLIN_COMPOSE_VERSION__
-        kotlin("jvm") version "1.4.31"
-        kotlin("kapt") version "1.4.31"
+        kotlin("jvm") version "1.5.10"
+        kotlin("kapt") version "1.5.10"
 //        id("org.jetbrains.compose") version "0.3.2"
-        id("org.jetbrains.compose") version "0.4.0-build177"
+        id("org.jetbrains.compose") version "0.4.0"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"
@@ -27,6 +27,7 @@ plugins {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=androidx.compose.ui.ExperimentalComposeUiApi"
 }
 
 repositories {
@@ -48,7 +49,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
 
     implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+    implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 //    implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-flow:1.4.3")
 
     implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
@@ -57,6 +58,10 @@ dependencies {
     implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
 
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
+
+    implementation("com.russhwolf:multiplatform-settings:0.7.7")
+    implementation("com.russhwolf:multiplatform-settings-serialization:0.7.7")
+    implementation("com.russhwolf:multiplatform-settings-coroutines:0.7.7")
 
 
     implementation("com.arkivanov.decompose:decompose:0.2.2")
@@ -78,6 +83,13 @@ dependencies {
     implementation("io.ktor:ktor:1.5.1")
     implementation("io.ktor:ktor-server-netty:1.5.1")
     implementation("io.ktor:ktor-html-builder:1.5.1")
+
+    implementation("io.ktor:ktor-client-core:1.5.1")
+    implementation("io.ktor:ktor-client-cio:1.5.1")
+
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("io.ktor:ktor-client-logging:1.5.1")
+
 
 }
 

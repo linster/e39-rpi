@@ -10,9 +10,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.application
 import ca.stefanm.ibus.gui.map.MapDebug
 import javax.inject.Inject
 
@@ -23,8 +25,10 @@ class DebugLaunchpad @Inject constructor(
     private val keyEventSimulator: KeyEventSimulator,
     private val paneManagerDebug: PaneManagerDebug,
     private val serviceStatusViewer: ServiceStatusViewer,
+    private val pairingDebug: PairingDebug
 ) {
 
+    @OptIn(ExperimentalComposeUiApi::class)
     fun show() {
         Window(title = "Compose for Desktop", size = IntSize(300, 500), centered = true) {
             val count = remember { mutableStateOf(0) }
@@ -60,6 +64,9 @@ class DebugLaunchpad @Inject constructor(
                     }
                     Button(onClick = {serviceStatusViewer.showWindow()}) {
                         Text("Service Status Viewer")
+                    }
+                    Button(onClick = { pairingDebug.show()}) {
+                        Text("Pairing Debug")
                     }
                 }
             }

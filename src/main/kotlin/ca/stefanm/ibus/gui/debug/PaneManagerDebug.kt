@@ -37,6 +37,7 @@ class PaneManagerDebug @Inject constructor(){
             val bannerEnabled = remember{ mutableStateOf(false) }
             val topPopInEnabled = remember{ mutableStateOf(true) }
             val sideSplitEnabled = remember{ mutableStateOf(true) }
+            val keyboardOverlayEnabled = remember{ mutableStateOf(true) }
             val bottomPanelEnabled = remember{ mutableStateOf(false) }
 
             //Should each box grow to maximum size?
@@ -44,10 +45,12 @@ class PaneManagerDebug @Inject constructor(){
             val bannerFillSize = remember{ mutableStateOf(false) }
             val topPopInFillSize = remember{ mutableStateOf(true) }
             val sideSplitFillSize = remember{ mutableStateOf(true) }
+            val keyboardOverlayFillSize = remember{ mutableStateOf(true) }
             val bottomPanelFillSize = remember{ mutableStateOf(false) }
 
             val sideSplitVisible = remember { mutableStateOf(false)}
             val topPopInVisible = remember { mutableStateOf(false)}
+
 
             @Composable fun MutableState<Boolean>.toToggleCheckbox(label : String) {
                 Row {
@@ -77,12 +80,14 @@ class PaneManagerDebug @Inject constructor(){
                     topPopInEnabled.toToggleCheckbox(label = "Top Pop-In Enabled")
                     sideSplitEnabled.toToggleCheckbox(label = "Side-split Enabled")
                     bottomPanelEnabled.toToggleCheckbox(label = "Bottom Panel Enabled")
+                    keyboardOverlayEnabled.toToggleCheckbox("Keyboard Overlay enabled")
                     Spacer(Modifier.height(10.dp))
                     mainContentFillSize.toToggleCheckbox(label = "MainContent Fill size?")
                     bannerFillSize.toToggleCheckbox(label = "Banner Fill size?")
                     topPopInFillSize.toToggleCheckbox(label = "Top Pop-In Fill size?")
                     sideSplitFillSize.toToggleCheckbox(label = "Side-split Fill size?")
                     bottomPanelFillSize.toToggleCheckbox(label = "Bottom Panel Fill size?")
+                    keyboardOverlayFillSize.toToggleCheckbox(label = "Keyboard overlay Fill size?")
                     Spacer(Modifier.height(30.dp))
                     sideSplitVisible.toToggleCheckbox("Side-split visible")
                     topPopInVisible.toToggleCheckbox("Top Pop-in visible")
@@ -111,7 +116,7 @@ class PaneManagerDebug @Inject constructor(){
                         topPopIn = topPopInComposable.value,
                         mainContent = getContentFiller(),
                         sideSplitVisible = sideSplitVisible.value,
-                        topPopInVisible = topPopInVisible.value
+                        topPopInVisible = topPopInVisible.value,
                     )
                 }
             }

@@ -1,21 +1,21 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.MainMenu
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
+import ca.stefanm.ibus.gui.picker.TextEntry
 import ca.stefanm.ibus.lib.logging.Logger
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import java.util.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import kotlin.collections.ArrayDeque
 
 
 @Module
@@ -30,59 +30,60 @@ class NavigationModule {
     @JvmSuppressWildcards(suppress = false)
     fun provideRootNode(
         mainMenu: MainMenu
-    ) : NavigationNode = mainMenu
+    ) : NavigationNode<*> = mainMenu
 
     @Provides
     @ElementsIntoSet
     @Named(ALL_NODES)
     fun provideAllNodes(
         mainMenu: MainMenu,
-        bluetoothPairingMenu: BluetoothPairingMenu
-    ) : Set<NavigationNode> = setOf(
+        bluetoothPairingMenu: BluetoothPairingMenu,
+    ) : Set<NavigationNode<*>> = setOf<NavigationNode<*>>(
         mainMenu,
-        bluetoothPairingMenu
+        bluetoothPairingMenu,
     )
 
 }
 
 @ApplicationScope
 class Navigator @Inject constructor(
-    @Named(ROOT_NODE) private val rootNode : NavigationNode
+    @Named(ROOT_NODE) private val rootNode : NavigationNode<*>,
+    private val textEntry: Provider<TextEntry>
 ) {
 
-    private val _currentNode = MutableStateFlow(rootNode)
-    val currentNode : StateFlow<NavigationNode>
-        get() = _currentNode
+    private val _mainContentScreen = MutableStateFlow(rootNode)
+    val mainContentScreen : StateFlow<NavigationNode<*>>
+        get() = _mainContentScreen
 
-    val backStack : Stack<NavigationNode> = Stack<NavigationNode>()
+    private val backStack : ArrayDeque<NavigationNode<*>> = ArrayDeque()
     init {
-        backStack.push(rootNode)
+        backStack.addLast(rootNode)
     }
 
-    fun navigateToNode(newNode : NavigationNode) {
-        backStack.push(currentNode.value)
-        _currentNode.value = newNode
+    fun navigateToNode(newNode : NavigationNode<*>) {
+        backStack.addLast(mainContentScreen.value)
+        _mainContentScreen.value = newNode
     }
 
     fun goBack() {
-        _currentNode.value = backStack.pop()
-        if (backStack.empty()) {
-            backStack.push(rootNode)
+        _mainContentScreen.value = backStack.removeLast()
+        if (backStack.isEmpty()) {
+            backStack.addLast(rootNode)
         }
     }
 }
 
-interface NavigationNode {
-    val thisClass : Class<out NavigationNode>
+interface NavigationNode<R> {
+    val thisClass : Class<out NavigationNode<R>>
     fun provideMainContent() : @Composable () -> Unit
 }
 
 class NavigationNodeTraverser @Inject constructor(
     private val navigator: Provider<Navigator>,
-    @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode>>,
+    @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
     private val logger: Logger
 ) {
-    fun navigateToNode(node : Class<out NavigationNode>) {
+    fun navigateToNode(node : Class<out NavigationNode<*>>) {
         val newNode = allNodes.get().find { it.thisClass == node }
         if (newNode == null) {
             logger.e("NAVIGATOR", "No new node found")
@@ -90,16 +91,9 @@ class NavigationNodeTraverser @Inject constructor(
         }
         navigator.get().navigateToNode(newNode)
     }
+
     fun goBack() {
         navigator.get().goBack()
     }
-
-    suspend fun keyboardInput() {
-        //TODO find that twitter post about s
-        //https://www.reddit.com/r/androiddev/comments/898j9j/kotlin_coroutines_to_show_alert_dialog_yeah_why/
-
-
-    }
-
 }
 

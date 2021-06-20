@@ -5,7 +5,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
 import ca.stefanm.ibus.lib.messages.toDeviceIdString
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.car.platform.ForegroundPlatform
 import com.fazecast.jSerialComm.SerialPort
 import com.fazecast.jSerialComm.SerialPortInvalidPortException
@@ -27,7 +27,7 @@ interface SerialPortWriter {
 @ExperimentalCoroutinesApi
 @ConfiguredCarScope
 class JSerialCommsAdapter @Inject constructor(
-    private val deviceConfiguration: DeviceConfiguration,
+    private val deviceConfiguration: CarPlatformConfiguration,
     private val blockingWriter : BlockingJSerialCommsWriter,
     private val nonBlockingWriter : NonBlockingJSerialCommsWriter,
     private val blockingReader : BlockingJSerialCommsReader
@@ -35,14 +35,14 @@ class JSerialCommsAdapter @Inject constructor(
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
         when (deviceConfiguration.serialPortWriteMode) {
-            DeviceConfiguration.SerialPortWriteMode.BLOCKING -> blockingWriter
-            DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING -> nonBlockingWriter
+            CarPlatformConfiguration.SerialPortWriteMode.BLOCKING -> blockingWriter
+            CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING -> nonBlockingWriter
         }.writeRawBytes(bytes)
     }
 
     override fun readMessages(): Flow<IBusMessage> {
         return when (deviceConfiguration.serialPortReadMode) {
-            DeviceConfiguration.SerialPortReadMode.BLOCKING -> blockingReader.readMessages()
+            CarPlatformConfiguration.SerialPortReadMode.BLOCKING -> blockingReader.readMessages()
             else -> error("Not supported")
         }
     }
@@ -166,7 +166,7 @@ class BlockingJSerialCommsReader @Inject constructor(
 @ConfiguredCarScope
 class JSerialCommsSerialPortProvider @Inject constructor(
     private val logger: Logger,
-    private val deviceConfiguration: DeviceConfiguration
+    private val deviceConfiguration: CarPlatformConfiguration
 ) {
 
     companion object {
@@ -197,8 +197,8 @@ class JSerialCommsSerialPortProvider @Inject constructor(
             9600, 8, 1, SerialPort.EVEN_PARITY
         )
 
-        if (deviceConfiguration.serialPortReadMode == DeviceConfiguration.SerialPortReadMode.BLOCKING
-            && deviceConfiguration.serialPortWriteMode == DeviceConfiguration.SerialPortWriteMode.BLOCKING) {
+        if (deviceConfiguration.serialPortReadMode == CarPlatformConfiguration.SerialPortReadMode.BLOCKING
+            && deviceConfiguration.serialPortWriteMode == CarPlatformConfiguration.SerialPortWriteMode.BLOCKING) {
             //We know this works experimentally.
             port.setComPortTimeouts(
                 SerialPort.TIMEOUT_READ_BLOCKING or SerialPort.TIMEOUT_WRITE_BLOCKING,
@@ -209,13 +209,13 @@ class JSerialCommsSerialPortProvider @Inject constructor(
             var timeoutMode = 0
 
             timeoutMode = timeoutMode or when (deviceConfiguration.serialPortReadMode) {
-                DeviceConfiguration.SerialPortReadMode.NON_BLOCKING -> SerialPort.TIMEOUT_NONBLOCKING
-                DeviceConfiguration.SerialPortReadMode.BLOCKING -> SerialPort.TIMEOUT_READ_BLOCKING
+                CarPlatformConfiguration.SerialPortReadMode.NON_BLOCKING -> SerialPort.TIMEOUT_NONBLOCKING
+                CarPlatformConfiguration.SerialPortReadMode.BLOCKING -> SerialPort.TIMEOUT_READ_BLOCKING
             }
 
             timeoutMode = timeoutMode or when (deviceConfiguration.serialPortWriteMode) {
-                DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING -> SerialPort.TIMEOUT_NONBLOCKING
-                DeviceConfiguration.SerialPortWriteMode.BLOCKING -> SerialPort.TIMEOUT_WRITE_BLOCKING
+                CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING -> SerialPort.TIMEOUT_NONBLOCKING
+                CarPlatformConfiguration.SerialPortWriteMode.BLOCKING -> SerialPort.TIMEOUT_WRITE_BLOCKING
             }
 
             port.setComPortTimeouts(timeoutMode, READ_TIMEOUT_NO_DATA_MS, SEND_TIMEOUT_MS)

@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.car.bluetooth
 
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import javax.inject.Inject
 
 //TODO For now we'll just hard-code which phone we're paired to.
@@ -9,7 +9,7 @@ import javax.inject.Inject
 //TODO to choose which device to pair to (and unpair from).
 @ConfiguredCarScope
 class BluetoothOnScreenSetupManager @Inject constructor(
-    private val pairedPhone: DeviceConfiguration.PairedPhone
+    private val pairedPhone: CarPlatformConfiguration.PairedPhone
 ) {
 
     suspend fun isPhonePaired() = true

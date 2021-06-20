@@ -4,7 +4,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
@@ -31,12 +31,12 @@ class ConfigurablePlatform @Inject constructor() {
     var configurablePlatformServiceRunner: ConfigurablePlatformServiceRunner? = null
     var configuredCarComponent : ConfiguredCarComponent? = null
 
-    var currentConfiguration : DeviceConfiguration? = null
+    var currentConfiguration : CarPlatformConfiguration? = null
         private set
 
     private var serviceListJob : Job? = null
 
-    fun run(initialConfiguration: DeviceConfiguration = LaptopDeviceConfiguration()) {
+    fun run(initialConfiguration: CarPlatformConfiguration = LaptopDeviceConfiguration()) {
         onNewDeviceConfiguration(currentConfiguration ?: initialConfiguration)
     }
 
@@ -48,7 +48,7 @@ class ConfigurablePlatform @Inject constructor() {
     }
 
 
-    fun onNewDeviceConfiguration(configuration: DeviceConfiguration) {
+    fun onNewDeviceConfiguration(configuration: CarPlatformConfiguration) {
         //destroy and recreate the Platform.
         stop()
 

@@ -2,7 +2,7 @@ package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.car.platform.Service
 import com.github.hypfvieh.bluetooth.DeviceManager
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
@@ -56,12 +56,12 @@ class DbusConnector @Inject constructor(
 //This is a hack because I haven't thought through the design for the multiple-phone pairing yet.
 @ConfiguredCarScope
 class DbusReconnector @Inject constructor(
-    private val deviceConfiguration: DeviceConfiguration,
+    private val deviceConfiguration: CarPlatformConfiguration,
     private val dbusConnector: DbusConnector,
     private val logger: Logger
 ) {
 
-    var previouslyPairedPhone : DeviceConfiguration.PairedPhone? = null
+    var previouslyPairedPhone : CarPlatformConfiguration.PairedPhone? = null
 
     @Synchronized
     fun reconnect() : Pair<DBusConnection?, MediaPlayer1?>{

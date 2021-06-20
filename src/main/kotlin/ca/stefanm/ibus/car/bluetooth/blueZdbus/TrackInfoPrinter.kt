@@ -8,7 +8,7 @@ import ca.stefanm.ibus.car.bordmonitor.menu.painter.getAllowedLength
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.Service
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,7 +40,7 @@ class CliTrackInfoPrinter @Inject constructor(
 class ScreenTrackInfoPrinter @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
     private val cliTrackInfoPrinter: CliTrackInfoPrinter,
-    private val deviceConfiguration: DeviceConfiguration,
+    private val deviceConfiguration: CarPlatformConfiguration,
     private val textLengthConstraints: TextLengthConstraints,
     @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) private val messagesOut : Channel<IBusMessage>,
     coroutineScope: CoroutineScope,
@@ -64,12 +64,12 @@ class ScreenTrackInfoPrinter @Inject constructor(
         currentArtist = artist
         currentAlbum = album
 
-        if (deviceConfiguration.displayDriver == DeviceConfiguration.DisplayDriver.MK4) {
+        if (deviceConfiguration.displayDriver == CarPlatformConfiguration.DisplayDriver.MK4) {
             printMessage(track, 5)
             printMessage(artist, 6)
         }
 
-        if (deviceConfiguration.displayDriver == DeviceConfiguration.DisplayDriver.TV_MODULE) {
+        if (deviceConfiguration.displayDriver == CarPlatformConfiguration.DisplayDriver.TV_MODULE) {
             printMessage(track, 6)
             printMessage(artist, 7)
         }

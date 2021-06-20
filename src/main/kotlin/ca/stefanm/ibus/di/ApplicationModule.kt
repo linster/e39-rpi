@@ -7,10 +7,11 @@ import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.gui.GuiMain
 import ca.stefanm.ibus.gui.di.GuiModule
+import ca.stefanm.ibus.gui.di.MapModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import dagger.Component
@@ -30,7 +31,8 @@ annotation class ApplicationScope
 @Component(modules = [
     ApplicationModule::class,
     GuiModule::class,
-    NavigationModule::class
+    NavigationModule::class,
+    MapModule::class
 ])
 @ApplicationScope
 interface ApplicationComponent {
@@ -49,7 +51,7 @@ class ApplicationModule {
     @Named(INITIAL_CONFIGURATION)
     @Provides
     @ApplicationScope
-    fun provideInitialConfiguration() : DeviceConfiguration = LaptopDeviceConfiguration()
+    fun provideInitialConfiguration() : CarPlatformConfiguration = LaptopDeviceConfiguration()
 
 
     companion object {

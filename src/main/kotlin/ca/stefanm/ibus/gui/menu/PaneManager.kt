@@ -14,23 +14,24 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PaneManager(
     //Children should not use max size.
-    banner : @Composable (() -> Unit)?,
+    banner: @Composable (() -> Unit)?,
 
     //Children can use fillMaxSize, and it just works.
-    sideSplit : @Composable (() -> Unit)?,
-    sideSplitVisible : Boolean,
+    sideSplit: @Composable (() -> Unit)?,
+    sideSplitVisible: Boolean,
 
     //Children should not use max size.
-    bottomPanel : @Composable (() -> Unit)?,
+    bottomPanel: @Composable (() -> Unit)?,
 
     //This is for notifications
     //Children should use max size
-    topPopIn : @Composable (() -> Unit)?,
-    topPopInVisible : Boolean,
+    topPopIn: @Composable (() -> Unit)?,
+    topPopInVisible: Boolean,
 
     //Children should use max size.
-    mainContent : @Composable () -> Unit
+    mainContent: @Composable () -> Unit
 ) {
+
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxWidth()) {
             val maxWeightBanner = 0.25F
@@ -41,17 +42,36 @@ fun PaneManager(
                     if (bottomPanel == null) 0.0F else maxWeightBottom
 
             if (banner != null) {
-                Box(modifier = Modifier
-                    .wrapContentHeight(Alignment.Top)) {
+                Box(
+                    modifier = Modifier
+                        .wrapContentHeight(Alignment.Top)
+                ) {
                     banner()
                 }
             }
-            Box(Modifier.weight(weightContent)) { mainContent()}
+            Box(Modifier.weight(weightContent)) { mainContent() }
             if (bottomPanel != null) {
-                Box (modifier = Modifier
+                Box(
+                    modifier = Modifier
                 ) {
                     bottomPanel()
                 }
+            }
+        }
+
+
+
+        Box(
+            modifier = Modifier.fillMaxWidth(0.4f)
+                .align(Alignment.TopEnd)
+        ) {
+            AnimatedVisibility(
+                modifier = Modifier.align(Alignment.TopEnd),
+                visible = sideSplitVisible,
+                enter = slideInHorizontally({ it }),
+                exit = slideOutHorizontally({ it })
+            ) {
+                sideSplit?.invoke()
             }
         }
 
@@ -63,26 +83,10 @@ fun PaneManager(
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.TopEnd),
                 visible = topPopInVisible,
-                initiallyVisible = topPopInVisible,
-                enter = slideInVertically( {-it}),
-                exit = slideOutVertically({-it})
+                enter = slideInVertically({ -it }),
+                exit = slideOutVertically({ -it })
             ) {
                 topPopIn?.invoke()
-            }
-        }
-
-        Box(
-            modifier = Modifier.fillMaxWidth(0.4f)
-                .align(Alignment.TopEnd)
-        ) {
-            AnimatedVisibility(
-                modifier = Modifier.align(Alignment.TopEnd),
-                visible = sideSplitVisible,
-                initiallyVisible = sideSplitVisible,
-                enter = slideInHorizontally( {it}),
-                exit = slideOutHorizontally( {it})
-            ) {
-                sideSplit?.invoke()
             }
         }
     }

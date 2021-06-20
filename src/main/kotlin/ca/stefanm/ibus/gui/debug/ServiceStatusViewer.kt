@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.gui.debug
 
 import androidx.compose.desktop.Window
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,8 @@ class ServiceStatusViewer @Inject constructor(
             val list = configurablePlatform.servicesRunning.collectAsState(GlobalScope.coroutineContext)
 
             logger.d("VIEWER", list.value.toString())
-            ServiceStatusList(list.value)
+//            ServiceStatusList(list.value)
+            ScrollableStatusList(list.value)
 //            list.value.forEach {
 //                Row {
 //                    ServiceGroup(it)
@@ -44,9 +46,32 @@ class ServiceStatusViewer @Inject constructor(
 
     @Composable
     fun ScrollableStatusList(
-        content : @Composable () -> Unit
+        list : List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>
     ) {
 
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .background(color = Color(180, 180, 180))
+                .padding(10.dp)
+        ) {
+            val stateVertical = rememberScrollState(0)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(stateVertical)
+                    .padding(end = 12.dp, bottom = 12.dp)
+            ) {
+                ServiceStatusList(list)
+
+
+            }
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd)
+                    .fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(stateVertical)
+            )
+        }
     }
 
     @Composable

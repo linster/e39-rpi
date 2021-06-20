@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.configuration
 
 
-interface DeviceConfiguration {
+interface CarPlatformConfiguration {
     val isPi : Boolean
     val iBusInterfaceUri : String
     val displayDriver : DisplayDriver
@@ -34,32 +34,32 @@ interface DeviceConfiguration {
     val trackInfoPrinter : TrackInfoPrinterType
 }
 
-class Pi3BPlusDeviceConfiguration() : DeviceConfiguration {
+class Pi3BPlusDeviceConfiguration() : CarPlatformConfiguration {
     override val isPi = true
     override val iBusInterfaceUri = "/dev/ttyUSB0"
-    override val displayDriver = DeviceConfiguration.DisplayDriver.TV_MODULE
+    override val displayDriver = CarPlatformConfiguration.DisplayDriver.TV_MODULE
 
-    override val pairedPhone = DeviceConfiguration.PairedPhone(
+    override val pairedPhone = CarPlatformConfiguration.PairedPhone(
         friendlyName = "Stefan's Pixel 2",
         macAddress = listOf(0x40, 0x4E, 0x36, 0xB9, 0x47, 0x3E)
     )
 
     override fun toString() = toDebugString()
 
-    override val serialPortReadMode = DeviceConfiguration.SerialPortReadMode.BLOCKING
-    override val serialPortWriteMode = DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING
+    override val serialPortReadMode = CarPlatformConfiguration.SerialPortReadMode.BLOCKING
+    override val serialPortWriteMode = CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING
 
-    override val trackInfoPrinter = DeviceConfiguration.TrackInfoPrinterType.BMBT
+    override val trackInfoPrinter = CarPlatformConfiguration.TrackInfoPrinterType.BMBT
 
 }
 
-class LaptopDeviceConfiguration : DeviceConfiguration {
+class LaptopDeviceConfiguration : CarPlatformConfiguration {
     override val isPi = false
-    override val iBusInterfaceUri = "/dev/ttyS5"
-//    override val iBusInterfaceUri = "/dev/ttyUSB0"
-    override val displayDriver = DeviceConfiguration.DisplayDriver.TV_MODULE
+//    override val iBusInterfaceUri = "/dev/ttyS5"
+    override val iBusInterfaceUri = "/dev/ttyUSB0"
+    override val displayDriver = CarPlatformConfiguration.DisplayDriver.TV_MODULE
 
-    override val pairedPhone = DeviceConfiguration.PairedPhone(
+    override val pairedPhone = CarPlatformConfiguration.PairedPhone(
         friendlyName = "Stefan's Pixel 2",
         macAddress = listOf(0x40, 0x4E, 0x36, 0xB9, 0x47, 0x3E)
     )
@@ -67,9 +67,9 @@ class LaptopDeviceConfiguration : DeviceConfiguration {
     override fun toString() = toDebugString()
 
 
-    override val serialPortReadMode = DeviceConfiguration.SerialPortReadMode.BLOCKING
-    override val serialPortWriteMode = DeviceConfiguration.SerialPortWriteMode.NON_BLOCKING
+    override val serialPortReadMode = CarPlatformConfiguration.SerialPortReadMode.BLOCKING
+    override val serialPortWriteMode = CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING
 
-    override val trackInfoPrinter = DeviceConfiguration.TrackInfoPrinterType.CLI
+    override val trackInfoPrinter = CarPlatformConfiguration.TrackInfoPrinterType.CLI
 
 }

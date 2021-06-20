@@ -12,7 +12,7 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunner
 import ca.stefanm.ibus.car.platform.PlatformServiceList
 import ca.stefanm.ibus.car.platform.PlatformServiceRunner
-import ca.stefanm.ibus.configuration.DeviceConfiguration
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.di.ApplicationComponent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
@@ -49,13 +49,13 @@ interface ConfiguredCarComponent {
 
 @Module
 class ConfiguredCarModule(
-    private val deviceConfiguration: DeviceConfiguration
+    private val deviceConfiguration: CarPlatformConfiguration
 ) {
 
 
     @Provides
     @ConfiguredCarScope
-    fun provideDeviceConfiguration() : DeviceConfiguration = deviceConfiguration
+    fun provideDeviceConfiguration() : CarPlatformConfiguration = deviceConfiguration
 
     @ExperimentalCoroutinesApi
     @Provides
@@ -70,25 +70,25 @@ class ConfiguredCarModule(
 
     @Provides
     @ConfiguredCarScope
-    fun providePairedPhone(deviceConfiguration: DeviceConfiguration) : DeviceConfiguration.PairedPhone = deviceConfiguration.pairedPhone
+    fun providePairedPhone(deviceConfiguration: CarPlatformConfiguration) : CarPlatformConfiguration.PairedPhone = deviceConfiguration.pairedPhone
 
     @Provides
     @ConfiguredCarScope
     fun provideTrackPrinter(
-        deviceConfiguration: DeviceConfiguration,
+        deviceConfiguration: CarPlatformConfiguration,
         screenTrackInfoPrinter: ScreenTrackInfoPrinter,
         cliTrackInfoPrinter: CliTrackInfoPrinter
     ) : TrackInfoPrinter {
         return when(deviceConfiguration.trackInfoPrinter) {
-            DeviceConfiguration.TrackInfoPrinterType.CLI -> cliTrackInfoPrinter
-            DeviceConfiguration.TrackInfoPrinterType.BMBT -> screenTrackInfoPrinter
+            CarPlatformConfiguration.TrackInfoPrinterType.CLI -> cliTrackInfoPrinter
+            CarPlatformConfiguration.TrackInfoPrinterType.BMBT -> screenTrackInfoPrinter
         }
     }
 
     @Provides
     @ConfiguredCarScope
-    fun provideTextLengthConstraints(deviceConfiguration: DeviceConfiguration) : TextLengthConstraints {
-        return if (deviceConfiguration.displayDriver == DeviceConfiguration.DisplayDriver.TV_MODULE) {
+    fun provideTextLengthConstraints(deviceConfiguration: CarPlatformConfiguration) : TextLengthConstraints {
+        return if (deviceConfiguration.displayDriver == CarPlatformConfiguration.DisplayDriver.TV_MODULE) {
             TvModuleTextLengthConstraints
         } else {
             Mk4NavTextLengthConstraints
@@ -98,7 +98,7 @@ class ConfiguredCarModule(
     @Provides
     @ConfiguredCarScope
     fun provideRelayReaderWriter(
-        deviceConfiguration: DeviceConfiguration,
+        deviceConfiguration: CarPlatformConfiguration,
         cliRelayReaderWriter: CliRelayReaderWriter,
         rpiRelayReaderWriter: RpiRelayReaderWriter
     ) : RelayReaderWriter {
