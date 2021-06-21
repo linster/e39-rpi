@@ -3,8 +3,7 @@ package ca.stefanm.ibus.gui.map
 import androidx.compose.desktop.AppWindow
 import androidx.compose.desktop.LocalAppWindow
 import androidx.compose.desktop.SwingPanel
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -64,6 +63,8 @@ fun Int.toMapScale() : MapScale {
     return MapScale.values().toList().circular()[this + 3]
 }
 
+//TODO we need a function to calculate a new map center given
+//TODO an old mapcenter, the current zoom, and a direction.
 
 
 @Composable
@@ -104,20 +105,53 @@ fun MapViewer(
             .height(468.dp)
     ) {
 
-        Box(
+        BoxWithConstraints(
             Modifier.fillMaxSize()
         ) {
-            Text("Foo")
-            SwingPanel(
-                background = Color.White,
-                modifier = Modifier.fillMaxSize(),
-                factory = {
-                    JPanel().apply {
-                        layout = BorderLayout(0, 0)
-                        add(mapViewer())
-                    }
+
+            val height = this.maxHeight
+            val width = this.maxWidth
+
+
+            //TODO have a big-ass box.
+            //TODO load a 20*20 grid of tiles in the box for the zoom level
+            //TODO use rememberScrollPosition for horizontal/vertical,
+            //TODO and then change that to get the extent center in the center of the viewport.
+
+
+            //TODO keep track of original extents, and then the panned extents.
+            //TODO use a side-effect to change the original extents when the panned extents
+            //TODO aren't fully contained in the original.
+            //TODO this should look like a LaunchedEffect?? followed by some derivedStateOf
+
+            val stateVertical = rememberScrollState((height / 2).value.toInt())
+            val stateHorizontal = rememberScrollState((width / 2).value.toInt())
+
+            LaunchedEffect(stateVertical.value, stateHorizontal.value) {
+                //TODO From the extents, take the scroll values, and then find where our new center actually is
+                //TODO call onCenterPositionChanged()
+            }
+
+            val (initialX, initialY, initialZoom) = remember(extents) {
+                derivedStateOf(extents) {
+
                 }
-            )
+            }
+
+            Layout(
+                modifier = Modifier.fillMaxSize()
+                    .verticalScroll(stateVertical)
+                    .horizontalScroll(stateHorizontal),
+                content = {
+
+                    //TODO put a list of 100 composables in here.
+                    //TODO check the size of the earth and how many map tiles we have.
+                    //TODO we might need a circular list / mod of the tile indexes.
+                }
+            ) { measurables, constraints ->
+
+            }
+
         }
 
         if (overlayProperties.mapScaleVisible) {
@@ -146,23 +180,4 @@ fun MapViewer(
         }
     }
 
-}
-
-
-private fun mapViewer() : JXMapViewer = JXMapViewer().also { mapViewer ->
-
-    //https://github.com/msteiger/jxmapviewer2/blob/master/examples/src/sample1_basics/Sample1.java
-
-    val info: TileFactoryInfo = OSMTileFactoryInfo()
-    val tileFactory = DefaultTileFactory(info)
-    mapViewer.tileFactory = tileFactory
-
-    // Use 8 threads in parallel to load the tiles
-    tileFactory.setThreadPoolSize(8)
-
-    // Set the focus
-    val frankfurt = GeoPosition(50.11, 8.68)
-
-    mapViewer.zoom = 7
-    mapViewer.centerPosition = frankfurt
 }

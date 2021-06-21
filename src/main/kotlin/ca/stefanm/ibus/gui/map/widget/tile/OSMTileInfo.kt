@@ -2,21 +2,13 @@ package ca.stefanm.ibus.gui.map.widget.tile
 
 import androidx.compose.ui.unit.dp
 import javax.inject.Inject
+import kotlin.math.sin
 
 class OSMTileServerInfo @Inject constructor() {
 
-    private companion object {
-        const val MIN_ZOOM = 0
-        const val MAX_ZOOM = 19
-    }
-
-    val tileSize = 256.dp
-
     fun getTileUrl(x : Int, y : Int, zoom : Int) : String {
-        return "http://tile.openstreetmap.org/${MAX_ZOOM - zoom}/$x/$y.png"
+        return "http://tile.openstreetmap.org/$zoom/$x/$y.png"
     }
-
-
 }
 
 object MercartorCalc {
@@ -38,7 +30,7 @@ object MercartorCalc {
      */
     fun latToY(latitudeDegrees: Double, radius: Double): Int {
         val latitude = Math.toRadians(latitudeDegrees)
-        val y = radius / 2.0 * Math.log((1.0 + Math.sin(latitude)) / (1.0 - Math.sin(latitude)))
+        val y = radius / 2.0 * Math.log((1.0 + sin(latitude)) / (1.0 - Math.sin(latitude)))
         return y.toInt()
     }
 

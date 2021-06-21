@@ -12,6 +12,8 @@ import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.gui.GuiMain
 import ca.stefanm.ibus.gui.di.GuiModule
 import ca.stefanm.ibus.gui.di.MapModule
+import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
+import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import dagger.Component
@@ -38,6 +40,9 @@ annotation class ApplicationScope
 interface ApplicationComponent {
 
     fun configuredCarComponent(configuredCarModule: ConfiguredCarModule) : ConfiguredCarComponent
+
+    fun tileFetcher() : TileFetcher
+    fun tileCacheClearer() : TileServerImageCacheClearer
 
     fun inject(cliMain : CliMain)
     fun inject(guiMain: GuiMain)

@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.map.widget.tile.TileView
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.flow.collect
@@ -25,7 +27,7 @@ class MapDebug @Inject constructor(
     fun show() {
         Window(
             title = "BMW E39 Nav Loading",
-            size = IntSize(1024, 800)
+            size = IntSize(1280, 1000)
         ) {
             windowContent()
         }
@@ -57,16 +59,27 @@ class MapDebug @Inject constructor(
                 )
             }
 
-            Box(modifier = Modifier
-                .height(468.dp)
-                .width(800.dp)
-                .border(2.dp, Color.Red)
-            ) {
-                MapViewer(
-                    overlayProperties = overlayProperties.value,
-                    extents = extents.value,
-                    onCenterPositionUpdated = {}
-                )
+            Column {
+
+                Box(
+                    modifier = Modifier
+                        .height(468.dp)
+                        .width(800.dp)
+                        .border(2.dp, Color.Red)
+                ) {
+                    MapViewer(
+                        overlayProperties = overlayProperties.value,
+                        extents = extents.value,
+                        onCenterPositionUpdated = {}
+                    )
+                }
+
+                NestingCard {
+                    NestingCardHeader("Tile Image tester")
+
+                    TileView(0, 0, 0)
+                }
+
             }
         }
     }
@@ -97,10 +110,10 @@ class MapDebug @Inject constructor(
 
         Column {
             NestingCard {
-                NestingCardHeader("Download zoom 0")
+                NestingCardHeader("Tile Cache")
                 Button(onClick = {
-
-                }) { Text("Download")}
+                    DaggerApplicationComponent.create().tileCacheClearer().clearCache()
+                }) { Text("Clear")}
             }
             NestingCard {
                 NestingCardHeader("Map Control")
@@ -143,6 +156,16 @@ class MapDebug @Inject constructor(
 
                 NestingCard {
                     NestingCardHeader("Pan")
+
+                    Row {
+                        Button(onClick = {}) { Text("<--")}
+                        Button(onClick = {}) { Text("-->")}
+                    }
+
+                    Row {
+                        Button(onClick = {}) { Text("^")}
+                        Button(onClick = {}) { Text("V")}
+                    }
 
                 }
             }

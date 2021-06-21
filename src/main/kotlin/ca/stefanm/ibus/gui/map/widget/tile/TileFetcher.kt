@@ -43,6 +43,14 @@ class TileFetcher @Inject constructor(
     }
 }
 
+class TileServerImageCacheClearer @Inject constructor(
+    private val tileServerImageCache: TileServerImageCache
+) {
+    fun clearCache() {
+        tileServerImageCache.clearCache()
+    }
+}
+
 class TileServerImageCache @Inject constructor(
     private val logger: Logger
 ) {
