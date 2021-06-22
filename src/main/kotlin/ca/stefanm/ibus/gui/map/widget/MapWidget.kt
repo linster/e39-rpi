@@ -14,9 +14,13 @@ import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
 import com.ginsberg.cirkle.circular
+import com.javadocmd.simplelatlng.LatLng
+import com.javadocmd.simplelatlng.LatLngTool
+import com.javadocmd.simplelatlng.util.LengthUnit
+import java.math.BigDecimal
 import kotlin.math.min
 import kotlin.math.pow
-
+import kotlin.math.roundToInt
 
 
 //Defines overlays on the map.
@@ -44,7 +48,7 @@ fun MapViewer(
     onCenterPositionUpdated : (newCenter : GeoPosition) -> Unit
 ) {
 
-    BoxWithConstraints(
+    Box(
         modifier = Modifier
             .width(800.dp)
             .height(468.dp)
@@ -54,8 +58,8 @@ fun MapViewer(
             Modifier.fillMaxSize()
         ) {
 
-            val height = this.maxHeight
-            val width = this.maxWidth
+            val viewportHeight = this.maxHeight
+            val viewportWidth = this.maxWidth
 
 
             //TODO have a big-ass box.
@@ -69,7 +73,7 @@ fun MapViewer(
             //TODO aren't fully contained in the original.
             //TODO this should look like a LaunchedEffect?? followed by some derivedStateOf
 
-            val stateVertical = rememberScrollState(0) //(height / 2).value.toInt())
+            val stateVertical = rememberScrollState(0)
             val stateHorizontal = rememberScrollState(0)
 
             val numPreLoadedTilesX = (maxWidth / 256.dp) * 5
@@ -88,40 +92,6 @@ fun MapViewer(
             val endY = (centerContainingTile.second) + (numPreLoadedTilesY / 2).toInt()
             val zoom = extents.mapScale.mapZoomLevel
 
-            //Initial launch effect to center the map on the extent
-            LaunchedEffect(extents.center, extents.mapScale) {
-                stateHorizontal.scroll {
-
-                    //TODO
-                    //TODO NONONO. Don't use tiles to get close to the answer.
-                    //TODO Use the big canvas size and find the offset.
-                    //TODO Find the TL corner of the canvas. Find the BR corner of the canvas.
-                    //TODO find how many meters across it is. Find how many pixels wide it is.
-                    //TODO find how many meters from the top-left we need to move right to get
-                    //TODO to our center. Find what fraction of the pixel-width we need to move.
-                    //TODO
-                    val exb = endX
-                    val tilePixelsFull = (centerContainingTile.first - startX) * 256
-                    val partialTilePixels = ExtentCalculator.offsetInTile(
-                        extents.center,
-                        centerContainingTile.first,
-                        centerContainingTile.second,
-                        zoom
-                    ).x
-                    scrollBy((tilePixelsFull + partialTilePixels).toFloat() - (maxWidth.value))
-                }
-
-                stateVertical.scroll {
-                    val tilePixelsFull = (centerContainingTile.second - startY) * 256
-                    val partialTilePixels = ExtentCalculator.offsetInTile(
-                        extents.center,
-                        centerContainingTile.first,
-                        centerContainingTile.second,
-                        zoom
-                    ).y
-                    scrollBy((tilePixelsFull + partialTilePixels).toFloat() - (maxHeight.value))
-                }
-            }
 
             BoxWithConstraints(
                 Modifier
@@ -130,30 +100,62 @@ fun MapViewer(
                     .horizontalScroll(stateHorizontal)
             ) {
 
-                LaunchedEffect(extents.center, extents.mapScale) {
 
+                //Scroll so our center is in the middle of the screen.
+                LaunchedEffect(extents.center, extents.mapScale) {
                     val canvasTilesTall = endY - startY
+                    val canvasHeightMeters = LatLngTool.distance(
+                        LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
+                        LatLng(ExtentCalculator.tile2lat(endY + 1, zoom), extents.center.longitude),
+                        LengthUnit.METER
+                    )
+
+                    val canvasHeightPixels = (canvasTilesTall) * 256
+                    val actualMetersFromTop = LatLngTool.distance(
+                        LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
+                        LatLng(extents.center.latitude, extents.center.longitude),
+                        LengthUnit.METER
+                    )
+
+//                    val scrollPixelsFromTop = (actualMetersFromTop / canvasHeightMeters) * canvasHeightPixels
+                    val scrollPixelsFromTop = (actualMetersFromTop / canvasHeightMeters) * stateVertical.maxValue
+
+                    stateVertical.scrollTo(scrollPixelsFromTop.roundToInt())
 
                     val canvasWidthTiles = endX - startX
-                    val canvasWidthMeters = ExtentCalculator.tileWidthInMeters(startY, zoom) * canvasWidthTiles
-                    val canvasWidthPixels = canvasWidthTiles * 256
+                    val canvasWidthMeters = LatLngTool.distance(
+                        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
+                        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(endX + 1, zoom)),
+                        LengthUnit.METER
+                    )
+                    val canvasWidthPixels = (canvasWidthTiles) * 256
+                    val actualMetersFromLeft = LatLngTool.distance(
+                        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
+                        LatLng(extents.center.latitude, extents.center.longitude),
+                        LengthUnit.METER
+                    )
 
+//                    val scrollPixelsFromLeft = (actualMetersFromLeft / canvasWidthMeters) * canvasWidthPixels
+                    val scrollPixelsFromLeft = (actualMetersFromLeft / canvasWidthMeters) * stateHorizontal.maxValue
 
-                    stateHorizontal.scroll {
-                    }
-
-                    stateVertical.scroll {
-//                        scrollBy((tilePixelsFull + partialTilePixels).toFloat() - (maxHeight.value))
-                    }
+                    stateHorizontal.scrollTo(scrollPixelsFromLeft.roundToInt())
                 }
 
+                //TODO add an effect here to listen to the scroll state and use the canvas to compute
+                //TODO the new center for the listener
+
+                RawTileGrid(startX, endX, startY, endY,
+                    zoom = extents.mapScale.mapZoomLevel
+                )
 
 
-                //TODO change this to boxWithConstraints, and move the launchedEffect down here.
-                //TODO then we'll know how wide the virtual canvas is.
-                    RawTileGrid(startX, endX, startY, endY,
-                        zoom = extents.mapScale.mapZoomLevel
+                Canvas(Modifier.matchParentSize()){
+                    drawCircle(
+                        center = Offset(1792F, 10F),
+                        radius = 30F,
+                        color = Color.Red
                     )
+                }
             }
         }
 
@@ -202,10 +204,6 @@ fun RawTileGrid(
     endY : Int,
     zoom : Int,
 ) {
-    //We need to bounds check here.
-
-    val tileSize = 256.dp
-
     val validXIndices = (0 .. (2.0.pow(zoom) - 1).toInt()).toList().circular()
     val validYIndices = (0 .. (2.0.pow(zoom) - 1).toInt()).toList().circular()
 

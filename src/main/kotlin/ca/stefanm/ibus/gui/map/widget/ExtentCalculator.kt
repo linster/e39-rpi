@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.map.widget
 
 import androidx.compose.ui.unit.IntOffset
+import com.javadocmd.simplelatlng.LatLng
 import org.jxmapviewer.viewer.GeoPosition
 import kotlin.math.cos
 import kotlin.math.pow
@@ -41,28 +42,6 @@ object ExtentCalculator {
         zoom: Int
     ) : Double {
         return (40_075_016.686 * cos(Math.toRadians(tile2lat(tileY, zoom)))) / (2.0.pow(zoom))
-    }
-
-    fun offsetInTile(
-        //A lat-long that's inside the tile, not the top-left, and not the center.
-        insetPosition : GeoPosition,
-        tileX : Int,
-        tileY : Int,
-        zoom : Int
-    ) : IntOffset {
-
-        //This is how-wide the tile width is in meters. Latitude-dependent
-        //because Mercartor
-        val tileWidthMeters = (40_075_016.686 * cos(Math.toRadians(tile2lat(tileY, zoom)))) / (2.0.pow(zoom))
-
-        //Tile height, latitude independent, because Mercartor is cylindrical
-        val tileHeightMeters = 10
-
-        //Now we find how many meters position is from the tile top-left corner.
-
-
-
-        return IntOffset.Zero
     }
 
     data class TileBounds(
