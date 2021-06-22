@@ -1,6 +1,8 @@
 package ca.stefanm.ibus.gui.map.widget
 
+import androidx.compose.ui.unit.IntOffset
 import org.jxmapviewer.viewer.GeoPosition
+import kotlin.math.cos
 import kotlin.math.pow
 
 
@@ -25,6 +27,7 @@ object ExtentCalculator {
         //Calculate with one tile per step, then multiply by the step factor
         //to scale how much we've moved.
 
+        TODO()
 
 
     }
@@ -33,6 +36,34 @@ object ExtentCalculator {
     //TODO I need a method to find out, inside a tile, how far to scroll the tile
     //TODO to get to the coord I want.
 
+    fun tileWidthInMeters(
+        tileY: Int,
+        zoom: Int
+    ) : Double {
+        return (40_075_016.686 * cos(Math.toRadians(tile2lat(tileY, zoom)))) / (2.0.pow(zoom))
+    }
+
+    fun offsetInTile(
+        //A lat-long that's inside the tile, not the top-left, and not the center.
+        insetPosition : GeoPosition,
+        tileX : Int,
+        tileY : Int,
+        zoom : Int
+    ) : IntOffset {
+
+        //This is how-wide the tile width is in meters. Latitude-dependent
+        //because Mercartor
+        val tileWidthMeters = (40_075_016.686 * cos(Math.toRadians(tile2lat(tileY, zoom)))) / (2.0.pow(zoom))
+
+        //Tile height, latitude independent, because Mercartor is cylindrical
+        val tileHeightMeters = 10
+
+        //Now we find how many meters position is from the tile top-left corner.
+
+
+
+        return IntOffset.Zero
+    }
 
     data class TileBounds(
         val topLeft : GeoPosition,
@@ -60,10 +91,12 @@ object ExtentCalculator {
         return GeoPosition(avgLat, avgLng)
     }
 
+    //Top Left Corner
     fun tile2lon(x: Int, zoom: Int): Double {
         return x / 2.0.pow(zoom.toDouble()) * 360.0 - 180
     }
 
+    //Top Left Corner
     fun tile2lat(y: Int, zoom: Int): Double {
         val n = Math.PI - 2.0 * Math.PI * y / 2.0.pow(zoom.toDouble())
         return Math.toDegrees(Math.atan(Math.sinh(n)))
@@ -71,7 +104,9 @@ object ExtentCalculator {
 
 
 
-    fun getTileNumber(lat: Double, lon: Double, zoom: Int): Triple<Int, Int, Int> {
+    fun getTileNumber(lat: Double, lon: Double, zoom: Int): Pair<Int, Int> {
+        //TODO Careful with converting these Java math functions
+        //TODO Kotlin rounding behaviour doesn't tend toward positive infinity.
         var xtile = Math.floor((lon + 180) / 360 * (1 shl zoom)).toInt()
         var ytile =
             Math.floor((1 - Math.log(Math.tan(Math.toRadians(lat)) + 1 / Math.cos(Math.toRadians(lat))) / Math.PI) / 2 * (1 shl zoom))
@@ -80,6 +115,6 @@ object ExtentCalculator {
         if (xtile >= 1 shl zoom) xtile = (1 shl zoom) - 1
         if (ytile < 0) ytile = 0
         if (ytile >= 1 shl zoom) ytile = (1 shl zoom) - 1
-        return Triple(xtile, ytile, zoom)
+        return Pair(xtile, ytile)
     }
 }

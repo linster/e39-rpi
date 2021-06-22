@@ -55,8 +55,8 @@ class Pi3BPlusDeviceConfiguration() : CarPlatformConfiguration {
 
 class LaptopDeviceConfiguration : CarPlatformConfiguration {
     override val isPi = false
-//    override val iBusInterfaceUri = "/dev/ttyS5"
-    override val iBusInterfaceUri = "/dev/ttyUSB0"
+    override val iBusInterfaceUri = "/dev/ttyS5"
+//    override val iBusInterfaceUri = "/dev/ttyUSB0"
     override val displayDriver = CarPlatformConfiguration.DisplayDriver.TV_MODULE
 
     override val pairedPhone = CarPlatformConfiguration.PairedPhone(

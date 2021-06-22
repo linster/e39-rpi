@@ -11,7 +11,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.map.widget.MapScale
+import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
+
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.flow.collect
@@ -77,7 +80,11 @@ class MapDebug @Inject constructor(
                 NestingCard {
                     NestingCardHeader("Tile Image tester")
 
-                    TileView(0, 0, 0)
+                    RawTileGrid(
+                        2, 3,
+                        4, 4,
+                        0
+                    )
                 }
 
             }
@@ -90,7 +97,7 @@ class MapDebug @Inject constructor(
         onExtentsChanged : (new : Extents) -> Unit
     ) {
 
-        val zoom = remember { mutableStateOf(7) }
+        val zoom = remember { mutableStateOf(MapScale.METERS_100) }
         val mapCenter = remember { mutableStateOf(GeoPosition(0.0, 0.0)) }
 
         LaunchedEffect(zoom, mapCenter) {
@@ -100,7 +107,7 @@ class MapDebug @Inject constructor(
             ) { zoom, center ->
                 Extents(
                     center = center,
-                    mapScale = zoom.toMapScale()
+                    mapScale = zoom
                 )
             }.collect {
                 onExtentsChanged(it)
@@ -123,12 +130,12 @@ class MapDebug @Inject constructor(
 
                     Text("Zoom: ${zoom.value}")
                     Slider(
-                        value = zoom.value.toFloat(),
+                        value = MapScale.values().indexOf(zoom.value).toFloat(),
                         onValueChange = {
                             logger.d("mapDebug", "newZoom: $it")
-                            zoom.value = it.roundToInt() },
-                        valueRange = 0F.rangeTo(10F),
-                        steps = 11
+                            zoom.value = MapScale.values().toList().circular()[it.roundToInt()] },
+                        valueRange = 0F.rangeTo(MapScale.values().size.toFloat()),
+                        steps = MapScale.values().size
                     )
                 }
 
@@ -222,6 +229,13 @@ class MapDebug @Inject constructor(
                         val currentIndex = MapScale.values().indexOf(mapScaleZoom.value)
                         mapScaleZoom.value = MapScale.values().toList().circular()[currentIndex + 1]
                     }) { Text("Zoom in") }
+                }
+
+                NestingCard {
+                    MapScaleWidget(
+                        mapScaleZoom.value,
+                        GeoPosition(0.0, 0.0)
+                    )
                 }
 
                 Row {

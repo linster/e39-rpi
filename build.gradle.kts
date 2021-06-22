@@ -57,6 +57,9 @@ dependencies {
 
     implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
 
+    implementation("com.javadocmd:simplelatlng:1.3.1")
+
+
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
 
     implementation("com.russhwolf:multiplatform-settings:0.7.7")
