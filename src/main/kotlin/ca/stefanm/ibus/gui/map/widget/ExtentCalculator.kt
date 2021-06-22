@@ -37,6 +37,8 @@ object ExtentCalculator {
     //TODO I need a method to find out, inside a tile, how far to scroll the tile
     //TODO to get to the coord I want.
 
+    //Check out GeoUtil.getBitmapCoordinate()
+
     fun tileWidthInMeters(
         tileY: Int,
         zoom: Int

@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.map
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import org.jxmapviewer.viewer.GeoPosition
@@ -12,11 +13,16 @@ import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
+import ca.stefanm.ibus.gui.map.widget.tile.OSMTileServerInfo
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import com.javadocmd.simplelatlng.util.LengthUnit
+import com.javadocmd.simplelatlng.window.LatLngWindow
+import org.jxmapviewer.OSMTileFactoryInfo
+import org.jxmapviewer.viewer.util.GeoUtil
+import java.awt.geom.Point2D
 import java.math.BigDecimal
 import kotlin.math.min
 import kotlin.math.pow
@@ -76,8 +82,8 @@ fun MapViewer(
             val stateVertical = rememberScrollState(0)
             val stateHorizontal = rememberScrollState(0)
 
-            val numPreLoadedTilesX = (maxWidth / 256.dp) * 5
-            val numPreLoadedTilesY = (maxHeight / 256.dp) * 5
+            val numPreLoadedTilesX = (maxWidth / 256.dp) * 3
+            val numPreLoadedTilesY = (maxWidth / 256.dp) * 3 //We want this to be square so we a line diagonally across passes through the center.
 
             val centerContainingTile = ExtentCalculator.getTileNumber(
                 extents.center.latitude,
@@ -118,9 +124,11 @@ fun MapViewer(
                     )
 
 //                    val scrollPixelsFromTop = (actualMetersFromTop / canvasHeightMeters) * canvasHeightPixels
+                    val scrollPixelsFromTop_lp = (actualMetersFromTop / canvasHeightMeters) * stateVertical.maxValue
                     val scrollPixelsFromTop = (actualMetersFromTop / canvasHeightMeters) * stateVertical.maxValue
 
-                    stateVertical.scrollTo(scrollPixelsFromTop.roundToInt())
+                    stateVertical.scrollTo(0)
+                    stateVertical.dispatchRawDelta(scrollPixelsFromTop.toFloat())
 
                     val canvasWidthTiles = endX - startX
                     val canvasWidthMeters = LatLngTool.distance(
@@ -138,11 +146,59 @@ fun MapViewer(
 //                    val scrollPixelsFromLeft = (actualMetersFromLeft / canvasWidthMeters) * canvasWidthPixels
                     val scrollPixelsFromLeft = (actualMetersFromLeft / canvasWidthMeters) * stateHorizontal.maxValue
 
-                    stateHorizontal.scrollTo(scrollPixelsFromLeft.roundToInt())
+                    stateHorizontal.scrollTo(0)
+                    stateHorizontal.dispatchRawDelta(scrollPixelsFromLeft.toFloat())
                 }
 
                 //TODO add an effect here to listen to the scroll state and use the canvas to compute
                 //TODO the new center for the listener
+
+                LaunchedEffect(stateHorizontal.value, stateVertical.value) {
+
+                    val startPosition = LatLng(
+                        ExtentCalculator.tile2lat(startY, zoom),
+                        ExtentCalculator.tile2lon(startX, zoom)
+                    )
+
+                    val topRight = LatLng(
+                        ExtentCalculator.tile2lat(startY, zoom),
+                        ExtentCalculator.tile2lon(endX + 1, zoom)
+                    )
+
+                    val bottomLeft = LatLng(
+                        ExtentCalculator.tile2lat(endY + 1, zoom),
+                        ExtentCalculator.tile2lon(startX, zoom)
+                    )
+
+                    val fractionGoingEast = stateHorizontal.value / stateHorizontal.maxValue.toDouble()
+                    val fractionGoingSouth = stateVertical.value / stateVertical.maxValue.toDouble()
+
+                    val longFromLeft = LatLngTool.travel(
+                        startPosition,
+                        LatLngTool.Bearing.EAST,
+                        LatLngTool.distance(
+                            startPosition,
+                            topRight,
+                            LengthUnit.METER
+                        ) * fractionGoingEast,
+                        LengthUnit.METER
+                    ).longitude
+
+                    val latFromNorth = LatLngTool.travel(
+                        startPosition,
+                        LatLngTool.Bearing.SOUTH,
+                        LatLngTool.distance(
+                            startPosition,
+                            bottomLeft,
+                            LengthUnit.METER
+                        ) * fractionGoingSouth,
+                        LengthUnit.METER
+                    ).latitude
+
+                    onCenterPositionUpdated(
+                        GeoPosition(latFromNorth, longFromLeft)
+                    )
+                }
 
                 RawTileGrid(startX, endX, startY, endY,
                     zoom = extents.mapScale.mapZoomLevel

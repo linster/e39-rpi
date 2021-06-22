@@ -46,8 +46,8 @@ fun TileView(
             .size(256.dp)
             .then(
                 if (debug) {
-                    Modifier.border(1.dp, Color.Red)
-//                    Modifier
+//                    Modifier.border(1.dp, Color.Red)
+                    Modifier
                 } else {
                     Modifier
                 }

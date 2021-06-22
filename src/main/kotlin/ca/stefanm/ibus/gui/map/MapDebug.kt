@@ -17,9 +17,14 @@ import ca.stefanm.ibus.gui.map.widget.tile.TileView
 
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
+import com.javadocmd.simplelatlng.LatLng
+import com.javadocmd.simplelatlng.LatLngTool
+import com.javadocmd.simplelatlng.util.LengthUnit
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import org.jxmapviewer.viewer.GeoPosition
+import java.awt.Desktop
+import java.net.URI
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -38,6 +43,8 @@ class MapDebug @Inject constructor(
 
     @Composable
     fun windowContent() {
+
+        val mapReportedCenter = remember { mutableStateOf(LatLng(0.0, 0.0))}
 
         val overlayProperties = remember { mutableStateOf(OverlayProperties(
             centerCrossHairsVisible = false,
@@ -58,7 +65,8 @@ class MapDebug @Inject constructor(
                     },
                     onExtentsChanged = {
                         extents.value = it
-                    }
+                    },
+                    mapReportedCenter = mapReportedCenter.value
                 )
             }
 
@@ -73,7 +81,9 @@ class MapDebug @Inject constructor(
                     MapViewer(
                         overlayProperties = overlayProperties.value,
                         extents = extents.value,
-                        onCenterPositionUpdated = {}
+                        onCenterPositionUpdated = {
+                            mapReportedCenter.value = LatLng(it.latitude, it.longitude)
+                        }
                     )
                 }
 
@@ -94,7 +104,10 @@ class MapDebug @Inject constructor(
     @Composable
     fun manipulator(
         onOverlayPropertiesChanged : (new : OverlayProperties) -> Unit,
-        onExtentsChanged : (new : Extents) -> Unit
+        onExtentsChanged : (new : Extents) -> Unit,
+
+        //The center the map reports.
+        mapReportedCenter : LatLng
     ) {
 
         val zoom = remember { mutableStateOf(MapScale.METERS_100) }
@@ -252,6 +265,49 @@ class MapDebug @Inject constructor(
                     Button(onClick = {
 
                     }) { Text("Query Center : (${center.value.latitude}, ${center.value.longitude})")}
+                }
+            }
+
+            NestingCard {
+                NestingCardHeader("Center error")
+
+                Row {
+                    Button(
+                        onClick = {
+                            Desktop.getDesktop().browse(
+                                URI.create(
+                                    "http://maps.google.com/maps?q=loc:${mapCenter.value.latitude},${mapCenter.value.longitude}"
+                                )
+                            )
+                        }
+                    ) {
+                        Text("Requested Center")
+                    }
+                    Text("${mapCenter.value.latitude} ${mapCenter.value.longitude}")
+                }
+                Row {
+                    Button(
+                        onClick = {
+                            Desktop.getDesktop().browse(
+                                URI.create(
+                                    "http://maps.google.com/maps?q=loc:${mapReportedCenter.latitude},${mapReportedCenter.longitude}"
+                                )
+                            )
+                        }
+                    ) {
+                        Text("Map Reported Center")
+                    }
+                    Text("${mapReportedCenter.latitude} ${mapReportedCenter.longitude}")
+                }
+                Row {
+                    Text(
+                        "Distance (m): ${
+                            LatLngTool.distance(
+                                LatLng(mapCenter.value.latitude, mapCenter.value.longitude),
+                                mapReportedCenter,
+                                LengthUnit.METER
+                            )
+                        }")
                 }
             }
         }
