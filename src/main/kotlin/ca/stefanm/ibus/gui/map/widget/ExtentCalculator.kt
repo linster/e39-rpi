@@ -2,6 +2,8 @@ package ca.stefanm.ibus.gui.map.widget
 
 import androidx.compose.ui.unit.IntOffset
 import com.javadocmd.simplelatlng.LatLng
+import com.javadocmd.simplelatlng.LatLngTool
+import com.javadocmd.simplelatlng.util.LengthUnit
 import org.jxmapviewer.viewer.GeoPosition
 import kotlin.math.cos
 import kotlin.math.pow
@@ -15,22 +17,17 @@ object ExtentCalculator {
 
 
     fun newMapCenterOnPan(
-        oldMapCenter : GeoPosition,
-        currentZoom : Int,
-        positiveMovement : Boolean,
-        horizontal : Boolean,
-        stepsPerTile : Int = 8
-    ) : GeoPosition {
-        //If horizontal and clicks positive, moving right
-        //If horizontal and clicks negative, moving left.
+        oldMapCenter : LatLng,
+        currentZoom : MapScale,
+        bearing : Double,
+    ) : LatLng {
 
-
-        //Calculate with one tile per step, then multiply by the step factor
-        //to scale how much we've moved.
-
-        TODO()
-
-
+        return LatLngTool.travel(
+            oldMapCenter,
+            bearing,
+            currentZoom.meters.toDouble(),
+            LengthUnit.METER
+        )
     }
 
     //TODO

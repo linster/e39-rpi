@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
@@ -178,13 +179,37 @@ class MapDebug @Inject constructor(
                     NestingCardHeader("Pan")
 
                     Row {
-                        Button(onClick = {}) { Text("<--")}
-                        Button(onClick = {}) { Text("-->")}
+                        Button(onClick = {
+                            mapCenter.value = ExtentCalculator.newMapCenterOnPan(
+                                mapCenter.value.let { LatLng(it.latitude, it.longitude) },
+                                zoom.value,
+                                LatLngTool.Bearing.WEST,
+                            ).let { GeoPosition(it.latitude, it.longitude) }
+                        }) { Text("<--")}
+                        Button(onClick = {
+                            mapCenter.value = ExtentCalculator.newMapCenterOnPan(
+                                mapCenter.value.let { LatLng(it.latitude, it.longitude) },
+                                zoom.value,
+                                LatLngTool.Bearing.EAST,
+                            ).let { GeoPosition(it.latitude, it.longitude) }
+                        }) { Text("-->")}
                     }
 
                     Row {
-                        Button(onClick = {}) { Text("^")}
-                        Button(onClick = {}) { Text("V")}
+                        Button(onClick = {
+                            mapCenter.value = ExtentCalculator.newMapCenterOnPan(
+                                mapCenter.value.let { LatLng(it.latitude, it.longitude) },
+                                zoom.value,
+                                LatLngTool.Bearing.NORTH,
+                            ).let { GeoPosition(it.latitude, it.longitude) }
+                        }) { Text("^")}
+                        Button(onClick = {
+                            mapCenter.value = ExtentCalculator.newMapCenterOnPan(
+                                mapCenter.value.let { LatLng(it.latitude, it.longitude) },
+                                zoom.value,
+                                LatLngTool.Bearing.SOUTH,
+                            ).let { GeoPosition(it.latitude, it.longitude) }
+                        }) { Text("V")}
                     }
 
                 }
@@ -308,6 +333,14 @@ class MapDebug @Inject constructor(
                                 LengthUnit.METER
                             )
                         }")
+                }
+
+                Row {
+                    Button(
+                        onClick = {
+                            mapCenter.value = GeoPosition(mapReportedCenter.latitude, mapReportedCenter.longitude)
+                        }
+                    ) { Text("Recenter on Reported Center")}
                 }
             }
         }
