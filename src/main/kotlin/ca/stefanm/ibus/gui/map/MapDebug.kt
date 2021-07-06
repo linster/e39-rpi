@@ -35,7 +35,7 @@ class MapDebug @Inject constructor(
 
     fun show() {
         Window(
-            title = "BMW E39 Nav Loading",
+            title = "Map Debug",
             size = IntSize(1280, 1000)
         ) {
             windowContent()

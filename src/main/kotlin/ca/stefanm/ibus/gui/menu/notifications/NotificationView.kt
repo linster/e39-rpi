@@ -89,14 +89,14 @@ import kotlin.time.ExperimentalTime
             ) {
                 Text(
                     text = this@toView.topText,
-                    fontSize = 48.sp,
+                    fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 if (this@toView.contentText.isNotEmpty()) {
                     Text(
                         text = this@toView.contentText,
-                        fontSize = 36.sp,
+                        fontSize = 26.sp,
                         color = Color.White
                     )
                 }

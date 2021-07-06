@@ -66,9 +66,9 @@ class PaneManagerDebug @Inject constructor(){
             val topPopInComposableDefault = getFiller(Color.Magenta, topPopInEnabled.value, topPopInFillSize.value)
             val topPopInComposable = remember { mutableStateOf<(@Composable () -> Unit)?>(topPopInComposableDefault) }
             val topPopInComposableNotification = Notification(
-                topText = "Boy Howdy",
-                contentText = "What it do",
-                image = Notification.NotificationImage.BLUETOOTH
+                topText = "Example Notification",
+                contentText = "Content Text",
+                image = Notification.NotificationImage.MAP_WAYPOINT
             )
 
             Row {
