@@ -10,11 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowScope
+import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
@@ -31,15 +34,18 @@ import kotlin.math.roundToInt
 
 class MapDebug @Inject constructor(
     private val logger: Logger
-) {
+) : WindowManager.E39Window {
 
-    fun show() {
-        Window(
-            title = "Map Debug",
-            size = IntSize(1280, 1000)
-        ) {
-            windowContent()
-        }
+    override val tag: Any
+        get() = this
+
+    override val size = WindowSize(1280.dp, 1000.dp)
+    override val title = "Map Debug"
+    override val defaultPosition: WindowManager.E39Window.DefaultPosition
+        get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
+
+    override fun content(): @Composable WindowScope.() -> Unit = {
+        windowContent()
     }
 
     @Composable

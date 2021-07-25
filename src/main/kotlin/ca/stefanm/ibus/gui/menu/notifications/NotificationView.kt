@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.Notification
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 @Composable fun Notification.toView() {
     Row(
         Modifier.fillMaxSize()
@@ -47,7 +46,7 @@ import kotlin.time.ExperimentalTime
             Column(
                 Modifier
                     .weight(0.20F)
-                    .border(2.dp, Color.Cyan)
+                    //.border(2.dp, Color.Cyan)
                     .align(Alignment.CenterVertically)
             ) {
                 Row(Modifier.align(Alignment.CenterHorizontally)) {
@@ -56,9 +55,9 @@ import kotlin.time.ExperimentalTime
                     val resource = svgResource(
                         when (this@toView.image) {
                             Notification.NotificationImage.NONE -> error("Invalid")
-                            Notification.NotificationImage.ALERT_CIRCLE -> "icons/alert-circle.png"
-                            Notification.NotificationImage.ALERT_OCTAGON -> "icons/alert-octagon.png"
-                            Notification.NotificationImage.ALERT_TRIANGLE -> "icons/alert-triangle.png"
+                            Notification.NotificationImage.ALERT_CIRCLE -> "icons/alert-circle.svg"
+                            Notification.NotificationImage.ALERT_OCTAGON -> "icons/alert-octagon.svg"
+                            Notification.NotificationImage.ALERT_TRIANGLE -> "icons/alert-triangle.svg"
                             Notification.NotificationImage.BLUETOOTH -> "icons/bluetooth.svg"
                             Notification.NotificationImage.MESSAGE_CIRCLE -> "icons/message-circle.svg"
                             Notification.NotificationImage.MESSAGE_SQUARE -> "icons/message-square.svg"
@@ -77,7 +76,7 @@ import kotlin.time.ExperimentalTime
                         contentDescription = this@toView.image.toString(),
                         modifier = Modifier
                             .fillMaxSize(0.75F)
-                            .border(2.dp, Color.Red)
+                            //.border(2.dp, Color.Red)
                             .aspectRatio(1.0F)
                     )
                 }

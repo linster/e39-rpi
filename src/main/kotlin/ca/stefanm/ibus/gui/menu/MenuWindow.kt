@@ -8,42 +8,59 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.window.WindowScope
+import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.notifications.toView
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
 class MenuWindow @Inject constructor(
     private val navigator: Navigator,
-    private val logger: Logger
-) {
+    private val logger: Logger,
+    private val notificationHub: NotificationHub
+) : WindowManager.E39Window {
 
-    fun openWindow(x : Int, y : Int) {
-        Window(
-            title = "BMW E39 Nav Menu",
-            size = IntSize(800, 468),
-            undecorated = true,
-            centered = false,
-            location = IntOffset(x, y+30)
-        ) {
-            PaneManager(
-                banner = null,
-                sideSplit = null,
-                sideSplitVisible = false,
-                bottomPanel = null,
-                topPopIn = null,
-                topPopInVisible = false,
-                mainContent = {
-                    Box(
-                        Modifier.fillMaxSize()
-                    ) {
-                        val currentNode = navigator.mainContentScreen.collectAsState()
+    override val title: String
+        get() = "BMW E39 Nav Menu"
 
-                        logger.d("MenuWindow", currentNode.value.thisClass.canonicalName)
+    override val defaultPosition: WindowManager.E39Window.DefaultPosition
+        get() = WindowManager.E39Window.DefaultPosition.OVER_MAIN
 
-                        currentNode.value.provideMainContent()()
-                    }
+    override val size: WindowSize
+        get() = WindowManager.DEFAULT_SIZE
+
+    override fun content(): @Composable WindowScope.() -> Unit = {
+        rootContent()
+    }
+
+    override val tag: Any
+        get() = this
+
+    @Composable
+    private fun rootContent() {
+        PaneManager(
+            banner = null,
+            sideSplit = null,
+            sideSplitVisible = false,
+            bottomPanel = null,
+            topPopIn = {
+                   notificationHub.currentNotification.collectAsState().value?.toView()
+            },
+            topPopInVisible = notificationHub.currentNotificationIsVisible.collectAsState(false).value,
+            mainContent = {
+                Box(
+                    Modifier.fillMaxSize()
+                ) {
+                    val currentNode = navigator.mainContentScreen.collectAsState()
+
+                    logger.d("MenuWindow", currentNode.value.thisClass.canonicalName)
+
+                    currentNode.value.provideMainContent()()
                 }
-            )
-        }
+            }
+        )
     }
 }

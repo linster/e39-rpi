@@ -18,7 +18,9 @@ import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.debug.KeyEventSimulator
 import ca.stefanm.ibus.gui.debug.MenuDebug
 import ca.stefanm.ibus.gui.map.MapDebug
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -29,18 +31,8 @@ fun main() {
 @ExperimentalTime
 class GuiMain {
 
-
     @Inject
-    lateinit var loadingWindow: LoadingWindow
-
-    @Inject
-    lateinit var keyEventSimulator: KeyEventSimulator
-
-    @Inject
-    lateinit var mapDebug: MapDebug
-
-    @Inject
-    lateinit var menuDebug: MenuDebug
+    lateinit var windowManager: Provider<WindowManager>
 
     init {
         DaggerApplicationComponent.builder().build().inject(this)
@@ -51,49 +43,6 @@ class GuiMain {
     }
 
     fun main() {
-        loadingWindow.show()
-
-//        Window(title = "Compose for Desktop", size = IntSize(300, 300)) {
-//            val count = remember { mutableStateOf(0) }
-//            MaterialTheme {
-//                Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
-//                    Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-//                        onClick = {
-//                            count.value++
-//                        }) {
-//                        Text(if (count.value == 0) "Hello World" else "Clicked ${count.value}!")
-//                    }
-//                    Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-//                        onClick = {
-//                            count.value = 0
-//                        }) {
-//                        Text("Reset")
-//                    }
-//                    Button(
-//                        onClick = {
-//                            keyEventSimulator.show()
-//                        }
-//                    ) {
-//                        Text("Simulator")
-//                    }
-//
-//                    Button(
-//                        onClick = {
-//                            loadingWindow.show()
-//                        }
-//                    ) {
-//                        Text("Loading Window")
-//                    }
-//
-//                    Button(onClick = { mapDebug.show() }) {
-//                        Text("Map Debug")
-//                    }
-//
-//                    Button(onClick = { menuDebug.show()}) {
-//                        Text("Menu Debug")
-//                    }
-//                }
-//            }
-//        }
+        windowManager.get().runApplication()
     }
 }

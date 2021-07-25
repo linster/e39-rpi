@@ -13,9 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowScope
+import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
 import ca.stefanm.ibus.car.platform.PlatformService
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.GlobalScope
 import javax.inject.Inject
@@ -23,25 +26,23 @@ import javax.inject.Inject
 class ServiceStatusViewer @Inject constructor(
     private val configurablePlatform: ConfigurablePlatform,
     private val logger : Logger
-) {
+) : WindowManager.E39Window {
 
-    fun showWindow() {
+    override val tag: Any
+        get() = this
 
-        Window(
-            title = "Service Status",
-        ) {
-            val list = configurablePlatform.servicesRunning.collectAsState(GlobalScope.coroutineContext)
+    override val title = "Service Status"
+    override val defaultPosition: WindowManager.E39Window.DefaultPosition
+        get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-            logger.d("VIEWER", list.value.toString())
-//            ServiceStatusList(list.value)
-            ScrollableStatusList(list.value)
-//            list.value.forEach {
-//                Row {
-//                    ServiceGroup(it)
-//                    Spacer(Modifier.height(10.dp))
-//                }
-//            }
-        }
+    override val size = WindowSize(800.dp, 1024.dp)
+
+    override fun content(): @Composable WindowScope.() -> Unit = {
+        val list = configurablePlatform.servicesRunning.collectAsState(GlobalScope.coroutineContext)
+
+        logger.d("VIEWER", list.value.toString())
+
+        ScrollableStatusList(list.value)
     }
 
     @Composable
