@@ -6,15 +6,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
@@ -23,6 +21,9 @@ import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.PaneManager
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.toView
+import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalChipMenuWindowOverlay
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 
@@ -35,7 +36,7 @@ class PaneManagerDebug @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = WindowSize(1300.dp, 800.dp)
+    override val size = WindowSize(1600.dp, 800.dp)
     override val tag: Any
         get() = this
 
@@ -79,9 +80,12 @@ class PaneManagerDebug @Inject constructor(
         )
 
         Row {
-            Column(
+            NestingCard(
                 Modifier.width(300.dp)
             ) {
+
+                NestingCardHeader("Pane Debug")
+
                 mainContentEnabled.toToggleCheckbox(label = "MainContent Enabled")
                 bannerEnabled.toToggleCheckbox(label = "Banner Enabled")
                 topPopInEnabled.toToggleCheckbox(label = "Top Pop-In Enabled")
@@ -110,6 +114,17 @@ class PaneManagerDebug @Inject constructor(
 
             }
 
+
+            val mainContentOverlay = remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+
+            NestingCard(
+                Modifier.width(450.dp)
+            ) {
+                //TODO put in an overlay layer on MainContent above
+                //TODO put this in on PaneManager.
+                ModalChipMenuOverlayDebugPane { mainContentOverlay.value = it }
+            }
+
             Column(
                 Modifier
                     .width(800.dp)
@@ -124,6 +139,7 @@ class PaneManagerDebug @Inject constructor(
                     mainContent = getContentFiller(),
                     sideSplitVisible = sideSplitVisible.value,
                     topPopInVisible = topPopInVisible.value,
+                    mainContentOverlay = mainContentOverlay.value
                 )
             }
         }
@@ -164,6 +180,121 @@ class PaneManagerDebug @Inject constructor(
                         onDraw = {}
                     )
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun ModalChipMenuOverlayDebugPane(
+        onNewOverlay : (newOverlay : (@Composable () -> Unit)?) -> Unit
+    ) {
+
+        NestingCardHeader("Chip Menu Overlays")
+
+        Button(onClick = { onNewOverlay { null } }) { Text("Clear Overlay")}
+
+        val menuTopLeft = remember { mutableStateOf(IntOffset.Zero) }
+        val menuWidth = remember { mutableStateOf(584) }
+        val chipOrientation = remember { mutableStateOf(ItemChipOrientation.E) }
+        val data = remember { mutableStateOf(ModalMenu.EMPTY) }
+
+        NestingCard {
+            NestingCardHeader("Preset Positions")
+            Row {
+                Button(onClick = {
+                    menuTopLeft.value = IntOffset(64, 64)
+                }) { Text("NW")}
+                Button(onClick = {
+                    menuTopLeft.value = IntOffset(512, 256)
+                }) { Text("NE")}
+                Button(onClick = {
+                    menuTopLeft.value = IntOffset(64, 64)
+                }) { Text("SW")}
+                Button(onClick = {
+                    menuTopLeft.value = IntOffset(512, 256)
+                }) { Text("SE")}
+            }
+        }
+
+        NestingCard {
+            NestingCardHeader("Chip Orientation")
+            Row {
+                for (orientation in ItemChipOrientation.values()) {
+                    Button(onClick = {
+                        chipOrientation.value = orientation
+                        data.value = data.value.copy(chipOrientation = chipOrientation.value)
+                    }) { Text(orientation.name)}
+                }
+            }
+        }
+
+        NumericTextViewWithSpinnerButtons(
+            label = "Width",
+            initialValue = menuWidth.value,
+            stepOnButton = 32,
+            onValueChanged = { menuWidth.value = it}
+        )
+
+        NestingCard {
+            NestingCardHeader("Data")
+
+            Button(onClick = {
+                data.value = ModalMenu(
+                    chipOrientation = chipOrientation.value,
+                    onOpen = {},
+                    onClose = {},
+                    items = listOf(
+                        ModalMenu.ModalMenuItem(
+                            title = "Terminate Guidance",
+                            onClicked = {}
+                        ),
+                        ModalMenu.ModalMenuItem(
+                            title = "Instruction",
+                            onClicked = {}
+                        ),
+                        ModalMenu.ModalMenuItem(
+                            title = "New Route",
+                            onClicked = {}
+                        ),
+                        ModalMenu.ModalMenuItem(
+                            title = "Traffic Information",
+                            onClicked = {}
+                        ),
+                        ModalMenu.ModalMenuItem(
+                            title = "Route Preference",
+                            onClicked = {}
+                        ),
+                    )
+                )
+            }) { Text("Navigation Typical")}
+
+            Button(onClick = {
+                data.value = ModalMenu(
+                    chipOrientation = chipOrientation.value,
+                    onOpen = {},
+                    onClose = {},
+                    items = (1..20).map {
+                        ModalMenu.ModalMenuItem(
+                            title = "Menu Item $it",
+                            onClicked = {}
+                        )
+                    }
+                )
+            }) { Text("Tall")}
+        }
+
+        LaunchedEffect(
+            menuTopLeft.value,
+            menuWidth.value,
+            chipOrientation.value,
+            data.value
+        ) {
+            onNewOverlay {
+                ModalChipMenuWindowOverlay(
+                    menuTopLeft = menuTopLeft.value,
+                    menuWidth = menuWidth.value,
+                    menuData = data.value
+                )
             }
         }
     }

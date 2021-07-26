@@ -107,6 +107,9 @@ class WindowManager @Inject constructor(
                 resizable = false,
                 alwaysOnTop = true,
                 enabled = true,
+                onCloseRequest = {
+                    closeHmiMainWindow()
+                }
             ) {
                 hmiWindow.content()()
             }

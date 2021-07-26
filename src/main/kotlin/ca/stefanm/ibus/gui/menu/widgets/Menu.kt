@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
 
 @Composable
 fun BmwFullScreenMenu(
@@ -103,33 +104,7 @@ fun TrackInfoText(text: String, size : Int = 18) {
 }
 
 
-@Composable
-fun BmwFullScreenBottomBar(
-    date : String = "--/--/--",
-    time : String = "00:00",
-    centerContent : @Composable () -> Unit = { Text("") }
-) {
-    CenterGradientWithEdgeHighlight(highlightAlignment = Alignment.TopCenter) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = time,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(229, 255, 255, 255)
-            )
-            centerContent()
-            Text(
-                text = date,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(229, 255, 255, 255)
-            )
-        }
-    }
-}
+
 
 @Composable
 fun CenterGradientWithEdgeHighlight(

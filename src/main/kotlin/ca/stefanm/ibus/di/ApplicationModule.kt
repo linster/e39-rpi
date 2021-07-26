@@ -41,6 +41,8 @@ interface ApplicationComponent {
 
     fun configuredCarComponent(configuredCarModule: ConfiguredCarModule) : ConfiguredCarComponent
 
+    fun logger() : Logger
+
     fun tileFetcher() : TileFetcher
     fun tileCacheClearer() : TileServerImageCacheClearer
 

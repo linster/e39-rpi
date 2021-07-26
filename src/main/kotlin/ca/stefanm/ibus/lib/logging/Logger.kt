@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.lib.logging
 
+import ca.stefanm.ibus.di.DaggerApplicationComponent
+
 interface Logger {
 
     fun v(tag : String, msg : String)
@@ -36,4 +38,12 @@ class StdOutLogger : Logger {
         e(tag, "$msg exception: ${e.printStackTrace()}")
     }
 
+}
+
+class StaticLogger(impl : Logger = DaggerApplicationComponent.create().logger()) : Logger by impl {
+    companion object : Logger by StaticLogger()
+}
+
+fun foo(){
+    StaticLogger.d("wat", "bar")
 }

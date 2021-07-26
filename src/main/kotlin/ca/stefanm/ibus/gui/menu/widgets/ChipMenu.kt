@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -43,8 +44,27 @@ object ChipItemColors {
 @Composable
 fun EmptyMenuItem() {
     MenuItem(
-        scrollListenerOnClickListener = {}
+        onClicked = {}
     )
+}
+
+private data class MenuItemMeasurements(
+    val chipWidth : Float,
+    val highlightWidth : Float,
+    val fontSize : TextUnit
+) {
+    companion object {
+        val BIG = MenuItemMeasurements(
+            chipWidth = 16.0F,
+            highlightWidth = 8.0F,
+            fontSize = 36.sp
+        )
+        val SMALL = MenuItemMeasurements(
+            chipWidth = 12.0F,
+            highlightWidth = 6.0F,
+            fontSize = 24.sp
+        )
+    }
 }
 
 @Composable
@@ -53,24 +73,24 @@ fun MenuItem(
     labelColor : Color = ChipItemColors.TEXT_WHITE,
     chipOrientation: ItemChipOrientation = ItemChipOrientation.NONE,
     isSelected: Boolean = false,
-    scrollListenerOnClickListener: ScrollListenerOnClickListener
+    isSmallSize : Boolean = false,
+    onClicked : () -> Unit
 ) {
 
-    val chipWidth = 16.0F
+    val measurements = if (isSmallSize) MenuItemMeasurements.SMALL else MenuItemMeasurements.BIG
+
+    val chipWidth = measurements.chipWidth
     val chipColor = Color(121, 181, 220, 255)
     val chipHighlights = Color.White
-    val highlightWidth = 4.0f
-
-//    val selected = remember { isSelected }
-    val selected = isSelected
+    val highlightWidth = measurements.highlightWidth
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
             color = labelColor,
-            fontSize = 36.sp,
+            fontSize = measurements.fontSize,
             modifier = Modifier
-                .clickable { scrollListenerOnClickListener() }
+                .clickable { onClicked() }
                 .then(
                     when (chipOrientation) {
                         ItemChipOrientation.NW,
@@ -191,26 +211,27 @@ fun MenuItem(
                 }
             }
 
-            if (selected) {
+            if (isSelected) {
                 //Selected
 
-                val highlightWidth = 8.0f
+                val rectY =
+                    if (chipOrientation == ItemChipOrientation.NW || chipOrientation == ItemChipOrientation.NE) {
+                        highlightWidth + (2 * chipWidth)
+                    } else {
+                        highlightWidth
+                    }
 
-                val rectY = if (chipOrientation == ItemChipOrientation.NW || chipOrientation == ItemChipOrientation.NE) {
-                    highlightWidth / 2.0F + (2 * chipWidth)
-                } else {
-                    highlightWidth / 2.0F
-                }
-
-                val rectHeight = if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
-                    this.size.height - rectY - (2 * chipWidth)
-                } else {
-                    this.size.height - rectY
-                }
+                val rectHeight =
+                    if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
+                        this.size.height - rectY - (2 * chipWidth)
+                    } else {
+                        this.size.height - rectY
+                    }
 
                 this.drawRect(
                     color = ChipItemColors.SelectedColor,
-                    topLeft = Offset(x = highlightWidth / 2.0F,
+                    topLeft = Offset(
+                        x = highlightWidth,
                         y = rectY
                     ),
                     style = Stroke(width = highlightWidth),
@@ -219,7 +240,8 @@ fun MenuItem(
 
                 this.drawRect(
                     color = ChipItemColors.SelectedColor,
-                    topLeft = Offset( x =
+                    topLeft = Offset(
+                        x =
                         if (chipOrientation == ItemChipOrientation.E ||
                             chipOrientation == ItemChipOrientation.SE ||
                             chipOrientation == ItemChipOrientation.NE
@@ -227,14 +249,17 @@ fun MenuItem(
                             this.size.width - (2 * chipWidth)
                         } else {
                             0.0F
-                       }, y = rectY),
+                        }, y = rectY
+                    ),
                     style = Fill,
-                    size = Size(chipWidth * 2F,
+                    size = Size(
+                        chipWidth * 2F,
                         if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
                             this.size.height - (chipWidth * 2)
                         } else {
                             this.size.height
-                        }),
+                        }
+                    ),
                 )
             }
         })

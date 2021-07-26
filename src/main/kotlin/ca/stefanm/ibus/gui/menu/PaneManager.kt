@@ -29,7 +29,9 @@ fun PaneManager(
     topPopInVisible: Boolean,
 
     //Children should use max size.
-    mainContent: @Composable () -> Unit
+    mainContent: @Composable () -> Unit,
+
+    mainContentOverlay : (@Composable () -> Unit)? = null
 ) {
 
     Box(Modifier.fillMaxSize()) {
@@ -49,7 +51,10 @@ fun PaneManager(
                     banner()
                 }
             }
-            Box(Modifier.weight(weightContent)) { mainContent() }
+            Box(Modifier.weight(weightContent)) {
+                mainContent()
+                mainContentOverlay?.invoke()
+            }
             if (bottomPanel != null) {
                 Box(
                     modifier = Modifier

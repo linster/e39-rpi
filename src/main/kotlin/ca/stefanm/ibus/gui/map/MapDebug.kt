@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.debug.NestingCard
+import ca.stefanm.ibus.gui.debug.NestingCardHeader
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
@@ -39,7 +41,7 @@ class MapDebug @Inject constructor(
     override val tag: Any
         get() = this
 
-    override val size = WindowSize(1280.dp, 1000.dp)
+    override val size = WindowSize(1480.dp, 1000.dp)
     override val title = "Map Debug"
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
@@ -352,28 +354,5 @@ class MapDebug @Inject constructor(
         }
     }
 
-    @Composable
-    fun NestingCard(
-        modifier: Modifier = Modifier,
-        contents : @Composable () -> Unit
-    ) {
-        Card(
-            modifier = Modifier
-                .padding(8.dp)
-                .then(modifier),
-            elevation = 8.dp
-        ) {
-            Column {
-                contents()
-            }
-        }
-    }
 
-    @Composable fun NestingCardHeader(text : String) {
-        Text(
-            modifier = Modifier.padding(vertical = 8.dp),
-            text = text,
-            style = MaterialTheme.typography.subtitle1
-        )
-    }
 }
