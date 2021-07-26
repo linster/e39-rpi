@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -14,13 +15,17 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.notifications.toView
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarClock
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MenuWindow @Inject constructor(
     private val navigator: Navigator,
     private val logger: Logger,
-    private val notificationHub: NotificationHub
+    private val notificationHub: NotificationHub,
+    private val bottomBarClock: BottomBarClock
 ) : WindowManager.E39Window {
 
     override val title: String
@@ -45,7 +50,17 @@ class MenuWindow @Inject constructor(
             banner = null,
             sideSplit = null,
             sideSplitVisible = false,
-            bottomPanel = null,
+            bottomPanel = {
+                val scope = rememberCoroutineScope()
+                scope.launch {
+                    bottomBarClock.updateValues()
+                }
+
+                BmwFullScreenBottomBar(
+                    date = bottomBarClock.dateFlow.collectAsState().value,
+                    time = bottomBarClock.timeFlow.collectAsState().value,
+                )
+            },
             topPopIn = {
                    notificationHub.currentNotification.collectAsState().value?.toView()
             },

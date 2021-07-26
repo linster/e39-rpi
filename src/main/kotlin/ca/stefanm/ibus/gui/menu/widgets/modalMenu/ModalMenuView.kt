@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.gui.menu.widgets.modalMenu
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +14,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import ca.stefanm.ibus.gui.menu.widgets.BmwChipMenu
+import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 
@@ -47,7 +50,9 @@ fun ModalChipMenu(
     modalMenu: ModalMenu
 ) {
     Box(
-        modifier = modifier
+        modifier = modifier.then(
+            Modifier.background(ChipItemColors.MenuBackground)
+        )
     ) {
         Column {
             LaunchedEffect(modalMenu) {
