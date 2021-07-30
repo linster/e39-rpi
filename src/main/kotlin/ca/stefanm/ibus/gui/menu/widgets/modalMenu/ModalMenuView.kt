@@ -59,6 +59,8 @@ fun ModalChipMenu(
                 modalMenu.onOpen
             }
 
+            //TODO USE THE POSITION OF THE DATA TO REGISTER A SELECTION INDEX.
+
             DisposableEffect(modalMenu) {
                 onDispose {
                     modalMenu.onClose
@@ -68,7 +70,11 @@ fun ModalChipMenu(
             for (item in modalMenu.items) {
                 MenuItem(
                     label = item.title,
-                    chipOrientation = modalMenu.chipOrientation,
+                    chipOrientation = if (item.isSelectable) {
+                        modalMenu.chipOrientation
+                    } else {
+                           ItemChipOrientation.NONE
+                    },
                     isSelected = item.isSelected,
                     isSmallSize = true,
                     onClicked = item.onClicked

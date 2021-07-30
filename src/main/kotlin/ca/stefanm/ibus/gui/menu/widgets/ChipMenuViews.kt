@@ -271,9 +271,8 @@ fun MenuItem(
 
 @Composable
 fun BmwChipMenu(
-    scrollListener: ScrollListener,
-    contentLeft : @Composable (scrollListener : ScrollListener) -> Unit,
-    contentRight : @Composable (scrollListener : ScrollListener) -> Unit
+    contentLeft : @Composable () -> Unit,
+    contentRight : @Composable () -> Unit
 ) {
     Box (Modifier
         .background(ChipItemColors.MenuBackground)
@@ -281,10 +280,10 @@ fun BmwChipMenu(
     ){
         Row(Modifier.fillMaxWidth().wrapContentHeight()) {
             Column(Modifier.weight(0.5f, true)) {
-                contentLeft(scrollListener)
+                contentLeft()
             }
             Column(Modifier.weight(0.5f, true)) {
-                contentRight(scrollListener)
+                contentRight()
             }
         }
     }

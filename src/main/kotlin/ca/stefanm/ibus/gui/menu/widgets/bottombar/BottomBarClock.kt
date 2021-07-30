@@ -29,7 +29,7 @@ class BottomBarClock @Inject constructor() {
             _dateFlow.value = currentTime.let {
                 "${it.dayOfMonth}/${it.month.value}/${it.year}"
             }
-            delay(Duration.Companion.minutes(1))
+            delay(Duration.Companion.seconds(15))
             yield()
         }
     }

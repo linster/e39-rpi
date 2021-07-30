@@ -48,34 +48,80 @@ class NavigationModule {
 @ApplicationScope
 class Navigator @Inject constructor(
     @Named(ROOT_NODE) private val rootNode : NavigationNode<*>,
-    private val textEntry: Provider<TextEntry>
+    private val logger: Logger
 ) {
 
-    private val _mainContentScreen = MutableStateFlow(rootNode)
-    val mainContentScreen : StateFlow<NavigationNode<*>>
+    data class BackStackRecord<R>(
+        val node : NavigationNode<R>,
+        var incomingResult : IncomingResult?
+    )
+
+    data class IncomingResult(
+        val requestParameters : Any?,
+        val resultFrom : Class<out NavigationNode<*>>?,
+        val result : Any?
+    )
+
+    private val _mainContentScreen = MutableStateFlow(BackStackRecord(rootNode, null))
+    val mainContentScreen : StateFlow<BackStackRecord<*>>
         get() = _mainContentScreen
 
-    private val backStack : ArrayDeque<NavigationNode<*>> = ArrayDeque()
+    private val backStack : ArrayDeque<BackStackRecord<*>> = ArrayDeque()
     init {
-        backStack.addLast(rootNode)
+        backStack.addLast(BackStackRecord(rootNode, null))
     }
 
     fun navigateToNode(newNode : NavigationNode<*>) {
         backStack.addLast(mainContentScreen.value)
-        _mainContentScreen.value = newNode
+        _mainContentScreen.value = BackStackRecord(newNode, null)
+    }
+
+    fun navigateToNodeWithParameters(newNode: NavigationNode<*>, parameters : Any) {
+        //Think of this as an Intent.putExtra()
+        //This could be something like a prompt...
+
+        //TODO put an entry on top of the back stack, and set it's incomingResult before displaying it.
+        backStack.addLast(mainContentScreen.value)
+        _mainContentScreen.value = BackStackRecord(newNode, IncomingResult(
+            requestParameters = parameters, //Intent.putExtra()
+            resultFrom = null, //Use instead of requestCode
+            result = null
+        ))
     }
 
     fun goBack() {
         _mainContentScreen.value = backStack.removeLast()
         if (backStack.isEmpty()) {
-            backStack.addLast(rootNode)
+            backStack.addLast(BackStackRecord(rootNode, null))
         }
+    }
+
+    fun <R> setResultForNodeAndGoBack(node: NavigationNode<R>, result : R) {
+        //We're setting a result for the currently displayed node
+        //TODO First assert that node is what's on top of the stack.
+        //TODO Then, take the second item on the stack, and set result on it.
+        //TODO also check that the node we're modifiyng isn't the root node.
+
+        if (node != mainContentScreen.value.node) {
+            logger.w("Navigator", "WARNING: Trying to navigate back from " +
+                    "not the top node! Node: $node, ${mainContentScreen.value.node}")
+        }
+
+        val displayedNodeWithResult = backStack.removeLast()
+
+        backStack.last().incomingResult = IncomingResult(
+            resultFrom = displayedNodeWithResult.node.thisClass,
+            result = result,
+            requestParameters = null
+        )
+
+        _mainContentScreen.value = backStack.last()
     }
 }
 
-interface NavigationNode<R> {
-    val thisClass : Class<out NavigationNode<R>>
-    fun provideMainContent() : @Composable () -> Unit
+interface NavigationNode<Result> {
+    val thisClass : Class<out NavigationNode<Result>>
+    fun provideMainContent() : @Composable (incomingResult : Navigator.IncomingResult?) -> Unit
 }
 
 class NavigationNodeTraverser @Inject constructor(
@@ -83,13 +129,32 @@ class NavigationNodeTraverser @Inject constructor(
     @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
     private val logger: Logger
 ) {
-    fun navigateToNode(node : Class<out NavigationNode<*>>) {
+
+    private fun findNode(node : Class<out NavigationNode<*>>) : NavigationNode<*>? {
         val newNode = allNodes.get().find { it.thisClass == node }
         if (newNode == null) {
             logger.e("NAVIGATOR", "No new node found")
-            return
+            return null
         }
-        navigator.get().navigateToNode(newNode)
+        return newNode
+    }
+
+    fun navigateToNode(node : Class<out NavigationNode<*>>) {
+        findNode(node)?.let { newNode ->
+            navigator.get().navigateToNode(newNode)
+        }
+    }
+
+    fun navigateToNodeWithParameters(node : Class<out NavigationNode<*>>, parameters: Any) {
+        findNode(node)?.let { newNode ->
+            navigator.get().navigateToNodeWithParameters(newNode, parameters)
+        }
+    }
+
+    fun <R> setResultAndGoBack(node : NavigationNode<R>, result : R) {
+        //Nothing really preventing a bad child from getting a copy of ALL_NODES
+        //and setting results on random things.
+        navigator.get().setResultForNodeAndGoBack(node, result)
     }
 
     fun goBack() {

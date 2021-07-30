@@ -18,15 +18,20 @@ import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 class KeyEventSimulator @Inject constructor(
     private val logger: Logger,
-    private val configurablePlatform: ConfigurablePlatform
+    private val configurablePlatform: ConfigurablePlatform,
+    @Named(ApplicationModule.INPUT_EVENTS_WRITER) val inputEventsWriter : MutableSharedFlow<InputEvent>,
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -131,6 +136,7 @@ class KeyEventSimulator @Inject constructor(
                 .configuredCarComponent
                 ?.ibusInputMessageParser()
                 ?.debugSend(inputEvent)
+                ?: inputEventsWriter.emit(inputEvent)
             logger.d("KeyEventSimulator", "Sending event: $inputEvent")
         }
     }

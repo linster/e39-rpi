@@ -14,7 +14,6 @@ import javax.inject.Inject
 
 class MenuDebug @Inject constructor(
     private val logger: Logger,
-    private val menuKnobListenerService: MenuKnobListenerService
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -36,8 +35,7 @@ class MenuDebug @Inject constructor(
             }
         ) {
             BmwChipMenu(
-                scrollListener = menuKnobListenerService.toScrollListener(9),
-                contentLeft = { listener ->
+                contentLeft = {
 
 //                    val currentSelected = listener.currentSelectedIndex.value
 //
@@ -58,8 +56,7 @@ class MenuDebug @Inject constructor(
 //                        isSelected = currentSelected == 4,
 //                        scrollListenerOnClickListener = listener.ScrollListenerOnClick(4) { logger.d("MENU", "Selected 4")})
                 },
-                contentRight = { listener ->
-
+                contentRight = {
 //                    val currentSelected = listener.currentSelectedIndex.value
 //
 //                    MenuItem(label = "GPS-Navigation", chipOrientation = ItemChipOrientation.NE,
