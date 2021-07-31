@@ -148,16 +148,16 @@ object HalfScreenMenu {
         //that behaves as one, so that scrolling
         //spans both columns
 
-        val selectionOrderConjoinedList = mutableStateListOf(*(listOf(SnapshotPair(leftItems[0], TwoColumnListSource.LEFT)) +
+        val selectionOrderConjoinedList = listOf(SnapshotPair(leftItems[0], TwoColumnListSource.LEFT)) +
                 rightItems.map { SnapshotPair(it, TwoColumnListSource.RIGHT) } +
                 leftItems.drop(1).asReversed()
-                    .map { SnapshotPair(it, TwoColumnListSource.LEFT) }).toTypedArray())
+                    .map { SnapshotPair(it, TwoColumnListSource.LEFT) }
 
-        println("   Conjoined list: ${selectionOrderConjoinedList.map { 
-            ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title) to it.second 
-        }}")
+//        println("   Conjoined list: ${selectionOrderConjoinedList.map {
+//            ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title) to it.second
+//        }}")
 
-        val knobListenerService = DaggerApplicationComponent.create().knobListenerService()
+        val knobListenerService = MenuWindow.MenuWindowKnobListener.current
 
         val conjoinedList = knobListenerService.listenForKnob(
             listData = selectionOrderConjoinedList,
@@ -182,8 +182,9 @@ object HalfScreenMenu {
         }")
 
 
-        val updatableLeft = remember(conjoinedList.value) { derivedStateOf {
+        val updatableLeft = remember(conjoinedList) { derivedStateOf {
             conjoinedList.value
+                .asSequence()
                 .filter { it.second == TwoColumnListSource.LEFT }
                 .map { it.first }
                 .map { Pair(it, leftItems.indexOf(it)) }
@@ -191,8 +192,9 @@ object HalfScreenMenu {
                 .map { it.first }
                 .toList()
         } }
-        val updatableRight = remember(conjoinedList.value) { derivedStateOf {
+        val updatableRight = remember(conjoinedList) { derivedStateOf {
             conjoinedList.value
+                .asSequence()
                 .filter { it.second == TwoColumnListSource.RIGHT }
                 .map { it.first }
                 .map { Pair(it, rightItems.indexOf(it)) }
@@ -209,14 +211,7 @@ object HalfScreenMenu {
             Row(Modifier.fillMaxWidth().wrapContentHeight()) {
                 Column(Modifier.weight(0.5f, true)) {
                     if (leftItems.isNotEmpty()) {
-                        conjoinedList.value
-                            .filter { it.second == TwoColumnListSource.LEFT }
-                            .map { it.first }
-                            .map { Pair(it, leftItems.indexOf(it)) }
-                            .sortedBy { it.second }
-                            .map { it.first }
-                            .toList()
-                            .forEachIndexed { index, menuItem ->
+                        updatableLeft.value.forEachIndexed { index, menuItem ->
                             menuItem.toView(
                                 chipOrientation = if (!menuItem.isSelectable) {
                                     ItemChipOrientation.NONE

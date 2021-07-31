@@ -140,15 +140,15 @@ class DebugHmiRoot @Inject constructor(
             }
 
             Box(Modifier.wrapContentWidth().fillMaxSize()) {
-//                FullScreenMenu.TwoColumnFillFromTop(
-//                    leftItems = leftItems,
-//                    rightItems = rightItems
-//                )
-//
-                HalfScreenMenu.OneColumn(
-                    items = leftItems,
-                    alignment = Alignment.Start
+                FullScreenMenu.TwoColumnFillFromTop(
+                    leftItems = leftItems,
+                    rightItems = rightItems
                 )
+//
+//                HalfScreenMenu.OneColumn(
+//                    items = leftItems,
+//                    alignment = Alignment.Start
+//                )
 
                 if (isTopShowing.value) {
                     //HalfScreenMenu.TopHalfTwoColumn(leftItems, rightItems)
