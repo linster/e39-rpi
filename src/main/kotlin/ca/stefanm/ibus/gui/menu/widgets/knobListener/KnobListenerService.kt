@@ -58,7 +58,7 @@ class KnobListenerService @Inject constructor(
         return produceState(initialValue = stateListOf, listData) {
 
 
-            logger.d("WATWATWAT", "ENTERING COMPOSITION ZOMG ${listData}")
+//            logger.d("WATWATWAT", "ENTERING COMPOSITION ZOMG ${listData}")
 
             //TODO WTF
             //TODO, opening new windows causes the hmi root to be recomposed after
@@ -81,7 +81,7 @@ class KnobListenerService @Inject constructor(
                 }
             }
 
-            logger.d("WAT", "About to collect ${value.hashCode()}")
+//            logger.d("WAT", "About to collect ${value.hashCode()}")
 
 //            val inputEvents = DaggerApplicationComponent.create().inputEvents()
 

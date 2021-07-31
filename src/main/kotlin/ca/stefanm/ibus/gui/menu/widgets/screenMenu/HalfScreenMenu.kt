@@ -2,21 +2,19 @@ package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.StateObject
 import androidx.compose.runtime.snapshots.StateRecord
 import ca.stefanm.ibus.gui.menu.MenuWindow
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.reduceUpdateOnClick
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.intellij.lang.annotations.JdkConstants
 import kotlin.math.E
 
@@ -174,64 +172,55 @@ object HalfScreenMenu {
         //that behaves as one, so that scrolling
         //spans both columns
 
-        val selectionOrderConjoinedList = listOf(SnapshotPair(leftItems[0], TwoColumnListSource.LEFT)) +
-                rightItems.map { SnapshotPair(it, TwoColumnListSource.RIGHT) } +
-                leftItems.drop(1).asReversed()
-                    .map { SnapshotPair(it, TwoColumnListSource.LEFT) }
-        
-        val selectionOrderConjoinedList2 = 
-            listOf(ConjoinedListRecord(leftItems[0], TwoColumnListSource.LEFT, 0)) +
-                rightItems.map }
 
-//        println("   Conjoined list: ${selectionOrderConjoinedList.map {
-//            ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title) to it.second
-//        }}")
+        val circularList = mutableListOf<ConjoinedListRecord<MenuItem, TwoColumnListSource>>()
+
+        if (leftItems.isNotEmpty()) {
+            circularList.add(ConjoinedListRecord(leftItems[0], TwoColumnListSource.LEFT, 0))
+        }
+
+        circularList.addAll(
+            rightItems.mapIndexed { index, menuItem -> ConjoinedListRecord(menuItem,TwoColumnListSource.RIGHT,index) }
+        )
+
+        circularList.addAll(
+            leftItems.drop(1).reversed()
+                .map { ConjoinedListRecord(it, TwoColumnListSource.LEFT, leftItems.indexOf(it)) }
+        )
+
+
+        val selectionOrderConjoinedList = remember { circularList }
+
 
         val knobListenerService = MenuWindow.MenuWindowKnobListener.current
+
+        val currentlySelectedItem = remember { mutableStateOf<MenuItem?>(null) }
 
         val conjoinedList = knobListenerService.listenForKnob(
             listData = selectionOrderConjoinedList,
 
             onItemClickAdapter = {
-                it.first.onClicked()
+                it.item.onClicked()
             },
             onSelectAdapter = { item, isNowSelected ->
-                SnapshotPair(item.first.copyAndSetIsSelected(isNowSelected), item.second)
+                currentlySelectedItem.value = item.item
+                println("WAT Currently selected: $item, $isNowSelected")
+                ConjoinedListRecord(item.first.copyAndSetIsSelected(isNowSelected), item.second, item.third)
             },
             isSelectableAdapter = {
-                it.first.isSelectable
+                it.item.isSelectable
             }
         )
 
-        println("ST Conjoined list: ${
-            conjoinedList.value.map {
-                val title = ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title)
-                val source = it.second
-                "title : ${title} ; isSelected : ${it.first.isSelected}" 
-            }
-        }")
+//        println("ST Conjoined list: ${
+//            conjoinedList.value.map {
+//                val title = ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title)
+//                val source = it.second
+//                val originalPosition = it.third
+//                "title : ${title} ; isSelected : ${it.first.isSelected}"
+//            }
+//        }")
 
-
-        val updatableLeft = remember(conjoinedList) { derivedStateOf {
-            conjoinedList.value
-                .asSequence()
-                .filter { it.second == TwoColumnListSource.LEFT }
-                .map { it.first }
-                .map { Pair(it, leftItems.indexOf(it)) }
-                .sortedBy { it.second }
-                .map { it.first }
-                .toList()
-        } }
-        val updatableRight = remember(conjoinedList) { derivedStateOf {
-            conjoinedList.value
-                .asSequence()
-                .filter { it.second == TwoColumnListSource.RIGHT }
-                .map { it.first }
-                .map { Pair(it, rightItems.indexOf(it)) }
-                .sortedBy { it.second }
-                .map { it.first }
-                .toList()
-        } }
 
         Box (
             Modifier
@@ -241,35 +230,47 @@ object HalfScreenMenu {
             Row(Modifier.fillMaxWidth().wrapContentHeight()) {
                 Column(Modifier.weight(0.5f, true)) {
                     if (leftItems.isNotEmpty()) {
-                        updatableLeft.value.forEachIndexed { index, menuItem ->
-                            menuItem.toView(
-                                chipOrientation = if (!menuItem.isSelectable) {
-                                    ItemChipOrientation.NONE
-                                } else {
-                                    when (index) {
-                                        0 -> ItemChipOrientation.NW
-                                        updatableLeft.value.lastIndex -> ItemChipOrientation.SW
-                                        else -> ItemChipOrientation.W
-                                    }
+                        key(currentlySelectedItem) {
+                            conjoinedList.value
+                                .filter { it.sourcePlacementEnum == TwoColumnListSource.LEFT }
+                                .sortedBy { it.originalItemPosition }
+                                .map { it.item }
+                                .forEachIndexed { index, menuItem ->
+                                    menuItem.toView(
+                                        chipOrientation = if (!menuItem.isSelectable) {
+                                            ItemChipOrientation.NONE
+                                        } else {
+                                            when (index) {
+                                                0 -> ItemChipOrientation.NW
+                                                leftItems.lastIndex -> ItemChipOrientation.SW
+                                                else -> ItemChipOrientation.W
+                                            }
+                                        }
+                                    )()
                                 }
-                            )()
                         }
                     }
                 }
                 Column(Modifier.weight(0.5f, true)) {
                     if (rightItems.isNotEmpty()) {
-                        updatableRight.value.forEachIndexed { index, menuItem ->
-                            menuItem.toView(
-                                chipOrientation = if (!menuItem.isSelectable) {
-                                    ItemChipOrientation.NONE
-                                } else {
-                                    when (index) {
-                                        0 -> ItemChipOrientation.NE
-                                        updatableRight.value.lastIndex -> ItemChipOrientation.SE
-                                        else -> ItemChipOrientation.E
-                                    }
+                        key(currentlySelectedItem) {
+                            conjoinedList.value
+                                .filter { it.sourcePlacementEnum == TwoColumnListSource.RIGHT }
+                                .sortedBy { it.originalItemPosition }
+                                .map { it.item }
+                                .forEachIndexed { index, menuItem ->
+                                    menuItem.toView(
+                                        chipOrientation = if (!menuItem.isSelectable) {
+                                            ItemChipOrientation.NONE
+                                        } else {
+                                            when (index) {
+                                                0 -> ItemChipOrientation.NE
+                                                rightItems.lastIndex -> ItemChipOrientation.SE
+                                                else -> ItemChipOrientation.E
+                                            }
+                                        }
+                                    )()
                                 }
-                            )()
                         }
                     }
                 }

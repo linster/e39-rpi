@@ -164,7 +164,9 @@ class DebugHmiRoot @Inject constructor(
 
 @ApplicationScope
 class DebugScreen2 @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val notificationHub: NotificationHub,
+    private val modalMenuService: ModalMenuService
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -183,7 +185,35 @@ class DebugScreen2 @Inject constructor(
                     ),
                     TextMenuItem(
                         title = "2",
-                        onClicked = {}
+                        onClicked = {
+                            notificationHub.postNotificationBackground(
+                                Notification(
+                                    image = Notification.NotificationImage.ALERT_OCTAGON,
+                                    topText = "2!"
+                            ))
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "3",
+                        onClicked = {
+                            modalMenuService.showModalMenu(
+                                menuTopLeft = IntOffset(500, 300),
+                                menuWidth = 500,
+                                menuData = ModalMenu(
+                                    chipOrientation = ItemChipOrientation.E,
+                                    items = listOf(
+                                        ModalMenu.ModalMenuItem(
+                                            title = "1",
+                                            onClicked = { notificationHub.postNotificationBackground(Notification(Notification.NotificationImage.ALERT_TRIANGLE, topText = "1")) }
+                                        ),
+                                        ModalMenu.ModalMenuItem(
+                                            title = "2",
+                                            onClicked = { notificationHub.postNotificationBackground(Notification(Notification.NotificationImage.ALERT_TRIANGLE, topText = "2"))}
+                                        )
+                                    )
+                                )
+                            )
+                        }
                     )
                 ),
                 alignment = Alignment.Start
