@@ -196,12 +196,10 @@ object HalfScreenMenu {
         )
         //We want this list to stay between compositions even though we mutate it.
         //If the remember isn't here, we infinitely recompose and I don't know why.
-
-
-        val selectionOrderConjoinedList = remember (MenuWindow.MenuWindowKnobListener.current) { circularList }
+        val selectionOrderConjoinedList = remember (MenuWindow.MenuWindowKnobListener.current) { mutableStateOf(circularList) }
 
         val conjoinedList = MenuWindow.MenuWindowKnobListener.current.listenForKnob(
-            listData = selectionOrderConjoinedList,
+            listData = selectionOrderConjoinedList.value,
 
             onItemClickAdapter = {
                 it.item.onClicked()

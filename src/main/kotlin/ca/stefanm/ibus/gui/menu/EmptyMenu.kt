@@ -26,7 +26,7 @@ class EmptyMenu @Inject constructor(
         )
 
         LaunchedEffect(true) {
-            navigationNodeTraverser.navigateToNode(DebugHmiRoot::class.java)
+            navigationNodeTraverser.navigateToNode(BMWMainMenu::class.java)
         }
     }
 }

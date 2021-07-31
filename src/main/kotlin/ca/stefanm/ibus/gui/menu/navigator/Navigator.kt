@@ -4,12 +4,12 @@ import androidx.compose.runtime.*
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugScreen2
+import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.EmptyMenu
-import ca.stefanm.ibus.gui.menu.MainMenu
+import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
-import ca.stefanm.ibus.gui.picker.TextEntry
 import ca.stefanm.ibus.lib.logging.Logger
 import dagger.Module
 import dagger.Provides
@@ -41,17 +41,19 @@ class NavigationModule {
     @ElementsIntoSet
     @Named(ALL_NODES)
     fun provideAllNodes(
-        mainMenu: MainMenu,
+        composeDebugMenu: ComposeDebugMenu,
         bluetoothPairingMenu: BluetoothPairingMenu,
         debugHmiRoot: DebugHmiRoot,
         debugScreen2: DebugScreen2,
-        emptyMenu: EmptyMenu
+        emptyMenu: EmptyMenu,
+        bmwMainMenu: BMWMainMenu
     ) : Set<NavigationNode<*>> = setOf<NavigationNode<*>>(
-        mainMenu,
+        composeDebugMenu,
         bluetoothPairingMenu,
         debugHmiRoot,
         debugScreen2,
-        emptyMenu
+        emptyMenu,
+        bmwMainMenu
     )
 
 }

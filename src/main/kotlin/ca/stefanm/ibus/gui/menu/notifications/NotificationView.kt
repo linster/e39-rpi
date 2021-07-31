@@ -8,6 +8,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.imageFromResource
@@ -17,12 +19,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
 import kotlin.time.ExperimentalTime
 
 @Composable fun Notification.toView() {
     Row(
         Modifier.fillMaxSize()
-            .background(Color(48, 72, 107, 255))
+            //.background(Color(48, 72, 107, 255))
+            .border(width = 2.dp, color = Color(48, 72, 107, 255))
+            .background(
+                Brush.horizontalGradient(
+                    listOf(
+                        Color(68, 128, 192, 255),
+                        Color(61, 112, 176, 255),
+                        Color(68, 128, 192, 255)
+                    )
+                )
+            )
     ) {
         if (this@toView.image == Notification.NotificationImage.NONE) {
             Column(
@@ -82,24 +95,24 @@ import kotlin.time.ExperimentalTime
                 }
             }
 
-            Column(
-                Modifier.weight(0.75F)
-                    .padding(15.dp)
-            ) {
-                Text(
-                    text = this@toView.topText,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                if (this@toView.contentText.isNotEmpty()) {
+                Column(
+                    Modifier.weight(0.75F)
+                        .padding(15.dp)
+                ) {
                     Text(
-                        text = this@toView.contentText,
-                        fontSize = 26.sp,
+                        text = this@toView.topText,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
+                    if (this@toView.contentText.isNotEmpty()) {
+                        Text(
+                            text = this@toView.contentText,
+                            fontSize = 26.sp,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }
-    }
 }

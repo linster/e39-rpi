@@ -1,14 +1,10 @@
 package ca.stefanm.ibus.gui.menu
 
-import androidx.compose.desktop.AppManager
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.IntOffset
-import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
-import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
@@ -17,7 +13,6 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.picker.TextEntry
@@ -25,14 +20,14 @@ import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
 @ApplicationScope
-class MainMenu @Inject constructor(
+class ComposeDebugMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val textEntry: TextEntry,
     private val logger: Logger,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
 ) : NavigationNode<Nothing> {
-    override val thisClass = MainMenu::class.java
+    override val thisClass = ComposeDebugMenu::class.java
 
     override fun provideMainContent(): @Composable (incoming : Navigator.IncomingResult?) -> Unit = {
 

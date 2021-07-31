@@ -23,7 +23,7 @@ class BottomBarClock @Inject constructor() {
             val currentTime = Instant.now().atZone(ZoneId.systemDefault())
 
             _timeFlow.value = currentTime.toLocalDateTime().let { localDateTime ->
-                "${localDateTime.hour.rem(13).toString(10).padStart(2, '0')}:${localDateTime.minute.toString(10).padStart(2, '0')} ${localDateTime.hour.let { if (it >= 12) "PM" else "AM" }}"
+                "${localDateTime.hour.rem(12).toString(10).padStart(2, '0')}:${localDateTime.minute.toString(10).padStart(2, '0')} ${localDateTime.hour.let { if (it >= 12) "PM" else "AM" }}"
             }
 
             _dateFlow.value = currentTime.let {
