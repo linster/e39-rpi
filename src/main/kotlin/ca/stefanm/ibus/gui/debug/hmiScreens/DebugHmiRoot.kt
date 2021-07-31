@@ -104,7 +104,7 @@ class DebugHmiRoot @Inject constructor(
                     title = "Modal 2",
                     onClicked = {
                         modalMenuService.showModalMenu(
-                            menuTopLeft = IntOffset(600, 200),
+                            menuTopLeft = IntOffset(800, 200),
                             menuWidth = 400,
                             menuData = ModalMenu(
                                 chipOrientation = ItemChipOrientation.E,
@@ -214,7 +214,11 @@ class DebugScreen2 @Inject constructor(
                                 )
                             )
                         }
-                    )
+                    ),
+                    TextMenuItem(title = "4", onClicked = {}),
+                    TextMenuItem(title = "5", onClicked = {}),
+                    TextMenuItem(title = "6", onClicked = {}),
+                    TextMenuItem(title = "7", onClicked = {}),
                 ),
                 alignment = Alignment.Start
             )

@@ -56,15 +56,6 @@ class KnobListenerService @Inject constructor(
         val stateListOf = mutableStateListOf(*listData.toTypedArray())
 
         return produceState(initialValue = stateListOf, listData) {
-
-
-//            logger.d("WATWATWAT", "ENTERING COMPOSITION ZOMG ${listData}")
-
-            //TODO WTF
-            //TODO, opening new windows causes the hmi root to be recomposed after
-            //TODO this has been launched.
-            //TODO modal works because we set this up before composition.
-
             val selectedListIndices = stateListOf
                 .mapIndexed { index, t -> index to t }
                 .filter { isSelectableAdapter(it.second) }
@@ -80,10 +71,6 @@ class KnobListenerService @Inject constructor(
                     value = stateListOf
                 }
             }
-
-//            logger.d("WAT", "About to collect ${value.hashCode()}")
-
-//            val inputEvents = DaggerApplicationComponent.create().inputEvents()
 
             inputEvents
                 .onSubscription { logger.d("BAZBAT", "onSubscription") }

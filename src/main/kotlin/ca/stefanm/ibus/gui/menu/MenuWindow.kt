@@ -72,7 +72,7 @@ class MenuWindow @Inject constructor(
         //TODO then down the stack we'll have the knob listener, and this is marked as stable.
 
         val dummyKnobListenerService = KnobListenerService(MutableSharedFlow())
-
+        val providedKnobListenerService = remember { mutableStateOf(realKnobListenerService) }
 
         PaneManager(
             banner = null,
@@ -102,16 +102,26 @@ class MenuWindow @Inject constructor(
                     logger.d("MenuWindow", currentNode.value.node.thisClass.canonicalName)
                     logger.d("MenuWindow", currentNode.value.incomingResult.toString())
 
-                    with (currentNode.value) {
-                        CompositionLocalProvider(
-                            MenuWindowKnobListener provides modalMenuService.modalMenuOverlay.collectAsState().value.let { if (it == null) realKnobListenerService else dummyKnobListenerService }) {
+
+                    CompositionLocalProvider(
+                        MenuWindowKnobListener provides providedKnobListenerService.value
+                    ) {
+                        with (currentNode.value) {
                             node.provideMainContent().invoke(incomingResult)
                         }
                     }
+
                 }
             },
             mainContentOverlay = {
-                modalMenuService.modalMenuOverlay.collectAsState().value?.invoke()
+                modalMenuService.modalMenuOverlay.collectAsState().value.let {
+                    if (it != null) {
+                        providedKnobListenerService.value = dummyKnobListenerService
+                        it.invoke()
+                    } else {
+                        providedKnobListenerService.value = realKnobListenerService
+                    }
+                }
             }
         )
     }

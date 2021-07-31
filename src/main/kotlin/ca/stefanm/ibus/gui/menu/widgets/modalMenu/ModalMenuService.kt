@@ -22,12 +22,16 @@ class ModalMenuService @Inject constructor(
     private val _modalMenuOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
     val modalMenuOverlay = _modalMenuOverlay.asStateFlow()
 
+    var isNotificationShowing : Boolean = false
+
     fun showModalMenu(
         menuTopLeft : IntOffset,
         menuWidth : Int, //The height can be automatically calculated.
         menuData : ModalMenu
     ) {
         _modalMenuOverlay.value = {
+
+            isNotificationShowing = true
 
             ModalChipMenuWindowOverlay(
                 menuTopLeft = menuTopLeft,
@@ -58,7 +62,6 @@ class ModalMenuService @Inject constructor(
     private fun List<ModalMenu.ModalMenuItem>.reduceUpdateOnClick(
         newOnclick : (existingOnClick : () -> Unit) -> Unit
     ) : List<ModalMenu.ModalMenuItem> {
-        //TODO Set each onClick to also close the menu after being run.
         return this.map { item ->
             item.copy(onClicked = { newOnclick(item.onClicked) })
         }
@@ -66,5 +69,6 @@ class ModalMenuService @Inject constructor(
 
     fun closeModalMenu() {
         _modalMenuOverlay.value = null
+        isNotificationShowing = false
     }
 }
