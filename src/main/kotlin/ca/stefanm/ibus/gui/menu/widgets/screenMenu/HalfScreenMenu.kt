@@ -11,6 +11,12 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.StateObject
+import androidx.compose.runtime.snapshots.StateRecord
+import org.intellij.lang.annotations.JdkConstants
+import kotlin.math.E
 
 object HalfScreenMenu {
 
@@ -60,6 +66,77 @@ object HalfScreenMenu {
 
     private enum class TwoColumnListSource { LEFT, RIGHT }
 
+    private data class SnapshotPair<A, B>(
+        val first : A,
+        val second : B
+    ) : StateObject {
+
+        val backingList = mutableStateListOf(first, second)
+
+        override val firstStateRecord: StateRecord
+            get() = backingList.firstStateRecord
+
+        override fun prependStateRecord(value: StateRecord) {
+            backingList.prependStateRecord(value)
+        }
+    }
+
+    @Composable
+    fun OneColumn(
+        items : List<MenuItem>,
+        alignment: Alignment.Horizontal
+    ) {
+
+        val columnContents : @Composable ColumnScope.() -> Unit = {
+
+                val colItems = items.let {
+                    DaggerApplicationComponent.create().knobListenerService().listenForKnob(
+                        listData = items,
+
+                        onItemClickAdapter = { it.onClicked() },
+                        onSelectAdapter = { item, isNowSelected ->
+                            when (item) {
+                                is TextMenuItem -> item.copy(isSelected = isNowSelected)
+                                is CheckBoxMenuItem -> item.copy(isSelected = isNowSelected)
+                                is ImageMenuItem -> item.copy(isSelected = isNowSelected)
+                                else -> error("Unsupported type")
+                            }
+                        },
+                        isSelectableAdapter = { it.isSelectable }
+                    ).value
+                }
+                for (item in colItems) {
+                    item.toView(
+                        chipOrientation = if (alignment == Alignment.Start) ItemChipOrientation.W else ItemChipOrientation.E,
+                    )()
+                }
+            }
+
+
+        Box (
+            Modifier
+                .background(ChipItemColors.MenuBackground)
+                .fillMaxWidth()
+        ){
+            Row(Modifier.fillMaxWidth().wrapContentHeight()) {
+                Column(Modifier.weight(0.5f, true)) {
+                    if (alignment == Alignment.Start) {
+                        columnContents()
+                    } else {
+                        MenuItem.SPACER
+                    }
+                }
+                Column(Modifier.weight(0.5f, true)) {
+                    if (alignment == Alignment.End) {
+                        columnContents()
+                    } else {
+                        MenuItem.SPACER
+                    }
+                }
+            }
+        }
+    }
+
     @Composable
     internal fun TwoColumn(
         leftItems: List<MenuItem>,
@@ -69,10 +146,14 @@ object HalfScreenMenu {
         //that behaves as one, so that scrolling
         //spans both columns
 
-        val selectionOrderConjoinedList = listOf(
-            leftItems[0] to TwoColumnListSource.LEFT
-        ) + rightItems.map { it to TwoColumnListSource.RIGHT
-        } + leftItems.drop(1).reversed().map { it to TwoColumnListSource.LEFT }
+        val selectionOrderConjoinedList = mutableStateListOf(*(listOf(SnapshotPair(leftItems[0], TwoColumnListSource.LEFT)) +
+                rightItems.map { SnapshotPair(it, TwoColumnListSource.RIGHT) } +
+                leftItems.drop(1).asReversed()
+                    .map { SnapshotPair(it, TwoColumnListSource.LEFT) }).toTypedArray())
+
+        println("   Conjoined list: ${selectionOrderConjoinedList.map { 
+            ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title) to it.second 
+        }}")
 
         val knobListenerService = DaggerApplicationComponent.create().knobListenerService()
 
@@ -83,26 +164,24 @@ object HalfScreenMenu {
                 it.first.onClicked()
             },
             onSelectAdapter = { item, isNowSelected ->
-                //We're going to do a side-effect on the onSelect.
-                val updatedItem = if (item.second == TwoColumnListSource.LEFT) {
-                    updatableLeft.set(updatableLeft.indexOf(item.first),
-                        item.first.copyAndSetIsSelected(isNowSelected))
-                } else {
-                    updatableRight.set(updatableRight.indexOf(item.first),
-                        item.first.copyAndSetIsSelected(isNowSelected))
-                }
-
-                Pair(updatedItem, item.second)
+                SnapshotPair(item.first.copyAndSetIsSelected(isNowSelected), item.second)
             },
             isSelectableAdapter = {
                 it.first.isSelectable
             }
         )
 
+        println("ST Conjoined list: ${
+            conjoinedList.value.map {
+                val title = ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title)
+                val source = it.second
+                "title : ${title} ; isSelected : ${it.first.isSelected}" 
+            }
+        }")
+
 
         val updatableLeft = remember(conjoinedList.value) { derivedStateOf {
             conjoinedList.value
-                .asSequence()
                 .filter { it.second == TwoColumnListSource.LEFT }
                 .map { it.first }
                 .map { Pair(it, leftItems.indexOf(it)) }
@@ -110,8 +189,15 @@ object HalfScreenMenu {
                 .map { it.first }
                 .toList()
         } }
-        val updatableRight = mutableStateListOf(*rightItems.toTypedArray())
-
+        val updatableRight = remember(conjoinedList.value) { derivedStateOf {
+            conjoinedList.value
+                .filter { it.second == TwoColumnListSource.RIGHT }
+                .map { it.first }
+                .map { Pair(it, rightItems.indexOf(it)) }
+                .sortedBy { it.second }
+                .map { it.first }
+                .toList()
+        } }
 
         Box (
             Modifier
@@ -120,15 +206,22 @@ object HalfScreenMenu {
         ){
             Row(Modifier.fillMaxWidth().wrapContentHeight()) {
                 Column(Modifier.weight(0.5f, true)) {
-                    if (updatableLeft.isNotEmpty()) {
-                        updatableLeft.forEachIndexed { index, menuItem ->
+                    if (leftItems.isNotEmpty()) {
+                        conjoinedList.value
+                            .filter { it.second == TwoColumnListSource.LEFT }
+                            .map { it.first }
+                            .map { Pair(it, leftItems.indexOf(it)) }
+                            .sortedBy { it.second }
+                            .map { it.first }
+                            .toList()
+                            .forEachIndexed { index, menuItem ->
                             menuItem.toView(
                                 chipOrientation = if (!menuItem.isSelectable) {
                                     ItemChipOrientation.NONE
                                 } else {
                                     when (index) {
                                         0 -> ItemChipOrientation.NW
-                                        updatableLeft.lastIndex -> ItemChipOrientation.SW
+                                        updatableLeft.value.lastIndex -> ItemChipOrientation.SW
                                         else -> ItemChipOrientation.W
                                     }
                                 }
@@ -137,15 +230,15 @@ object HalfScreenMenu {
                     }
                 }
                 Column(Modifier.weight(0.5f, true)) {
-                    if (updatableRight.isNotEmpty()) {
-                        updatableRight.forEachIndexed { index, menuItem ->
+                    if (rightItems.isNotEmpty()) {
+                        updatableRight.value.forEachIndexed { index, menuItem ->
                             menuItem.toView(
                                 chipOrientation = if (!menuItem.isSelectable) {
                                     ItemChipOrientation.NONE
                                 } else {
                                     when (index) {
                                         0 -> ItemChipOrientation.NE
-                                        updatableRight.lastIndex -> ItemChipOrientation.SE
+                                        updatableRight.value.lastIndex -> ItemChipOrientation.SE
                                         else -> ItemChipOrientation.E
                                     }
                                 }

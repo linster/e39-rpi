@@ -21,9 +21,9 @@ import javax.inject.Named
 
 /** Inject this into any control that needs to listen to scroll wheel state. */
 @ExperimentalCoroutinesApi
-@ApplicationScope
+//@ApplicationScope
 class KnobListenerService @Inject constructor(
-    @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
+//    @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
 ) {
 
 
@@ -56,7 +56,7 @@ class KnobListenerService @Inject constructor(
 
         val stateListOf = mutableStateListOf(*listData.toTypedArray())
 
-        return produceState(initialValue = stateListOf, stateListOf) {
+        return produceState(initialValue = stateListOf) {
 
             val selectedListIndices = stateListOf
                 .mapIndexed { index, t -> index to t }
@@ -74,7 +74,11 @@ class KnobListenerService @Inject constructor(
                 }
             }
 
+            val inputEvents = DaggerApplicationComponent.create().inputEvents()
             inputEvents.collect { event ->
+
+                logger.d("WAT", "EVENT WAT: $event")
+
                 val offset = if (event !is InputEvent.NavKnobTurned) { 0 } else {
                     event.clicks * (if (event.direction == InputEvent.NavKnobTurned.Direction.RIGHT) 1 else -1)
                 }

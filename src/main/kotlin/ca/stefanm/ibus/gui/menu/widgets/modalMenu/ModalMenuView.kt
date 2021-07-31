@@ -57,8 +57,6 @@ fun ModalChipMenu(
                 modalMenu.onOpen
             }
 
-            //TODO USE THE POSITION OF THE DATA TO REGISTER A SELECTION INDEX.
-
             DisposableEffect(modalMenu) {
                 onDispose {
                     modalMenu.onClose

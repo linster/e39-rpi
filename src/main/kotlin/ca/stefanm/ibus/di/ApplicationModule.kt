@@ -49,6 +49,9 @@ interface ApplicationComponent {
 
     fun knobListenerService() : KnobListenerService
 
+    @Named(ApplicationModule.INPUT_EVENTS) fun inputEvents() : SharedFlow<InputEvent>
+
+
     fun inject(cliMain : CliMain)
     fun inject(guiMain: GuiMain)
 }

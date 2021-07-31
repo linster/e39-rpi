@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.gui.menu.Notification
@@ -16,11 +17,11 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.*
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.SPACER
 import javax.inject.Inject
 
 class DebugHmiRoot @Inject constructor(
@@ -39,29 +40,29 @@ class DebugHmiRoot @Inject constructor(
             BmwSingleLineHeader("Debug")
 
             val isBottomShowing = remember { mutableStateOf(false) }
-            val isTopShowing = remember { mutableStateOf(false) }
+            val isTopShowing = remember { mutableStateOf(true) }
 
             val leftItems = listOf(
-                MenuItem.TextMenuItem(
+                TextMenuItem(
                     title = "Go Back",
                     onClicked = { navigationNodeTraverser.goBack() }
                 ),
-                MenuItem.CheckBoxMenuItem(
-                    title = "Half Screen HMI Top",
+                CheckBoxMenuItem(
+                    title = "Half Screen Top",
                     isChecked = isTopShowing.value,
                     onClicked = {
-                        isTopShowing.value = true
+                        isTopShowing.value = !isTopShowing.value
                     }
                 ),
-                MenuItem.SPACER,
-                MenuItem.CheckBoxMenuItem(
-                    title = "Half Screen HMI Bottom",
+                SPACER,
+                CheckBoxMenuItem(
+                    title = "Half Screen Bottom",
                     isChecked = isBottomShowing.value,
                     onClicked = {
-                        isBottomShowing.value = true
+                        isBottomShowing.value = !isBottomShowing.value
                     }
                 ),
-                MenuItem.TextMenuItem(
+                TextMenuItem(
                     title = "Open Modal",
                     onClicked = {
                         modalMenuService.showModalMenu(
@@ -80,6 +81,10 @@ class DebugHmiRoot @Inject constructor(
                                                 )
                                             )
                                         }
+                                    ),
+                                    ModalMenu.ModalMenuItem(
+                                        title = "Second",
+                                        onClicked = {modalMenuService.closeModalMenu()}
                                     )
                                 )
                             )
@@ -88,18 +93,31 @@ class DebugHmiRoot @Inject constructor(
                 )
             )
 
+            val rightItems = (1..4).map {
+                TextMenuItem(
+                    title = "Item: $it",
+                    isSelectable = it != 2,
+                    onClicked = {}
+                )
+            }
+
             Box(Modifier.wrapContentWidth().fillMaxSize()) {
-                FullScreenMenu.TwoColumnFillFromTop(
-                    leftItems = leftItems,
-                    rightItems = leftItems
+//                FullScreenMenu.TwoColumnFillFromTop(
+//                    leftItems = leftItems,
+//                    rightItems = rightItems
+//                )
+//
+                HalfScreenMenu.OneColumn(
+                    items = leftItems,
+                    alignment = Alignment.Start
                 )
 
                 if (isTopShowing.value) {
-                    HalfScreenMenu.TopHalfTwoColumn(leftItems, leftItems)
+                    //HalfScreenMenu.TopHalfTwoColumn(leftItems, rightItems)
                 }
 
                 if (isBottomShowing.value) {
-                    HalfScreenMenu.BottomHalfTwoColumn(leftItems, leftItems)
+//                    HalfScreenMenu.BottomHalfTwoColumn(leftItems, rightItems)
                 }
             }
         }
