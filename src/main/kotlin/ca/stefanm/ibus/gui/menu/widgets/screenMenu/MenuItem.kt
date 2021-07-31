@@ -34,6 +34,18 @@ interface MenuItem {
             isSelected = false,
             onClicked = {}
         )
+
+        fun List<MenuItem>.reduceUpdateOnClick(
+            newOnClick : (existingOnClick : () -> Unit) -> Unit
+        ) : List<MenuItem> = this.map {
+            val newOnClick = { newOnClick(it.onClicked)}
+            when (it) {
+                is TextMenuItem -> it.copy(onClicked = newOnClick)
+                is CheckBoxMenuItem -> it.copy(onClicked = newOnClick)
+                is ImageMenuItem -> it.copy(onClicked = newOnClick)
+                else -> error("Unsupported.")
+            }
+        }
     }
 }
 

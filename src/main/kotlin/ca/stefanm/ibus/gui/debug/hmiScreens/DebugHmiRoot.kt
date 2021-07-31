@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -18,12 +20,15 @@ import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.*
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.SPACER
 import javax.inject.Inject
 
+@ApplicationScope
+@Stable
 class DebugHmiRoot @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
@@ -46,6 +51,10 @@ class DebugHmiRoot @Inject constructor(
                 TextMenuItem(
                     title = "Go Back",
                     onClicked = { navigationNodeTraverser.goBack() }
+                ),
+                TextMenuItem(
+                    title = "Debug 2",
+                    onClicked = { navigationNodeTraverser.navigateToNode(DebugScreen2::class.java) }
                 ),
                 CheckBoxMenuItem(
                     title = "Half Screen Top",
@@ -149,6 +158,43 @@ class DebugHmiRoot @Inject constructor(
 //                    HalfScreenMenu.BottomHalfTwoColumn(leftItems, rightItems)
                 }
             }
+        }
+    }
+}
+
+@ApplicationScope
+class DebugScreen2 @Inject constructor(
+    private val navigationNodeTraverser: NavigationNodeTraverser
+) : NavigationNode<Nothing> {
+
+    override val thisClass: Class<out NavigationNode<Nothing>>
+        get() = DebugScreen2::class.java
+
+    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
+
+        val knobListener = it!!.requestParameters as KnobListenerService
+        Column {
+            BmwSingleLineHeader("Debug 2")
+
+            HalfScreenMenu.OneColumn(
+                items = mutableListOf(
+                    TextMenuItem(
+                        title = "Go Back",
+                        onClicked = { navigationNodeTraverser.goBack() }
+                    ),
+                    TextMenuItem(
+                        title = "2",
+                        onClicked = {}
+                    )
+                ).let {
+                      knobListener.listenForKnob(listData = it,
+                      onSelectAdapter = { item, isNowSelected -> item.copy(isSelected = isNowSelected) },
+                      isSelectableAdapter = { item -> item.isSelectable },
+                      onItemClickAdapter = {item -> item.onClicked() })
+                }.value, //This pattern seems to work. However the UI isn't updating.
+                alignment = Alignment.Start
+            )
+
         }
     }
 }

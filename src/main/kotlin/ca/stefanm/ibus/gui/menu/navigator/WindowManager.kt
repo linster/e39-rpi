@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 import javax.inject.Provider
-import javax.inject.Singleton
 
 
 @ApplicationScope
@@ -43,9 +42,11 @@ class WindowManager @Inject constructor(
         fun content() : @Composable WindowScope.() -> Unit
     }
 
+    data class HmiWindowState(
+        val isHmiWindowOpen : Boolean = false
+    )
 
-    data class WindowManagerState(
-        val isHmiWindowOpen : Boolean = false,
+    data class SystemWindowState(
         val openDebugWindows : SnapshotStateList<E39Window> = mutableStateListOf()
     ) {
 
@@ -66,16 +67,22 @@ class WindowManager @Inject constructor(
         }
     }
 
-    private val windowManagerState = MutableStateFlow(WindowManagerState())
+    private val hmiWindowState = MutableStateFlow(HmiWindowState())
+    private val windowManagerState = MutableStateFlow(SystemWindowState())
 
     //Invoke from Main
     fun runApplication() = application {
         // Currently we use Swing's menu under the hood, so we need to set this property to change the look and feel of the menu on Windows/Linux
         System.setProperty("skiko.rendering.laf.global", "true")
 
-        val windowManagerState = produceState(WindowManagerState()) {
+        val systemWindowState = produceState(SystemWindowState()) {
             windowManagerState.collect { value = it }
         }
+
+        val hmiWindowState = produceState(HmiWindowState()) {
+            hmiWindowState.collect { value = it }
+        }
+
 
         val mainWindowState = rememberWindowState(
             isOpen = true,
@@ -90,7 +97,7 @@ class WindowManager @Inject constructor(
         }
 
 
-        if (windowManagerState.value.isHmiWindowOpen) {
+        if (hmiWindowState.value.isHmiWindowOpen) {
             Window(
                 state = rememberWindowState(
                     position = mainWindowState.position.let {
@@ -111,11 +118,11 @@ class WindowManager @Inject constructor(
                     closeHmiMainWindow()
                 }
             ) {
-                hmiWindow.content()()
+                    hmiWindow.content()()
             }
         }
 
-        for (window in windowManagerState.value.openDebugWindows) {
+        for (window in systemWindowState.value.openDebugWindows) {
             key(window) {
                 Window(
                     title = window.title,
@@ -123,7 +130,7 @@ class WindowManager @Inject constructor(
                         size = window.size
                     ),
                     onCloseRequest = {
-                        windowManagerState.value.closeWindow(window)
+                        systemWindowState.value.closeWindow(window)
                     }
                 ) {
                     window.content().invoke(this)
@@ -135,11 +142,11 @@ class WindowManager @Inject constructor(
     //TODO LOLOL because the debug window opening updates the WindowManagerState.value
     //TODO under the hood there's a recomposition that causes the kob listener to break.
     fun openHmiMainWindow() {
-        windowManagerState.value = windowManagerState.value.copy(isHmiWindowOpen = true)
+        hmiWindowState.value = hmiWindowState.value.copy(isHmiWindowOpen = true)
     }
 
     fun closeHmiMainWindow() {
-        windowManagerState.value = windowManagerState.value.copy(isHmiWindowOpen = false)
+        hmiWindowState.value = hmiWindowState.value.copy(isHmiWindowOpen = false)
     }
 
     fun openDebugWindow(debugWindow: E39Window) {

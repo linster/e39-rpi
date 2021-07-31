@@ -1,9 +1,6 @@
 package ca.stefanm.ibus.gui.menu.widgets.knobListener
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
@@ -14,8 +11,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -24,6 +20,7 @@ import javax.inject.Provider
 /** Inject this into any control that needs to listen to scroll wheel state. */
 @ExperimentalCoroutinesApi
 @ApplicationScope
+@Stable
 class KnobListenerService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
     val modalMenuService: Provider<ModalMenuService>
@@ -85,8 +82,15 @@ class KnobListenerService @Inject constructor(
                 }
             }
 
+            logger.d("WAT", "About to collect ${value.hashCode()}")
+
 //            val inputEvents = DaggerApplicationComponent.create().inputEvents()
-            inputEvents.collect { event ->
+
+            inputEvents
+                .onSubscription { logger.d("BAZBAT", "onSubscription") }
+                .onEmpty { logger.d("BAZBAT", "onEmpty") }
+                .onEach { logger.d("BAZBAT", "onEach") }
+                .onCompletion { logger.d("BAZBAT", "onCompletion") }.collect { event ->
 
                 logger.d("WAT", "EVENT WAT: $event")
 

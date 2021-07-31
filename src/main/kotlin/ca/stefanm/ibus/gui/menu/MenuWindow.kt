@@ -3,11 +3,13 @@ package ca.stefanm.ibus.gui.menu
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
@@ -19,6 +21,8 @@ import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@ApplicationScope
+@Stable
 class MenuWindow @Inject constructor(
     private val navigator: Navigator,
     private val logger: Logger,
@@ -45,6 +49,12 @@ class MenuWindow @Inject constructor(
 
     @Composable
     private fun rootContent() {
+
+        //TODO, a KnobListener needs to be a CompositionLocal passed down all the way through
+        //TODO so we can avoid chains of passing it in as a screen parameter.
+        //TODO this is the root node of the composition so it's a pretty good place to put it.
+        //TODO https://developer.android.com/jetpack/compose/compositionlocal
+
         PaneManager(
             banner = null,
             sideSplit = null,
