@@ -172,7 +172,6 @@ class DebugScreen2 @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
-        val knobListener = it!!.requestParameters as KnobListenerService
         Column {
             BmwSingleLineHeader("Debug 2")
 
@@ -186,12 +185,7 @@ class DebugScreen2 @Inject constructor(
                         title = "2",
                         onClicked = {}
                     )
-                ).let {
-                      knobListener.listenForKnob(listData = it,
-                      onSelectAdapter = { item, isNowSelected -> item.copy(isSelected = isNowSelected) },
-                      isSelectableAdapter = { item -> item.isSelectable },
-                      onItemClickAdapter = {item -> item.onClicked() })
-                }.value, //This pattern seems to work. However the UI isn't updating.
+                ),
                 alignment = Alignment.Start
             )
 

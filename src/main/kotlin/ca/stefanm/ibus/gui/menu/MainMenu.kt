@@ -11,7 +11,6 @@ import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
-import ca.stefanm.ibus.gui.debug.hmiScreens.DebugScreen2
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -32,7 +31,6 @@ class MainMenu @Inject constructor(
     private val logger: Logger,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
-    private val knobListenerService: KnobListenerService,
 ) : NavigationNode<Nothing> {
     override val thisClass = MainMenu::class.java
 
@@ -92,7 +90,7 @@ class MainMenu @Inject constructor(
                 }) { Text("Show Modal")}
 
                 Button(onClick = {
-                    navigationNodeTraverser.navigateToNodeWithParameters(DebugScreen2::class.java, knobListenerService)
+                    navigationNodeTraverser.navigateToNode(DebugHmiRoot::class.java)
                 }) { Text("Debug 2 with passed in listener")}
             }
         }

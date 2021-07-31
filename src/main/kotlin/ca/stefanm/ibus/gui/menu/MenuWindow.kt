@@ -2,24 +2,24 @@ package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.notifications.toView
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarClock
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @ApplicationScope
 @Stable
@@ -28,8 +28,13 @@ class MenuWindow @Inject constructor(
     private val logger: Logger,
     private val notificationHub: NotificationHub,
     private val bottomBarClock: BottomBarClock,
-    private val modalMenuService: ModalMenuService
+    private val modalMenuService: ModalMenuService,
+    private val knobListenerService: KnobListenerService
 ) : WindowManager.E39Window {
+
+    companion object {
+        val MenuWindowKnobListener = compositionLocalOf { DaggerApplicationComponent.create().knobListenerService() }
+    }
 
     override val title: String
         get() = "BMW E39 Nav Menu"
@@ -91,7 +96,10 @@ class MenuWindow @Inject constructor(
                     logger.d("MenuWindow", currentNode.value.incomingResult.toString())
 
                     with (currentNode.value) {
-                        node.provideMainContent().invoke(incomingResult)
+
+                        CompositionLocalProvider(MenuWindowKnobListener provides knobListenerService) {
+                            node.provideMainContent().invoke(incomingResult)
+                        }
                     }
                 }
             },

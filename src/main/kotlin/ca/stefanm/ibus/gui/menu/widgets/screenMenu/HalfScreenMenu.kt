@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.StateObject
 import androidx.compose.runtime.snapshots.StateRecord
+import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.reduceUpdateOnClick
 import org.intellij.lang.annotations.JdkConstants
 import kotlin.math.E
@@ -91,7 +92,7 @@ object HalfScreenMenu {
         val columnContents : @Composable ColumnScope.() -> Unit = {
 
                 val colItems = items.reduceUpdateOnClick { it() ; println("items") }.let {
-                    DaggerApplicationComponent.create().knobListenerService().listenForKnob(
+                    MenuWindow.MenuWindowKnobListener.current.listenForKnob(
                         listData = items,
 
                         onItemClickAdapter = { it.onClicked() },
