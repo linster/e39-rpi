@@ -1,24 +1,21 @@
 package ca.stefanm.ibus.gui.map
 
 
-import androidx.compose.desktop.Window
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.di.DaggerApplicationComponent
-import ca.stefanm.ibus.gui.debug.NestingCard
-import ca.stefanm.ibus.gui.debug.NestingCardHeader
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
-import ca.stefanm.ibus.gui.map.widget.tile.TileView
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 
 import ca.stefanm.ibus.lib.logging.Logger

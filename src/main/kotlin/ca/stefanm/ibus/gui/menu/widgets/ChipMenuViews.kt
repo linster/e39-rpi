@@ -57,7 +57,7 @@ private data class MenuItemMeasurements(
         val BIG = MenuItemMeasurements(
             chipWidth = 16.0F,
             highlightWidth = 8.0F,
-            fontSize = 36.sp
+            fontSize = 30.sp
         )
         val SMALL = MenuItemMeasurements(
             chipWidth = 12.0F,
@@ -264,27 +264,5 @@ fun MenuItem(
             }
         })
 
-    }
-
-
-}
-
-@Composable
-fun BmwChipMenu(
-    contentLeft : @Composable () -> Unit,
-    contentRight : @Composable () -> Unit
-) {
-    Box (Modifier
-        .background(ChipItemColors.MenuBackground)
-        .fillMaxWidth()
-    ){
-        Row(Modifier.fillMaxWidth().wrapContentHeight()) {
-            Column(Modifier.weight(0.5f, true)) {
-                contentLeft()
-            }
-            Column(Modifier.weight(0.5f, true)) {
-                contentRight()
-            }
-        }
     }
 }

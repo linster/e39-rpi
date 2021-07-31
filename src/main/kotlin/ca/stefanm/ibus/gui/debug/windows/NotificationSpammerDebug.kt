@@ -1,4 +1,4 @@
-package ca.stefanm.ibus.gui.debug
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +14,6 @@ import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ibus.gui.menu.notifications.toView
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 

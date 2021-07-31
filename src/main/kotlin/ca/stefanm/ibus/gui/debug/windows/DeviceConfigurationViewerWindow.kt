@@ -1,10 +1,9 @@
-package ca.stefanm.ibus.gui.debug
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.desktop.Window
 //import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

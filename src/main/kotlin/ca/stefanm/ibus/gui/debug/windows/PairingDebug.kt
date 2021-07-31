@@ -1,4 +1,4 @@
-package ca.stefanm.ibus.gui.debug
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.desktop.Window
 import androidx.compose.foundation.layout.Column

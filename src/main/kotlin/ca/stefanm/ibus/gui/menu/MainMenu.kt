@@ -10,25 +10,17 @@ import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.picker.TextEntry
 import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.lib.messages.IBusMessage
-import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.value.MutableValue
-import com.arkivanov.decompose.value.Value
-import com.ginsberg.cirkle.circular
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @ApplicationScope
@@ -95,6 +87,10 @@ class MainMenu @Inject constructor(
                         )
                     )
                 }) { Text("Show Modal")}
+
+                Button(onClick = {
+                    navigationNodeTraverser.navigateToNode(DebugHmiRoot::class.java)
+                }) { Text("Debug Root")}
             }
         }
 

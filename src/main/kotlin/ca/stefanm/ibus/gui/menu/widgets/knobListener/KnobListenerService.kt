@@ -58,7 +58,6 @@ class KnobListenerService @Inject constructor(
 
         return produceState(initialValue = stateListOf, stateListOf) {
 
-            //TODO filter out non-selectable items.
             val selectedListIndices = stateListOf
                 .mapIndexed { index, t -> index to t }
                 .filter { isSelectableAdapter(it.second) }

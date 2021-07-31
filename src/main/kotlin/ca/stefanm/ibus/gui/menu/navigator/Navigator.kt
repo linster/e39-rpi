@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.menu.MainMenu
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
@@ -38,9 +39,11 @@ class NavigationModule {
     fun provideAllNodes(
         mainMenu: MainMenu,
         bluetoothPairingMenu: BluetoothPairingMenu,
+        debugHmiRoot: DebugHmiRoot
     ) : Set<NavigationNode<*>> = setOf<NavigationNode<*>>(
         mainMenu,
         bluetoothPairingMenu,
+        debugHmiRoot
     )
 
 }

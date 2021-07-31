@@ -12,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
-import ca.stefanm.ibus.gui.menu.widgets.BmwChipMenu
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
@@ -22,8 +20,8 @@ import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 data class ModalMenu(
     val items : List<ModalMenuItem>,
     val chipOrientation: ItemChipOrientation,
-    val onOpen : suspend () -> Unit,
-    val onClose : () -> Unit,
+    val onOpen : suspend () -> Unit = {},
+    val onClose : () -> Unit = {},
 ) {
 
     data class ModalMenuItem(
