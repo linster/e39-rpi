@@ -9,6 +9,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.CoroutineScope
@@ -18,12 +19,14 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 /** Inject this into any control that needs to listen to scroll wheel state. */
 @ExperimentalCoroutinesApi
-//@ApplicationScope
+@ApplicationScope
 class KnobListenerService @Inject constructor(
-//    @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
+    @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
+    val modalMenuService: Provider<ModalMenuService>
 ) {
 
 
@@ -56,7 +59,15 @@ class KnobListenerService @Inject constructor(
 
         val stateListOf = mutableStateListOf(*listData.toTypedArray())
 
-        return produceState(initialValue = stateListOf) {
+        return produceState(initialValue = stateListOf, listData, modalMenuService.get().modalMenuOverlay.value == null) {
+
+
+            logger.d("WATWATWAT", "ENTERING COMPOSITION ZOMG ${listData}")
+
+            //TODO WTF
+            //TODO, opening new windows causes the hmi root to be recomposed after
+            //TODO this has been launched.
+            //TODO modal works because we set this up before composition.
 
             val selectedListIndices = stateListOf
                 .mapIndexed { index, t -> index to t }
@@ -74,7 +85,7 @@ class KnobListenerService @Inject constructor(
                 }
             }
 
-            val inputEvents = DaggerApplicationComponent.create().inputEvents()
+//            val inputEvents = DaggerApplicationComponent.create().inputEvents()
             inputEvents.collect { event ->
 
                 logger.d("WAT", "EVENT WAT: $event")
@@ -106,6 +117,7 @@ class KnobListenerService @Inject constructor(
                     onItemClickAdapter(stateListOf[selectedListIndices[selectedIndex]])
                 }
             }
+
         }
 
     }

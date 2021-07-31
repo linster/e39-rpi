@@ -132,6 +132,8 @@ class WindowManager @Inject constructor(
         }
     }
 
+    //TODO LOLOL because the debug window opening updates the WindowManagerState.value
+    //TODO under the hood there's a recomposition that causes the kob listener to break.
     fun openHmiMainWindow() {
         windowManagerState.value = windowManagerState.value.copy(isHmiWindowOpen = true)
     }

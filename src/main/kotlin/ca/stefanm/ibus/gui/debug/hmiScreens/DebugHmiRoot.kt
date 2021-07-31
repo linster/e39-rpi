@@ -90,6 +90,35 @@ class DebugHmiRoot @Inject constructor(
                             )
                         )
                     }
+                ),
+                TextMenuItem(
+                    title = "Modal 2",
+                    onClicked = {
+                        modalMenuService.showModalMenu(
+                            menuTopLeft = IntOffset(600, 200),
+                            menuWidth = 400,
+                            menuData = ModalMenu(
+                                chipOrientation = ItemChipOrientation.E,
+                                items = listOf(
+                                    ModalMenu.ModalMenuItem(
+                                        title = "Third",
+                                        onClicked = {
+                                            notificationHub.postNotificationBackground(
+                                                Notification(
+                                                    Notification.NotificationImage.ALERT_CIRCLE,
+                                                    topText = "FIRST!!"
+                                                )
+                                            )
+                                        }
+                                    ),
+                                    ModalMenu.ModalMenuItem(
+                                        title = "Fourth",
+                                        onClicked = {modalMenuService.closeModalMenu()}
+                                    )
+                                )
+                            )
+                        )
+                    }
                 )
             )
 
