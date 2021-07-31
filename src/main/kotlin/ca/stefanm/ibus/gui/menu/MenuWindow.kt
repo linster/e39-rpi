@@ -17,7 +17,10 @@ import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarClock
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import java.awt.event.InputEvent
 import javax.inject.Inject
 
 
@@ -29,7 +32,7 @@ class MenuWindow @Inject constructor(
     private val notificationHub: NotificationHub,
     private val bottomBarClock: BottomBarClock,
     private val modalMenuService: ModalMenuService,
-    private val knobListenerService: KnobListenerService
+    private val realKnobListenerService: KnobListenerService
 ) : WindowManager.E39Window {
 
     companion object {
@@ -67,6 +70,10 @@ class MenuWindow @Inject constructor(
         //TODO, or remove the junk in debug screen 2 with getting the listenForKnob, and
         //TODO use a composition local provider to access the current we set right here
         //TODO then down the stack we'll have the knob listener, and this is marked as stable.
+
+        val dummyKnobListenerService = KnobListenerService(MutableSharedFlow())
+
+
         PaneManager(
             banner = null,
             sideSplit = null,
@@ -96,8 +103,8 @@ class MenuWindow @Inject constructor(
                     logger.d("MenuWindow", currentNode.value.incomingResult.toString())
 
                     with (currentNode.value) {
-
-                        CompositionLocalProvider(MenuWindowKnobListener provides knobListenerService) {
+                        CompositionLocalProvider(
+                            MenuWindowKnobListener provides modalMenuService.modalMenuOverlay.collectAsState().value.let { if (it == null) realKnobListenerService else dummyKnobListenerService }) {
                             node.provideMainContent().invoke(incomingResult)
                         }
                     }

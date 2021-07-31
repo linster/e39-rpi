@@ -17,15 +17,14 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
+
 /** Inject this into any control that needs to listen to scroll wheel state. */
 @ExperimentalCoroutinesApi
 @ApplicationScope
 @Stable
 class KnobListenerService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
-    val modalMenuService: Provider<ModalMenuService>
 ) {
-
 
 
     @Composable
@@ -56,7 +55,7 @@ class KnobListenerService @Inject constructor(
 
         val stateListOf = mutableStateListOf(*listData.toTypedArray())
 
-        return produceState(initialValue = stateListOf, listData, modalMenuService.get().modalMenuOverlay.value == null) {
+        return produceState(initialValue = stateListOf, listData) {
 
 
             logger.d("WATWATWAT", "ENTERING COMPOSITION ZOMG ${listData}")

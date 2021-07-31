@@ -83,6 +83,32 @@ object HalfScreenMenu {
         }
     }
 
+    private open class SnapshotTriple<A, B, C>(
+        val first : A,
+        val second : B,
+        val third : C
+    ) : StateObject {
+        val backingList = mutableStateListOf(first, second, third)
+        override val firstStateRecord: StateRecord
+            get() = backingList.firstStateRecord
+
+        override fun prependStateRecord(value: StateRecord) {
+            backingList.prependStateRecord(value)
+        }
+
+        operator fun component1() : A = first
+        operator fun component2() : B = second
+        operator fun component3() : C = third
+        override fun toString() =
+            "SnapshotTriple(first = $first, second = $second, third = $third)"
+    }
+
+    private class ConjoinedListRecord<I, P>(
+        val item : I,
+        val sourcePlacementEnum : P, //LEFT or RIGHT, or a quadrant
+        val originalItemPosition : Int //Original index in placement
+    ) : SnapshotTriple<I, P, Int>(item, sourcePlacementEnum, originalItemPosition)
+
     @Composable
     fun OneColumn(
         items : List<MenuItem>,
@@ -152,6 +178,10 @@ object HalfScreenMenu {
                 rightItems.map { SnapshotPair(it, TwoColumnListSource.RIGHT) } +
                 leftItems.drop(1).asReversed()
                     .map { SnapshotPair(it, TwoColumnListSource.LEFT) }
+        
+        val selectionOrderConjoinedList2 = 
+            listOf(ConjoinedListRecord(leftItems[0], TwoColumnListSource.LEFT, 0)) +
+                rightItems.map }
 
 //        println("   Conjoined list: ${selectionOrderConjoinedList.map {
 //            ((it.first as? TextMenuItem)?.title ?: (it.first as? CheckBoxMenuItem)?.title) to it.second
