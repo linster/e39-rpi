@@ -1,7 +1,5 @@
-package ca.stefanm.ibus.gui.menu.widgets.modalMenu
+package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -16,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 object Keyboard {
@@ -37,10 +34,12 @@ object Keyboard {
         KeyboardPane {
             LaunchedEffect(true) {
                 delay(30_000)
-                closeWithoutEntry()
+//                closeWithoutEntry()
             }
             when (type) {
-                KeyboardType.FULL -> QwertyKeyboard(onTextEntered, closeWithoutEntry)
+                KeyboardType.FULL -> QwertyKeyboard.QwertyKeyboard(onTextEntered, closeWithoutEntry)
+                KeyboardType.NUMERIC -> GridKeyboard.NumericKeyboard(onTextEntered, closeWithoutEntry)
+                KeyboardType.TELEPHONE -> GridKeyboard.TelephoneKeyboard(onTextEntered, closeWithoutEntry)
             }
         }
     }
@@ -66,20 +65,22 @@ object Keyboard {
                     )
                     .fillMaxWidth()
                     .fillMaxHeight(0.6F),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.TopCenter
             ) {
-                contents()
+                Column {
+                    contents()
+                }
             }
         }
     }
 
     @Composable
-    private fun CursorTextBoxViewer(
+    internal fun CursorTextBoxViewer(
         pendingText : String,
         cursorAfterIndex : Int //After which character 0-indexed is the cursor located
     ) {
         Box(Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .wrapContentHeight()
             .background(ChipItemColors.MenuBackground)
         ) {
@@ -89,7 +90,7 @@ object Keyboard {
                     Text(
                         text = " $char ",
                         color = ChipItemColors.TEXT_WHITE,
-                        fontSize = 14.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         modifier = Modifier.background(ChipItemColors.TEXT_BLUE_LIGHT)
@@ -100,7 +101,7 @@ object Keyboard {
                     Text(
                         text = " ",
                         color = ChipItemColors.TEXT_WHITE,
-                        fontSize = 14.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         modifier = Modifier.background(ChipItemColors.SelectedColor)
@@ -120,25 +121,4 @@ object Keyboard {
             }
         }
     }
-
-    @Composable
-    private fun QwertyKeyboard(
-        onTextEntered: (entered: String) -> Unit,
-        closeWithoutEntry: () -> Unit
-    ) {
-        Box(Modifier.aspectRatio(2F).background(Color.Magenta).fillMaxSize()) {
-            Column {
-                for (i in -1..7) {
-                    CursorTextBoxViewer("Wat Foo bar", i)
-                }
-            }
-        }
-    }
-
-
-    @Composable
-    private fun drawKeyboard() {
-
-    }
-
 }
