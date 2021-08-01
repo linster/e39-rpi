@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugScreen2
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -35,74 +36,13 @@ class BMWMainMenu @Inject constructor(
 
             BmwSingleLineHeader("Menu")
 
-
-//TextMenuItem(
-// label = "On-Board Computer",
-//onClicked = { logger.d("MENU","Selected 0")}
-//),
-//TextMenuItem(
-// label = "Telephone",
-//onClicked = { logger.d("MENU", "Selected 1")}
-//),
-//TextMenuItem(
-// label = "Code", labelColor = ChipItemColors.TEXT_BLUE_DARK,
-//onClicked = { logger.d("MENU", "Selected 2")}
-//),
-//MenuItem.SPACER,
-//TextMenuItem(
-// label = "Emergency", labelColor = Color.Red,
-//onClicked = { logger.d("MENU", "Selected 3")}
-//),
-//TextMenuItem(
-// label = "Settings",
-//onClicked = { logger.d("MENU", "Selected 4")}
-//),
-////                },
-////                contentRight = {
-////                    val currentSelected = listener.currentSelectedIndex.value
-////
-//TextMenuItem(
-// label = "GPS-Navigation",
-//onClicked = { logger.d("MENU", "Selected 5")}
-//),
-//TextMenuItem(
-// label = "Aux. Ventilation",
-//onClicked = { logger.d("MENU", "Selected 6")}
-//),
-//TextMenuItem(
-// label = "Aux. Ventilation",
-//onClicked = { logger.d("MENU", "Selected 7")}
-//),
-//MenuItem.SPACER,
-//MenuItem.SPACER,
-//TextMenuItem(
-// label = "Monitor Off",
-//onClicked = { logger.d("MENU", "Selected 9")}
-//),
-
-            val leftItems = listOf(
+            val nwItems = listOf(
                 TextMenuItem(
                     title = "GPS-Navigation",
                     onClicked = { navigationNodeTraverser.goBack() }
-                ),
-                MenuItem.SPACER,
-                MenuItem.SPACER,
-                TextMenuItem(
-                    title = "Bluetooth Pairing",
-                    onClicked = { navigationNodeTraverser.goBack() }
-                ),
-                TextMenuItem(
-                    title = "Settings",
-                    onClicked = { navigationNodeTraverser.navigateToNode(DebugScreen2::class.java) }
-                ),
-                TextMenuItem(
-                    title = "Debug",
-                    labelColor = Color.Red,
-                    onClicked = {}
                 )
             )
-
-            val rightItems = listOf(
+            val neItems = listOf(
                 TextMenuItem(
                     title = "Telephone Dialer",
                     onClicked = {}
@@ -111,9 +51,24 @@ class BMWMainMenu @Inject constructor(
                     title = "Chat Notifications",
                     onClicked = {}
                 ),
-                MenuItem.SPACER,
-                MenuItem.SPACER,
-                MenuItem.SPACER,
+            )
+
+            val swItems = listOf(
+                TextMenuItem(
+                    title = "Bluetooth Pairing",
+                    onClicked = { navigationNodeTraverser.goBack() }
+                ),
+                TextMenuItem(
+                    title = "Settings",
+                    onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiRoot::class.java) }
+                ),
+                TextMenuItem(
+                    title = "Debug",
+                    labelColor = Color.Red,
+                    onClicked = {}
+                )
+            )
+            val seItems = listOf(
                 TextMenuItem(
                     title = "Back to BMW",
                     labelColor = Color.Red,
@@ -122,9 +77,11 @@ class BMWMainMenu @Inject constructor(
             )
 
             Box(Modifier.wrapContentWidth().fillMaxSize()) {
-                FullScreenMenu.TwoColumnFillFromTop(
-                    leftItems = leftItems,
-                    rightItems = rightItems
+                FullScreenMenu.TwoColumnFillFromCorners(
+                    nw = nwItems,
+                    ne = neItems,
+                    sw = swItems,
+                    se = seItems
                 )
             }
         }

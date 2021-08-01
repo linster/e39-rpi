@@ -30,7 +30,6 @@ class LoadingWindow @Inject constructor(
     private val keyEventSimulator: KeyEventSimulator,
     private val debugLaunchpad: DebugLaunchpad,
     private val paneManagerDebug: PaneManagerDebug,
-    private val menuWindow: MenuWindow,
 
     private val windowManager : Provider<WindowManager>
 ) {
