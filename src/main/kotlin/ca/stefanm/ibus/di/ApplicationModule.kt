@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -48,7 +49,7 @@ interface ApplicationComponent {
     fun tileCacheClearer() : TileServerImageCacheClearer
 
     fun knobListenerService() : KnobListenerService
-
+    fun modalMenuService() : ModalMenuService
 //    @Named(ApplicationModule.INPUT_EVENTS) fun inputEvents() : SharedFlow<InputEvent>
 
 

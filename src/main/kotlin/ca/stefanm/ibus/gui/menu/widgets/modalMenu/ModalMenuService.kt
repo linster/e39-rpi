@@ -22,8 +22,6 @@ class ModalMenuService @Inject constructor(
     private val _modalMenuOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
     val modalMenuOverlay = _modalMenuOverlay.asStateFlow()
 
-    var isNotificationShowing : Boolean = false
-
     fun showModalMenu(
         menuTopLeft : IntOffset,
         menuWidth : Int, //The height can be automatically calculated.
@@ -31,7 +29,6 @@ class ModalMenuService @Inject constructor(
     ) {
         _modalMenuOverlay.value = {
 
-            isNotificationShowing = true
 
             ModalChipMenuWindowOverlay(
                 menuTopLeft = menuTopLeft,
@@ -69,6 +66,18 @@ class ModalMenuService @Inject constructor(
 
     fun closeModalMenu() {
         _modalMenuOverlay.value = null
-        isNotificationShowing = false
+    }
+
+    fun showKeyboard(
+        type : Keyboard.KeyboardType,
+        onTextEntered : (entered : String) -> Unit
+    ) {
+        _modalMenuOverlay.value = {
+            Keyboard.showKeyboard(
+                type = type,
+                onTextEntered = { onTextEntered(it); closeModalMenu() },
+                closeWithoutEntry = this::closeModalMenu
+            )()
+        }
     }
 }

@@ -112,7 +112,8 @@ object HalfScreenMenu {
     @Composable
     fun OneColumn(
         items : List<MenuItem>,
-        alignment: Alignment.Horizontal
+        alignment: Alignment.Horizontal = Alignment.Start,
+        fullWidth : Boolean = false
     ) {
 
         val columnContents : @Composable ColumnScope.() -> Unit = {
@@ -135,7 +136,11 @@ object HalfScreenMenu {
                 }
                 for (item in colItems) {
                     item.toView(
-                        chipOrientation = if (alignment == Alignment.Start) ItemChipOrientation.W else ItemChipOrientation.E,
+                        chipOrientation = if (!item.isSelectable) {
+                            ItemChipOrientation.NONE
+                        } else {
+                            if (alignment == Alignment.Start) ItemChipOrientation.W else ItemChipOrientation.E
+                        },
                     )()
                 }
             }
@@ -146,19 +151,25 @@ object HalfScreenMenu {
                 .background(ChipItemColors.MenuBackground)
                 .fillMaxWidth()
         ){
-            Row(Modifier.fillMaxWidth().wrapContentHeight()) {
-                Column(Modifier.weight(0.5f, true)) {
-                    if (alignment == Alignment.Start) {
-                        columnContents()
-                    } else {
-                        MenuItem.SPACER
+            Row(Modifier.fillMaxWidth().wrapContentHeight(),
+                horizontalArrangement = if (alignment == Alignment.Start) Arrangement.Start else Arrangement.End
+            ) {
+                if (fullWidth) {
+                    Column(Modifier.weight(1F, true)) { columnContents() }
+                } else {
+                    Column(Modifier.weight(0.5f, true)) {
+                        if (alignment == Alignment.Start) {
+                            columnContents()
+                        } else {
+                            MenuItem.SPACER
+                        }
                     }
-                }
-                Column(Modifier.weight(0.5f, true)) {
-                    if (alignment == Alignment.End) {
-                        columnContents()
-                    } else {
-                        MenuItem.SPACER
+                    Column(Modifier.weight(0.5f, true)) {
+                        if (alignment == Alignment.End) {
+                            columnContents()
+                        } else {
+                            MenuItem.SPACER
+                        }
                     }
                 }
             }

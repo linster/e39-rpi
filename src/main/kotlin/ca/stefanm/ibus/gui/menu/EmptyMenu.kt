@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -26,7 +27,7 @@ class EmptyMenu @Inject constructor(
         )
 
         LaunchedEffect(true) {
-            navigationNodeTraverser.navigateToNode(BMWMainMenu::class.java)
+            navigationNodeTraverser.navigateToNode(DebugHmiKeyboard::class.java)
         }
     }
 }

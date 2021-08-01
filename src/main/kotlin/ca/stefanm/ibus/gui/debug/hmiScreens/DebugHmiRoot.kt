@@ -31,8 +31,6 @@ import javax.inject.Inject
 @Stable
 class DebugHmiRoot @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val modalMenuService: ModalMenuService,
-    private val notificationHub: NotificationHub
 ) : NavigationNode<Nothing>{
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -40,189 +38,21 @@ class DebugHmiRoot @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        BmwSingleLineHeader("Debug")
 
-            BmwSingleLineHeader("Debug")
-
-            val isBottomShowing = remember { mutableStateOf(false) }
-            val isTopShowing = remember { mutableStateOf(true) }
-
-            val leftItems = listOf(
+        HalfScreenMenu.OneColumn(
+            alignment = Alignment.Start,
+            items = listOf(
                 TextMenuItem(
-                    title = "Go Back",
-                    onClicked = { navigationNodeTraverser.goBack() }
+                    title = "DebugHmiMenuTests",
+                    onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiMenuTest::class.java)}
                 ),
                 TextMenuItem(
-                    title = "Debug 2",
-                    onClicked = { navigationNodeTraverser.navigateToNode(DebugScreen2::class.java) }
-                ),
-                CheckBoxMenuItem(
-                    title = "Half Screen Top",
-                    isChecked = isTopShowing.value,
-                    onClicked = {
-                        isTopShowing.value = !isTopShowing.value
-                    }
-                ),
-                SPACER,
-                CheckBoxMenuItem(
-                    title = "Half Screen Bottom",
-                    isChecked = isBottomShowing.value,
-                    onClicked = {
-                        isBottomShowing.value = !isBottomShowing.value
-                    }
-                ),
-                TextMenuItem(
-                    title = "Open Modal",
-                    onClicked = {
-                        modalMenuService.showModalMenu(
-                            menuTopLeft = IntOffset(300, 200),
-                            menuWidth = 400,
-                            menuData = ModalMenu(
-                                chipOrientation = ItemChipOrientation.E,
-                                items = listOf(
-                                    ModalMenu.ModalMenuItem(
-                                        title = "First",
-                                        onClicked = {
-                                            notificationHub.postNotificationBackground(
-                                                Notification(
-                                                    Notification.NotificationImage.ALERT_CIRCLE,
-                                                    topText = "FIRST!!"
-                                                )
-                                            )
-                                        }
-                                    ),
-                                    ModalMenu.ModalMenuItem(
-                                        title = "Second",
-                                        onClicked = {modalMenuService.closeModalMenu()}
-                                    )
-                                )
-                            )
-                        )
-                    }
-                ),
-                TextMenuItem(
-                    title = "Modal 2",
-                    onClicked = {
-                        modalMenuService.showModalMenu(
-                            menuTopLeft = IntOffset(800, 200),
-                            menuWidth = 400,
-                            menuData = ModalMenu(
-                                chipOrientation = ItemChipOrientation.E,
-                                items = listOf(
-                                    ModalMenu.ModalMenuItem(
-                                        title = "Third",
-                                        onClicked = {
-                                            notificationHub.postNotificationBackground(
-                                                Notification(
-                                                    Notification.NotificationImage.ALERT_CIRCLE,
-                                                    topText = "FIRST!!"
-                                                )
-                                            )
-                                        }
-                                    ),
-                                    ModalMenu.ModalMenuItem(
-                                        title = "Fourth",
-                                        onClicked = {modalMenuService.closeModalMenu()}
-                                    )
-                                )
-                            )
-                        )
-                    }
+                    title = "DBus-BlueZ",
+                    onClicked = { }
                 )
             )
+        )
 
-            val rightItems = (1..4).map {
-                TextMenuItem(
-                    title = "Item: $it",
-                    isSelectable = it != 2,
-                    onClicked = {}
-                )
-            }
-
-            Box(Modifier.wrapContentWidth().fillMaxSize()) {
-                FullScreenMenu.TwoColumnFillFromTop(
-                    leftItems = leftItems,
-                    rightItems = rightItems
-                )
-//
-//                HalfScreenMenu.OneColumn(
-//                    items = leftItems,
-//                    alignment = Alignment.Start
-//                )
-
-                if (isTopShowing.value) {
-                    //HalfScreenMenu.TopHalfTwoColumn(leftItems, rightItems)
-                }
-
-                if (isBottomShowing.value) {
-//                    HalfScreenMenu.BottomHalfTwoColumn(leftItems, rightItems)
-                }
-            }
-        }
-    }
-}
-
-@ApplicationScope
-class DebugScreen2 @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val notificationHub: NotificationHub,
-    private val modalMenuService: ModalMenuService
-) : NavigationNode<Nothing> {
-
-    override val thisClass: Class<out NavigationNode<Nothing>>
-        get() = DebugScreen2::class.java
-
-    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-
-        Column {
-            BmwSingleLineHeader("Debug 2")
-
-            HalfScreenMenu.OneColumn(
-                items = mutableListOf(
-                    TextMenuItem(
-                        title = "Go Back",
-                        onClicked = { navigationNodeTraverser.goBack() }
-                    ),
-                    TextMenuItem(
-                        title = "2",
-                        onClicked = {
-                            notificationHub.postNotificationBackground(
-                                Notification(
-                                    image = Notification.NotificationImage.ALERT_OCTAGON,
-                                    topText = "2!"
-                            ))
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "3",
-                        onClicked = {
-                            modalMenuService.showModalMenu(
-                                menuTopLeft = IntOffset(500, 300),
-                                menuWidth = 500,
-                                menuData = ModalMenu(
-                                    chipOrientation = ItemChipOrientation.E,
-                                    items = listOf(
-                                        ModalMenu.ModalMenuItem(
-                                            title = "1",
-                                            onClicked = { notificationHub.postNotificationBackground(Notification(Notification.NotificationImage.ALERT_TRIANGLE, topText = "1")) }
-                                        ),
-                                        ModalMenu.ModalMenuItem(
-                                            title = "2",
-                                            onClicked = { notificationHub.postNotificationBackground(Notification(Notification.NotificationImage.ALERT_TRIANGLE, topText = "2"))}
-                                        )
-                                    )
-                                )
-                            )
-                        }
-                    ),
-                    TextMenuItem(title = "4", onClicked = {}),
-                    TextMenuItem(title = "5", onClicked = {}),
-                    TextMenuItem(title = "6", onClicked = {}),
-                    TextMenuItem(title = "7", onClicked = {}),
-                ),
-                alignment = Alignment.Start
-            )
-
-        }
     }
 }

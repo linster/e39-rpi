@@ -2,8 +2,7 @@ package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
-import ca.stefanm.ibus.gui.debug.hmiScreens.DebugScreen2
+import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.EmptyMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
@@ -44,14 +43,18 @@ class NavigationModule {
         composeDebugMenu: ComposeDebugMenu,
         bluetoothPairingMenu: BluetoothPairingMenu,
         debugHmiRoot: DebugHmiRoot,
-        debugScreen2: DebugScreen2,
+        debugHmiMenuTestTwoColumn: DebugHmiMenuTestTwoColumn,
+        debugHmiMenuTestOneColumn: DebugHmiMenuTestOneColumn,
+        debugHmiKeyboard: DebugHmiKeyboard,
         emptyMenu: EmptyMenu,
         bmwMainMenu: BMWMainMenu
     ) : Set<NavigationNode<*>> = setOf<NavigationNode<*>>(
         composeDebugMenu,
         bluetoothPairingMenu,
         debugHmiRoot,
-        debugScreen2,
+        debugHmiMenuTestTwoColumn,
+        debugHmiMenuTestOneColumn,
+        debugHmiKeyboard,
         emptyMenu,
         bmwMainMenu
     )
