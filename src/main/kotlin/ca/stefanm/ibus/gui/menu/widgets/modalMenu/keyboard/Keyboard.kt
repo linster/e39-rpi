@@ -83,6 +83,7 @@ object Keyboard {
             .fillMaxWidth()
             .wrapContentHeight()
             .background(ChipItemColors.MenuBackground)
+            .padding(4.dp)
         ) {
             Row {
 
@@ -93,7 +94,7 @@ object Keyboard {
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
-                        modifier = Modifier.background(ChipItemColors.TEXT_BLUE_LIGHT)
+                        modifier = Modifier
                     )
                 }
 
@@ -106,6 +107,10 @@ object Keyboard {
                         maxLines = 1,
                         modifier = Modifier.background(ChipItemColors.SelectedColor)
                     )
+                }
+
+                if (pendingText.isEmpty()) {
+                    displayCursor()
                 }
 
                 pendingText.forEachIndexed { index, c ->

@@ -10,6 +10,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 
@@ -21,12 +22,13 @@ enum class SpecialTags {
     RightArrow,
     Cancel,
     Return,
-    Shift
+    Shift,
+    BackSpace
 }
 
 const val TabSpacerLabel = "Tab"
 const val BackSpaceLabel = "Backspace"
-const val CapslockLabel = "Caps Lock"
+const val CapslockLabel = "Caps"
 const val ReturnLabel = "Return"
 const val ShiftLabel = "Shift"
 
@@ -69,7 +71,12 @@ internal fun QwertyKeyDefinition.toView(
         })
         .height(38.dp)
         .then(if (keySize == QwertyKeyDefinition.KeySize.FLEX) {
-            Modifier.fillMaxWidth()
+            //This is probably a good place for Intrinsics?
+            if (specialTag == SpecialTags.Return) {
+                Modifier.width(85.dp)
+            } else {
+                Modifier.widthIn(38.dp, (3 * 38).dp).fillMaxWidth()
+            }
         } else {
             Modifier.aspectRatio(keySize.scale.toFloat())
         })
@@ -84,7 +91,8 @@ internal fun QwertyKeyDefinition.toView(
                     lowerCaseLabel
                 }
             },
-            color = Color.White
+            color = Color.White,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -103,7 +111,7 @@ internal val qwertyKeyboardByRow : List<List<QwertyKeyDefinition>> = listOf(
         QwertyKeyDefinition("0",")"),
         QwertyKeyDefinition("-","_"),
         QwertyKeyDefinition("=","+"),
-        QwertyKeyDefinition(BackSpaceLabel, BackSpaceLabel, keySize = QwertyKeyDefinition.KeySize.FLEX)
+        QwertyKeyDefinition(BackSpaceLabel, BackSpaceLabel, keySize = QwertyKeyDefinition.KeySize.FLEX, specialTag = SpecialTags.BackSpace)
     ),
     listOf(
         QwertyKeyDefinition(TabSpacerLabel, TabSpacerLabel, keySize = QwertyKeyDefinition.KeySize.TAB),
@@ -119,7 +127,7 @@ internal val qwertyKeyboardByRow : List<List<QwertyKeyDefinition>> = listOf(
         QwertyKeyDefinition("p"),
         QwertyKeyDefinition("[", "{"),
         QwertyKeyDefinition("]", "}"),
-        QwertyKeyDefinition("\\", "|")
+        QwertyKeyDefinition("\\", "|", keySize = QwertyKeyDefinition.KeySize.TAB)
     ),
     listOf(
         QwertyKeyDefinition(CapslockLabel, CapslockLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.CapsLock),
@@ -155,7 +163,7 @@ internal val qwertyKeyboardByRow : List<List<QwertyKeyDefinition>> = listOf(
         QwertyKeyDefinition("", "", keySize = QwertyKeyDefinition.KeySize.SPACE, specialTag = SpecialTags.Spacebar),
         QwertyKeyDefinition(LeftArrowLabel, LeftArrowLabel, specialTag = SpecialTags.LeftArrow),
         QwertyKeyDefinition(RightArrowLabel, RightArrowLabel, specialTag = SpecialTags.RightArrow),
-        QwertyKeyDefinition(CancelLabel, CancelLabel, specialTag = SpecialTags.Cancel)
+        QwertyKeyDefinition(CancelLabel, CancelLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.Cancel)
     )
 
 )
