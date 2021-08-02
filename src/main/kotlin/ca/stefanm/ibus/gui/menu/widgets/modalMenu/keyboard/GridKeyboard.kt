@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 
 import androidx.compose.runtime.Composable
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 
 internal object GridKeyboard {
 
@@ -8,6 +9,7 @@ internal object GridKeyboard {
     @Composable
     internal fun NumericKeyboard(
         prefilled : String = "",
+        knobListenerService: KnobListenerService,
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit
     ) {
@@ -17,6 +19,7 @@ internal object GridKeyboard {
     @Composable
     internal fun TelephoneKeyboard(
         prefilled : String = "",
+        knobListenerService: KnobListenerService,
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit
     ) {
@@ -26,6 +29,7 @@ internal object GridKeyboard {
     @Composable
     private fun GridKeyboard(
         prefilled : String = "",
+        knobListenerService: KnobListenerService,
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit,
         rows : Int,

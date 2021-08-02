@@ -40,7 +40,17 @@ data class QwertyKeyDefinition(
     val lowerCaseLabel : String,
     val upperCaseLabel : String = lowerCaseLabel.uppercase(),
     val shiftModifierLabel : String = upperCaseLabel,
+
     val keySize : KeySize = KeySize.NORMAL,
+
+    var isSelected: Boolean = false,
+
+    val isLowerCaseSelectable : Boolean = true,
+    val isUpperCaseSelectable : Boolean = isLowerCaseSelectable,
+
+    val onSelectedEmitString : ((char : String) -> Unit)? = null,
+    val onSelected : (isModifierUpperCase : Boolean) -> Unit = { onSelectedEmitString?.invoke(if (it) upperCaseLabel else lowerCaseLabel)},
+
     val specialTag : SpecialTags? = null //For keys with empty labels, so we can do an equality check on a tab vs caps lock.
 ) {
     enum class KeySize(val scale : Double) {
@@ -56,10 +66,7 @@ data class QwertyKeyDefinition(
 @Composable
 internal fun QwertyKeyDefinition.toView(
     isUpperCase : Boolean = false,
-    isSelected : Boolean = false,
     hideLabelIfNotCurrentlySelectable : Boolean = true, //If we are in SHIFT modifier, and there's keys that aren't selectable, keep the key but hide the label.
-    onSelectedEmitString : ((char : String) -> Unit)? = null,
-    onSelected : (isModifierUpperCase : Boolean) -> Unit = { onSelectedEmitString?.invoke(if (it) upperCaseLabel else lowerCaseLabel)},
 ) {
 
     Box(Modifier.border(

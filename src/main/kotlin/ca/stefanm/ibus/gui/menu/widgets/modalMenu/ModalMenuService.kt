@@ -75,6 +75,7 @@ class ModalMenuService @Inject constructor(
             Keyboard.showKeyboard(
                 type = type,
                 prefilled = prefilled,
+                knobListenerService = knobListenerService,
                 onTextEntered = { onTextEntered(it); closeModalMenu() },
                 closeWithoutEntry = this::closeModalMenu
             )()

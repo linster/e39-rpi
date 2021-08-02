@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import kotlinx.coroutines.delay
 
 
@@ -27,20 +28,17 @@ object Keyboard {
     fun showKeyboard(
         type: KeyboardType,
         prefilled : String = "",
+        knobListenerService: KnobListenerService,
         onTextEntered : (entered : String) -> Unit,
         closeWithoutEntry : () -> Unit
     ) : @Composable () -> Unit = {
         //This might actually be a good use-case for a CompositionLocal.
 
         KeyboardPane {
-            LaunchedEffect(true) {
-                delay(30_000)
-//                closeWithoutEntry()
-            }
             when (type) {
-                KeyboardType.FULL -> QwertyKeyboard.QwertyKeyboard(prefilled, onTextEntered, closeWithoutEntry)
-                KeyboardType.NUMERIC -> GridKeyboard.NumericKeyboard(prefilled, onTextEntered, closeWithoutEntry)
-                KeyboardType.TELEPHONE -> GridKeyboard.TelephoneKeyboard(prefilled, onTextEntered, closeWithoutEntry)
+                KeyboardType.FULL -> QwertyKeyboard.QwertyKeyboard(prefilled, knobListenerService, onTextEntered, closeWithoutEntry)
+                KeyboardType.NUMERIC -> GridKeyboard.NumericKeyboard(prefilled, knobListenerService, onTextEntered, closeWithoutEntry)
+                KeyboardType.TELEPHONE -> GridKeyboard.TelephoneKeyboard(prefilled, knobListenerService, onTextEntered, closeWithoutEntry)
             }
         }
     }

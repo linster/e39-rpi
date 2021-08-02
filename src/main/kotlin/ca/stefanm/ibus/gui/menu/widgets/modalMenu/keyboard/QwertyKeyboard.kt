@@ -3,9 +3,13 @@ package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ca.stefanm.ibus.gui.menu.MenuWindow
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ConjoinedListRecord
 import com.ginsberg.cirkle.circular
 
 internal object QwertyKeyboard {
@@ -14,6 +18,7 @@ internal object QwertyKeyboard {
     @Composable
     internal fun QwertyKeyboard(
         preFilled : String = "",
+        knobListenerService: KnobListenerService,
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit
     ) {
@@ -38,8 +43,120 @@ internal object QwertyKeyboard {
                 cursorPosition.value = cursorPosition.value + this.length
             }
 
-            LaunchedEffect(enteredText.value, cursorPosition.value) {
-                println("Text, Cursor: ${enteredText.value.toList()}, ${cursorPosition.value}")
+//            LaunchedEffect(enteredText.value, cursorPosition.value) {
+//                println("Text, Cursor: ${enteredText.value.toList()}, ${cursorPosition.value}")
+//            }
+
+            //Conjoin the list for scrolling between rows.
+            val conjoinedQwertyRowList : List<ConjoinedListRecord<QwertyKeyDefinition, Int>> =
+                qwertyKeyboardByRow.flatMapIndexed { index: Int, rowList: List<QwertyKeyDefinition> ->
+                    rowList.mapIndexed { indexInRow, qwertyKeyDefinition ->
+                        ConjoinedListRecord(
+                            item = qwertyKeyDefinition.let {
+                                //We need to bind the onSelected here to the state we have
+                                //based on the key's special tag.
+                                if (it.specialTag !in SpecialTags.values()) {
+                                    it.copy(onSelectedEmitString = { entered -> entered.appendToState() })
+                                } else {
+                                    it.specialTag as SpecialTags
+                                    it.copy(onSelectedEmitString = when (it.specialTag) {
+                                        SpecialTags.Tab -> {
+                                            { "    ".appendToState() }
+                                        }
+                                        SpecialTags.CapsLock -> {
+                                            {
+                                                isCapsLocked.value = !isCapsLocked.value
+                                                isModifierCapitalized.value = !isModifierCapitalized.value
+                                            }
+                                        }
+                                        SpecialTags.Spacebar -> {
+                                            { " ".appendToState() }
+                                        }
+                                        SpecialTags.LeftArrow -> {
+                                            {
+                                                if (cursorPosition.value > 0) {
+                                                    cursorPosition.let { pos ->
+                                                        pos.value = (pos.value - 1).rem(enteredText.value.length)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        SpecialTags.RightArrow -> {
+                                            {
+                                                cursorPosition.let { pos ->
+                                                    if (pos.value != enteredText.value.length) {
+                                                        pos.value =
+                                                            (pos.value + 1).rem(enteredText.value.length + 1)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        SpecialTags.Cancel -> {
+                                            { closeWithoutEntry() }
+                                        }
+                                        SpecialTags.Return -> {
+                                            { onTextEntered(enteredText.value) }
+                                        }
+                                        SpecialTags.Shift -> {
+                                            { isModifierCapitalized.value = !isModifierCapitalized.value }
+                                        }
+                                        SpecialTags.BackSpace -> {
+                                            {
+                                                if (cursorPosition.value > 0) {
+                                                    enteredText.value = enteredText.value.filterIndexed { index, c -> index != cursorPosition.value - 1 }
+                                                    cursorPosition.value = cursorPosition.value - 1
+                                                }
+                                            }
+                                        }
+                                    })
+                                }
+                            },
+                            sourcePlacementEnum = index,
+                            //Scrolling will always jump from right-edge to left edge of every row.
+                            //If we want to have smooth scrolling (right, down-one + right, move left)
+                            //then we need to reverse every second rowList, and then this flag needs to do
+                            //and indexOf on the original list of lists. See the QuadrantTwoColumn for an example to follow.
+                            //Though, if you do that, then on even rows, scrolling right will move the selector left.
+                            //So it's better to leave it for consistency.
+                            originalItemPosition = indexInRow
+                        )
+                    }
+                }
+
+
+            val knobQwertyKeyboardViewsByRow = knobListenerService.listenForKnob(
+                listData = conjoinedQwertyRowList,
+                onSelectAdapter = { item, isNowSelected ->
+                    ConjoinedListRecord(item.item.copy(isSelected = isNowSelected), item.second, item.third) },
+                isSelectableAdapter = {
+                    if (isModifierCapitalized.value) {
+                        it.item.isUpperCaseSelectable
+                    } else {
+                        it.item.isLowerCaseSelectable
+                    }
+                },
+                onItemClickAdapter = { it.first.onSelected(isModifierCapitalized.value) }
+            )
+
+            fun SnapshotStateList<ConjoinedListRecord<QwertyKeyDefinition, Int>>.rePartitionByRow() : SnapshotStateList<SnapshotStateList<QwertyKeyDefinition>> {
+
+                //SnapshotStateList<List<ConjoinedListRecord<QwertyKeyDefinition, Int>>>
+
+                val returned : List<MutableList<ConjoinedListRecord<QwertyKeyDefinition, Int>>> = (0..qwertyKeyboardByRow.lastIndex).map { mutableListOf() }
+
+                for (record in this) {
+                    returned[record.sourcePlacementEnum].add(record)
+                }
+
+                for (sublist in returned) {
+                    sublist.sortBy { it.originalItemPosition }
+                }
+
+                //Ew. But I want to make sure it's SnapshotStateList all the way down so our double-nested
+                //for loop below updates deeply.
+                return SnapshotStateList<SnapshotStateList<QwertyKeyDefinition>>().apply {
+                    addAll(returned.map { sublist -> SnapshotStateList<QwertyKeyDefinition>().apply { addAll(sublist)} })
+                }
             }
 
             Box(Modifier.wrapContentSize().align(Alignment.CenterHorizontally)) {
@@ -51,7 +168,7 @@ internal object QwertyKeyboard {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    qwertyKeyboardByRow.forEachIndexed { index, row ->
+                    knobQwertyKeyboardViewsByRow.value.rePartitionByRow().forEachIndexed { index, row ->
                         val isLast = index == qwertyKeyboardByRow.lastIndex
                         Row(Modifier.fillMaxWidth()) {
                             row.forEach { key ->
@@ -62,62 +179,12 @@ internal object QwertyKeyboard {
                                 ) {
                                     if (key.specialTag != null) {
                                         key.toView(
-                                            isUpperCase = isModifierCapitalized.value,
-                                            onSelectedEmitString = when (key.specialTag) {
-                                                SpecialTags.Tab -> {
-                                                    { "    ".appendToState() }
-                                                }
-                                                SpecialTags.CapsLock -> {
-                                                    {
-                                                        isCapsLocked.value = !isCapsLocked.value
-                                                        isModifierCapitalized.value = !isModifierCapitalized.value
-                                                    }
-                                                }
-                                                SpecialTags.Spacebar -> {
-                                                    { " ".appendToState() }
-                                                }
-                                                SpecialTags.LeftArrow -> {
-                                                    {
-                                                        if (cursorPosition.value > 0) {
-                                                            cursorPosition.let { pos ->
-                                                                pos.value = (pos.value - 1).rem(enteredText.value.length)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                SpecialTags.RightArrow -> {
-                                                    {
-                                                        cursorPosition.let { pos ->
-                                                            if (pos.value != enteredText.value.length) {
-                                                                pos.value =
-                                                                    (pos.value + 1).rem(enteredText.value.length + 1)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                SpecialTags.Cancel -> {
-                                                    { closeWithoutEntry() }
-                                                }
-                                                SpecialTags.Return -> {
-                                                    { onTextEntered(enteredText.value) }
-                                                }
-                                                SpecialTags.Shift -> {
-                                                    { isModifierCapitalized.value = !isModifierCapitalized.value }
-                                                }
-                                                SpecialTags.BackSpace -> {
-                                                    {
-                                                        if (cursorPosition.value > 0) {
-                                                            enteredText.value = enteredText.value.filterIndexed { index, c -> index != cursorPosition.value - 1 }
-                                                            cursorPosition.value = cursorPosition.value - 1
-                                                        }
-                                                    }
-                                                }
-                                            }
+                                            isUpperCase = isModifierCapitalized.value
                                         )
                                     } else {
                                         key.toView(
-                                            isUpperCase = isModifierCapitalized.value,
-                                            onSelectedEmitString = { it.appendToState() })
+                                            isUpperCase = isModifierCapitalized.value
+                                        )
                                     }
                                 }
                             }

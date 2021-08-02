@@ -49,7 +49,16 @@ interface MenuItem {
     }
 }
 
-
+fun String.toMultiTextMenuItems(labelColor: Color? = ChipItemColors.TEXT_WHITE) : List<TextMenuItem> {
+    return this.split('\n').map {
+        TextMenuItem(
+            title = it,
+            labelColor = ChipItemColors.TEXT_WHITE,
+            isSelectable = false,
+            onClicked = {}
+        )
+    }
+}
 
 data class TextMenuItem(
     val title : String,
