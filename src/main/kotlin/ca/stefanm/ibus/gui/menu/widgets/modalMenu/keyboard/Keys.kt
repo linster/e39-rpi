@@ -1,12 +1,27 @@
 package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 
-object SpecialTags {
-    object Tab
-    object CapsLock
-    object Spacebar
+enum class SpecialTags {
+    Tab,
+    CapsLock,
+    Spacebar,
+    LeftArrow,
+    RightArrow,
+    Cancel,
+    Return,
+    Shift
 }
 
 const val TabSpacerLabel = "Tab"
@@ -24,7 +39,7 @@ data class QwertyKeyDefinition(
     val upperCaseLabel : String = lowerCaseLabel.uppercase(),
     val shiftModifierLabel : String = upperCaseLabel,
     val keySize : KeySize = KeySize.NORMAL,
-    val specialTag : Any? = null //For keys with empty labels, so we can do an equality check on a tab vs caps lock.
+    val specialTag : SpecialTags? = null //For keys with empty labels, so we can do an equality check on a tab vs caps lock.
 ) {
     enum class KeySize(val scale : Double) {
         NORMAL(1.0),
@@ -38,15 +53,40 @@ data class QwertyKeyDefinition(
 
 @Composable
 internal fun QwertyKeyDefinition.toView(
-    isSelectableLowerCase : Boolean = true,
-    isSelectableUpperCase : Boolean = true,
+    isUpperCase : Boolean = false,
     isSelected : Boolean = false,
     hideLabelIfNotCurrentlySelectable : Boolean = true, //If we are in SHIFT modifier, and there's keys that aren't selectable, keep the key but hide the label.
     onSelectedEmitString : ((char : String) -> Unit)? = null,
     onSelected : (isModifierUpperCase : Boolean) -> Unit = { onSelectedEmitString?.invoke(if (it) upperCaseLabel else lowerCaseLabel)},
 ) {
 
-    //TODO use the KeySize to make an aspect ratio for a button.
+    Box(Modifier.border(
+        width = 4.dp,
+        color = if (isSelected) {
+            ChipItemColors.SelectedColor
+        } else {
+            ChipItemColors.MenuBackground
+        })
+        .height(38.dp)
+        .then(if (keySize == QwertyKeyDefinition.KeySize.FLEX) {
+            Modifier.fillMaxWidth()
+        } else {
+            Modifier.aspectRatio(keySize.scale.toFloat())
+        })
+        .clickable { onSelected(isUpperCase) }
+        , contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (hideLabelIfNotCurrentlySelectable && isSelected) "" else {
+                if (isUpperCase) {
+                    upperCaseLabel
+                } else {
+                    lowerCaseLabel
+                }
+            },
+            color = Color.White
+        )
+    }
 }
 
 internal val qwertyKeyboardByRow : List<List<QwertyKeyDefinition>> = listOf(
@@ -94,10 +134,10 @@ internal val qwertyKeyboardByRow : List<List<QwertyKeyDefinition>> = listOf(
         QwertyKeyDefinition("l"),
         QwertyKeyDefinition(";", ":"),
         QwertyKeyDefinition("'", "\""),
-        QwertyKeyDefinition(ReturnLabel, ReturnLabel, keySize = QwertyKeyDefinition.KeySize.FLEX)
+        QwertyKeyDefinition(ReturnLabel, ReturnLabel, keySize = QwertyKeyDefinition.KeySize.FLEX, specialTag = SpecialTags.Return)
     ),
     listOf(
-        QwertyKeyDefinition(ShiftLabel, ShiftLabel, keySize = QwertyKeyDefinition.KeySize.LEFT_SHIFT),
+        QwertyKeyDefinition(ShiftLabel, ShiftLabel, keySize = QwertyKeyDefinition.KeySize.LEFT_SHIFT, specialTag = SpecialTags.Shift),
         QwertyKeyDefinition("z"),
         QwertyKeyDefinition("x"),
         QwertyKeyDefinition("c"),
@@ -108,14 +148,14 @@ internal val qwertyKeyboardByRow : List<List<QwertyKeyDefinition>> = listOf(
         QwertyKeyDefinition(",", "<"),
         QwertyKeyDefinition(".", ">"),
         QwertyKeyDefinition("/", "?"),
-        QwertyKeyDefinition(ShiftLabel, ShiftLabel, keySize = QwertyKeyDefinition.KeySize.FLEX)
+        QwertyKeyDefinition(ShiftLabel, ShiftLabel, keySize = QwertyKeyDefinition.KeySize.FLEX, specialTag = SpecialTags.Shift)
     ),
     listOf(
         //TODO when laying this out, put some spaces in here with weights.
         QwertyKeyDefinition("", "", keySize = QwertyKeyDefinition.KeySize.SPACE, specialTag = SpecialTags.Spacebar),
-        QwertyKeyDefinition(LeftArrowLabel, LeftArrowLabel),
-        QwertyKeyDefinition(RightArrowLabel, RightArrowLabel),
-        QwertyKeyDefinition(CancelLabel, CancelLabel)
+        QwertyKeyDefinition(LeftArrowLabel, LeftArrowLabel, specialTag = SpecialTags.LeftArrow),
+        QwertyKeyDefinition(RightArrowLabel, RightArrowLabel, specialTag = SpecialTags.RightArrow),
+        QwertyKeyDefinition(CancelLabel, CancelLabel, specialTag = SpecialTags.Cancel)
     )
 
 )

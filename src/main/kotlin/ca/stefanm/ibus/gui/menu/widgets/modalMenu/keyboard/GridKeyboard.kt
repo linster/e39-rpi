@@ -43,6 +43,6 @@ internal object GridKeyboard {
         aspectRatio : Float,
         keys : List<QwertyKeyDefinition> //Populated from top-left, across, then down.
     ) {
-        
+
     }
 }
