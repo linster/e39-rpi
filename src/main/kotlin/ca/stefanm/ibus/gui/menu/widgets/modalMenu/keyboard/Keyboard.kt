@@ -26,6 +26,7 @@ object Keyboard {
 
     fun showKeyboard(
         type: KeyboardType,
+        prefilled : String = "",
         onTextEntered : (entered : String) -> Unit,
         closeWithoutEntry : () -> Unit
     ) : @Composable () -> Unit = {
@@ -37,9 +38,9 @@ object Keyboard {
 //                closeWithoutEntry()
             }
             when (type) {
-                KeyboardType.FULL -> QwertyKeyboard.QwertyKeyboard(onTextEntered, closeWithoutEntry)
-                KeyboardType.NUMERIC -> GridKeyboard.NumericKeyboard(onTextEntered, closeWithoutEntry)
-                KeyboardType.TELEPHONE -> GridKeyboard.TelephoneKeyboard(onTextEntered, closeWithoutEntry)
+                KeyboardType.FULL -> QwertyKeyboard.QwertyKeyboard(prefilled, onTextEntered, closeWithoutEntry)
+                KeyboardType.NUMERIC -> GridKeyboard.NumericKeyboard(prefilled, onTextEntered, closeWithoutEntry)
+                KeyboardType.TELEPHONE -> GridKeyboard.TelephoneKeyboard(prefilled, onTextEntered, closeWithoutEntry)
             }
         }
     }
@@ -109,15 +110,11 @@ object Keyboard {
                     )
                 }
 
-                if (pendingText.isEmpty()) {
+                if (pendingText.isEmpty() || cursorAfterIndex == 0) {
                     displayCursor()
                 }
 
                 pendingText.forEachIndexed { index, c ->
-                    if (cursorAfterIndex == -1) {
-                        displayCursor()
-                    }
-
                     displayChar(c)
                     if (index + 1 == cursorAfterIndex) {
                         displayCursor()

@@ -7,6 +7,7 @@ internal object GridKeyboard {
 
     @Composable
     internal fun NumericKeyboard(
+        prefilled : String = "",
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit
     ) {
@@ -15,6 +16,7 @@ internal object GridKeyboard {
 
     @Composable
     internal fun TelephoneKeyboard(
+        prefilled : String = "",
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit
     ) {
@@ -23,6 +25,7 @@ internal object GridKeyboard {
 
     @Composable
     private fun GridKeyboard(
+        prefilled : String = "",
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit,
         rows : Int,
@@ -31,18 +34,5 @@ internal object GridKeyboard {
         keys : List<QwertyKeyDefinition> //Populated from top-left, across, then down.
     ) {
         //Hold the preview window AND the buttons here
-    }
-
-
-    @Composable
-    fun GridKeyboardButtons(
-        onTextEntered: (entered: String) -> Unit,
-        closeWithoutEntry: () -> Unit,
-        rows : Int,
-        columns : Int,
-        aspectRatio : Float,
-        keys : List<QwertyKeyDefinition> //Populated from top-left, across, then down.
-    ) {
-
     }
 }

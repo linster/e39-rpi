@@ -68,11 +68,13 @@ class ModalMenuService @Inject constructor(
 
     fun showKeyboard(
         type : Keyboard.KeyboardType,
+        prefilled : String = "",
         onTextEntered : (entered : String) -> Unit
     ) {
         _modalMenuOverlay.value = {
             Keyboard.showKeyboard(
                 type = type,
+                prefilled = prefilled,
                 onTextEntered = { onTextEntered(it); closeModalMenu() },
                 closeWithoutEntry = this::closeModalMenu
             )()

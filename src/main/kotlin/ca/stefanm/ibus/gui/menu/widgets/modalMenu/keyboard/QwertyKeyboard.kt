@@ -2,18 +2,18 @@ package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.ginsberg.cirkle.circular
 
 internal object QwertyKeyboard {
 
 
     @Composable
     internal fun QwertyKeyboard(
+        preFilled : String = "",
         onTextEntered: (entered: String) -> Unit,
         closeWithoutEntry: () -> Unit
     ) {
@@ -24,8 +24,9 @@ internal object QwertyKeyboard {
             verticalArrangement = Arrangement.Bottom
         ) {
 
-            val enteredText = remember { mutableStateOf("")}
-            val cursorPosition = remember { mutableStateOf(-1) }
+            val enteredText = remember { mutableStateOf(preFilled)}
+
+            val cursorPosition = remember { mutableStateOf(preFilled.length) }
 
             Keyboard.CursorTextBoxViewer(enteredText.value, cursorPosition.value)
 
@@ -37,8 +38,8 @@ internal object QwertyKeyboard {
                 cursorPosition.value = cursorPosition.value + this.length
             }
 
-            fun backSpace() {
-
+            LaunchedEffect(enteredText.value, cursorPosition.value) {
+                println("Text, Cursor: ${enteredText.value.toList()}, ${cursorPosition.value}")
             }
 
             Box(Modifier.wrapContentSize().align(Alignment.CenterHorizontally)) {
@@ -76,10 +77,23 @@ internal object QwertyKeyboard {
                                                     { " ".appendToState() }
                                                 }
                                                 SpecialTags.LeftArrow -> {
-                                                    { cursorPosition.value = cursorPosition.value - 1 }
+                                                    {
+                                                        if (cursorPosition.value > 0) {
+                                                            cursorPosition.let { pos ->
+                                                                pos.value = (pos.value - 1).rem(enteredText.value.length)
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                                 SpecialTags.RightArrow -> {
-                                                    { cursorPosition.value = cursorPosition.value + 1 }
+                                                    {
+                                                        cursorPosition.let { pos ->
+                                                            if (pos.value != enteredText.value.length) {
+                                                                pos.value =
+                                                                    (pos.value + 1).rem(enteredText.value.length + 1)
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                                 SpecialTags.Cancel -> {
                                                     { closeWithoutEntry() }
@@ -91,7 +105,12 @@ internal object QwertyKeyboard {
                                                     { isModifierCapitalized.value = !isModifierCapitalized.value }
                                                 }
                                                 SpecialTags.BackSpace -> {
-                                                    { backSpace() }
+                                                    {
+                                                        if (cursorPosition.value > 0) {
+                                                            enteredText.value = enteredText.value.filterIndexed { index, c -> index != cursorPosition.value - 1 }
+                                                            cursorPosition.value = cursorPosition.value - 1
+                                                        }
+                                                    }
                                                 }
                                             }
                                         )
@@ -104,7 +123,6 @@ internal object QwertyKeyboard {
                             }
                         }
                     }
-
                 }
             }
         }

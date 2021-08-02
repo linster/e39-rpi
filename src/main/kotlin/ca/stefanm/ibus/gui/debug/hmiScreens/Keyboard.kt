@@ -44,7 +44,7 @@ class DebugHmiKeyboard @Inject constructor(
                     TextMenuItem(
                         title = "Open Keyboard Type ${it.name}"
                     ) {
-                        modalMenuService.showKeyboard(it) { text -> enteredText.value  =text }
+                        modalMenuService.showKeyboard(it, "") { text -> enteredText.value  =text }
                     }
                 }
             )
