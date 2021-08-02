@@ -48,9 +48,6 @@ data class QwertyKeyDefinition(
     val isLowerCaseSelectable : Boolean = true,
     val isUpperCaseSelectable : Boolean = isLowerCaseSelectable,
 
-    val onSelectedEmitString : ((char : String) -> Unit)? = null,
-    val onSelected : (isModifierUpperCase : Boolean) -> Unit = { onSelectedEmitString?.invoke(if (it) upperCaseLabel else lowerCaseLabel)},
-
     val specialTag : SpecialTags? = null //For keys with empty labels, so we can do an equality check on a tab vs caps lock.
 ) {
     enum class KeySize(val scale : Double) {
@@ -66,7 +63,7 @@ data class QwertyKeyDefinition(
 @Composable
 internal fun QwertyKeyDefinition.toView(
     isUpperCase : Boolean = false,
-    hideLabelIfNotCurrentlySelectable : Boolean = true, //If we are in SHIFT modifier, and there's keys that aren't selectable, keep the key but hide the label.
+    onMouseClick : () -> Unit = {}
 ) {
 
     Box(Modifier.border(
@@ -87,17 +84,11 @@ internal fun QwertyKeyDefinition.toView(
         } else {
             Modifier.aspectRatio(keySize.scale.toFloat())
         })
-        .clickable { onSelected(isUpperCase) }
+        .clickable { onMouseClick() }
         , contentAlignment = Alignment.Center
     ) {
         Text(
-            text = if (hideLabelIfNotCurrentlySelectable && isSelected) "" else {
-                if (isUpperCase) {
-                    upperCaseLabel
-                } else {
-                    lowerCaseLabel
-                }
-            },
+            text = if (isUpperCase) { upperCaseLabel } else { lowerCaseLabel },
             color = Color.White,
             fontWeight = FontWeight.Bold
         )
