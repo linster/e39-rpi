@@ -2,8 +2,10 @@ package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
+import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -13,6 +15,7 @@ import javax.inject.Inject
 
 //This is an empty menu that depends on a knob scroll listener so
 //that the root menu that needs one works well.
+@AutoDiscover
 class EmptyMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser
 ) : NavigationNode<Nothing> {

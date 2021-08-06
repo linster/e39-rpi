@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.debug.hmiScreens
 
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -22,6 +24,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.*
 import javax.inject.Inject
 
+@AutoDiscover
 class DebugHmiMenuTest @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser
 ) : NavigationNode<Nothing> {
@@ -49,7 +52,7 @@ class DebugHmiMenuTest @Inject constructor(
     }
 }
 
-
+@AutoDiscover
 class DebugHmiMenuTestTwoColumn @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
@@ -155,6 +158,7 @@ class DebugHmiMenuTestTwoColumn @Inject constructor(
     }
 }
 
+@AutoDiscover
 class DebugHmiMenuTestOneColumn @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val notificationHub: NotificationHub,

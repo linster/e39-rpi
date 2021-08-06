@@ -45,6 +45,12 @@ repositories {
 //}
 
 dependencies {
+
+
+    kapt(project(":autoDiscovery"))
+    implementation(project(":autoDiscovery"))
+    implementation(project(":autoDiscoveryAnnotations"))
+
     implementation("com.squareup.okio:okio:2.6.0")
     implementation(compose.desktop.currentOs)
 
@@ -92,6 +98,7 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("io.ktor:ktor-client-logging:1.5.1")
+
 
 
 }

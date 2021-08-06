@@ -6,3 +6,5 @@ pluginManagement {
 }
 
 rootProject.name = "rpi"
+include("autoDiscoveryAnnotations")
+include("autoDiscovery")

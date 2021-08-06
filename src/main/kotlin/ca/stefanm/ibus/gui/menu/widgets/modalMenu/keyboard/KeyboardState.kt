@@ -29,10 +29,19 @@ internal fun StateManagedKeyboard(
     val isCapsLocked = remember { mutableStateOf(false) }
     val isModifierCapitalized = remember { mutableStateOf(false) }
 
+    LaunchedEffect(enteredText.value, cursorPosition.value) {
+        println(enteredText.value to cursorPosition.value)
+    }
+
     fun String.appendToState() {
         //TODO Append where the cursor is, not just at the end.
-        enteredText.value = enteredText.value + this
-        cursorPosition.value = cursorPosition.value + this.length
+        if (cursorPosition.value == enteredText.value.length) {
+            enteredText.value = enteredText.value + this
+            cursorPosition.value = cursorPosition.value + this.length
+        } else {
+            enteredText.value = enteredText.value + this
+            cursorPosition.value = cursorPosition.value + this.length
+        }
     }
 
     fun QwertyKeyDefinition.onSelected() {
