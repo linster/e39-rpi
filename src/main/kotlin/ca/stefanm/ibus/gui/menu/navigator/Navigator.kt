@@ -28,7 +28,7 @@ class NavigationModule {
     }
 
     @Provides
-    @Named(ROOT_NODE)
+    @Named(value = ROOT_NODE)
     @JvmSuppressWildcards(suppress = false)
     fun provideRootNode(
 //        mainMenu: MainMenu

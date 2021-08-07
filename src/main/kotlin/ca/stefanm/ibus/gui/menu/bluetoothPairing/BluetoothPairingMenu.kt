@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import javax.inject.Inject
 
+@AutoDiscover
 class BluetoothPairingMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser
 ) : NavigationNode<BluetoothPairingMenu.PairingResult> {

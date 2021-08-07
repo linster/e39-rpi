@@ -5,6 +5,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
@@ -20,6 +21,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
 @ApplicationScope
+@AutoDiscover
 class ComposeDebugMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val textEntry: TextEntry,

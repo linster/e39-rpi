@@ -1,9 +1,23 @@
 package ca.stefanm.ibus.autoDiscover
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+
+
+
+//https://stackoverflow.com/questions/46773519/accessing-com-sun-tools-javac-util-from-java-9
+//import com.sun.tools.javac.code.Symbol
+//import com.sun.tools.javac.code.Symbol.ClassSymbol
+
+import dagger.Module
+import dagger.Provides
+import dagger.multibindings.ElementsIntoSet
 import java.io.File
+import java.lang.reflect.WildcardType
 import javax.annotation.processing.*
+import javax.inject.Named
 import javax.lang.model.SourceVersion
+import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
@@ -31,13 +45,60 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
         super.init(processingEnv)
     }
 
-    override fun process(p0: MutableSet<out TypeElement>?, p1: RoundEnvironment?): Boolean {
+    override fun process(p0: MutableSet<out TypeElement>, env: RoundEnvironment): Boolean {
         println("BOB WAT ANNOTATION")
 
 //        messager.printMessage(Diagnostic.Kind.ERROR, "BOB WAT WAS HERE")
 //        messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "BOB WAT WARNED YOU")
 
+        generateSource(env.getElementsAnnotatedWith(p0.first()))
 
         return true
+    }
+
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+    private fun generateSource(elements : Set<Element>) {
+
+        val file = FileSpec.builder(
+            "ca.stefanm.ibus.gui.menu.navigator",
+            "AutoDiscoveredNodes"
+        ).addType(
+            TypeSpec.classBuilder("AutoDiscoveredNodesModule")
+                .addAnnotation(Module::class)
+                .addFunction(
+                    FunSpec.builder("provideDiscoveredNodes")
+                        .addAnnotation(Provides::class)
+                        .addAnnotation(ElementsIntoSet::class)
+                        .addAnnotation(
+                            AnnotationSpec.builder(Named::class)
+                                .addMember("all_nodes")
+                                .build()
+                        )
+                        .returns(
+                            ClassName("kotlin.collections", "Set")
+                                .parameterizedBy(
+                                    ClassName("ca.stefanm.ibus.gui.menu.navigator", "NavigationNode")
+                                    //TODO need to have a * wildcard parameterized type here.
+                                    //.parameterizedBy()
+                                )
+                        )
+                        .apply {
+                            elements.forEachIndexed { index, element ->
+
+                                //Todo make a ClassName for each of these
+
+//                                val paramType = with ((element as ClassSymbol).asClassName()) {
+//                                    ClassName(packageName, simpleName)
+//                                }
+
+                                //
+                                addParameter(index, String::class)
+                            }
+                        }
+                        .build()
+                ).build()
+        ).build()
+
+        file.writeTo(System.out)
     }
 }
