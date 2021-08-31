@@ -36,28 +36,28 @@ class NavigationModule {
         emptyMenu: EmptyMenu
     ) : NavigationNode<*> = emptyMenu
 
-    @Provides
-    @ElementsIntoSet
-    @Named(ALL_NODES)
-    fun provideAllNodes(
-        composeDebugMenu: ComposeDebugMenu,
-        bluetoothPairingMenu: BluetoothPairingMenu,
-        debugHmiRoot: DebugHmiRoot,
-        debugHmiMenuTestTwoColumn: DebugHmiMenuTestTwoColumn,
-        debugHmiMenuTestOneColumn: DebugHmiMenuTestOneColumn,
-        debugHmiKeyboard: DebugHmiKeyboard,
-        emptyMenu: EmptyMenu,
-        bmwMainMenu: BMWMainMenu
-    ) : Set<NavigationNode<*>> = setOf<NavigationNode<*>>(
-        composeDebugMenu,
-        bluetoothPairingMenu,
-        debugHmiRoot,
-        debugHmiMenuTestTwoColumn,
-        debugHmiMenuTestOneColumn,
-        debugHmiKeyboard,
-        emptyMenu,
-        bmwMainMenu
-    )
+//    @Provides
+//    @ElementsIntoSet
+//    @Named(ALL_NODES)
+//    fun provideAllNodes(
+//        composeDebugMenu: ComposeDebugMenu,
+//        bluetoothPairingMenu: BluetoothPairingMenu,
+//        debugHmiRoot: DebugHmiRoot,
+//        debugHmiMenuTestTwoColumn: DebugHmiMenuTestTwoColumn,
+//        debugHmiMenuTestOneColumn: DebugHmiMenuTestOneColumn,
+//        debugHmiKeyboard: DebugHmiKeyboard,
+//        emptyMenu: EmptyMenu,
+//        bmwMainMenu: BMWMainMenu
+//    ) : Set<NavigationNode<*>> = setOf<NavigationNode<*>>(
+//        composeDebugMenu,
+//        bluetoothPairingMenu,
+//        debugHmiRoot,
+//        debugHmiMenuTestTwoColumn,
+//        debugHmiMenuTestOneColumn,
+//        debugHmiKeyboard,
+//        emptyMenu,
+//        bmwMainMenu
+//    )
 
 }
 
@@ -143,7 +143,7 @@ interface NavigationNode<Result> {
 
 class NavigationNodeTraverser @Inject constructor(
     private val navigator: Provider<Navigator>,
-    @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
+    @Named("all_nodes") private val allNodes : Provider<Set<NavigationNode<*>>>,
     private val logger: Logger
 ) {
 
