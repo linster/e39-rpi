@@ -2,25 +2,14 @@ package ca.stefanm.ibus.autoDiscover
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-//import com.sun.tools.javac.code.Symbol
-
-
-//https://stackoverflow.com/questions/46773519/accessing-com-sun-tools-javac-util-from-java-9
-//import com.sun.tools.javac.code.Symbol
-//import com.sun.tools.javac.code.Symbol.ClassSymbol
-
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
-import java.io.File
-import java.lang.reflect.WildcardType
 import javax.annotation.processing.*
 import javax.inject.Named
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
-import javax.tools.Diagnostic
 
 class NodeDiscoveryProcessor : AbstractProcessor() {
 
@@ -46,13 +35,9 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
     }
 
     override fun process(p0: MutableSet<out TypeElement>, env: RoundEnvironment): Boolean {
-        println("BOB WAT ANNOTATION")
-
-//        messager.printMessage(Diagnostic.Kind.ERROR, "BOB WAT WAS HERE")
-//        messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "BOB WAT WARNED YOU")
-
-        generateSource(env.getElementsAnnotatedWith(p0.first()))
-
+        if (p0.isNotEmpty()) {
+            generateSource(env.getElementsAnnotatedWith(p0.first()))
+        }
         return true
     }
 
@@ -78,8 +63,7 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                             ClassName("kotlin.collections", "Set")
                                 .parameterizedBy(
                                     ClassName("ca.stefanm.ibus.gui.menu.navigator", "NavigationNode")
-                                    //TODO need to have a * wildcard parameterized type here.
-                                    //.parameterizedBy()
+                                        .parameterizedBy(STAR)
                                 )
                         )
                         .apply {
@@ -110,5 +94,6 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
         ).build()
 
         file.writeTo(System.out)
+        file.writeTo(filer)
     }
 }
