@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 import javax.annotation.processing.*
+import javax.inject.Inject
 import javax.inject.Named
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
@@ -44,21 +45,39 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private fun generateSource(elements : Set<Element>) {
 
+        val constructor = FunSpec.constructorBuilder()
+            .addAnnotation(Inject::class)
+            .apply {
+                elements.forEach {
+                    addParameter(
+                        (it.asType().asTypeName() as ClassName).simpleName.lowercase(),
+                        it.asType().asTypeName(),
+                        KModifier.PRIVATE
+                    )
+                }
+            }.build()
+
         val file = FileSpec.builder(
             "ca.stefanm.ibus.gui.menu.navigator",
-            "AutoDiscoveredNodes"
+            "AutoDiscoveredNodesProvider"
         ).addType(
-            TypeSpec.classBuilder("AutoDiscoveredNodesModule")
-                .addAnnotation(Module::class)
-                .addFunction(
-                    FunSpec.builder("provideDiscoveredNodes")
-                        .addAnnotation(Provides::class)
-                        .addAnnotation(ElementsIntoSet::class)
-                        .addAnnotation(
-                            AnnotationSpec.builder(Named::class)
-                                .addMember("\"all_nodes\"")
-                                .build()
+            TypeSpec.classBuilder("AutoDiscoveredNodesProvider")
+                .primaryConstructor(constructor)
+                .apply {
+                    elements.forEach {
+                        addProperty(
+                            PropertySpec.builder(
+                                (it.asType().asTypeName() as ClassName).simpleName.lowercase(),
+                                it.asType().asTypeName(),
+                            ).initializer(
+                                (it.asType().asTypeName() as ClassName).simpleName.lowercase(),
+                            ).addModifiers(KModifier.PRIVATE)
+                            .build()
                         )
+                    }
+                }
+                .addFunction(
+                    FunSpec.builder("getAllNodes")
                         .returns(
                             ClassName("kotlin.collections", "Set")
                                 .parameterizedBy(
@@ -66,17 +85,17 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                                         .parameterizedBy(STAR)
                                 )
                         )
-                        .apply {
-                            elements.forEachIndexed { index, element ->
-
-                                val elementName = (element.asType().asTypeName() as ClassName).simpleName
-
-                                addParameter(ParameterSpec.builder(
-                                    elementName.lowercase(),
-                                    element.asType().asTypeName()
-                                ).build())
-                            }
-                        }
+//                        .apply {
+//                            elements.forEachIndexed { index, element ->
+//
+//                                val elementName = (element.asType().asTypeName() as ClassName).simpleName
+//
+//                                addParameter(ParameterSpec.builder(
+//                                    elementName.lowercase(),
+//                                    element.asType().asTypeName()
+//                                ).build())
+//                            }
+//                        }
                         .apply {
                             val code = CodeBlock.builder()
                                 .add("return setOf(\n")
