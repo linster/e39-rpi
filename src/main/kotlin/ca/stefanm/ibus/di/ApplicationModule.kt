@@ -14,7 +14,6 @@ import ca.stefanm.ibus.gui.di.GuiModule
 import ca.stefanm.ibus.gui.di.MapModule
 import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
 import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
-import ca.stefanm.ibus.gui.menu.navigator.AutoDiscoveredNodesModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
@@ -37,7 +36,6 @@ annotation class ApplicationScope
     ApplicationModule::class,
     GuiModule::class,
     NavigationModule::class,
-    AutoDiscoveredNodesModule::class,
     MapModule::class
 ])
 @ApplicationScope

@@ -143,6 +143,15 @@ interface NavigationNode<Result> {
 
 class NavigationNodeTraverser @Inject constructor(
     private val navigator: Provider<Navigator>,
+
+    //TODO
+    //TODO what we could do here is instead of depending on a provider of a set
+    //TODO that dagger builds, we could depend on a class that contains a set
+    //TODO ...and that class has a get() method that returns the set we're querying.
+    //TODO That way, the code we generate from kotlin poet doesn't need dagger junk
+    //TODO in it, and we then don't need two annotation passes (unnsuported by KAPT,
+    //TODO ... dunno if KSP and KAPT play nice together. Does dagger work on KSP?)
+
     @Named("all_nodes") private val allNodes : Provider<Set<NavigationNode<*>>>,
     private val logger: Logger
 ) {
