@@ -2,7 +2,7 @@ package ca.stefanm.ibus.autoDiscover
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-
+//import com.sun.tools.javac.code.Symbol
 
 
 //https://stackoverflow.com/questions/46773519/accessing-com-sun-tools-javac-util-from-java-9
@@ -71,7 +71,7 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                         .addAnnotation(ElementsIntoSet::class)
                         .addAnnotation(
                             AnnotationSpec.builder(Named::class)
-                                .addMember("all_nodes")
+                                .addMember("\"all_nodes\"")
                                 .build()
                         )
                         .returns(
@@ -85,15 +85,25 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                         .apply {
                             elements.forEachIndexed { index, element ->
 
-                                //Todo make a ClassName for each of these
+                                val elementName = (element.asType().asTypeName() as ClassName).simpleName
 
-//                                val paramType = with ((element as ClassSymbol).asClassName()) {
-//                                    ClassName(packageName, simpleName)
-//                                }
-
-                                //
-                                addParameter(index, String::class)
+                                addParameter(ParameterSpec.builder(
+                                    elementName.lowercase(),
+                                    element.asType().asTypeName()
+                                ).build())
                             }
+                        }
+                        .apply {
+                            val code = CodeBlock.builder()
+                                .add("return setOf(\n")
+                                .withIndent {
+                                    elements.map {
+                                        add((it.asType().asTypeName() as ClassName).simpleName.lowercase() + ",\n")
+                                    }
+                                }
+                                .add(")")
+                                .build()
+                            addStatement(code.toString())
                         }
                         .build()
                 ).build()
