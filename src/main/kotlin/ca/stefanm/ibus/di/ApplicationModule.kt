@@ -14,6 +14,8 @@ import ca.stefanm.ibus.gui.di.GuiModule
 import ca.stefanm.ibus.gui.di.MapModule
 import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
 import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
+import ca.stefanm.ibus.di.AutoDiscoveredNodesProvider
+import ca.stefanm.ibus.gui.menu.navigator.NavigationBindsModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
@@ -26,6 +28,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import java.util.*
 import javax.inject.Named
 import javax.inject.Scope
 
@@ -36,6 +39,7 @@ annotation class ApplicationScope
     ApplicationModule::class,
     GuiModule::class,
     NavigationModule::class,
+    NavigationBindsModule::class,
     MapModule::class
 ])
 @ApplicationScope
@@ -47,6 +51,8 @@ interface ApplicationComponent {
 
     fun tileFetcher() : TileFetcher
     fun tileCacheClearer() : TileServerImageCacheClearer
+
+    fun autoDiscoveredNodesProvider() : AutoDiscoveredNodesProvider
 
     fun knobListenerService() : KnobListenerService
     fun modalMenuService() : ModalMenuService

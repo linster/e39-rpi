@@ -17,6 +17,10 @@ plugins {
     id("java")
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 
 //https://imperceptiblethoughts.com/shadow/getting-started/
 

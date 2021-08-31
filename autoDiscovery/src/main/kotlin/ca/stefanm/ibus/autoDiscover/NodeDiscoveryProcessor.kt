@@ -58,8 +58,8 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
             }.build()
 
         val file = FileSpec.builder(
-            "ca.stefanm.ibus.gui.menu.navigator",
-            "AutoDiscoveredNodesProvider"
+            "ca.stefanm.ibus.di",
+            "AutoDiscoveredNodesProviderImpl"
         ).addType(
             TypeSpec.classBuilder("AutoDiscoveredNodesProvider")
                 .primaryConstructor(constructor)
@@ -113,6 +113,20 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
         ).build()
 
         file.writeTo(System.out)
+
+
+        //TODO don't write this using the filer to make a source
+        //TODO file. instead, write to a random file.
+        //TODO, then make a gradle task that copies that random file.
+        //TODO the gradle task can be something like "AutoDiscoverScreens"
+        //TODO. This task must be run once, which will run kapt to process
+        //TODO all the annotations, then it will create the file we need and
+        //TODO place it in the DI folder. Then we can run the kapt again.
+        //TODO we can get fancy by making a stub class of this where the getNodes()
+        //TODO doesn't return anything, but this will allow us to run dagger to
+        //TODO generate the factories. Then the AutoDiscover gradle task can be used
+        //TODO to overwrite that stub file.
         file.writeTo(filer)
+
     }
 }

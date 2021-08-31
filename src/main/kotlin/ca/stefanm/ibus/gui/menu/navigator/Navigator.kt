@@ -1,7 +1,10 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ibus.di.ApplicationComponent
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.di.AutoDiscoveredNodesProvider
+import ca.stefanm.ibus.di.AutoDiscoveredNodesProviderImpl
 import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.EmptyMenu
@@ -10,10 +13,13 @@ import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
+import dagger.Binds
+import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 import kotlinx.coroutines.flow.*
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -58,7 +64,12 @@ class NavigationModule {
         emptyMenu,
         bmwMainMenu
     )
+}
 
+@Module
+abstract class NavigationBindsModule {
+    @BindsOptionalOf
+    abstract fun bindAutoProvider(provider: AutoDiscoveredNodesProviderImpl) : Optional<AutoDiscoveredNodesProvider>
 }
 
 @Stable
@@ -152,12 +163,16 @@ class NavigationNodeTraverser @Inject constructor(
     //TODO in it, and we then don't need two annotation passes (unnsuported by KAPT,
     //TODO ... dunno if KSP and KAPT play nice together. Does dagger work on KSP?)
 
-    @Named("all_nodes") private val allNodes : Provider<Set<NavigationNode<*>>>,
+    @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
     private val logger: Logger
 ) {
 
+    private val nodeProvider : AutoDiscoveredNodesProvider by lazy {
+        DaggerApplicationComponent.autoDiscoveredNodesProvider()
+    }
+
     private fun findNode(node : Class<out NavigationNode<*>>) : NavigationNode<*>? {
-        val newNode = allNodes.get().find { it.thisClass == node }
+        val newNode = nodeProvider.find { it.thisClass == node }
         if (newNode == null) {
             logger.e("NAVIGATOR", "No new node found")
             return null
