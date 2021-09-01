@@ -48,6 +48,13 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
         val constructor = FunSpec.constructorBuilder()
             .addAnnotation(Inject::class)
             .apply {
+
+                addParameter(
+                    "autoDiscoveredNodesHolder",
+                    ClassName("ca.stefanm.ibus.di", "AutoDiscoveredNodesHolder"),
+                    KModifier.PRIVATE
+                )
+
                 elements.forEach {
                     addParameter(
                         (it.asType().asTypeName() as ClassName).simpleName.lowercase(),
@@ -59,11 +66,21 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
 
         val file = FileSpec.builder(
             "ca.stefanm.ibus.di",
-            "AutoDiscoveredNodesProviderImpl"
+            "AutoDiscoveredNodesDiscoverer"
         ).addType(
-            TypeSpec.classBuilder("AutoDiscoveredNodesProvider")
+            TypeSpec.classBuilder("AutoDiscoveredNodeDiscoverer")
                 .primaryConstructor(constructor)
                 .apply {
+
+                    addProperty(
+                        PropertySpec.builder(
+                            "autoDiscoveredNodesHolder",
+                            ClassName("ca.stefanm.ibus.di", "AutoDiscoveredNodesHolder")
+                        ).initializer("autoDiscoveredNodesHolder")
+                            .addModifiers(KModifier.PRIVATE)
+                            .build()
+                    )
+
                     elements.forEach {
                         addProperty(
                             PropertySpec.builder(
@@ -78,6 +95,7 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                 }
                 .addFunction(
                     FunSpec.builder("getAllNodes")
+                        //.addModifiers(KModifier.OVERRIDE)
                         .returns(
                             ClassName("kotlin.collections", "Set")
                                 .parameterizedBy(
@@ -85,17 +103,6 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                                         .parameterizedBy(STAR)
                                 )
                         )
-//                        .apply {
-//                            elements.forEachIndexed { index, element ->
-//
-//                                val elementName = (element.asType().asTypeName() as ClassName).simpleName
-//
-//                                addParameter(ParameterSpec.builder(
-//                                    elementName.lowercase(),
-//                                    element.asType().asTypeName()
-//                                ).build())
-//                            }
-//                        }
                         .apply {
                             val code = CodeBlock.builder()
                                 .add("return setOf(\n")
@@ -109,7 +116,10 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                             addStatement(code.toString())
                         }
                         .build()
-                ).build()
+                ).addInitializerBlock(CodeBlock.of(
+                    "autoDiscoveredNodesHolder.autoDiscoveredNodes.addAll(getAllNodes()) \n"
+                ))
+                .build()
         ).build()
 
         file.writeTo(System.out)
