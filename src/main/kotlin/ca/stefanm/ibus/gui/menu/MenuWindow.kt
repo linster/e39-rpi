@@ -63,14 +63,6 @@ class MenuWindow @Inject constructor(
         //TODO this is the root node of the composition so it's a pretty good place to put it.
         //TODO https://developer.android.com/jetpack/compose/compositionlocal
 
-
-        //TODO "nearest composition local provider". We might need to have the caller of each
-        //TODO layout be the provider, and inside the layout then use the upper.
-
-        //TODO, or remove the junk in debug screen 2 with getting the listenForKnob, and
-        //TODO use a composition local provider to access the current we set right here
-        //TODO then down the stack we'll have the knob listener, and this is marked as stable.
-
         val dummyKnobListenerService = KnobListenerService(MutableSharedFlow())
         val providedKnobListenerService = remember { mutableStateOf(realKnobListenerService) }
 

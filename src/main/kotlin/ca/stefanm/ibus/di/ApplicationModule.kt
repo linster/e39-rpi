@@ -50,7 +50,6 @@ interface ApplicationComponent {
     fun tileFetcher() : TileFetcher
     fun tileCacheClearer() : TileServerImageCacheClearer
 
-//    fun autoDiscoveredNodesProvider() : AutoDiscoveredNodesProvider
 
     fun knobListenerService() : KnobListenerService
     fun modalMenuService() : ModalMenuService

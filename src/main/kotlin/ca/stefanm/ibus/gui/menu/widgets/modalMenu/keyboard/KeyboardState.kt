@@ -34,13 +34,17 @@ internal fun StateManagedKeyboard(
     }
 
     fun String.appendToState() {
-        //TODO Append where the cursor is, not just at the end.
         if (cursorPosition.value == enteredText.value.length) {
             enteredText.value = enteredText.value + this
             cursorPosition.value = cursorPosition.value + this.length
         } else {
-            enteredText.value = enteredText.value + this
-            cursorPosition.value = cursorPosition.value + this.length
+            //We're appending in the middle of the string.
+            enteredText.value =
+                enteredText.value.slice(0 until cursorPosition.value) +
+                        this +
+                        enteredText.value.slice(cursorPosition.value .. enteredText.value.lastIndex)
+
+            cursorPosition.value = cursorPosition.value + 1
         }
     }
 

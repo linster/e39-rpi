@@ -45,70 +45,25 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private fun generateSource(elements : Set<Element>) {
 
-        val constructor = FunSpec.constructorBuilder()
-            .addAnnotation(Inject::class)
-            .apply {
-
-                addParameter(
-                    "autoDiscoveredNodesHolder",
-                    ClassName("ca.stefanm.ibus.di", "AutoDiscoveredNodesHolder"),
-                    KModifier.PRIVATE
-                )
-
-                elements.forEach {
-                    addParameter(
-                        (it.asType().asTypeName() as ClassName).simpleName.lowercase(),
-                        it.asType().asTypeName(),
-                        KModifier.PRIVATE
-                    )
-                }
-            }.build()
-
         val file = FileSpec.builder(
             "ca.stefanm.ibus.di",
-            "AutoDiscoveredNodesDiscoverer"
+            "AutoDiscoveredNodesRegistry"
         ).addType(
-            TypeSpec.classBuilder("AutoDiscoveredNodeDiscoverer")
-                .primaryConstructor(constructor)
-                .apply {
-
-                    addProperty(
-                        PropertySpec.builder(
-                            "autoDiscoveredNodesHolder",
-                            ClassName("ca.stefanm.ibus.di", "AutoDiscoveredNodesHolder")
-                        ).initializer("autoDiscoveredNodesHolder")
-                            .addModifiers(KModifier.PRIVATE)
-                            .build()
-                    )
-
-                    elements.forEach {
-                        addProperty(
-                            PropertySpec.builder(
-                                (it.asType().asTypeName() as ClassName).simpleName.lowercase(),
-                                it.asType().asTypeName(),
-                            ).initializer(
-                                (it.asType().asTypeName() as ClassName).simpleName.lowercase(),
-                            ).addModifiers(KModifier.PRIVATE)
-                            .build()
-                        )
-                    }
-                }
+            TypeSpec.classBuilder("AutoDiscoveredNodesRegistry")
+                .primaryConstructor(
+                    FunSpec.constructorBuilder()
+                        .addAnnotation(Inject::class.java)
+                        .build()
+                )
                 .addFunction(
-                    FunSpec.builder("getAllNodes")
-                        //.addModifiers(KModifier.OVERRIDE)
-                        .returns(
-                            ClassName("kotlin.collections", "Set")
-                                .parameterizedBy(
-                                    ClassName("ca.stefanm.ibus.gui.menu.navigator", "NavigationNode")
-                                        .parameterizedBy(STAR)
-                                )
-                        )
+                    FunSpec.builder("getAllDiscoveredNodeClasses")
                         .apply {
                             val code = CodeBlock.builder()
                                 .add("return setOf(\n")
                                 .withIndent {
+//                                    addStatement()
                                     elements.map {
-                                        add((it.asType().asTypeName() as ClassName).simpleName.lowercase() + ",\n")
+                                        add("%T::class.java,\n", (it.asType().asTypeName() as ClassName))
                                     }
                                 }
                                 .add(")")
@@ -116,9 +71,7 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                             addStatement(code.toString())
                         }
                         .build()
-                ).addInitializerBlock(CodeBlock.of(
-                    "autoDiscoveredNodesHolder.autoDiscoveredNodes.addAll(getAllNodes()) \n"
-                ))
+                )
                 .build()
         ).build()
 

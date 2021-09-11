@@ -11,11 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.imageFromResource
 import androidx.compose.ui.window.*
-import ca.stefanm.ibus.gui.debug.windows.DeviceConfigurationViewerWindow
-import ca.stefanm.ibus.gui.debug.windows.KeyEventSimulator
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
-import ca.stefanm.ibus.gui.debug.windows.DebugLaunchpad
-import ca.stefanm.ibus.gui.debug.windows.PaneManagerDebug
+import ca.stefanm.ibus.gui.debug.windows.*
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import javax.inject.Inject
 import javax.inject.Provider
@@ -30,7 +27,7 @@ class LoadingWindow @Inject constructor(
     private val keyEventSimulator: KeyEventSimulator,
     private val debugLaunchpad: DebugLaunchpad,
     private val paneManagerDebug: PaneManagerDebug,
-
+    private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow,
     private val windowManager : Provider<WindowManager>
 ) {
 
@@ -71,6 +68,9 @@ class LoadingWindow @Inject constructor(
                 Item("Pane Manager Debugger",
                     onClick = { windowManager.get().openDebugWindow(paneManagerDebug) },
                     //shortcut = KeyStroke(Key.P)
+                )
+                Item("Navigation Hmi Debugger",
+                    onClick = { windowManager.get().openDebugWindow(hmiNavigatorDebugWindow)},
                 )
             }
             Menu("Configuration") {

@@ -10,13 +10,10 @@ import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
-import dagger.Binds
-import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 import kotlinx.coroutines.flow.*
-import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -43,23 +40,25 @@ class NavigationModule {
     @ElementsIntoSet
     @Named(ALL_NODES)
     fun provideAllNodes(
-        composeDebugMenu: ComposeDebugMenu,
-        bluetoothPairingMenu: BluetoothPairingMenu,
-        debugHmiRoot: DebugHmiRoot,
-        debugHmiMenuTestTwoColumn: DebugHmiMenuTestTwoColumn,
-        debugHmiMenuTestOneColumn: DebugHmiMenuTestOneColumn,
-        debugHmiKeyboard: DebugHmiKeyboard,
-        emptyMenu: EmptyMenu,
-        bmwMainMenu: BMWMainMenu
-    ) : Set<NavigationNode<*>> = setOf<NavigationNode<*>>(
-        composeDebugMenu,
-        bluetoothPairingMenu,
-        debugHmiRoot,
-        debugHmiMenuTestTwoColumn,
-        debugHmiMenuTestOneColumn,
-        debugHmiKeyboard,
-        emptyMenu,
-        bmwMainMenu
+        bluetoothpairingmenu: BluetoothPairingMenu,
+        emptymenu: EmptyMenu,
+        bmwmainmenu: BMWMainMenu,
+        composedebugmenu: ComposeDebugMenu,
+        debughmimenutest: DebugHmiMenuTest,
+        debughmikeyboard: DebugHmiKeyboard,
+        debughmimenutesttwocolumn: DebugHmiMenuTestTwoColumn,
+        debughmimenutestonecolumn: DebugHmiMenuTestOneColumn,
+        debughmiroot: DebugHmiRoot
+    ) : Set<NavigationNode<*>> = setOf(
+        bluetoothpairingmenu,
+        emptymenu,
+        bmwmainmenu,
+        composedebugmenu,
+        debughmimenutest,
+        debughmikeyboard,
+        debughmimenutesttwocolumn,
+        debughmimenutestonecolumn,
+        debughmiroot,
     )
 }
 
@@ -118,6 +117,12 @@ class Navigator @Inject constructor(
         ))
     }
 
+    fun navigateToRoot() {
+        backStack.clear()
+        backStack.addLast(BackStackRecord(rootNode, null))
+        _mainContentScreen.value = backStack.last()
+    }
+
     fun goBack() {
         _mainContentScreen.value = backStack.removeLast()
         if (backStack.isEmpty()) {
@@ -146,6 +151,25 @@ class Navigator @Inject constructor(
 
         _mainContentScreen.value = backStack.last()
     }
+
+    //This is an interface returned to the HMINavigatorDebugWindow.
+    //None of the objects in this interface should ever be modified
+    //in normal operation.
+    interface NavigatorDebugClient {
+        //Don't change this value unless you know what you're doing.
+        val mutableMainContentScreen : MutableStateFlow<BackStackRecord<*>>
+
+        val backStack : ArrayDeque<BackStackRecord<*>>
+    }
+
+    fun getDebugClient() : NavigatorDebugClient {
+        return object : NavigatorDebugClient {
+            override val mutableMainContentScreen: MutableStateFlow<BackStackRecord<*>>
+                get() = _mainContentScreen
+            override val backStack: ArrayDeque<BackStackRecord<*>>
+                get() = this@Navigator.backStack
+        }
+    }
 }
 
 interface NavigationNode<Result> {
@@ -155,17 +179,23 @@ interface NavigationNode<Result> {
 
 class NavigationNodeTraverser @Inject constructor(
     private val navigator: Provider<Navigator>,
-    private val autoDiscoveredNodesHolder: AutoDiscoveredNodesHolder,
+    @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
+    //private val selfRegisteredNavigationNodesHolder: SelfRegisteredNavigationNodesHolder,
     private val logger: Logger
 ) {
 
     private fun findNode(node : Class<out NavigationNode<*>>) : NavigationNode<*>? {
-        val newNode = autoDiscoveredNodesHolder.autoDiscoveredNodes.find { it.thisClass == node }
+        val newNode = allNodes.get().find { it.thisClass == node }
         if (newNode == null) {
-            logger.e("NAVIGATOR", "No new node found")
+            logger.e("NAVIGATOR", "No new node found. Requested ${node.toGenericString()}")
+            //selfRegisteredNavigationNodesHolder.checkAllNodesRegistered()
             return null
         }
         return newNode
+    }
+
+    fun registerAsNavigationTarget(node : NavigationNode<*>) {
+        //selfRegisteredNavigationNodesHolder.registerNode(node)
     }
 
     fun navigateToNode(node : Class<out NavigationNode<*>>) {
@@ -184,6 +214,10 @@ class NavigationNodeTraverser @Inject constructor(
         //Nothing really preventing a bad child from getting a copy of ALL_NODES
         //and setting results on random things.
         navigator.get().setResultForNodeAndGoBack(node, result)
+    }
+
+    fun navigateToRoot() {
+        navigator.get().navigateToRoot()
     }
 
     fun goBack() {

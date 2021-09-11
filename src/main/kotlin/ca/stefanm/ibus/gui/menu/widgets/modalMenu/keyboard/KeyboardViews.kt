@@ -18,6 +18,7 @@ object KeyboardViews {
     //This provides the big blue area popped in from the bottom that we're going to draw the keyboard in.
     @Composable
     internal fun KeyboardPane(
+        maxHeight : Float = 0.6F,
         contents: @Composable () -> Unit
     ) {
         Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
@@ -34,7 +35,7 @@ object KeyboardViews {
                         )
                     )
                     .fillMaxWidth()
-                    .fillMaxHeight(0.6F),
+                    .fillMaxHeight(maxHeight),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Column {

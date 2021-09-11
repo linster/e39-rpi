@@ -34,7 +34,13 @@ object Keyboard {
     ) : @Composable () -> Unit = {
         //This might actually be a good use-case for a CompositionLocal.
 
-        KeyboardViews.KeyboardPane {
+        KeyboardViews.KeyboardPane(
+            maxHeight = when (type) {
+                KeyboardType.FULL -> 0.6F
+                KeyboardType.NUMERIC -> 0.4f
+                KeyboardType.TELEPHONE -> 0.6F
+            }
+        ) {
             when (type) {
                 KeyboardType.FULL -> QwertyKeyboard.QwertyKeyboard(prefilled, knobListenerService, onTextEntered, closeWithoutEntry)
                 KeyboardType.NUMERIC -> GridKeyboard.NumericKeyboard(prefilled, knobListenerService, onTextEntered, closeWithoutEntry)
@@ -42,7 +48,4 @@ object Keyboard {
             }
         }
     }
-
-
-
 }
