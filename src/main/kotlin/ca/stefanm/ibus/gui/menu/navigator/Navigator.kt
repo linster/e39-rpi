@@ -7,6 +7,7 @@ import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.EmptyMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.BluetoothPinConfirmationScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
@@ -41,6 +42,7 @@ class NavigationModule {
     @Named(ALL_NODES)
     fun provideAllNodes(
         bluetoothpairingmenu: BluetoothPairingMenu,
+        bluetoothPinConfirmationScreen: BluetoothPinConfirmationScreen,
         emptymenu: EmptyMenu,
         bmwmainmenu: BMWMainMenu,
         composedebugmenu: ComposeDebugMenu,
@@ -48,9 +50,11 @@ class NavigationModule {
         debughmikeyboard: DebugHmiKeyboard,
         debughmimenutesttwocolumn: DebugHmiMenuTestTwoColumn,
         debughmimenutestonecolumn: DebugHmiMenuTestOneColumn,
-        debughmiroot: DebugHmiRoot
+        debughmiroot: DebugHmiRoot,
+        optionPromptTest: OptionPromptTest,
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
+        bluetoothPinConfirmationScreen,
         emptymenu,
         bmwmainmenu,
         composedebugmenu,
@@ -59,6 +63,7 @@ class NavigationModule {
         debughmimenutesttwocolumn,
         debughmimenutestonecolumn,
         debughmiroot,
+        optionPromptTest
     )
 }
 
@@ -141,10 +146,8 @@ class Navigator @Inject constructor(
                     "not the top node! Node: $node, ${mainContentScreen.value.node}")
         }
 
-        val displayedNodeWithResult = backStack.removeLast()
-
         backStack.last().incomingResult = IncomingResult(
-            resultFrom = displayedNodeWithResult.node.thisClass,
+            resultFrom = _mainContentScreen.value.node.thisClass,
             result = result,
             requestParameters = null
         )
@@ -180,7 +183,6 @@ interface NavigationNode<Result> {
 class NavigationNodeTraverser @Inject constructor(
     private val navigator: Provider<Navigator>,
     @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
-    //private val selfRegisteredNavigationNodesHolder: SelfRegisteredNavigationNodesHolder,
     private val logger: Logger
 ) {
 
@@ -192,10 +194,6 @@ class NavigationNodeTraverser @Inject constructor(
             return null
         }
         return newNode
-    }
-
-    fun registerAsNavigationTarget(node : NavigationNode<*>) {
-        //selfRegisteredNavigationNodesHolder.registerNode(node)
     }
 
     fun navigateToNode(node : Class<out NavigationNode<*>>) {

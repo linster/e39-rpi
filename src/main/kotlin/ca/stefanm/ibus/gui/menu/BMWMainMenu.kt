@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -58,7 +59,7 @@ class BMWMainMenu @Inject constructor(
             val swItems = listOf(
                 TextMenuItem(
                     title = "Bluetooth Pairing",
-                    onClicked = { navigationNodeTraverser.goBack() }
+                    onClicked = { navigationNodeTraverser.navigateToNode(BluetoothPairingMenu::class.java) }
                 ),
                 TextMenuItem(
                     title = "Settings",

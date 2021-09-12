@@ -41,21 +41,23 @@ class DebugHmiRoot @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
-        BmwSingleLineHeader("Debug")
+        Column {
+            BmwSingleLineHeader("Debug")
 
-        HalfScreenMenu.OneColumn(
-            alignment = Alignment.Start,
-            items = listOf(
-                TextMenuItem(
-                    title = "DebugHmiMenuTests",
-                    onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiMenuTest::class.java)}
-                ),
-                TextMenuItem(
-                    title = "DBus-BlueZ",
-                    onClicked = { }
+            HalfScreenMenu.OneColumn(
+                alignment = Alignment.Start,
+                items = listOf(
+                    TextMenuItem(
+                        title = "DebugHmiMenuTests",
+                        onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiMenuTest::class.java) }
+                    ),
+                    TextMenuItem(
+                        title = "DBus-BlueZ",
+                        onClicked = { }
+                    )
                 )
             )
-        )
+        }
 
     }
 }

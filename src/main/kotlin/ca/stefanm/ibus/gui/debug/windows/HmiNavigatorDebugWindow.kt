@@ -153,7 +153,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
         val registeredNodes = allNodes.get().map { it.thisClass }.toSet()
         val discoveredNodes = AutoDiscoveredNodesRegistry().getAllDiscoveredNodeClasses()
 
-        val nonRegisteredNodes = registeredNodes - discoveredNodes
+        val nonRegisteredNodes = discoveredNodes - registeredNodes
 
         if (nonRegisteredNodes.isEmpty()) {
             Text(

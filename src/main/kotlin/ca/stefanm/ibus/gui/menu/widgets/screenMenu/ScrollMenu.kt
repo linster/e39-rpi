@@ -41,6 +41,23 @@ object ScrollMenu {
         }
     }
 
+    @Composable
+    fun QuadrantColumnScrollFromSingleList(
+        items : List<MenuItem>,
+        fullWidth : Boolean = false,
+        displayOptions: ScrollListOptions,
+        maxLines : Int = 7,
+        onScrollListExitSelected : () -> Unit,
+        onScrollListItemSelected : (item : MenuItem) -> Unit = { it.onClicked() },
+        presentation : (@Composable OneColumnScrollListScope.() -> Unit)? = null
+    ) {
+        //Go back items at top left.
+        //Next page at bottom right
+        //Keep track of how many lines.
+
+        //TODO we could use the quadrant list.
+    }
+
     interface TwoColumnScrollListScope {
         val leftItems : List<MenuItem>
         val rightItems : List<MenuItem>
@@ -120,6 +137,7 @@ object ScrollMenu {
         ne : List<MenuItem>,
         sw : List<MenuItem>,
         se : List<MenuItem>,
+        maxLines: Int = 7,
         onScrollListExitSelected : () -> Unit,
         onScrollListItemSelected : (item : MenuItem) -> Unit = { it.onClicked() },
         displayOptions: ScrollListOptions
