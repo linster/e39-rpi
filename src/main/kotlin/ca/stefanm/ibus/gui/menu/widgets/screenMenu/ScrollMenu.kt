@@ -1,7 +1,12 @@
 package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.ginsberg.cirkle.circular
+import java.awt.Menu
+import kotlin.math.ceil
+import kotlin.math.max
 
 object ScrollMenu {
 
@@ -12,10 +17,8 @@ object ScrollMenu {
     @Composable
     fun OneColumnScroll(
         items : List<MenuItem>,
-        fullWidth : Boolean = false,
         displayOptions: ScrollListOptions,
         onScrollListExitSelected : () -> Unit,
-        onScrollListItemSelected : (item : MenuItem) -> Unit = { it.onClicked() },
         presentation : (@Composable OneColumnScrollListScope.() -> Unit)? = null
     ) {
         ConjoinedScrollList(
@@ -23,39 +26,20 @@ object ScrollMenu {
                 ConjoinedListRecord(menuItem, 0, index)
             },
             displayOptions = displayOptions,
+            conjoinedItemSpecialToken = -1,
             onScrollListExitSelected = onScrollListExitSelected,
-            onScrollListItemSelected = onScrollListItemSelected
-        ) ConjoinedScope@ {
-            if (presentation == null) {
-                HalfScreenMenu.OneColumn(
-                    items = this.visibleListSlice.map { it.item },
-                    fullWidth = fullWidth
+        ) { visibleListSlice ->
+            if (presentation == null) { //The default is full-screen menus unless the client wants to do something weird.
+                FullScreenMenu.OneColumn(
+                    items = visibleListSlice.map { it.item }
                 )
             } else {
                 presentation.invoke(object : OneColumnScrollListScope {
                     override val items: List<MenuItem>
-                        get() = this@ConjoinedScope.visibleListSlice.map { it.item }
-
+                        get() = visibleListSlice.map { it.item }
                 })
             }
         }
-    }
-
-    @Composable
-    fun QuadrantColumnScrollFromSingleList(
-        items : List<MenuItem>,
-        fullWidth : Boolean = false,
-        displayOptions: ScrollListOptions,
-        maxLines : Int = 7,
-        onScrollListExitSelected : () -> Unit,
-        onScrollListItemSelected : (item : MenuItem) -> Unit = { it.onClicked() },
-        presentation : (@Composable OneColumnScrollListScope.() -> Unit)? = null
-    ) {
-        //Go back items at top left.
-        //Next page at bottom right
-        //Keep track of how many lines.
-
-        //TODO we could use the quadrant list.
     }
 
     interface TwoColumnScrollListScope {
@@ -69,84 +53,62 @@ object ScrollMenu {
      */
     @Composable
     fun TwoColumnScroll(
-        leftItems: List<MenuItem>,
-        rightItems: List<MenuItem>,
+        items: List<MenuItem>,
         fillFrom : Arrangement.Vertical = Arrangement.Top,
         fillScreen : Boolean = false,
+        maxLines : Int = 6,
         displayOptions: ScrollListOptions,
         onScrollListExitSelected : () -> Unit,
-        onScrollListItemSelected : (item : MenuItem) -> Unit = { it.onClicked() },
         presentation : (@Composable TwoColumnScrollListScope.() -> Unit)? = null
     ) {
 
-        val LEFT = 0
-        val RIGHT = 1
-
-        val conjoinedList = (leftItems.mapIndexed { index, menuItem -> ConjoinedListRecord(menuItem, LEFT, index) }) +
-                (rightItems.mapIndexed { index, menuItem -> ConjoinedListRecord(menuItem, RIGHT, index) })
-
+        val SPECIAL = -1
+        val SOURCE = 0
 
         ConjoinedScrollList(
-            sourceList = conjoinedList,
+            sourceList = items.mapIndexed { index, menuItem -> ConjoinedListRecord(menuItem, SOURCE, index) },
             displayOptions = displayOptions,
-            onScrollListExitSelected = onScrollListExitSelected,
-            onScrollListItemSelected = onScrollListItemSelected
-        ) presentationScope@ {
+            conjoinedItemSpecialToken = SPECIAL,
+            onScrollListExitSelected = onScrollListExitSelected
+        ) { visibleListSlice ->
 
-            val left = this.visibleListSlice
-                .filter { it.sourcePlacementEnum == LEFT }
-                .sortedBy { it.originalItemPosition }
-                .map { it.item }
+            val numberSpecial = visibleListSlice.count { it.sourcePlacementEnum == SPECIAL }
+            val indicesLeft = 0..(maxLines - numberSpecial)
 
-            val right = this.visibleListSlice
-                .filter { it.sourcePlacementEnum == RIGHT }
-                .sortedBy { it.originalItemPosition }
-                .map { it.item }
+            val indicesRight = (indicesLeft.last)..(visibleListSlice.lastIndex)
+
+            val left = visibleListSlice
+                .slice(indicesLeft)
+
+            val right = visibleListSlice
+                .slice(indicesRight)
 
             if (presentation != null) {
                 presentation.invoke(object : TwoColumnScrollListScope {
-                    override val leftItems = left
-                    override val rightItems = rightItems
+                    override val leftItems = left.map { it.item }
+                    override val rightItems = right.map { it.item }
                 })
             } else {
                 if (fillScreen) {
                     FullScreenMenu.TwoColumnFillFromTop(
-                        leftItems = left,
-                        rightItems = right
+                        leftItems = left.map { it.item },
+                        rightItems = right.map { it.item }
                     )
                 } else {
                     if (fillFrom == Arrangement.Top) {
                         HalfScreenMenu.TopHalfTwoColumn(
-                            leftItems = left,
-                            rightItems = right
+                            leftItems = left.map { it.item },
+                            rightItems = right.map { it.item }
                         )
                     } else {
                         HalfScreenMenu.BottomHalfTwoColumn(
-                            leftItems = left,
-                            rightItems = right
+                            leftItems = left.map { it.item },
+                            rightItems = right.map { it.item }
                         )
                     }
                 }
             }
         }
-    }
-
-    @Composable
-    fun FullScreenQuadrantScroll(
-        nw : List<MenuItem>,
-        ne : List<MenuItem>,
-        sw : List<MenuItem>,
-        se : List<MenuItem>,
-        maxLines: Int = 7,
-        onScrollListExitSelected : () -> Unit,
-        onScrollListItemSelected : (item : MenuItem) -> Unit = { it.onClicked() },
-        displayOptions: ScrollListOptions
-    ) {
-
-        //TODO be careful about the ItemsPerPage in ScrollListOptions here
-
-        TODO()
-
     }
 
     //An options object to configure how the
@@ -163,12 +125,12 @@ object ScrollMenu {
          *  list item and so the scrolling past the first
          *  item in the page also changes the page
          */
-        val previousPageItemLabel : String? = "Prev Page",
+        val previousPageItemLabel : String = "Prev Page",
 
         /** Set to null so that there isn't a next page list item
          * and so that scrolling past the item sets the next page
          */
-        val nextPageItemLabel : String? = "Next Page",
+        val nextPageItemLabel : String = "Next Page",
 
         /** If true, put a selectable item on every page
          * that exits the scroll list.
@@ -179,11 +141,11 @@ object ScrollMenu {
          * list has.
          */
         val isPageCountItemVisible : Boolean = false,
+
+        val showSpacerRow : Boolean = true
     )
 
-    internal interface ConjoinedColumnScrollListScope<P> {
-        val visibleListSlice : List<ConjoinedListRecord<MenuItem, P>>
-    }
+
 
     /** This is a scroll-list with all the items already split-up and
      *  re-conjoined.
@@ -198,9 +160,11 @@ object ScrollMenu {
         /** Called when the user wishes to exit the scroll list */
         onScrollListExitSelected : () -> Unit,
 
-        onScrollListItemSelected : (item : MenuItem) -> Unit = { it.onClicked() },
+        //Value to set the Prev/Next/Exit special items to so the presentation
+        //knows to draw them differently
+        conjoinedItemSpecialToken : P,
 
-        presentation : @Composable ConjoinedColumnScrollListScope<P>.() -> Unit
+        presentation : @Composable (visibleListSlice : List<ConjoinedListRecord<MenuItem, P>>) -> Unit
     ) {
 
         //We need to split up the source list, and then add in the pieces we want.
@@ -209,6 +173,80 @@ object ScrollMenu {
         //and to mutate that state when our items
 
 
+        val sourceItemsPerSlice = displayOptions.itemsPerPage + 1 -
+                if (displayOptions.isExitItemOnEveryPage) 1 else 0 -
+                        if (displayOptions.isPageCountItemVisible) 1 else 0 -
+                                1 - //prev item
+                                1 - //next item
+                                if (displayOptions.showSpacerRow) 1 else 0   //spacer item
 
+        val totalPages = ceil(sourceList.count().toDouble() / sourceItemsPerSlice.toDouble()).toInt()
+        val currentPage = remember { mutableStateOf(0) }
+
+        val validPageIndices = (0 until totalPages).toList()
+        val exitItem = TextMenuItem(
+            title = displayOptions.exitListItemLabel,
+            onClicked = onScrollListExitSelected
+        )
+
+        val nextPageItem = TextMenuItem(
+            title = displayOptions.nextPageItemLabel,
+            onClicked = {
+                if (currentPage.value + 1 in validPageIndices) {
+                    currentPage.value = currentPage.value + 1
+                }
+            }
+        )
+
+        val previousPageItem = TextMenuItem(
+            title = displayOptions.previousPageItemLabel,
+            onClicked = {
+                if (currentPage.value - 1 in validPageIndices) {
+                    currentPage.value = currentPage.value - 1
+                }
+            }
+        )
+
+        val pageIndicatorItem = TextMenuItem(
+            title = "Page: ${currentPage.value + 1} / $totalPages",
+            isSelectable = false,
+            onClicked = {}
+        )
+
+        val spacerItem = TextMenuItem(
+            title = "",
+            isSelectable = false,
+            onClicked = {}
+        )
+
+        val pagePreamble = mutableListOf<MenuItem>().apply {
+            add(nextPageItem)
+            add(previousPageItem)
+            if (currentPage.value == 0) {
+                add(exitItem)
+            } else {
+                if (displayOptions.isExitItemOnEveryPage) {
+                    add(exitItem)
+                }
+            }
+
+
+            add(pageIndicatorItem)
+            if (displayOptions.showSpacerRow) {
+                add(spacerItem)
+            }
+        }.toList().mapIndexed { index, menuItem -> ConjoinedListRecord(menuItem, conjoinedItemSpecialToken, index) }
+
+
+        val sourceItemsByPage = sourceList
+            .windowed(
+                size = sourceItemsPerSlice,
+                step = sourceItemsPerSlice,
+                partialWindows = true
+            ).map { pageItems ->
+                listOf(*pagePreamble.toTypedArray(), *pageItems.toTypedArray())
+            }
+
+        presentation.invoke((sourceItemsByPage.getOrNull(currentPage.value) ?: pagePreamble))
     }
 }

@@ -68,6 +68,13 @@ data class TextMenuItem(
     override val onClicked : () -> Unit
 ) : MenuItem {
 
+    companion object {
+        const val CHECKBOX_CHECKED = "\uD83D\uDDF9"
+        const val CHECKBOX_UNCHECKED = "\u2610"
+
+        fun Boolean.toCheckBox() : String = if (this) CHECKBOX_CHECKED else CHECKBOX_UNCHECKED
+    }
+
     override fun toView(chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
         MenuItem(
             label = title,

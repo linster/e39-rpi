@@ -23,6 +23,18 @@ import kotlin.math.E
 object FullScreenMenu {
 
     @Composable
+    fun OneColumn(
+        items : List<MenuItem>
+    ) {
+        Box(modifier = Modifier
+            .background(ChipItemColors.MenuBackground)
+            .fillMaxSize()
+        ) {
+            HalfScreenMenu.OneColumn(items, fullWidth = true)
+        }
+    }
+
+    @Composable
     fun TwoColumnFillFromTop(
         leftItems : List<MenuItem>,
         rightItems : List<MenuItem>

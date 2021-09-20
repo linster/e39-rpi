@@ -12,4 +12,10 @@ package ca.stefanm.ibus.gui.menu.bluetoothPairing.ui
 //...plus we need to register a property changed listener that goes to ProduceState
 //...so that we can keep the UI up to current.
 class CurrentlyPairedDeviceManager {
+
+    //The screen that launches all the others has this.
+    interface IncomingEventProducer {
+        fun onPairingResult()
+        fun onRequestToPairResult()
+    }
 }

@@ -6,7 +6,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.dbus.BluetoothPairingManager
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.dbus.BluetoothPairingManager
 import javax.inject.Inject
 
 class PairingDebug @Inject constructor(

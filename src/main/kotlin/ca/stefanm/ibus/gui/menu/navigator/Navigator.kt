@@ -8,6 +8,8 @@ import ca.stefanm.ibus.gui.menu.EmptyMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.BluetoothPinConfirmationScreen
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.CurrentDeviceViewer
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.PairableDeviceChooser
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
@@ -43,6 +45,8 @@ class NavigationModule {
     fun provideAllNodes(
         bluetoothpairingmenu: BluetoothPairingMenu,
         bluetoothPinConfirmationScreen: BluetoothPinConfirmationScreen,
+        pairableDeviceChooser: PairableDeviceChooser,
+        currentDeviceViewer: CurrentDeviceViewer,
         emptymenu: EmptyMenu,
         bmwmainmenu: BMWMainMenu,
         composedebugmenu: ComposeDebugMenu,
@@ -55,6 +59,8 @@ class NavigationModule {
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
+        pairableDeviceChooser,
+        currentDeviceViewer,
         emptymenu,
         bmwmainmenu,
         composedebugmenu,
