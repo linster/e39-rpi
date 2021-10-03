@@ -41,13 +41,22 @@ class PairableDeviceChooser @Inject constructor(
         val alias : String, //Name of device
         val isPaired : Boolean,
         val isConnected : Boolean
-    )
+    ) {
+        companion object {
+            val EMPTY = PairableDevice(
+                "<INVALID>",
+                "<INVALID>",
+                false,
+                false
+            )
+        }
+    }
 
     data class PairableDeviceChooserParameters(
         val pairableDevices : SharedFlow<List<PairableDevice>>
     )
 
-    sealed class PairableDeviceChooserResult {
+    sealed class PairableDeviceChooserResult : UiResult() {
         object Cancelled : PairableDeviceChooserResult()
         data class RequestPairToDevice(val device: PairableDevice) : PairableDeviceChooserResult()
     }

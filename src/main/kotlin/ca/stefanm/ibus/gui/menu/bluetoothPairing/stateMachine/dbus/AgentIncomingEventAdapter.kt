@@ -1,24 +1,28 @@
 package ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.dbus
 
-import ca.stefanm.ibus.car.platform.Service
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.*
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.DBusConnectionDependingComponent
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.DBusConnectionOwningComponent
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.DBusSessionConnection
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.DBusSystemConnection
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.bluez.Agent1
 import org.bluez.AgentManager1
 import org.bluez.exceptions.BluezCanceledException
 import org.bluez.exceptions.BluezDoesNotExistException
 import org.bluez.exceptions.BluezRejectedException
 import org.freedesktop.dbus.DBusPath
-import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.types.UInt16
 import org.freedesktop.dbus.types.UInt32
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 //This class is the adapter to the DBus Agent Interface
 
@@ -26,9 +30,9 @@ typealias Passkey = UInt32
 typealias Entered = UInt16
 
 class AgentIncomingEventAdapter @Inject constructor(
-    private val connectionOwningComponent: ConnectionOwningComponent,
+    private val DBusConnectionOwningComponent: DBusConnectionOwner,
     private val logger : Logger
-) : ConnectionDependingComponent {
+) : DBusConnectionDependingComponent {
 
     private companion object {
         const val TAG = "AgentIncomingEventAdapter"
@@ -40,8 +44,8 @@ class AgentIncomingEventAdapter @Inject constructor(
     private lateinit var agentManager: AgentManager1
 
     override fun onSetup() {
-        systemConnection = connectionOwningComponent.getSystemBusConnection()
-        sessionConnection = connectionOwningComponent.getSessionBusConnection()
+        systemConnection = DBusConnectionOwningComponent.getSystemBusConnection()
+        sessionConnection = DBusConnectionOwningComponent.getSessionBusConnection()
 
         sessionConnection.exportObject(agentPath, agent)
 
@@ -76,7 +80,13 @@ class AgentIncomingEventAdapter @Inject constructor(
         data class DisplayPassKey(
             val device : DBusPath,
             val passKey : Passkey,
-            val entered: Entered
+            val entered: Entered,
+
+        ) : AgentEvent()
+
+        data class RequestingPassKeyApproval(
+            val onUserApprovePassKey : suspend () -> Unit,
+            val onUserDenyPassKey : suspend () -> Unit
         ) : AgentEvent()
 
         //Called when DisplayPasskey or DisplayPinCode no longer need to be
@@ -146,9 +156,7 @@ class AgentIncomingEventAdapter @Inject constructor(
             //During the pairing process, this method can be called to update the entered value.
             runBlocking {
                 passKeyMutex.withLock {
-                    passKeyMap[_device!!] = passKeyMap[_device]!!.let { old ->
-                        Pair(old.first, UInt16(old.second.toInt() + 1))
-                    }
+                    passKeyMap[_device!!] = Pair(passKeyMap[_device]!!.first, _entered!!)
                 }
 
                 _incomingAgentEvents.emit(
@@ -169,19 +177,45 @@ class AgentIncomingEventAdapter @Inject constructor(
                 throw BluezRejectedException("_passkey was null")
             }
 
+            //TODO this is where we need to throw the exception if the user selects
+            //TODO no.
+            //Maybe make a RequestingConfirmation() state, and have that state
+            //have a suspend lambda that we block on here.
+
             runBlocking {
                 passKeyMutex.withLock {
                     if (!passKeyMap.containsKey(_device)) {
+                        //This probably can't ever happen
                         throw BluezRejectedException("No passkey stored for device $_device")
                     }
 
                     if (passKeyMap[_device]?.first != _passkey) {
+                        //Auto-reject devices where the pass key isn't what we made for it.
                         throw BluezRejectedException("Incorrect passkey stored for device $_device")
                     }
+                }
+
+                //TODO If this doesn't instantly produce a dead-lock, this pattern needs further study.
+                val isApproved = withContext(Dispatchers.IO) {
+                    suspendCoroutine<Boolean> {
+                        runBlocking {
+                            _incomingAgentEvents.emit(
+                                AgentEvent.RequestingPassKeyApproval(
+                                    onUserApprovePassKey = suspend { it.resume(true) },
+                                    onUserDenyPassKey = suspend { it.resume(false) }
+                                )
+                            )
+                        }
+                    }
+                }
+
+                if (!isApproved) {
+                    throw BluezRejectedException("User disapproved pairing")
                 }
             }
 
             //Falling through to here is success
+            //TODO set the device as trusted here.
             return
         }
 

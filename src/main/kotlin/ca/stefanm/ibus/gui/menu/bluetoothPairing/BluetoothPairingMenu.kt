@@ -19,6 +19,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
@@ -38,6 +39,9 @@ class BluetoothPairingMenu @Inject constructor(
     override fun provideMainContent(): @Composable (Navigator.IncomingResult?) -> Unit = {
         Column {
 
+            //TODO this is currently
+            //TODO this debug menu,
+            //TODO, but it will be the main menu driving everying.
             val pairingResult = remember { mutableStateOf<BluetoothPinConfirmationScreen.PinConfirmationResult?>(null) }
 
             if (it?.resultFrom == BluetoothPinConfirmationScreen::class.java &&
@@ -86,14 +90,24 @@ class BluetoothPairingMenu @Inject constructor(
 
             Button(onClick = {
                 navigationNodeTraverser.showCurrentDevice(
-                    PairableDeviceChooser.PairableDevice(
+                    MutableStateFlow(PairableDeviceChooser.PairableDevice(
                         address = "12:34:56:78:90:AB",
                         alias = "Pixel 2",
                         isPaired = true,
                         isConnected = true
-                    )
+                    ))
                 )
             }) { Text("Current Device")}
+
+            Button( onClick = {
+                navigationNodeTraverser
+                    .navigateToNodeWithParameters(
+                        BtEmptyMenu::class.java,
+                        BtEmptyMenu.EmptyMenuParameters(
+                            isInitialLoad = true
+                        )
+                    )
+            }) { Text("Open Main Menu")}
 
             //Looks like we show the pairable devices, and while we're doing that, set our own agent.
             //That agent then listens to what's going on, and we listen to that to show the pin code.

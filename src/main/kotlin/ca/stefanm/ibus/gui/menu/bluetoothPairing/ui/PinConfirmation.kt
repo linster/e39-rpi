@@ -27,7 +27,7 @@ class BluetoothPinConfirmationScreen @Inject constructor(
 
     data class PinConfirmationResult(
         val isApproved : Boolean
-    )
+    ) : UiResult()
 
     data class PinConfirmationParameters(
         val phoneName : String,

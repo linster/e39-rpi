@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine
 
+import com.github.hypfvieh.bluetooth.DeviceManager
 import org.freedesktop.dbus.connections.impl.DBusConnection
 
 
@@ -8,18 +9,14 @@ interface Component {
     fun onCleanup()
 }
 
-interface ConnectionDependingComponent : Component
 
 typealias DBusSystemConnection = DBusConnection
 typealias DBusSessionConnection = DBusConnection
 
-interface ConnectionOwningComponent : Component {
+interface DBusConnectionOwningComponent : Component {
     fun getSystemBusConnection() : DBusSystemConnection
     fun getSessionBusConnection() : DBusSessionConnection
+    fun getDeviceManager() : DeviceManager
 }
 
-
-interface ClosableComponent {
-    /** Use this to release any connections the component may have */
-    fun onCleanup()
-}
+interface DBusConnectionDependingComponent : Component

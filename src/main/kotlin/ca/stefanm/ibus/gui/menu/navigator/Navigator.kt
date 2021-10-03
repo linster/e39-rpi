@@ -7,9 +7,7 @@ import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.EmptyMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.BluetoothPinConfirmationScreen
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.CurrentDeviceViewer
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.PairableDeviceChooser
+import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
@@ -45,6 +43,9 @@ class NavigationModule {
     fun provideAllNodes(
         bluetoothpairingmenu: BluetoothPairingMenu,
         bluetoothPinConfirmationScreen: BluetoothPinConfirmationScreen,
+        btEmptyMenu: BtEmptyMenu,
+        currentDeviceChooser: CurrentDeviceChooser,
+        mainBtMenu: MainBtMenu,
         pairableDeviceChooser: PairableDeviceChooser,
         currentDeviceViewer: CurrentDeviceViewer,
         emptymenu: EmptyMenu,
@@ -61,6 +62,9 @@ class NavigationModule {
         bluetoothPinConfirmationScreen,
         pairableDeviceChooser,
         currentDeviceViewer,
+        btEmptyMenu,
+        currentDeviceChooser,
+        mainBtMenu,
         emptymenu,
         bmwmainmenu,
         composedebugmenu,
@@ -158,6 +162,17 @@ class Navigator @Inject constructor(
             requestParameters = null
         )
 
+        _mainContentScreen.value = backStack.removeLast() //TODO removeLast()?
+    }
+
+    fun <R> cleanupBackStackDescendentsOf(node: Class<out NavigationNode<R>>) {
+        val indexNewTail = backStack
+            .firstOrNull { it.node.thisClass == node }
+            .let { backStack.indexOf(it) }
+
+        val indicesToDelete = (indexNewTail+ 1 .. backStack.lastIndex)
+
+        indicesToDelete.reversed().forEach { backStack.removeAt(it) }
         _mainContentScreen.value = backStack.last()
     }
 
@@ -226,6 +241,13 @@ class NavigationNodeTraverser @Inject constructor(
 
     fun goBack() {
         navigator.get().goBack()
+    }
+
+    //Remove all items in the backstack below the most recent one that
+    //has the given class. This can be used to implement a sort of task
+    //affinity scheme.
+    fun <R> cleanupBackStackDescendentsOf(node: Class<out NavigationNode<R>>) {
+        navigator.get().cleanupBackStackDescendentsOf(node)
     }
 }
 
