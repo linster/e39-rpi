@@ -1,7 +1,7 @@
-package ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.dbus
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
 
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.DBusConnectionOwningComponent
+import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusConnectionOwningComponent
 import com.github.hypfvieh.bluetooth.DeviceManager
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import javax.inject.Inject
@@ -27,14 +27,8 @@ class DBusConnectionOwner @Inject constructor() : DBusConnectionOwningComponent 
     }
 
     override fun onCleanup() {
-        sessionConnection.disconnect()
-//        //TODO
-//        Exception in thread "main" org.freedesktop.dbus.exceptions.DBusException: Not Connected
-//        at org.freedesktop.dbus.connections.impl.DBusConnection.releaseBusName(DBusConnection.java:453)
-//        at ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.dbus.DBusConnectionOwner.onCleanup(DBusConnectionOwner.kt:31)
-//        at ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.PairingManager.cleanupDBus(PairingManager.kt:42)
-//        at ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.PairingManager.onRequestNavigatorRoot(PairingManager.kt:63)
         sessionConnection.releaseBusName("ca.stefanm.e39")
+        sessionConnection.disconnect()
 
         deviceManager.closeConnection()
         systemConnection.disconnect()

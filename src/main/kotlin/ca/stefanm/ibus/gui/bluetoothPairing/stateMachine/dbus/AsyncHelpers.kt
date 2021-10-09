@@ -1,12 +1,9 @@
-package ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.dbus
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
 
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.yield
 import org.freedesktop.dbus.DBusAsyncReply
 import org.freedesktop.dbus.connections.impl.DBusConnection
-import org.freedesktop.dbus.exceptions.DBusException
-import org.freedesktop.dbus.interfaces.DBusInterface
 import java.lang.Exception
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

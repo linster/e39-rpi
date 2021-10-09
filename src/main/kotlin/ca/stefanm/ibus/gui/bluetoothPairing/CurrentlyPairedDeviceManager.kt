@@ -1,4 +1,4 @@
-package ca.stefanm.ibus.gui.menu.bluetoothPairing
+package ca.stefanm.ibus.gui.bluetoothPairing
 
 //This is the screen that shows us the devices that
 //BlueZ is paired to, and which ones are connected to.

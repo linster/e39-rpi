@@ -6,15 +6,18 @@ import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.EmptyMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.*
+import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
+import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -176,6 +179,28 @@ class Navigator @Inject constructor(
         _mainContentScreen.value = backStack.last()
     }
 
+    suspend fun <R> navigateToNodeAndAwaitResult(node: NavigationNode<R>, parameters: Any?) : R {
+        val oldScreen = _mainContentScreen.value
+        if (parameters == null) {
+            navigateToNode(node)
+        } else {
+            navigateToNodeWithParameters(node, parameters)
+        }
+
+        //Wait while the user is doing stuff
+        while (_mainContentScreen.value.node == node) {
+            yield()
+        }
+
+        if (oldScreen.node.thisClass != _mainContentScreen.value.node.thisClass
+            && _mainContentScreen.value.incomingResult?.resultFrom != node.thisClass) {
+            error("User navigated away instead of returning a result. Incoming result: ${_mainContentScreen.value.incomingResult}")
+        }
+
+        return _mainContentScreen.value.incomingResult?.result as R ?: error("Result not expected! Got ")
+
+    }
+
     //This is an interface returned to the HMINavigatorDebugWindow.
     //None of the objects in this interface should ever be modified
     //in normal operation.
@@ -248,6 +273,14 @@ class NavigationNodeTraverser @Inject constructor(
     //affinity scheme.
     fun <R> cleanupBackStackDescendentsOf(node: Class<out NavigationNode<R>>) {
         navigator.get().cleanupBackStackDescendentsOf(node)
+    }
+
+    suspend fun <R> navigateToNodeAndAwaitResult(node: Class<out NavigationNode<*>>, parameters: Any?) : R {
+        return findNode(node)!!.let {
+            withContext(Dispatchers.Main) {
+                navigator.get().navigateToNodeAndAwaitResult(it, parameters) as R
+            }
+        }
     }
 }
 

@@ -1,10 +1,11 @@
-package ca.stefanm.ibus.gui.menu.bluetoothPairing.ui
+package ca.stefanm.ibus.gui.bluetoothPairing.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -13,7 +14,6 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 //This is the screen that lets us pick devices to pair with
@@ -33,7 +33,8 @@ fun NavigationNodeTraverser.showPairableDevices(
 
 @AutoDiscover
 class PairableDeviceChooser @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val pairingManager: PairingManager
 ) : NavigationNode<PairableDeviceChooser.PairableDeviceChooserResult> {
 
     data class PairableDevice(
@@ -68,6 +69,10 @@ class PairableDeviceChooser @Inject constructor(
         Column {
 
             BmwSingleLineHeader("Select Device to Pair With")
+
+            if (it == null) {
+                pairingManager.onGoToBtMainMenu()
+            }
 
             //Unpack the Flow<Devices> here and make it a UI state.
             val pairableDevices = (it?.requestParameters as PairableDeviceChooserParameters)

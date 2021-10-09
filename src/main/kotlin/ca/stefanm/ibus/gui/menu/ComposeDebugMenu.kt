@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.BluetoothPairingMenu
+import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator

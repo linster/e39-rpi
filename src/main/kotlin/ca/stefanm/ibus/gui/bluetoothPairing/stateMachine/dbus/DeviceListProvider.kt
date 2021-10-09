@@ -1,8 +1,6 @@
-package ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.dbus
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
 
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.DBusConnectionDependingComponent
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.stateMachine.DBusConnectionOwningComponent
-import ca.stefanm.ibus.gui.menu.bluetoothPairing.ui.PairableDeviceChooser
+import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusConnectionDependingComponent
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.flow.*
@@ -27,6 +25,12 @@ class DeviceListProvider @Inject constructor(
         if (adapter.isDiscovering) {
             adapter.stopDiscovery()
         }
+    }
+
+    fun getDeviceForMac(macAddress: String) : BluetoothDevice {
+        return dBusConnectionOwningComponent.getDeviceManager()
+            .devices
+            .first { it.address == macAddress }
     }
 
     fun getDevices() : Flow<List<BluetoothDevice>> {
