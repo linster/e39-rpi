@@ -26,6 +26,21 @@ class KnobListenerService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
 ) {
 
+    fun knobTurnEvents() : Flow<InputEvent> {
+        return inputEvents.filter {
+            it is InputEvent.NavKnobPressed || it is InputEvent.NavKnobTurned
+        }.transform {
+            if (it is InputEvent.NavKnobPressed) {
+                emit(it)
+            }
+
+            if (it is InputEvent.NavKnobTurned) {
+                repeat(it.clicks) { _ ->
+                    emit(InputEvent.NavKnobTurned(1, it.direction))
+                }
+            }
+        }
+    }
 
     @Composable
     inline fun <reified T> listenForKnob(
@@ -73,12 +88,13 @@ class KnobListenerService @Inject constructor(
             }
 
             inputEvents
-                .onSubscription { logger.d("BAZBAT", "onSubscription") }
-                .onEmpty { logger.d("BAZBAT", "onEmpty") }
-                .onEach { logger.d("BAZBAT", "onEach") }
-                .onCompletion { logger.d("BAZBAT", "onCompletion") }.collect { event ->
+//                .onSubscription { logger.d("BAZBAT", "onSubscription") }
+//                .onEmpty { logger.d("BAZBAT", "onEmpty") }
+//                .onEach { logger.d("BAZBAT", "onEach") }
+//                .onCompletion { logger.d("BAZBAT", "onCompletion") }
+                .collect { event ->
 
-                logger.d("WAT", "EVENT WAT: $event")
+                //logger.d("WAT", "EVENT WAT: $event")
 
                 val offset = if (event !is InputEvent.NavKnobTurned) { 0 } else {
                     event.clicks * (if (event.direction == InputEvent.NavKnobTurned.Direction.RIGHT) 1 else -1)
@@ -92,9 +108,9 @@ class KnobListenerService @Inject constructor(
                 stateListOf[selectedListIndices[selectedIndex]] =
                     onSelectAdapter(stateListOf[selectedListIndices[selectedIndex]], true)
 
-                logger.d("Scroll", "Offset: $offset")
-                logger.d("Scroll", "SelectedIndex: (old, new) : $oldSelectedIndex, $selectedIndex")
-                logger.d("Scroll", "Selectable indices: ${selectedListIndices}")
+//                logger.d("Scroll", "Offset: $offset")
+//                logger.d("Scroll", "SelectedIndex: (old, new) : $oldSelectedIndex, $selectedIndex")
+//                logger.d("Scroll", "Selectable indices: ${selectedListIndices}")
 
                 value = stateListOf
 

@@ -8,6 +8,7 @@ import ca.stefanm.ibus.gui.menu.EmptyMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
+import ca.stefanm.ibus.gui.map.MapScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
@@ -60,6 +61,7 @@ class NavigationModule {
         debughmimenutestonecolumn: DebugHmiMenuTestOneColumn,
         debughmiroot: DebugHmiRoot,
         optionPromptTest: OptionPromptTest,
+        mapScreen: MapScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -76,7 +78,8 @@ class NavigationModule {
         debughmimenutesttwocolumn,
         debughmimenutestonecolumn,
         debughmiroot,
-        optionPromptTest
+        optionPromptTest,
+        mapScreen
     )
 }
 

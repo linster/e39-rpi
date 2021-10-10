@@ -47,6 +47,15 @@ data class Route(
     val path : List<GeoPosition>
 )
 
+data class PoiOverlay(
+    val pois : List<Poi>
+) {
+    data class Poi(
+        val label : String,
+        val position: GeoPosition
+    )
+}
+
 @Composable
 fun MapViewer(
     overlayProperties: OverlayProperties,

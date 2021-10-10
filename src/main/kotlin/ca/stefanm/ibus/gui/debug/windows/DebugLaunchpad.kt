@@ -24,7 +24,6 @@ class DebugLaunchpad @Inject constructor(
     private val keyEventSimulator: KeyEventSimulator,
     private val paneManagerDebug: PaneManagerDebug,
     private val serviceStatusViewer: ServiceStatusViewer,
-    private val pairingDebug: PairingDebug,
     private val notificationSpammerDebug: NotificationSpammerDebug,
     private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow
 ) : WindowManager.E39Window {
@@ -57,9 +56,6 @@ class DebugLaunchpad @Inject constructor(
             }
             Button(onClick = {windowManager.openDebugWindow(serviceStatusViewer) }) {
                 Text("Service Status Viewer")
-            }
-            Button(onClick = { pairingDebug.show()}) {
-                Text("Pairing Debug")
             }
             Button(onClick = { windowManager.openDebugWindow(notificationSpammerDebug)}) {
                 Text("Notification Spammer Debug")

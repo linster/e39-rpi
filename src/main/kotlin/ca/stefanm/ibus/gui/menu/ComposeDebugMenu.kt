@@ -34,17 +34,13 @@ class ComposeDebugMenu @Inject constructor(
     override fun provideMainContent(): @Composable (incoming : Navigator.IncomingResult?) -> Unit = {
 
             val enteredText = remember { mutableStateOf("Initial") }
-            val btResult = remember { mutableStateOf<BluetoothPairingMenu.PairingResult?>(
-                (it?.result as? BluetoothPairingMenu.PairingResult?)
-            )}
+
 
             Column {
                 Text("Hello Main Menu")
                 Button(onClick = {
                     navigationNodeTraverser.navigateToNode(BluetoothPairingMenu::class.java)
                 }) { Text("Go to bt")}
-
-                Text("Pairing Result: ${btResult.value}")
 
                 Button(
                     onClick = {

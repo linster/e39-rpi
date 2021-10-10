@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
+import ca.stefanm.ibus.gui.map.MapScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -34,7 +35,7 @@ class BMWMainMenu @Inject constructor(
             val nwItems = listOf(
                 TextMenuItem(
                     title = "GPS-Navigation",
-                    onClicked = { navigationNodeTraverser.goBack() }
+                    onClicked = { navigationNodeTraverser.navigateToNode(MapScreen::class.java) }
                 )
             )
             val neItems = listOf(

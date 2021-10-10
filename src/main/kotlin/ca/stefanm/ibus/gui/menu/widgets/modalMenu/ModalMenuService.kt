@@ -23,7 +23,8 @@ class ModalMenuService @Inject constructor(
     fun showModalMenu(
         menuTopLeft : IntOffset,
         menuWidth : Int, //The height can be automatically calculated.
-        menuData : ModalMenu
+        menuData : ModalMenu,
+        autoCloseOnSelect : Boolean = true
     ) {
         _modalMenuOverlay.value = {
 
@@ -36,7 +37,9 @@ class ModalMenuService @Inject constructor(
                     items = menuData.items
                         .reduceUpdateOnClick { existingOnClick ->
                             existingOnClick()
-                            closeModalMenu()
+                            if (autoCloseOnSelect) {
+                                closeModalMenu()
+                            }
                         }.let {
                             knobListenerService
                                 .listenForKnob(it,

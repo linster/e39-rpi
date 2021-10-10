@@ -20,6 +20,7 @@ enum class MapScale(
     val meters : Int,
     val mapZoomLevel : Int)
 {
+    METERS_25(displayString = "25 m", meters = 25, mapZoomLevel = 19),
     METERS_50(displayString = "50 m", meters = 50, mapZoomLevel = 18),
     METERS_100(displayString = "100 m", meters = 100, mapZoomLevel = 17),
     METERS_200(displayString = "200 m", meters = 200, mapZoomLevel = 16),
