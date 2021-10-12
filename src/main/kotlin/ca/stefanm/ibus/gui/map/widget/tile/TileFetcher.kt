@@ -1,12 +1,19 @@
 package ca.stefanm.ibus.gui.map.widget.tile
 
 import ca.stefanm.ibus.gui.di.MapModule
+import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
+import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.lib.logging.Logger
+import com.javadocmd.simplelatlng.LatLng
+import com.javadocmd.simplelatlng.LatLngTool
+import com.javadocmd.simplelatlng.util.LengthUnit
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.coroutines.flow.*
+import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
@@ -40,6 +47,72 @@ class TileFetcher @Inject constructor(
         }
 
         return response.receive()
+    }
+
+    data class DownloadStatus(
+        val tilesDownloaded : Int,
+        val totalTilesToDownload : Int
+    )
+    suspend fun downloadTiles(center : LatLng, radius : MapScale) : Flow<DownloadStatus> {
+
+        val tilesToDownload = MapScale.values().map { it.mapZoomLevel }.map { zoomLevel ->
+
+            val left = LatLngTool.travel(
+                center,
+                LatLngTool.Bearing.WEST,
+                radius.meters.toDouble(),
+                LengthUnit.METER
+            ).let { newLocation ->
+                ExtentCalculator.getTileNumber(newLocation.latitude, newLocation.longitude, zoomLevel)
+            }
+
+            val right = LatLngTool.travel(
+                center,
+                LatLngTool.Bearing.EAST,
+                radius.meters.toDouble(),
+                LengthUnit.METER
+            ).let { newLocation ->
+                ExtentCalculator.getTileNumber(newLocation.latitude, newLocation.longitude, zoomLevel)
+            }
+
+            val top = LatLngTool.travel(
+                center,
+                LatLngTool.Bearing.NORTH,
+                radius.meters.toDouble(),
+                LengthUnit.METER
+            ).let { newLocation ->
+                ExtentCalculator.getTileNumber(newLocation.latitude, newLocation.longitude, zoomLevel)
+            }
+
+
+            val bottom = LatLngTool.travel(
+                center,
+                LatLngTool.Bearing.SOUTH,
+                radius.meters.toDouble(),
+                LengthUnit.METER
+            ).let { newLocation ->
+                ExtentCalculator.getTileNumber(newLocation.latitude, newLocation.longitude, zoomLevel)
+            }
+
+
+            val xRange = left.first .. right.first
+            val yRange = top.second .. bottom.second
+
+            xRange.map { x ->
+                yRange.map { y ->
+                    x to y
+                }
+            }.flatten().map {(x, y) -> Triple(x, y, zoomLevel) }
+        }.flatten()
+
+        return flowOf(*tilesToDownload.toTypedArray())
+            .scan(DownloadStatus(tilesDownloaded = 0, totalTilesToDownload = tilesToDownload.size)) { accumulator, tile ->
+                getTileFromServer(tile.first, tile.second, tile.third)
+                DownloadStatus(
+                    tilesDownloaded = accumulator.tilesDownloaded + 1,
+                    totalTilesToDownload = accumulator.totalTilesToDownload
+                )
+            }
     }
 }
 
@@ -117,4 +190,10 @@ class TileServerImageCache @Inject constructor(
 
         tile.writeBytes(imageDataPng)
     }
+
+    fun calculateCacheSize() : Long {
+        return FileUtils.sizeOf(cacheDir)
+    }
+
+
 }

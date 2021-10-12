@@ -24,6 +24,8 @@ enum class MapScale(
     METERS_50(displayString = "50 m", meters = 50, mapZoomLevel = 18),
     METERS_100(displayString = "100 m", meters = 100, mapZoomLevel = 17),
     METERS_200(displayString = "200 m", meters = 200, mapZoomLevel = 16),
+    METERS_400(displayString = "400 m", meters = 400, mapZoomLevel = 15),
+    METERS_800(displayString = "800 m", meters = 800, mapZoomLevel = 14),
     KILOMETERS_1_6(displayString = "1.6 km", meters = 1600, mapZoomLevel = 13),
     KILOMETERS_25(displayString = "25 km", meters = 25600, mapZoomLevel = 9),
     KILOMETERS_50(displayString = "50 km", meters = 51200, mapZoomLevel = 8),

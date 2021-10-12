@@ -72,13 +72,10 @@ dependencies {
 
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
 
-    implementation("com.russhwolf:multiplatform-settings:0.7.7")
-    implementation("com.russhwolf:multiplatform-settings-serialization:0.7.7")
-    implementation("com.russhwolf:multiplatform-settings-coroutines:0.7.7")
+    implementation("com.uchuhimo:konf:1.1.2")
 
+    implementation("commons-io:commons-io:2.11.0")
 
-    implementation("com.arkivanov.decompose:decompose:0.2.2")
-    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.2.2")
     implementation("com.ginsberg:cirkle:1.0.1")
 
     api("com.google.dagger:dagger:2.35.1")

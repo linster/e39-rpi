@@ -1,13 +1,20 @@
 package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshots.StateObject
 import androidx.compose.runtime.snapshots.StateRecord
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
+import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 
 interface MenuItem {
     val isSelectable : Boolean

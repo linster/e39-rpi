@@ -16,6 +16,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
 
@@ -30,7 +31,7 @@ class BMWMainMenu @Inject constructor(
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            BmwSingleLineHeader("Menu")
+            BmwSingleLineHeader("Main Menu")
 
             val nwItems = listOf(
                 TextMenuItem(
@@ -38,31 +39,31 @@ class BMWMainMenu @Inject constructor(
                     onClicked = { navigationNodeTraverser.navigateToNode(MapScreen::class.java) }
                 )
             )
-            val neItems = listOf(
-                TextMenuItem(
-                    title = "Telephone Dialer",
-                    onClicked = {}
-                ),
-                TextMenuItem(
-                    title = "Chat Notifications",
-                    onClicked = {}
-                ),
+            val neItems = listOf<MenuItem>(
+//                TextMenuItem(
+//                    title = "Telephone Dialer",
+//                    onClicked = {}
+//                ),
+//                TextMenuItem(
+//                    title = "Chat Notifications",
+//                    onClicked = {}
+//                ),
             )
 
             val swItems = listOf(
-                TextMenuItem(
-                    title = "Bluetooth Pairing",
-                    onClicked = { navigationNodeTraverser.navigateToNode(BluetoothPairingMenu::class.java) }
-                ),
+//                TextMenuItem(
+//                    title = "Bluetooth Pairing",
+//                    onClicked = { navigationNodeTraverser.navigateToNode(BluetoothPairingMenu::class.java) }
+//                ),
                 TextMenuItem(
                     title = "Settings",
-                    onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiRoot::class.java) }
+                    onClicked = { navigationNodeTraverser.navigateToNode(SettingsRootMenu::class.java) }
                 ),
-                TextMenuItem(
-                    title = "Debug",
-                    labelColor = Color.Red,
-                    onClicked = {}
-                )
+//                TextMenuItem(
+//                    title = "Debug",
+//                    labelColor = Color.Red,
+//                    onClicked = {}
+//                )
             )
             val seItems = listOf(
                 TextMenuItem(

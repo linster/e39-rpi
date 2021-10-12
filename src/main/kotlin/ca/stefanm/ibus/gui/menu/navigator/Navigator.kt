@@ -9,6 +9,8 @@ import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.map.MapScreen
+import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
+import ca.stefanm.ibus.gui.menu.SettingsRootMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.lib.logging.Logger
@@ -54,6 +56,8 @@ class NavigationModule {
         currentDeviceViewer: CurrentDeviceViewer,
         emptymenu: EmptyMenu,
         bmwmainmenu: BMWMainMenu,
+        settingsRootMenu: SettingsRootMenu,
+        mapTileDownloaderScreen: MapTileDownloaderScreen,
         composedebugmenu: ComposeDebugMenu,
         debughmimenutest: DebugHmiMenuTest,
         debughmikeyboard: DebugHmiKeyboard,
@@ -69,6 +73,8 @@ class NavigationModule {
         currentDeviceViewer,
         btEmptyMenu,
         currentDeviceChooser,
+        settingsRootMenu,
+        mapTileDownloaderScreen,
         mainBtMenu,
         emptymenu,
         bmwmainmenu,
