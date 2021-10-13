@@ -3,18 +3,22 @@ package ca.stefanm.ibus.gui.map.widget.tile
 import ca.stefanm.ibus.gui.di.MapModule
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import com.javadocmd.simplelatlng.util.LengthUnit
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.flow.*
 import org.apache.commons.io.FileUtils
 import java.io.File
+import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.coroutineContext
@@ -22,7 +26,9 @@ import kotlin.coroutines.coroutineContext
 class TileFetcher @Inject constructor(
     private val osmTileServerInfo: OSMTileServerInfo,
     private val tileServerImageCache: TileServerImageCache,
-    @Named(MapModule.TILE_CLIENT) private val httpClient: HttpClient
+    @Named(MapModule.TILE_CLIENT) private val httpClient: HttpClient,
+    private val logger: Logger,
+    private val notificationHub: NotificationHub
 ) {
 
     suspend fun getTile(x : Int, y : Int, zoom : Int) : File {
@@ -53,9 +59,12 @@ class TileFetcher @Inject constructor(
         val tilesDownloaded : Int,
         val totalTilesToDownload : Int
     )
-    suspend fun downloadTiles(center : LatLng, radius : MapScale) : Flow<DownloadStatus> {
+    suspend fun downloadTiles(center : LatLng, radius : MapScale, closestZoom : MapScale) : Flow<DownloadStatus> {
 
-        val tilesToDownload = MapScale.values().map { it.mapZoomLevel }.map { zoomLevel ->
+        val tilesToDownload = MapScale.values()
+            .filter { it.meters > closestZoom.meters }
+            .map { it.mapZoomLevel }
+            .map { zoomLevel ->
 
             val left = LatLngTool.travel(
                 center,
@@ -105,13 +114,45 @@ class TileFetcher @Inject constructor(
             }.flatten().map {(x, y) -> Triple(x, y, zoomLevel) }
         }.flatten()
 
-        return flowOf(*tilesToDownload.toTypedArray())
-            .scan(DownloadStatus(tilesDownloaded = 0, totalTilesToDownload = tilesToDownload.size)) { accumulator, tile ->
-                getTileFromServer(tile.first, tile.second, tile.third)
-                DownloadStatus(
-                    tilesDownloaded = accumulator.tilesDownloaded + 1,
-                    totalTilesToDownload = accumulator.totalTilesToDownload
-                )
+        logger.d("TileFetcher", "Tiles to download : (count) ${tilesToDownload.size}")
+
+        val concurrentWorkers = 24
+
+        val flowsByWorker = tilesToDownload.windowed(
+            size = tilesToDownload.size / concurrentWorkers,
+            step = tilesToDownload.size / concurrentWorkers,
+            partialWindows = true
+        ).map {
+            flowOf(*it.toTypedArray()).map { tile ->
+                try {
+                    getTile(tile.first, tile.second, tile.third)
+                    true
+                } catch (e : Exception) {
+                    logger.e("TileFetcher", "Server response exception on tile ${tile}", e)
+                    notificationHub.postNotificationBackground(Notification(
+                        image = Notification.NotificationImage.ALERT_TRIANGLE,
+                        topText = "Tile Download Error",
+                        contentText = "Tile: ${tile}, error: ${e.message}",
+                        duration = Notification.NotificationDuration.SHORT
+                    ))
+                    false
+                }
+            }
+        }
+
+        return merge(*flowsByWorker.toTypedArray())
+            .scan(DownloadStatus(tilesDownloaded = 0, totalTilesToDownload = tilesToDownload.size)) { accumulator, tileLoadSuccess ->
+                if (tileLoadSuccess) {
+                    DownloadStatus(
+                        tilesDownloaded = accumulator.tilesDownloaded + 1,
+                        totalTilesToDownload = accumulator.totalTilesToDownload
+                    )
+                } else {
+                    DownloadStatus(
+                        tilesDownloaded = accumulator.tilesDownloaded,
+                        totalTilesToDownload = accumulator.totalTilesToDownload
+                    )
+                }
             }
     }
 }
