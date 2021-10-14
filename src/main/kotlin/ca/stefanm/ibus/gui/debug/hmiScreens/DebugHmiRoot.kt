@@ -48,13 +48,17 @@ class DebugHmiRoot @Inject constructor(
                 alignment = Alignment.Start,
                 items = listOf(
                     TextMenuItem(
+                        title = "Go Back",
+                        onClicked = {navigationNodeTraverser.goBack()}
+                    ),
+                    TextMenuItem(
                         title = "DebugHmiMenuTests",
                         onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiMenuTest::class.java) }
                     ),
-                    TextMenuItem(
-                        title = "DBus-BlueZ",
-                        onClicked = { }
-                    )
+//                    TextMenuItem(
+//                        title = "DBus-BlueZ",
+//                        onClicked = { }
+//                    )
                 )
             )
         }

@@ -47,6 +47,10 @@ class DebugHmiMenuTest @Inject constructor(
                 alignment = Alignment.Start,
                 items = listOf(
                     TextMenuItem(
+                        title = "Go Back",
+                        onClicked = { navigationNodeTraverser.goBack() }
+                    ),
+                    TextMenuItem(
                         title = "Two Column",
                         onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiMenuTestTwoColumn::class.java) }
                     ),

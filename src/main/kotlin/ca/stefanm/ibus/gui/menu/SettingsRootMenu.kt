@@ -61,6 +61,14 @@ class SettingsRootMenu @Inject constructor(
                                 DebugHmiRoot::class.java
                             )
                         }
+                    ),
+                    TextMenuItem(
+                        title = "About",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(
+                                AboutScreen::class.java
+                            )
+                        }
                     )
                 )
             )
