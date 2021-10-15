@@ -68,8 +68,21 @@ class MenuWindow @Inject constructor(
 
         PaneManager(
             banner = null,
-            sideSplit = null,
-            sideSplitVisible = false,
+            sideSplit = {
+                modalMenuService.sidePaneOverlay.collectAsState().value.let {
+                    if (it != null) {
+                        providedKnobListenerService.value = dummyKnobListenerService
+                        CompositionLocalProvider(
+                            MenuWindowKnobListener provides realKnobListenerService
+                        ) {
+                            it.invoke()
+                        }
+                    } else {
+                        providedKnobListenerService.value = realKnobListenerService
+                    }
+                }
+            },
+            sideSplitVisible = modalMenuService.sidePaneOverlay.collectAsState().value != null,
             bottomPanel = {
                 val scope = rememberCoroutineScope()
                 scope.launch {

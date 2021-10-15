@@ -8,8 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
-import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
+import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
 import ca.stefanm.ibus.gui.map.MapScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser

@@ -132,12 +132,16 @@ class KeyEventSimulator @Inject constructor(
     }
 
     private fun sendInputEvent(inputEvent : InputEvent) {
+
         GlobalScope.launch {
-            configurablePlatform
-                .configuredCarComponent
-                ?.ibusInputMessageParser()
-                ?.debugSend(inputEvent)
-                ?: inputEventsWriter.emit(inputEvent)
+
+            inputEventsWriter.emit(inputEvent)
+//
+//            configurablePlatform
+//                .configuredCarComponent
+//                ?.ibusInputMessageParser()
+//                ?.debugSend(inputEvent)
+//                ?: inputEventsWriter.emit(inputEvent)
             logger.d("KeyEventSimulator", "Sending event: $inputEvent")
         }
     }

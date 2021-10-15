@@ -1,6 +1,12 @@
 package ca.stefanm.ibus.gui.menu.widgets.modalMenu
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
@@ -20,6 +26,9 @@ class ModalMenuService @Inject constructor(
     private val _modalMenuOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
     val modalMenuOverlay = _modalMenuOverlay.asStateFlow()
 
+    private val _sidePaneOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
+    val sidePaneOverlay = _sidePaneOverlay.asStateFlow()
+
     fun showModalMenu(
         menuTopLeft : IntOffset,
         menuWidth : Int, //The height can be automatically calculated.
@@ -27,8 +36,6 @@ class ModalMenuService @Inject constructor(
         autoCloseOnSelect : Boolean = true
     ) {
         _modalMenuOverlay.value = {
-
-
             ModalChipMenuWindowOverlay(
                 menuTopLeft = menuTopLeft,
                 menuWidth = menuWidth,
@@ -83,5 +90,34 @@ class ModalMenuService @Inject constructor(
                 closeWithoutEntry = this::closeModalMenu
             )()
         }
+    }
+
+    fun showSidePaneOverlay(
+        darkenBackground : Boolean = false,
+        contents : @Composable () -> Unit
+    ) {
+        if (darkenBackground) {
+            _modalMenuOverlay.value = {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Brush.horizontalGradient(
+                            listOf(Color.Transparent,
+                            Color(0F, 0F, 0F, alpha = 0.6F)),
+                            startX = 0F,
+                            endX = 0.25F
+                        )
+                        )
+                ) { }
+            }
+        }
+        _sidePaneOverlay.value = contents
+    }
+
+    fun closeSidePaneOverlay(clearModalOverlay : Boolean = false) {
+        if (clearModalOverlay) {
+            closeModalMenu()
+        }
+        _sidePaneOverlay.value = null
     }
 }

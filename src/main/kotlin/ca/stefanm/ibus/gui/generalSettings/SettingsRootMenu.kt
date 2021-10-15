@@ -1,13 +1,11 @@
-package ca.stefanm.ibus.gui.menu
+package ca.stefanm.ibus.gui.generalSettings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
-import ca.stefanm.ibus.gui.bluetoothPairing.ui.MainBtMenu
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -59,6 +57,14 @@ class SettingsRootMenu @Inject constructor(
                         onClicked = {
                             navigationNodeTraverser.navigateToNode(
                                 DebugHmiRoot::class.java
+                            )
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "Car Service Config",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(
+                                CarServiceConfigScreen::class.java
                             )
                         }
                     ),

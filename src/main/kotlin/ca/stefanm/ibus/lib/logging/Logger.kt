@@ -1,6 +1,8 @@
 package ca.stefanm.ibus.lib.logging
 
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
 
 interface Logger {
 
@@ -37,13 +39,20 @@ class StdOutLogger : Logger {
     override fun e(tag: String, msg: String, e: Throwable) {
         e(tag, "$msg exception: ${e.printStackTrace()}")
     }
-
 }
+//
+//class LogDistributionHub {
+//
+//    val logEvents = MutableSharedFlow<Logger.() -> Unit>()
+//
+//    init {
+//        logEvents.tryEmit { v("foo", "bar") }
+//            logEvents.collect {
+//                it.
+//            }
+//    }
+//}
 
 class StaticLogger(impl : Logger = DaggerApplicationComponent.create().logger()) : Logger by impl {
     companion object : Logger by StaticLogger()
-}
-
-fun foo(){
-    StaticLogger.d("wat", "bar")
 }
