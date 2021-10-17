@@ -138,7 +138,7 @@ class MapTileDownloaderScreen @Inject constructor(
                 ),
                 rightItems = listOf(
                     TextMenuItem(
-                        title = "Set Fetch Radius",
+                        title = "Set Furthest Zoom",
                         onClicked = {
                             scope.launch {
                                 val current = MapScale.values().indexOf(downloadRadius.value)
@@ -148,7 +148,7 @@ class MapTileDownloaderScreen @Inject constructor(
                         }
                     ),
                     TextMenuItem(
-                        title = "Set Closest DL Zoom",
+                        title = "Set Closest Zoom",
                         onClicked = {
                             scope.launch {
                                 val current = MapScale.values().indexOf(downloadClosestZoom.value)

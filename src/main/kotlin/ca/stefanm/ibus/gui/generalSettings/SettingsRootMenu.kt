@@ -53,14 +53,6 @@ class SettingsRootMenu @Inject constructor(
                         }
                     ),
                     TextMenuItem(
-                        title = "Debug HMI Root",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                DebugHmiRoot::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
                         title = "Car Service Config",
                         onClicked = {
                             navigationNodeTraverser.navigateToNode(

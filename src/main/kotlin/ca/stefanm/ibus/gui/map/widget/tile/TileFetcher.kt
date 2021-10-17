@@ -61,6 +61,10 @@ class TileFetcher @Inject constructor(
     )
     suspend fun downloadTiles(center : LatLng, radius : MapScale, closestZoom : MapScale) : Flow<DownloadStatus> {
 
+        if (radius.meters < closestZoom.meters) {
+            return flowOf(DownloadStatus(0, 0))
+        }
+
         val tilesToDownload = MapScale.values()
             .filter { it.meters > closestZoom.meters }
             .map { it.mapZoomLevel }

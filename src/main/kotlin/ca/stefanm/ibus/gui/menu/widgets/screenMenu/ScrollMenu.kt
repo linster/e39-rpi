@@ -1,8 +1,16 @@
 package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Modifier
 import com.ginsberg.cirkle.circular
 import java.awt.Menu
 import kotlin.math.ceil
@@ -248,5 +256,31 @@ object ScrollMenu {
             }
 
         presentation.invoke((sourceItemsByPage.getOrNull(currentPage.value) ?: pagePreamble))
+    }
+
+    @Composable
+    fun SmoothOneColumnScroll(
+        items : List<MenuItem>
+    ) {
+
+        val scrollState = rememberScrollState(0)
+
+
+        //We want to listen to each item become selected, and produce a state of
+        //the current selected item.
+
+        val foo = produceState(items.firstOrNull { it.isSelected } ?: 0) {
+
+        }
+
+        Box(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+        ) {
+            //Make the scrollbar mostly transparent in the BMW style.
+            VerticalScrollbar(rememberScrollbarAdapter(scrollState))
+            FullScreenMenu.OneColumn(items)
+        }
     }
 }
