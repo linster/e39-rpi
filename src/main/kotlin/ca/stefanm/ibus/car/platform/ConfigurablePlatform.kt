@@ -9,11 +9,8 @@ import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -26,13 +23,23 @@ class ConfigurablePlatform @Inject constructor() {
         listOf()
     )
     val servicesRunning : StateFlow<List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>>
-        get() = _servicesRunning
+        get() = _servicesRunning.asStateFlow()
 
     var configurablePlatformServiceRunner: ConfigurablePlatformServiceRunner? = null
     var configuredCarComponent : ConfiguredCarComponent? = null
 
     var currentConfiguration : CarPlatformConfiguration? = null
-        private set
+        private set(value) {
+            field = value
+            runBlocking {
+                if (value != null) {
+                    _currentConfigurationFlow.emit(value)
+                }
+            }
+        }
+
+    private val _currentConfigurationFlow = MutableSharedFlow<CarPlatformConfiguration>(replay = 1)
+    val currentConfigurationFlow : SharedFlow<CarPlatformConfiguration> = _currentConfigurationFlow
 
     private var serviceListJob : Job? = null
 

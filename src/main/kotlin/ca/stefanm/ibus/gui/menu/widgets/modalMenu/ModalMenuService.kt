@@ -85,7 +85,12 @@ class ModalMenuService @Inject constructor(
     private val _modalMenuOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
     val modalMenuOverlay = _modalMenuOverlay.asStateFlow()
 
-    private val _sidePaneOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
+    data class SidePaneOverlay(
+        val ui : (@Composable () -> Unit)? = null,
+        val darkenBackground : Boolean = false
+    )
+
+    private val _sidePaneOverlay = MutableStateFlow(SidePaneOverlay())
     val sidePaneOverlay = _sidePaneOverlay.asStateFlow()
 
     fun showModalMenu(
@@ -155,28 +160,16 @@ class ModalMenuService @Inject constructor(
         darkenBackground : Boolean = false,
         contents : @Composable () -> Unit
     ) {
-        if (darkenBackground) {
-            _modalMenuOverlay.value = {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(Brush.horizontalGradient(
-                            listOf(Color.Transparent,
-                            Color(0F, 0F, 0F, alpha = 0.6F)),
-                            startX = 0F,
-                            endX = 0.25F
-                        )
-                        )
-                ) { }
-            }
-        }
-        _sidePaneOverlay.value = contents
+        _sidePaneOverlay.value = SidePaneOverlay(
+            ui = contents,
+            darkenBackground = darkenBackground
+        )
     }
 
-    fun closeSidePaneOverlay(clearModalOverlay : Boolean = false) {
-        if (clearModalOverlay) {
-            closeModalMenu()
-        }
-        _sidePaneOverlay.value = null
+    fun closeSidePaneOverlay(clearDarkening : Boolean = false) {
+        _sidePaneOverlay.value = _sidePaneOverlay.value.copy(
+            ui = null,
+            darkenBackground = !clearDarkening
+        )
     }
 }

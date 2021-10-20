@@ -75,14 +75,15 @@ class MenuWindow @Inject constructor(
                         CompositionLocalProvider(
                             MenuWindowKnobListener provides realKnobListenerService
                         ) {
-                            it.invoke()
+                            it.ui?.invoke()
                         }
                     } else {
                         providedKnobListenerService.value = realKnobListenerService
                     }
                 }
             },
-            sideSplitVisible = modalMenuService.sidePaneOverlay.collectAsState().value != null,
+            darkenBackgroundOnSideSplitDisplay = modalMenuService.sidePaneOverlay.collectAsState().value.darkenBackground,
+            sideSplitVisible = modalMenuService.sidePaneOverlay.collectAsState().value.ui != null,
             bottomPanel = {
                 val scope = rememberCoroutineScope()
                 scope.launch {

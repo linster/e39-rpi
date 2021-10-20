@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine
 
+import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DBusConnectionOwner
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DeviceListProvider
@@ -17,6 +18,7 @@ import org.bluez.exceptions.BluezDoesNotExistException
 import org.bluez.exceptions.BluezRejectedException
 import org.freedesktop.DBus
 import org.freedesktop.dbus.DBusPath
+import org.freedesktop.dbus.exceptions.DBusException
 import org.freedesktop.dbus.exceptions.DBusExecutionException
 import org.freedesktop.dbus.types.UInt16
 import org.freedesktop.dbus.types.UInt32
@@ -31,7 +33,8 @@ class PairingManager @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val dBusConnectionOwningComponent: DBusConnectionOwner,
     private val deviceListProvider: DeviceListProvider,
-    private val logger: Logger
+    private val logger: Logger,
+    private val configurationStorage: ConfigurationStorage
 ) {
 
     private companion object {
@@ -61,6 +64,11 @@ class PairingManager @Inject constructor(
                 dBusConnectionOwningComponent,
                 deviceListProvider
             ).asReversed().forEach { it.onCleanup() }
+            try {
+                cleanupAgent()
+            } catch (e : Exception) {
+                logger.e(TAG, "Cleanup agent", e)
+            }
             isDBusSetup = false
         }
     }
@@ -68,14 +76,17 @@ class PairingManager @Inject constructor(
     private lateinit var agentManager: AgentManager1
 
     private fun setupAgent() {
-        dBusConnectionOwningComponent.getSystemBusConnection().exportObject(agentPath, agent)
+        try {
+            dBusConnectionOwningComponent.getSystemBusConnection().exportObject(agentPath, agent)
+        } catch (e : DBusException) {
+            logger.e(TAG, "Export object exception", e)
+        }
 
         //dBusConnectionOwningComponent.getSystemBusConnection().e
         //dBusConnectionOwningComponent.getSessionBusConnection()
 
         agentManager = dBusConnectionOwningComponent.getSystemBusConnection().getAgentManager() ?: error("Couldn't get the AgentManager")
 
-        val localBus = dBusConnectionOwningComponent.getSessionBusConnection().getRemoteObject("org.freedesktop.DBus", "/org/freedesktop/DBus", DBus::class.java).GetNameOwner("ca.stefanm.e39")
         agentManager.RegisterAgent(
             DBusPath("" + agent.objectPath),
             "DisplayYesNo"
@@ -298,7 +309,7 @@ class PairingManager @Inject constructor(
                 }
             }
             is CurrentDeviceViewer.ViewResult.SetDeviceForCarPlatform -> {
-                TODO("Set this for Car Config")
+                configurationStorage.setBMBTPairedPhone(uiResult.device)
             }
         }
     }

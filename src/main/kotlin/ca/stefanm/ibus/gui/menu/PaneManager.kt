@@ -2,11 +2,14 @@ package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
 
@@ -18,6 +21,7 @@ fun PaneManager(
 
     //Children can use fillMaxSize, and it just works.
     sideSplit: @Composable (() -> Unit)?,
+    darkenBackgroundOnSideSplitDisplay : Boolean = false,
     sideSplitVisible: Boolean,
 
     //Children should not use max size.
@@ -53,12 +57,24 @@ fun PaneManager(
             }
             Box(Modifier.weight(weightContent)) {
                 mainContent()
+
+                if (darkenBackgroundOnSideSplitDisplay && sideSplitVisible) {
+                    Box(Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(Color.Transparent, Color(0F, 0F, 0F, alpha = 0.6F)),
+                                startX = 0F,
+                                endX = 0.25F
+                            )
+                        )
+                    ) { }
+                }
+
                 mainContentOverlay?.invoke()
             }
             if (bottomPanel != null) {
-                Box(
-                    modifier = Modifier
-                ) {
+                Box {
                     bottomPanel()
                 }
             }
