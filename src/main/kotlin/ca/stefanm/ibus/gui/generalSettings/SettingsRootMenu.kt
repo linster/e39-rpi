@@ -53,10 +53,10 @@ class SettingsRootMenu @Inject constructor(
                         }
                     ),
                     TextMenuItem(
-                        title = "Car Service Config",
+                        title = "Car Platform Config",
                         onClicked = {
                             navigationNodeTraverser.navigateToNode(
-                                CarServiceConfigScreen::class.java
+                                CarPlatformConfigScreen::class.java
                             )
                         }
                     ),

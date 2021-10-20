@@ -20,7 +20,7 @@ object E39Config : ConfigSpec() {
         }
 
 
-        val _isPi by required<Boolean>(
+        val _isPi by optional(false,
             "isPi", description = "Is E39 running on the RPi or a laptop?")
 
         val _iBusInterfaceUri by optional("/dev/ttyUSB0",
@@ -68,8 +68,20 @@ object E39Config : ConfigSpec() {
     }
 
     object LoadingWindowConfig : ConfigSpec() {
-        //Auto-launch HMI?
+
+        val autoLaunchHmi by optional(
+            false,
+            "AutoLaunchHmi",
+            "Should Open HMI automatically from loading window?"
+        )
+
         //Auto-launch platform on open?
         //Hide Menu?
+    }
+
+    object MapConfig : ConfigSpec() {
+        //Show debug info on tiles?
+
+        //Default center
     }
 }

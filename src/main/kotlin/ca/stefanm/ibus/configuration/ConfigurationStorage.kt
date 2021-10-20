@@ -5,6 +5,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
 import ca.stefanm.ibus.lib.logging.Logger
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.hocon
 import com.uchuhimo.konf.source.hocon.toHocon
 import java.io.File
 import javax.inject.Inject
@@ -25,6 +26,7 @@ class ConfigurationStorage @Inject constructor(
     private val configFile = File(e39BaseFolder, "config.conf")
 
     val config = Config { addSpec(E39Config) }
+        .from.hocon.file(configFile)
 
 
     init {
