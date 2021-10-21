@@ -18,6 +18,8 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.lib.logging.CompositeLogger
+import ca.stefanm.ibus.lib.logging.LogDistributionHub
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -45,6 +47,7 @@ interface ApplicationComponent {
 
     fun configuredCarComponent(configuredCarModule: ConfiguredCarModule) : ConfiguredCarComponent
 
+    @ApplicationScope
     fun logger() : Logger
 
     fun tileFetcher() : TileFetcher
@@ -121,7 +124,13 @@ class ApplicationModule {
 
     @Provides
     @ApplicationScope
-    fun provideLogger() : Logger {
-        return StdOutLogger()
+    fun provideLogger(
+        stdOutLogger: StdOutLogger,
+        logDistributionHub: LogDistributionHub
+    ) : Logger {
+        return CompositeLogger(
+            stdOutLogger,
+            logDistributionHub
+        )
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontWeight
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.menu.HmiLogViewerScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -44,6 +45,14 @@ class CarPlatformConfigScreen @Inject constructor(
                     onClicked = {
                         navigationNodeTraverser.navigateToNode(
                             CarServiceConfigScreen::class.java
+                        )
+                    }
+                ),
+                TextMenuItem(
+                    "Log Viewer",
+                    onClicked = {
+                        navigationNodeTraverser.navigateToNode(
+                            HmiLogViewerScreen::class.java
                         )
                     }
                 )

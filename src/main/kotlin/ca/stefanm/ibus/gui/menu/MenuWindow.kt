@@ -70,7 +70,7 @@ class MenuWindow @Inject constructor(
             banner = null,
             sideSplit = {
                 modalMenuService.sidePaneOverlay.collectAsState().value.let {
-                    if (it != null) {
+                    if (it.ui != null) {
                         providedKnobListenerService.value = dummyKnobListenerService
                         CompositionLocalProvider(
                             MenuWindowKnobListener provides realKnobListenerService

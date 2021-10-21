@@ -69,7 +69,8 @@ class NavigationModule {
         mapScreen: MapScreen,
         aboutScreen: AboutScreen,
         carServiceConfigScreen: CarServiceConfigScreen,
-        carPlatformConfigScreen: CarPlatformConfigScreen
+        carPlatformConfigScreen: CarPlatformConfigScreen,
+        hmiLogViewerScreen: HmiLogViewerScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -92,7 +93,8 @@ class NavigationModule {
         mapScreen,
         aboutScreen,
         carServiceConfigScreen,
-        carPlatformConfigScreen
+        carPlatformConfigScreen,
+        hmiLogViewerScreen
     )
 }
 

@@ -52,7 +52,7 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
             TypeSpec.classBuilder("AutoDiscoveredNodesRegistry")
                 .primaryConstructor(
                     FunSpec.constructorBuilder()
-                        .addAnnotation(Inject::class.java)
+                        //.addAnnotation(Inject::class.java)
                         .build()
                 )
                 .addFunction(
