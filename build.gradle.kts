@@ -1,4 +1,5 @@
 import org.jetbrains.compose.compose
+import org.jetbrains.kotlin.daemon.common.configureDaemonJVMOptions
 
 plugins {
 
@@ -68,12 +69,9 @@ dependencies {
     implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
 
     implementation("com.javadocmd:simplelatlng:1.3.1")
-
-
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
 
     implementation("com.uchuhimo:konf:1.1.2")
-
     implementation("commons-io:commons-io:2.11.0")
 
     implementation("com.ginsberg:cirkle:1.0.1")
@@ -90,15 +88,16 @@ dependencies {
 
 
     //Web
-    implementation("io.ktor:ktor:1.5.1")
-    implementation("io.ktor:ktor-server-netty:1.5.1")
-    implementation("io.ktor:ktor-html-builder:1.5.1")
+    val ktor_version = "1.6.4"
+    implementation("io.ktor:ktor:${ktor_version}")
+    implementation("io.ktor:ktor-server-netty:${ktor_version}")
+    implementation("io.ktor:ktor-html-builder:${ktor_version}")
 
-    implementation("io.ktor:ktor-client-core:1.5.1")
-    implementation("io.ktor:ktor-client-cio:1.5.1")
+    implementation("io.ktor:ktor-client-core:${ktor_version}")
+    implementation("io.ktor:ktor-client-cio:${ktor_version}")
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("io.ktor:ktor-client-logging:1.5.1")
+    implementation("io.ktor:ktor-client-logging:${ktor_version}")
 
 
 
@@ -107,6 +106,17 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
+
+        nativeDistributions {
+            packageVersion = "1.0.0"
+            packageName = "e39Rpi"
+            description = "BMW E39 HMI"
+            copyright = "© 2021 Stefan Martynkiw."
+            vendor = "stefanm.ca"
+            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb)
+            includeAllModules = true
+            //appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
+        }
     }
 }
 
