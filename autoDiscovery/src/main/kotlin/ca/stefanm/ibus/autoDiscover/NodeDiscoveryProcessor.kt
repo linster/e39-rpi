@@ -1,13 +1,7 @@
 package ca.stefanm.ibus.autoDiscover
 
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import dagger.Module
-import dagger.Provides
-import dagger.multibindings.ElementsIntoSet
 import javax.annotation.processing.*
-import javax.inject.Inject
-import javax.inject.Named
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
@@ -61,7 +55,6 @@ class NodeDiscoveryProcessor : AbstractProcessor() {
                             val code = CodeBlock.builder()
                                 .add("return setOf(\n")
                                 .withIndent {
-//                                    addStatement()
                                     elements.map {
                                         add("%T::class.java,\n", (it.asType().asTypeName() as ClassName))
                                     }

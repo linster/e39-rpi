@@ -8,3 +8,4 @@ pluginManagement {
 rootProject.name = "rpi"
 include("autoDiscoveryAnnotations")
 include("autoDiscovery")
+include("autoDiscoveryKsp")

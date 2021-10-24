@@ -24,8 +24,6 @@ tasks {
 
 
 dependencies {
-
-
     //Only to access the annotations
     implementation("com.google.dagger:dagger:2.35.1")
 
