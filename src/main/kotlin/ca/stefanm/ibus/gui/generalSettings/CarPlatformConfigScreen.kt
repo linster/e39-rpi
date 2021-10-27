@@ -55,6 +55,14 @@ class CarPlatformConfigScreen @Inject constructor(
                             HmiLogViewerScreen::class.java
                         )
                     }
+                ),
+                TextMenuItem(
+                    "Relay Toggle",
+                    onClicked = {
+                        navigationNodeTraverser.navigateToNode(
+                            RelayToggleScreen::class.java
+                        )
+                    }
                 )
             )
             )

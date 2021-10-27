@@ -100,7 +100,7 @@ class LogDistributionHub @Inject constructor() : Logger {
     }
 
     private fun LogEvent.notifyObservers() {
-        println("${this.hashCode()} Notifying observers ${observers.size}")
+        //println("${this.hashCode()} Notifying observers ${observers.size}")
         observers.forEach { it.invoke(this) }
     }
 

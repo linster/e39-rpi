@@ -5,10 +5,7 @@ import ca.stefanm.ibus.di.*
 import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
-import ca.stefanm.ibus.gui.generalSettings.AboutScreen
-import ca.stefanm.ibus.gui.generalSettings.CarPlatformConfigScreen
-import ca.stefanm.ibus.gui.generalSettings.CarServiceConfigScreen
-import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
+import ca.stefanm.ibus.gui.generalSettings.*
 import ca.stefanm.ibus.gui.map.MapScreen
 import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
 import ca.stefanm.ibus.gui.menu.*
@@ -70,7 +67,8 @@ class NavigationModule {
         aboutScreen: AboutScreen,
         carServiceConfigScreen: CarServiceConfigScreen,
         carPlatformConfigScreen: CarPlatformConfigScreen,
-        hmiLogViewerScreen: HmiLogViewerScreen
+        hmiLogViewerScreen: HmiLogViewerScreen,
+        relayToggleScreen: RelayToggleScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -94,7 +92,8 @@ class NavigationModule {
         aboutScreen,
         carServiceConfigScreen,
         carPlatformConfigScreen,
-        hmiLogViewerScreen
+        hmiLogViewerScreen,
+        relayToggleScreen
     )
 }
 

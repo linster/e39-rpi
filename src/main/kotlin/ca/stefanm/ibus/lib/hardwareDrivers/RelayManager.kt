@@ -5,6 +5,9 @@ import ca.stefanm.ibus.lib.logging.Logger
 import com.pi4j.io.i2c.I2CBus
 import com.pi4j.io.i2c.I2CDevice
 import com.pi4j.io.i2c.I2CFactory
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 

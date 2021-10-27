@@ -45,6 +45,7 @@ interface ConfiguredCarComponent {
     fun legacyPlatformServiceRunner() : PlatformServiceRunner
     fun configurablePlatformServiceRunner() : ConfigurablePlatformServiceRunner
     fun ibusInputMessageParser() : IBusInputMessageParser
+    fun relayReaderWriter() : RelayReaderWriter
 }
 
 @Module
