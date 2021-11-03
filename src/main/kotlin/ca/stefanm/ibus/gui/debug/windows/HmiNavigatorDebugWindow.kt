@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
@@ -38,7 +40,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = WindowSize(600.dp, 1200.dp)
+    override val size = DpSize(600.dp, 1200.dp)
     override val title = "HMI Navigator Debug"
 
     override fun content(): @Composable WindowScope.() -> Unit = {
@@ -122,6 +124,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
         ) {
             Text("Navigate to Registered Node V")
             DropdownMenu(
+                offset = DpOffset(0.dp, (-1000).dp),
                 expanded = isMenuOpen.value,
                 onDismissRequest = { isMenuOpen.value = false }
             ) {

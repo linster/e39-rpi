@@ -45,8 +45,7 @@ class MenuWindow @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.OVER_MAIN
 
-    override val size: WindowSize
-        get() = WindowManager.DEFAULT_SIZE
+    override val size get() = WindowManager.DEFAULT_SIZE
 
     override fun content(): @Composable WindowScope.() -> Unit = {
         rootContent()

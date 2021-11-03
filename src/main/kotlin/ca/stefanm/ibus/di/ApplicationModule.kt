@@ -16,6 +16,8 @@ import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
 import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.DebugKnobService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.CompositeLogger
@@ -53,6 +55,10 @@ interface ApplicationComponent {
     fun tileFetcher() : TileFetcher
     fun tileCacheClearer() : TileServerImageCacheClearer
 
+    @ApplicationScope
+    fun debugKnobService() : DebugKnobService
+
+    fun windowManager() : WindowManager
 
     fun knobListenerService() : KnobListenerService
     fun modalMenuService() : ModalMenuService

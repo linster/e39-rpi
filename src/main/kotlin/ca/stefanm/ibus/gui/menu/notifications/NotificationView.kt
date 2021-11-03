@@ -8,19 +8,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.imageFromResource
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.res.svgResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
-import kotlin.time.ExperimentalTime
 
 @Composable fun Notification.toView() {
     Row(
@@ -65,7 +59,7 @@ import kotlin.time.ExperimentalTime
                 Row(Modifier.align(Alignment.CenterHorizontally)) {
                     //image here
                     //https://feathericons.com/?query=nav
-                    val resource = svgResource(
+                    val resource = painterResource(
                         when (this@toView.image) {
                             Notification.NotificationImage.NONE -> error("Invalid")
                             Notification.NotificationImage.ALERT_CIRCLE -> "icons/alert-circle.svg"

@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
@@ -32,7 +33,7 @@ class PaneManagerDebug @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = WindowSize(1600.dp, 800.dp)
+    override val size = DpSize(1600.dp, 800.dp)
     override val tag: Any
         get() = this
 

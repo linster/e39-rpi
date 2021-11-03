@@ -1,16 +1,10 @@
 package ca.stefanm.ibus.gui.debug.windows
 
-import androidx.compose.desktop.Window
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.window.WindowScope
-import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
-
 
 class MenuDebug @Inject constructor(
     private val logger: Logger,

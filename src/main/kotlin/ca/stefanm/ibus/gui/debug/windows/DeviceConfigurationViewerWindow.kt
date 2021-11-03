@@ -1,39 +1,46 @@
 package ca.stefanm.ibus.gui.debug.windows
 
-import androidx.compose.desktop.Window
-//import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowScope
+import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
 
-class DeviceConfigurationViewerWindow @Inject constructor() {
+@ApplicationScope
+class DeviceConfigurationViewerWindow @Inject constructor(
+    private val configurablePlatform: ConfigurablePlatform
+) : WindowManager.E39Window {
 
-    fun show(deviceConfiguration: CarPlatformConfiguration?) {
-        Window(
-            title = "Device Configuration Viewer",
-            size = IntSize(300, 600),
-        ) {
+    override val title: String = "Device Configuration Viewer"
+    override val size = DpSize(300.dp, 600.dp)
+    override val tag: Any get() = this
+    override val defaultPosition: WindowManager.E39Window.DefaultPosition
+        get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-            Column(
-                modifier = Modifier.fillMaxSize(),
-//                scrollState = stateVertical
-            ) {
-                Column {
-                    deviceConfiguration.parseConfiguration().forEach {
-                        it.widget()
-                        Spacer(modifier = Modifier.height(5.dp))
-                    }
+    override fun content(): @Composable WindowScope.() -> Unit = {
+
+        val deviceConfiguration = configurablePlatform.currentConfigurationFlow.collectAsState(null)
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column {
+                deviceConfiguration.value.parseConfiguration().forEach {
+                    it.widget()
+                    Spacer(modifier = Modifier.height(5.dp))
                 }
             }
         }
-
     }
 
     data class ConfigurationItem(

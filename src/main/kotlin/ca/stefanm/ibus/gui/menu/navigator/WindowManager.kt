@@ -2,8 +2,10 @@ package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,19 +17,20 @@ import javax.inject.Provider
 @ApplicationScope
 class WindowManager @Inject constructor(
     private val loadingWindow: Provider<LoadingWindow>,
-    private val hmiWindow : MenuWindow
+    private val hmiWindow : MenuWindow,
+    private val configurablePlatform: ConfigurablePlatform
 ) {
 
     //Debugging options
     private val HMI_SHIFT_RIGHT = true //Don't overlap the HMI window fully
 
     companion object {
-        val DEFAULT_SIZE = WindowSize(800.dp, 468.dp)
+        val DEFAULT_SIZE = DpSize(800.dp, 468.dp)
     }
 
     interface E39Window {
         val title : String
-        val size : WindowSize
+        val size : DpSize
 
         val tag : Any
 
@@ -67,13 +70,21 @@ class WindowManager @Inject constructor(
         }
     }
 
+    private val runningApplicationScope = MutableStateFlow<androidx.compose.ui.window.ApplicationScope?>(null)
     private val hmiWindowState = MutableStateFlow(HmiWindowState())
     private val windowManagerState = MutableStateFlow(SystemWindowState())
+
+
+    fun exitApplication() {
+        runningApplicationScope.value?.exitApplication()
+    }
 
     //Invoke from Main
     fun runApplication() = application {
         // Currently we use Swing's menu under the hood, so we need to set this property to change the look and feel of the menu on Windows/Linux
         System.setProperty("skiko.rendering.laf.global", "true")
+
+        runningApplicationScope.value = this
 
         val systemWindowState = produceState(SystemWindowState()) {
             windowManagerState.collect { value = it }
@@ -85,16 +96,23 @@ class WindowManager @Inject constructor(
 
 
         val mainWindowState = rememberWindowState(
-            isOpen = true,
-            size = DEFAULT_SIZE
+            size = DEFAULT_SIZE,
         )
 
         Window(
             title = "BMW E39 Nav Loading",
-            state = mainWindowState
+            state = mainWindowState,
+            onCloseRequest = {
+                configurablePlatform.stop()
+                exitApplication()
+            },
+            resizable = false,
+            visible = true
+        //TODO set fullscreen if prod.
         ) {
             loadingWindow.get().contents()()
         }
+
 
 
         if (hmiWindowState.value.isHmiWindowOpen) {
@@ -107,7 +125,7 @@ class WindowManager @Inject constructor(
                             it
                         }
                     },
-                    size = DEFAULT_SIZE
+                    size = DEFAULT_SIZE,
                 ),
                 title = "E39 Menu",
                 undecorated = false,
@@ -139,8 +157,6 @@ class WindowManager @Inject constructor(
         }
     }
 
-    //TODO LOLOL because the debug window opening updates the WindowManagerState.value
-    //TODO under the hood there's a recomposition that causes the kob listener to break.
     fun openHmiMainWindow() {
         hmiWindowState.value = hmiWindowState.value.copy(isHmiWindowOpen = true)
     }

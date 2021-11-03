@@ -9,10 +9,8 @@ import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -128,4 +126,18 @@ class KnobListenerService @Inject constructor(
 
     }
 
+}
+
+@ApplicationScope
+class DebugKnobService @Inject constructor(
+    @Named(ApplicationModule.INPUT_EVENTS_WRITER) private val inputEventsWriter : MutableSharedFlow<InputEvent>,
+    private val logger: Logger
+) {
+    fun knobClick() {
+        GlobalScope.launch {
+            logger.d("DebugKnobService", "Sending event: NavKnobPressed")
+            inputEventsWriter.emit(InputEvent.NavKnobPressed)
+            logger.d("DebugKnobService", "Sent event: NavKnobPressed")
+        }
+    }
 }

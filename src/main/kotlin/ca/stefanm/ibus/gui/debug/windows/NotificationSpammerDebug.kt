@@ -8,6 +8,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
@@ -27,7 +28,7 @@ class NotificationSpammerDebug @Inject constructor(
 
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
-    override val size = WindowSize(300.dp, 500.dp)
+    override val size = DpSize(300.dp, 500.dp)
 
     override val title = "Notification Spammer"
 

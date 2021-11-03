@@ -89,8 +89,8 @@ fun PaneManager(
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.TopEnd),
                 visible = sideSplitVisible,
-                enter = slideInHorizontally({ it }),
-                exit = slideOutHorizontally({ it })
+                enter = slideInHorizontally(initialOffsetX = { it }),
+                exit = slideOutHorizontally(targetOffsetX = { it })
             ) {
                 sideSplit?.invoke()
             }
@@ -104,8 +104,8 @@ fun PaneManager(
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.TopEnd),
                 visible = topPopInVisible,
-                enter = slideInVertically({ -it }),
-                exit = slideOutVertically({ -it })
+                enter = slideInVertically(initialOffsetY = { -it }),
+                exit = slideOutVertically(targetOffsetY = { -it })
             ) {
                 topPopIn?.invoke()
             }

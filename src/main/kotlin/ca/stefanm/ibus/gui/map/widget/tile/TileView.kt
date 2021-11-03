@@ -3,11 +3,9 @@ package ca.stefanm.ibus.gui.map.widget.tile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 
@@ -36,9 +34,11 @@ fun TileView(
 
         val tileFile = tileFetcher.getTile(x, y, zoom)
 
-        image.value = org.jetbrains.skija.Image.makeFromEncoded(
-            tileFile.readBytes()
-        ).asImageBitmap()
+        tileFile.inputStream().buffered().use {
+            image.value = org.jetbrains.skia.Image.makeFromEncoded(
+                        it.readBytes()
+                    ).toComposeImageBitmap()
+        }
     }
 
     Box(

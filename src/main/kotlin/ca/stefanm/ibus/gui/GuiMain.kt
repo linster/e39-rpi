@@ -1,6 +1,5 @@
 package ca.stefanm.ibus.gui
 
-import androidx.compose.desktop.AppManager
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
@@ -20,10 +19,6 @@ class GuiMain {
 
     init {
         DaggerApplicationComponent.builder().build().inject(this)
-
-        AppManager.setEvents(onAppStart = {
-//            platform.run()
-        })
     }
 
     fun main() {

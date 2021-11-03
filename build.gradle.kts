@@ -5,10 +5,10 @@ plugins {
 
     if (true) {
         // __KOTLIN_COMPOSE_VERSION__
-        kotlin("jvm") version "1.5.10"
-        kotlin("kapt") version "1.5.10"
+        kotlin("jvm") version "1.5.31"
+        kotlin("kapt") version "1.5.31"
 //        id("org.jetbrains.compose") version "0.3.2"
-        id("org.jetbrains.compose") version "0.4.0"
+        id("org.jetbrains.compose") version "1.0.0-beta5"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"

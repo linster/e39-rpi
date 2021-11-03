@@ -22,6 +22,7 @@ import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.coroutineContext
+import kotlin.math.min
 
 class TileFetcher @Inject constructor(
     private val osmTileServerInfo: OSMTileServerInfo,
@@ -120,7 +121,7 @@ class TileFetcher @Inject constructor(
 
         logger.d("TileFetcher", "Tiles to download : (count) ${tilesToDownload.size}")
 
-        val concurrentWorkers = 24
+        val concurrentWorkers = min(24, tilesToDownload.size)
 
         val flowsByWorker = tilesToDownload.windowed(
             size = tilesToDownload.size / concurrentWorkers,

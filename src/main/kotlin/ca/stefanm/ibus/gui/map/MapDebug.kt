@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
@@ -38,7 +39,7 @@ class MapDebug @Inject constructor(
     override val tag: Any
         get() = this
 
-    override val size = WindowSize(1480.dp, 1000.dp)
+    override val size = DpSize(1480.dp, 1000.dp)
     override val title = "Map Debug"
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE

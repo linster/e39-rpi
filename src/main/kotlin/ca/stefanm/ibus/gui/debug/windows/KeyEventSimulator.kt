@@ -13,6 +13,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
@@ -40,7 +41,7 @@ class KeyEventSimulator @Inject constructor(
 
     override val defaultPosition = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = WindowSize(600.dp, 400.dp)
+    override val size = DpSize(600.dp, 400.dp)
     override val title = "Key Event Simulator"
 
     override fun content(): @Composable WindowScope.() -> Unit = {

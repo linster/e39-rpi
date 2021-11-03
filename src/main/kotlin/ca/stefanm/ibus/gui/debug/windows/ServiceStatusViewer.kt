@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
@@ -32,7 +33,7 @@ class ServiceStatusViewer @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = WindowSize(800.dp, 1024.dp)
+    override val size = DpSize(800.dp, 1024.dp)
 
     override fun content(): @Composable WindowScope.() -> Unit = {
         val list = configurablePlatform.servicesRunning.collectAsState(GlobalScope.coroutineContext)

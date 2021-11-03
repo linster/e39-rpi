@@ -1,6 +1,5 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
-import androidx.compose.desktop.AppManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,7 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.imageFromResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -35,14 +34,14 @@ class LoadingWindow @Inject constructor(
     private val windowManager : Provider<WindowManager>
 ) {
 
-    fun contents() : @Composable WindowScope.() -> Unit = {
+    fun contents() : @Composable FrameWindowScope.() -> Unit = {
 
         MenuBar {
 
             Menu("Quit") {
                 Item(
                     "Quit",
-                    onClick = { AppManager.exit() },
+                    onClick = { windowManager.get().exitApplication() },
                     //shortcut = KeyStroke(Key.Q)
                 )
             }
@@ -87,13 +86,13 @@ class LoadingWindow @Inject constructor(
             }
             Menu("Configuration") {
                 Item("View Device Configuration",
-                    onClick = { deviceConfigurationViewerWindow.show(configurablePlatform.currentConfiguration) }
+                    onClick = { windowManager.get().openDebugWindow(deviceConfigurationViewerWindow) }
                 )
             }
         }
 
         Image(
-            bitmap = imageFromResource("bmw_navigation.png"),
+            painter = painterResource("bmw_navigation.png"),
             contentDescription = null,
             modifier = Modifier.fillMaxSize()
                 .background(Color.Black)

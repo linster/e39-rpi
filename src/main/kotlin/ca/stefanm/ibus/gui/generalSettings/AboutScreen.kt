@@ -8,8 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.imageFromResource
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -84,7 +85,7 @@ class AboutScreen @Inject constructor(
                 horizontalAlignment = Alignment.CenterHorizontally)
             {
                 Image(
-                    bitmap = imageFromResource("tux.png"),
+                    painter = painterResource("tux.png"),
                     contentDescription = "Tux",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth(0.8f)

@@ -16,7 +16,6 @@ import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.picker.TextEntry
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
@@ -24,7 +23,6 @@ import javax.inject.Inject
 @AutoDiscover
 class ComposeDebugMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val textEntry: TextEntry,
     private val logger: Logger,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
@@ -43,15 +41,7 @@ class ComposeDebugMenu @Inject constructor(
                 }) { Text("Go to bt")}
 
                 Button(
-                    onClick = {
-                        textEntry.enterText(
-                            listOf(),
-                            onComplete = {
-                                enteredText.value = it
-                            },
-                            onCancel = {}
-                        )
-                    }
+                    onClick = {}
                 ) { Text("Enter text")}
                 Text(text = "Entered text: ${enteredText.value}")
 
@@ -87,6 +77,4 @@ class ComposeDebugMenu @Inject constructor(
                 }) { Text("Debug 2 with passed in listener")}
             }
         }
-
-
 }
