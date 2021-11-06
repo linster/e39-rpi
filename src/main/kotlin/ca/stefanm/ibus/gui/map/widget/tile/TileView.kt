@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 
 @Composable
@@ -24,7 +25,9 @@ fun TileView(
     x : Int,
     y : Int,
     zoom : Int,
-    debug : Boolean = true
+    debug : Boolean =
+        DaggerApplicationComponent.create().configurationStorage()
+            .config[E39Config.MapConfig.showDebugInfoOnTiles]
 ) {
 
     val image = remember { mutableStateOf<ImageBitmap?>(null) }

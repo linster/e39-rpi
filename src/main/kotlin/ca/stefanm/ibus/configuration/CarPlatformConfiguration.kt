@@ -71,5 +71,4 @@ class LaptopDeviceConfiguration : CarPlatformConfiguration {
     override val serialPortWriteMode = CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING
 
     override val trackInfoPrinter = CarPlatformConfiguration.TrackInfoPrinterType.CLI
-
 }

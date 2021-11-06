@@ -5,6 +5,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
@@ -37,7 +39,8 @@ class MapScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
     private val knobListenerService: KnobListenerService,
-    private val logger : Logger
+    private val logger : Logger,
+    private val configurationStorage: ConfigurationStorage
 ) : NavigationNode<MapScreen.MapScreenResult> {
 
     companion object {
@@ -106,7 +109,7 @@ class MapScreen @Inject constructor(
         val parameters = (it?.requestParameters as? MapScreenParameters) ?: MapScreenParameters(
             persistUiStateOnClose = false,
             openMode = MapScreenParameters.MapScreenOpenMode.BrowsingMode(
-                center = LatLng(45.3154699,-75.9194058)
+                center = configurationStorage.config[E39Config.MapConfig.defaultMapCenter]
             )
         )
 

@@ -8,6 +8,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.gui.GuiMain
 import ca.stefanm.ibus.gui.di.GuiModule
@@ -51,6 +52,9 @@ interface ApplicationComponent {
 
     @ApplicationScope
     fun logger() : Logger
+
+
+    fun configurationStorage() : ConfigurationStorage
 
     fun tileFetcher() : TileFetcher
     fun tileCacheClearer() : TileServerImageCacheClearer

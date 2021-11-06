@@ -1,11 +1,23 @@
 package ca.stefanm.ibus.configuration
 
+import com.javadocmd.simplelatlng.LatLng
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 
 object E39Config : ConfigSpec() {
 
     object CarPlatformConfigSpec : ConfigSpec() {
+
+        enum class InitialCarPlatformConfiguration {
+            LAPTOP,
+            RPI
+        }
+
+        val initialCarPlatformConfiguration by optional(
+            InitialCarPlatformConfiguration.LAPTOP,
+            "initialCarPlatformConfiguration",
+            "If we start the platform without a configuration, do we start it as the laptop or the pi?"
+        )
 
         fun toCarPlatformConfiguration(config: Config) : CarPlatformConfiguration {
             return object : CarPlatformConfiguration {
@@ -75,13 +87,36 @@ object E39Config : ConfigSpec() {
             "Should Open HMI automatically from loading window?"
         )
 
+        val autoLaunchPlatformOnOpen by optional(
+            true,
+            "AutoLaunchCarPlatformOnOpen",
+            "Do we start the platform on opening the loading window?"
+        )
+
         //Auto-launch platform on open?
         //Hide Menu?
     }
 
     object MapConfig : ConfigSpec() {
-        //Show debug info on tiles?
 
-        //Default center
+        val showDebugInfoOnTiles by optional(
+            false,
+            "showDebugInfoOnTiles",
+            "Should each mapTile have its osm x, y, zoom printed on it in the UI?"
+        )
+
+        val defaultMapCenter by optional(
+            LatLng(45.3154699,-75.9194058),
+            "defaultMapCenter",
+            "default LatLng to open all maps at. Default is in Kanata, ON, Canada."
+        )
+
+        object GuidanceService : ConfigSpec() {
+            val hereMapsApiToken by optional(
+                "",
+                "HereMapsApiToken",
+                "API Token for HERE Maps Guidance service."
+            )
+        }
     }
 }

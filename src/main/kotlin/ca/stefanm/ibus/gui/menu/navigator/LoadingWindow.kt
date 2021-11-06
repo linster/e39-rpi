@@ -34,6 +34,17 @@ class LoadingWindow @Inject constructor(
     private val windowManager : Provider<WindowManager>
 ) {
 
+    private fun startPlatform() {
+        val config = E39Config.CarPlatformConfigSpec
+            .toCarPlatformConfiguration(config = configurationStorage.config)
+        configurablePlatform.run(config)
+    }
+
+    private fun restartPlatform() {
+        configurablePlatform.stop()
+        startPlatform()
+    }
+
     fun contents() : @Composable FrameWindowScope.() -> Unit = {
 
         MenuBar {
@@ -49,7 +60,7 @@ class LoadingWindow @Inject constructor(
             Menu("Platform") {
                 Item(
                     "Start Platform",
-                    onClick = { configurablePlatform.run() },
+                    onClick = { startPlatform() },
                     //shortcut = KeyStroke(Key.S)
                 )
                 Item(
@@ -59,7 +70,7 @@ class LoadingWindow @Inject constructor(
                 )
                 Item(
                     "Restart Platform",
-                    onClick = { configurablePlatform.stop(); configurablePlatform.run() },
+                    onClick = { restartPlatform() },
                     //shortcut = KeyStroke(Key.R)
                 )
             }
@@ -103,8 +114,15 @@ class LoadingWindow @Inject constructor(
 
         if (configurationStorage.config[E39Config.LoadingWindowConfig.autoLaunchHmi]) {
             LaunchedEffect(true) {
-                delay(2000)
+                delay(500)
                 openMenuWindow()
+            }
+        }
+
+        if (configurationStorage.config[E39Config.LoadingWindowConfig.autoLaunchPlatformOnOpen]) {
+            LaunchedEffect(true) {
+                delay(100)
+                startPlatform()
             }
         }
     }
