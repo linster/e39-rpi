@@ -95,7 +95,7 @@ fun MenuItem(
                     when (chipOrientation) {
                         ItemChipOrientation.NW,
                         ItemChipOrientation.NE -> {
-                            Modifier.padding(top = (chipWidth * 1.5).dp, bottom = highlightWidth.dp, start = (chipWidth * 1.5).dp)
+                            Modifier.padding(top = (chipWidth).dp, bottom = highlightWidth.dp, start = (chipWidth * 1.5).dp)
                         }
                         ItemChipOrientation.SW,
                         ItemChipOrientation.SE -> {
@@ -116,41 +116,48 @@ fun MenuItem(
                 ItemChipOrientation.NW -> {
                     this.drawLine(
                         brush = SolidColor(chipColor),
-                        start = Offset(0.0f, chipWidth),
-                        end = Offset(this.size.height, chipWidth),
-                        strokeWidth = 2 * chipWidth
+                        start = Offset(0.0f, (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.height, (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
                     )
-                    this.drawLine(
-                        brush = SolidColor(chipColor),
-                        start = Offset(chipWidth, 0.0f),
-                        end = Offset(chipWidth, this.size.height - highlightWidth),
-                        strokeWidth = 2 * chipWidth
-                    )
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset((chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset((chipWidth * 0.5).dp.toPx(), this.size.height - highlightWidth),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
                 }
                 ItemChipOrientation.NE -> {
                     this.drawLine(
                         brush = SolidColor(chipColor),
-                        start = Offset(this.size.width - this.size.height, chipWidth),
-                        end = Offset(this.size.width, chipWidth),
-                        strokeWidth = 2 * chipWidth
+                        start = Offset(this.size.width - this.size.height, (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.width, (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
                     )
-                    this.drawLine(
-                        brush = SolidColor(chipColor),
-                        start = Offset(this.size.width - chipWidth, 0.0f),
-                        end = Offset(this.size.width - chipWidth, this.size.height - highlightWidth),
-                        strokeWidth = 2 * chipWidth
-                    )
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset(
+                                this.size.width - (chipWidth * 0.5).dp.toPx(),
+                                this.size.height - highlightWidth
+                            ),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
                 }
                 ItemChipOrientation.E -> {
                     this.drawLine(
                         brush = SolidColor(chipColor),
-                        start = Offset(this.size.width - chipWidth, 0.0f),
-                        end = Offset(this.size.width - chipWidth, this.size.height - highlightWidth),
-                        strokeWidth = 2 * chipWidth
+                        start = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), 0.0f),
+                        end = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), this.size.height - highlightWidth),
+                        strokeWidth = chipWidth.dp.toPx()
                     )
                     this.drawLine(
                         brush = SolidColor(chipHighlights),
-                        start = Offset(this.size.width - (2 * chipWidth), 0.0f),
+                        start = Offset(this.size.width - (chipWidth.dp.toPx()), 0.0f),
                         end = Offset(this.size.width, 0.0f),
                         strokeWidth = highlightWidth
                     )
@@ -158,54 +165,58 @@ fun MenuItem(
                 ItemChipOrientation.SE -> {
                     this.drawLine(
                         brush = SolidColor(chipColor),
-                        start = Offset(this.size.width - this.size.height, this.size.height - chipWidth),
-                        end = Offset(this.size.width, this.size.height - chipWidth),
-                        strokeWidth = 2 * chipWidth
+                        start = Offset(this.size.width - this.size.height, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.width, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
                     )
-                    this.drawLine(
-                        brush = SolidColor(chipColor),
-                        start = Offset(this.size.width - chipWidth, 0.0f),
-                        end = Offset(this.size.width - chipWidth, this.size.height),
-                        strokeWidth = 2 * chipWidth
-                    )
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), this.size.height),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
                     this.drawLine(
                         brush = SolidColor(chipHighlights),
-                        start = Offset(this.size.width - (2 * chipWidth), 0.0f),
+                        start = Offset(this.size.width - (chipWidth.dp.toPx()), 0.0f),
                         end = Offset(this.size.width, 0.0f),
                         strokeWidth = highlightWidth
                     )
                 }
                 ItemChipOrientation.SW -> {
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset((chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset((chipWidth * 0.5).dp.toPx(), this.size.height),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
                     this.drawLine(
                         brush = SolidColor(chipColor),
-                        start = Offset(chipWidth, 0.0f),
-                        end = Offset(chipWidth, this.size.height),
-                        strokeWidth = 2 * chipWidth
-                    )
-                    this.drawLine(
-                        brush = SolidColor(chipColor),
-                        start = Offset(0.0f, this.size.height - chipWidth),
-                        end = Offset(this.size.height, this.size.height - chipWidth),
-                        strokeWidth = 2 * chipWidth
+                        start = Offset(0.0f, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.height, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
                     )
                     this.drawLine(
                         brush = SolidColor(chipHighlights),
                         start = Offset(0.0f, highlightWidth),
-                        end = Offset(chipWidth * 2, highlightWidth),
+                        end = Offset(chipWidth.dp.toPx(), highlightWidth),
                         strokeWidth = highlightWidth
                     )
                 }
                 ItemChipOrientation.W -> {
                     this.drawLine(
                         brush = SolidColor(chipColor),
-                        start = Offset(chipWidth, 0.0f),
-                        end = Offset(chipWidth, this.size.height - highlightWidth),
-                        strokeWidth = 2 * chipWidth
+                        start = Offset((chipWidth * 0.5).dp.toPx(), 0.0f),
+                        end = Offset((chipWidth * 0.5).dp.toPx(), this.size.height - highlightWidth),
+                        strokeWidth = chipWidth.dp.toPx()
                     )
                     this.drawLine(
                         brush = SolidColor(chipHighlights),
                         start = Offset(0.0f, highlightWidth),
-                        end = Offset(chipWidth * 2, highlightWidth),
+                        end = Offset(chipWidth.dp.toPx(), highlightWidth),
                         strokeWidth = highlightWidth
                     )
                 }
@@ -216,48 +227,50 @@ fun MenuItem(
 
                 val rectY =
                     if (chipOrientation == ItemChipOrientation.NW || chipOrientation == ItemChipOrientation.NE) {
-                        highlightWidth + (2 * chipWidth)
+                        (highlightWidth) + chipWidth.dp.toPx()
                     } else {
-                        highlightWidth
-                    }
+                        highlightWidth * 0.5
+                    }.toFloat()
 
                 val rectHeight =
                     if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
-                        this.size.height - rectY - (2 * chipWidth)
+                        this.size.height - rectY - (chipWidth.dp.toPx()) - (highlightWidth)
                     } else {
                         this.size.height - rectY
-                    }
+                    }.toFloat()
 
                 this.drawRect(
-                    color = ChipItemColors.SelectedColor,
+                    color = Color.Green,
                     topLeft = Offset(
-                        x = highlightWidth,
+                        x = 0F,
                         y = rectY
                     ),
                     style = Stroke(width = highlightWidth),
-                    size = Size(this.size.width - highlightWidth, rectHeight)
+                    size = Size((this.size.width - (highlightWidth * 0.5)).toFloat(), rectHeight)
                 )
 
                 this.drawRect(
-                    color = ChipItemColors.SelectedColor,
+                    color = Color.Red,
                     topLeft = Offset(
                         x =
                         if (chipOrientation == ItemChipOrientation.E ||
                             chipOrientation == ItemChipOrientation.SE ||
                             chipOrientation == ItemChipOrientation.NE
                         ) {
-                            this.size.width - (2 * chipWidth)
+                            this.size.width - (chipWidth.dp.toPx())
                         } else {
                             0.0F
                         }, y = rectY
                     ),
                     style = Fill,
                     size = Size(
-                        chipWidth * 2F,
-                        if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
-                            this.size.height - (chipWidth * 2)
-                        } else {
-                            this.size.height
+                        chipWidth.dp.toPx(),
+                        when (chipOrientation) {
+                            ItemChipOrientation.NW,
+                            ItemChipOrientation.NE,
+                            ItemChipOrientation.SW,
+                            ItemChipOrientation.SE -> this.size.height - chipWidth.dp.toPx() - highlightWidth
+                            else -> this.size.height
                         }
                     ),
                 )

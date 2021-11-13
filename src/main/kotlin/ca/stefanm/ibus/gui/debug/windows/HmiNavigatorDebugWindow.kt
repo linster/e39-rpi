@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
+import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.navigator.*
@@ -82,6 +83,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
                     NestingCardHeader("Hot Keys")
                     ScreenHotKey(ComposeDebugMenu::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(BMWMainMenu::class.java as Class<NavigationNode<*>>)
+                    ScreenHotKey(DebugHmiMenuTestTwoColumn::class.java as Class<NavigationNode<*>>)
                 }
             }
 
