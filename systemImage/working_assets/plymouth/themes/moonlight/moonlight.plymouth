@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Additional Theme for Debian 10.0 Stretch
+Description=A theme that features a dark debian logo in concentrics circles with pulsing white glow, on a blue-gray background
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/moonlight
+ScriptFile=/usr/share/plymouth/themes/moonlight/moonlight.script

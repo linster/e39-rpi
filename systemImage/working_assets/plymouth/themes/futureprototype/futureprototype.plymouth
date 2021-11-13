@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Default theme for Debian 10.0 Buster
+Description=A theme that features a white debian 10 logo in a white spinning circle
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/futureprototype
+ScriptFile=/usr/share/plymouth/themes/futureprototype/futureprototype.script
