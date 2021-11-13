@@ -6,6 +6,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,11 +20,9 @@ import javax.inject.Provider
 class WindowManager @Inject constructor(
     private val loadingWindow: Provider<LoadingWindow>,
     private val hmiWindow : MenuWindow,
-    private val configurablePlatform: ConfigurablePlatform
+    private val configurablePlatform: ConfigurablePlatform,
+    private val configurationStorage: ConfigurationStorage
 ) {
-
-    //Debugging options
-    private val HMI_SHIFT_RIGHT = true //Don't overlap the HMI window fully
 
     companion object {
         val DEFAULT_SIZE = DpSize(800.dp, 468.dp)
@@ -119,7 +119,14 @@ class WindowManager @Inject constructor(
             Window(
                 state = rememberWindowState(
                     position = mainWindowState.position.let {
-                        if (HMI_SHIFT_RIGHT) {
+                        if (configurationStorage.config[E39Config.WindowManagerConfig.hmiShiftRight]) {
+                            //This blows up on Matthias' machine, and I'm not sure why yet.
+                            //> Task :run
+                            //Exception in thread "main" java.lang.IllegalArgumentException: Cannot round NaN value.
+                            //at kotlin.math.MathKt__MathJVMKt.roundToInt(MathJVM.kt:1132)
+                            //at androidx.compose.ui.util.Windows_desktopKt.setPositionSafely(Windows.desktop.kt:102)
+                            //at androidx.compose.ui.util.Windows_desktopKt.setPositionSafely(Windows.desktop.kt:57)
+                            //at
                             WindowPosition(it.x + 900.dp, it.y)
                         } else {
                             it
