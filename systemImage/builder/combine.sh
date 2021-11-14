@@ -14,7 +14,11 @@ mount -o loop,offset=$((512*532480)) 2021-10-30-raspios-bullseye-armhf-lite.img 
 
 # Add assets
 mkdir mnt/var/lib/e39
+mkdir mnt/etc/e39
 cp -a packages mnt/var/lib/e39
+cp configure.sh mnt/var/lib/e39
+cp firstboot.service mnt/lib/systemd/system/firstboot.service
+ln -s /lib/systemd/system/firstboot.service mnt/etc/systemd/system/default.target.wants
 
 umount mnt
 
