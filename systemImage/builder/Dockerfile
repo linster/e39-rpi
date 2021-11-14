@@ -11,6 +11,7 @@ ADD combine.sh \
 	e39-deps.control \
 	firstboot.service \
 	configure.sh \
+	install-e39.sh \
 	*.deb \
 	./
 CMD [ "./combine.sh" ]

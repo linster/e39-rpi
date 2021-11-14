@@ -4,4 +4,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends xserver-xorg xinit fvwm
 
+/var/lib/e39/install-e39.sh
+
 echo "e39 platform configured!"
