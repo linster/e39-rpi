@@ -1,0 +1,4 @@
+*.img
+mnt/
+*zip
+wpa_supplicant.conf

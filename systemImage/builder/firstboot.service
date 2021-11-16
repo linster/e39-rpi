@@ -1,0 +1,19 @@
+[Unit]
+Description=Configure e39 platform on first boot
+DefaultDependencies=no
+Conflicts=shutdown.target
+After=systemd-remount-fs.service network-online.target
+Wants=network-online.target
+Before=shutdown.target
+ConditionPathIsReadWrite=/etc
+ConditionPathExists=!/etc/e39/configured
+
+[Service]
+ExecStart=/var/lib/e39/configure.sh
+ExecStartPost=/usr/bin/touch /etc/e39/configured
+ExecStop=/usr/sbin/reboot
+Type=oneshot
+RemainAfterExit=no
+
+[Install]
+WantedBy=default.target
