@@ -14,7 +14,7 @@ plugins {
 //        kotlin("kapt") version "1.4.21"
 //        id("org.jetbrains.compose") version "0.0.0-unmerged-build21"
     }
-    id("com.github.johnrengelman.shadow") version "6.0.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
     id("java")
 }
 
@@ -42,7 +42,7 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
-//
+
 //jar {
 //    manifest {
 //        attributes 'Main-Class': 'ca.stefanm.ibus.MainKt'
@@ -50,8 +50,6 @@ repositories {
 //}
 
 dependencies {
-
-
     kapt(project(":autoDiscovery"))
     implementation(project(":autoDiscovery"))
     implementation(project(":autoDiscoveryAnnotations"))
@@ -59,9 +57,8 @@ dependencies {
     implementation("com.squareup.okio:okio:2.6.0")
     implementation(compose.desktop.currentOs)
 
-    implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation( "org.jetbrains.kotlin:kotlin-stdlib")
     implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
-//    implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-flow:1.4.3")
 
     implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
     implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
@@ -103,9 +100,16 @@ dependencies {
 
 }
 
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "ca.stefanm.ComposeMain"
+    }
+}
 compose.desktop {
     application {
-        mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
+//        mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
+        mainClass = "ca.stefanm.ComposeMain"
+
 
         nativeDistributions {
             packageVersion = "1.0.0"
@@ -113,16 +117,12 @@ compose.desktop {
             description = "BMW E39 HMI"
             copyright = "© 2021 Stefan Martynkiw."
             vendor = "stefanm.ca"
-            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb)
+            targetFormats(
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+            )
             includeAllModules = true
             //appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
+
         }
     }
 }
-
-//compileKotlin {
-//    kotlinOptions.jvmTarget = "1.8"
-//}
-//compileTestKotlin {
-//    kotlinOptions.jvmTarget = "1.8"
-//}
