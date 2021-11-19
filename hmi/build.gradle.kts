@@ -22,18 +22,14 @@ repositories {
 
 kotlin {
     jvm {
+        withJava()
+
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"
         }
         testRuns["test"].executionTask.configure {
             useJUnit()
         }
-
-//        compilations {
-//            val main by getting {
-//                this.
-//            }
-//        }
     }
     sourceSets {
         val jvmMain by getting {
@@ -51,14 +47,27 @@ kotlin {
                 implementation(project(":autoDiscoveryAnnotations"))
 
                 api("com.google.dagger:dagger:2.35.1")
-                configurations["kapt"].dependencies.add(
-                    implementation("com.google.dagger:dagger-compiler:2.35.1")
-                )
+//                configurations["kapt"].dependencies.add(
+//                    implementation("com.google.dagger:dagger-compiler:2.35.1")
+//                )
+
+                configurations["kapt"].dependencies
+                    .add(
+                        org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency(
+                            "com.google.dagger",
+                            "dagger-compiler",
+                            "2.35.1"
+                        )
+                    )
+
+
+                //TODO Next, I think there's something that needs to
+                //TODO include the generated sources into this source-set
+                //https://kotlinlang.org/docs/mpp-configure-compilations.html#create-a-custom-compilation
 
                 implementation("com.squareup.okio:okio:2.6.0")
 
-                //TODO this isn't platform indepdendent
-                implementation( kotlin("stdlib"))
+                implementation(kotlin("stdlib"))
 
                 implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 
