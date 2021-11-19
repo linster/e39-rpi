@@ -1,7 +1,10 @@
 plugins {
-    kotlin("multiplatform") version "1.6.0"
+    kotlin("multiplatform") version "1.5.31"
     id("org.jetbrains.compose") version "1.0.0-beta5"
+
 }
+
+apply(plugin = "kotlin-kapt")
 
 group = "ca.stefanm.ibus"
 version = "1.0"
@@ -25,28 +28,89 @@ kotlin {
         testRuns["test"].executionTask.configure {
             useJUnit()
         }
+
+//        compilations {
+//            val main by getting {
+//                this.
+//            }
+//        }
     }
     sourceSets {
         val jvmMain by getting {
+
             dependencies {
                 implementation(compose.desktop.currentOs)
-//                kapt(project(":autoDiscovery"))
+
+                //https://stackoverflow.com/questions/62283259/generated-classes-with-kapt-in-metadata-dependency
+
+                println(configurations.asMap.map { it.key }.toString())
+                configurations["kapt"].dependencies.add(
+                    project(":autoDiscovery")
+                )
                 implementation(project(":autoDiscovery"))
                 implementation(project(":autoDiscoveryAnnotations"))
+
+                api("com.google.dagger:dagger:2.35.1")
+                configurations["kapt"].dependencies.add(
+                    implementation("com.google.dagger:dagger-compiler:2.35.1")
+                )
+
+                implementation("com.squareup.okio:okio:2.6.0")
+
+                //TODO this isn't platform indepdendent
+                implementation( kotlin("stdlib"))
+
+                implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+
+                implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
+                implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
+
+                implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
+
+                implementation("com.javadocmd:simplelatlng:1.3.1")
+                implementation("org.jxmapviewer:jxmapviewer2:2.5")
+
+                implementation("com.uchuhimo:konf:1.1.2")
+                implementation("commons-io:commons-io:2.11.0")
+
+                implementation("com.ginsberg:cirkle:1.0.1")
+
+                implementation("com.pi4j:pi4j-core:1.1")
+
+                implementation("com.jakewharton.timber:timber:4.7.1")
+
+                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
+
+
+                //Web
+                val ktor_version = "1.6.4"
+                implementation("io.ktor:ktor:${ktor_version}")
+                implementation("io.ktor:ktor-server-netty:${ktor_version}")
+                implementation("io.ktor:ktor-html-builder:${ktor_version}")
+
+                implementation("io.ktor:ktor-client-core:${ktor_version}")
+                implementation("io.ktor:ktor-client-cio:${ktor_version}")
+
+                implementation("ch.qos.logback:logback-classic:1.2.3")
+                implementation("io.ktor:ktor-client-logging:${ktor_version}")
+
+
             }
         }
         val jvmTest by getting {
             dependencies {
+//                testImplementation("junit:junit:4.12")
                 implementation(kotlin("test"))
             }
         }
     }
 }
-
+//Has to be after the Kotlin block above.
+//apply(plugin = "kapt")
 compose.desktop {
     application {
-//        mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
-        mainClass = "ca.stefanm.ComposeMain"
+        mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
+//        mainClass = "ca.stefanm.ComposeMain"
 
 
         nativeDistributions {
