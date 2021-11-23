@@ -1,7 +1,8 @@
+import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.findKaptConfiguration
+
 plugins {
     kotlin("multiplatform") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0-beta5"
-
+    id("org.jetbrains.compose") version "1.0.0-beta6-dev474"
 }
 
 apply(plugin = "kotlin-kapt")
@@ -17,25 +18,59 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 repositories {
     google()
     jcenter()
+    mavenCentral()
+    //maven("https://kotlin.bintray.com/kotlinx")
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+//    dependsOn("kaptKotlinJvm")
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=androidx.compose.ui.ExperimentalComposeUiApi"
+}
+
 kotlin {
-    jvm {
+
+    linuxArm64("rpi") {
+
+    }
+
+    linuxX64("laptop") {
+
+    }
+
+    jvm("jvm") {
         withJava()
+
+        compilations {
+            val main by compilations.getting {
+                configurations {
+                    "implementation" {
+                        exclude(group = "androidx.compose.animation")
+                        exclude(group = "androidx.compose.foundation")
+                        exclude(group = "androidx.compose.material")
+                        exclude(group = "androidx.compose.runtime")
+                        exclude(group = "androidx.compose.ui")
+                    }
+                }
+            }
+        }
 
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"
+            //kotlinOptions.javaParameters = true
         }
         testRuns["test"].executionTask.configure {
             useJUnit()
         }
+
     }
+
     sourceSets {
         val jvmMain by getting {
-
             dependencies {
                 implementation(compose.desktop.currentOs)
+
 
                 //https://stackoverflow.com/questions/62283259/generated-classes-with-kapt-in-metadata-dependency
 
@@ -66,28 +101,18 @@ kotlin {
                 //https://kotlinlang.org/docs/mpp-configure-compilations.html#create-a-custom-compilation
 
                 implementation("com.squareup.okio:okio:2.6.0")
-
                 implementation(kotlin("stdlib"))
-
                 implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
-
                 implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
                 implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
-
                 implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
-
                 implementation("com.javadocmd:simplelatlng:1.3.1")
                 implementation("org.jxmapviewer:jxmapviewer2:2.5")
-
                 implementation("com.uchuhimo:konf:1.1.2")
                 implementation("commons-io:commons-io:2.11.0")
-
                 implementation("com.ginsberg:cirkle:1.0.1")
-
                 implementation("com.pi4j:pi4j-core:1.1")
-
                 implementation("com.jakewharton.timber:timber:4.7.1")
-
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
 
 
@@ -108,7 +133,7 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-//                testImplementation("junit:junit:4.12")
+                //testImplementation("junit:junit:4.12")
                 implementation(kotlin("test"))
             }
         }
@@ -118,9 +143,8 @@ kotlin {
 //apply(plugin = "kapt")
 compose.desktop {
     application {
+        //from(kotlin.targets["jvmMain"])
         mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
-//        mainClass = "ca.stefanm.ComposeMain"
-
 
         nativeDistributions {
             packageVersion = "1.0.0"
@@ -129,7 +153,8 @@ compose.desktop {
             copyright = "© 2021 Stefan Martynkiw."
             vendor = "stefanm.ca"
             targetFormats(
-                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage
             )
             includeAllModules = true
             //appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
