@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.findK
 
 plugins {
     kotlin("multiplatform") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0-beta6-dev474"
+    id("org.jetbrains.compose") version "1.0.0-rc2"
 }
 
 apply(plugin = "kotlin-kapt")
@@ -32,7 +32,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 kotlin {
 
     linuxArm64("rpi") {
-
     }
 
     linuxX64("laptop") {
@@ -144,7 +143,7 @@ kotlin {
 //apply(plugin = "kapt")
 compose.desktop {
     application {
-        //from(kotlin.targets["jvmMain"])
+        //from(kotlin.targets["rpi"])
         mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
 
         nativeDistributions {
