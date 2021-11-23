@@ -44,6 +44,7 @@ kotlin {
 
         compilations {
             val main by compilations.getting {
+                //https://github.com/JetBrains/compose-jb/issues/272#issuecomment-760731693
                 configurations {
                     "implementation" {
                         exclude(group = "androidx.compose.animation")
