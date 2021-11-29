@@ -1,17 +1,12 @@
 package ca.stefanm.ibus.gui.menu.widgets.bottombar
 
-import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
-import ca.stefanm.ibus.di.ApplicationModule
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.yield
 import java.time.Instant
 import java.time.ZoneId
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.time.Duration
 
 class BottomBarClock @Inject constructor() {

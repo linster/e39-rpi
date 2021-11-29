@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.bordmonitor.menu.painter
 
-import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
+import ca.stefanm.ibus.car.conduit.IBusDevice
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import okio.Buffer
 

@@ -2,7 +2,7 @@ package ca.stefanm.ibus.lib.logging.cli.debugPrinters
 
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule

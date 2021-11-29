@@ -3,7 +3,7 @@ package ca.stefanm.ibus.configuration
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.hocon

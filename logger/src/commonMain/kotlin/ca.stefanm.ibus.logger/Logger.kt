@@ -1,12 +1,4 @@
-package ca.stefanm.ibus.lib.logging
-
-import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.di.DaggerApplicationComponent
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
+package ca.stefanm.ibus.logger
 
 interface Logger {
     fun v(tag : String, msg : String)
@@ -17,34 +9,6 @@ interface Logger {
     fun e(tag : String, msg : String, e : Throwable)
 }
 
-@ApplicationScope
-class StdOutLogger @Inject constructor() : Logger {
-    override fun v(tag: String, msg: String) {
-        println("VERBOSE : $tag / $msg")
-    }
-
-    override fun d(tag: String, msg: String) {
-        println("DEBUG : $tag / $msg")
-    }
-
-    override fun i(tag: String, msg: String) {
-        println("INFO : $tag / $msg")
-    }
-
-    override fun w(tag: String, msg: String) {
-        println("WARN : $tag / $msg")
-    }
-
-    override fun e(tag: String, msg: String) {
-        println("ERROR : $tag / $msg")
-    }
-
-    override fun e(tag: String, msg: String, e: Throwable) {
-        e(tag, "$msg exception: ${e.printStackTrace()}")
-    }
-}
-
-@ApplicationScope
 class CompositeLogger(private vararg var loggers : Logger) : Logger {
     override fun v(tag: String, msg: String) =
         loggers.forEach { it.v(tag, msg) }
@@ -65,8 +29,7 @@ class CompositeLogger(private vararg var loggers : Logger) : Logger {
         loggers.forEach { it.e(tag, msg, e) }
 }
 
-@ApplicationScope
-class LogDistributionHub @Inject constructor() : Logger {
+class LogDistributionHub constructor() : Logger {
 
     //This is a hack. I don't know why Dagger gave everyone a separate
     //instance of the hub. There should be enough scope sprinkled everywhere.
@@ -126,6 +89,6 @@ class LogDistributionHub @Inject constructor() : Logger {
     }
 }
 
-class StaticLogger(impl : Logger = DaggerApplicationComponent.create().logger()) : Logger by impl {
-    companion object : Logger by StaticLogger()
-}
+//class StaticLogger(impl : Logger = DaggerApplicationComponent.create().logger()) : Logger by impl {
+//    companion object : Logger by StaticLogger()
+//}

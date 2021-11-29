@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.WindowScope
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import javax.inject.Inject
 
 class MenuDebug @Inject constructor(

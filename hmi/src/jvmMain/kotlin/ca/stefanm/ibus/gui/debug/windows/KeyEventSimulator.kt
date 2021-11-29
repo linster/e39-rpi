@@ -8,25 +8,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.conduit.InputEvent
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import java.awt.event.KeyEvent
-import java.awt.event.KeyListener
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -103,7 +97,8 @@ class KeyEventSimulator @Inject constructor(
                 Row {
                     Button(
                         modifier = Modifier.padding(5.dp),
-                        onClick = { sendInputEvent(InputEvent.NavKnobTurned(
+                        onClick = { sendInputEvent(
+                            InputEvent.NavKnobTurned(
                             direction = InputEvent.NavKnobTurned.Direction.LEFT,
                             clicks = steps.value.text.toIntOrNull() ?: 1))
                         }) { Text("<--") }
@@ -113,7 +108,8 @@ class KeyEventSimulator @Inject constructor(
                     ) { Text("Click")}
                     Button(
                         modifier = Modifier.padding(5.dp),
-                        onClick = { sendInputEvent(InputEvent.NavKnobTurned(
+                        onClick = { sendInputEvent(
+                            InputEvent.NavKnobTurned(
                             direction = InputEvent.NavKnobTurned.Direction.RIGHT,
                             clicks = steps.value.text.toIntOrNull() ?: 1))
                         }) { Text("-->") }

@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
 import ca.stefanm.ibus.lib.messages.toDeviceIdString

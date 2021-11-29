@@ -1,8 +1,11 @@
 import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.findKaptConfiguration
+import org.gradle.jvm.tasks.Jar
+import java.io.*
+import java.util.spi.*
 
 plugins {
     kotlin("multiplatform") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0-rc2"
+    id("org.jetbrains.compose") version "1.0.0-rc3"
 }
 
 apply(plugin = "kotlin-kapt")
@@ -31,15 +34,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
 kotlin {
 
-    linuxArm64("rpi") {
-    }
-
-    linuxX64("laptop") {
-
-    }
-
     jvm("jvm") {
         withJava()
+
 
         compilations {
             val main by compilations.getting {
@@ -67,9 +64,16 @@ kotlin {
     }
 
     sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":carConduit"))
+                implementation(project(":logger"))
+            }
+        }
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+
 
 
                 //https://stackoverflow.com/questions/62283259/generated-classes-with-kapt-in-metadata-dependency
@@ -80,6 +84,8 @@ kotlin {
                 )
                 implementation(project(":autoDiscovery"))
                 implementation(project(":autoDiscoveryAnnotations"))
+                implementation(project(":carConduit"))
+                implementation(project(":logger"))
 
                 api("com.google.dagger:dagger:2.35.1")
 //                configurations["kapt"].dependencies.add(
@@ -162,3 +168,29 @@ compose.desktop {
         }
     }
 }
+
+//https://gitanswer.com/compose-jb-verify-module-dependencies-when-building-native-images-kotlin-821189932
+val printModuleDeps by tasks.creating {
+    doLast {
+        val uberJar = tasks.named("packageUberJarForCurrentOS", Jar::class)
+        val jarFile = uberJar.get().archiveFile.get().asFile
+
+        val jdeps = ToolProvider.findFirst("jdeps").orElseGet { error("Can't find jdeps tool in JDK") }
+        val out = StringWriter()
+        val pw = PrintWriter(out)
+        jdeps.run(pw, pw, "--print-module-deps", "--ignore-missing-deps", jarFile.absolutePath)
+
+        val modules = out.toString()
+        println(modules)
+        // compose.desktop.application.nativeDistributions.modules.addAll(modules.split(","))
+    }
+    dependsOn("packageUberJarForCurrentOS")
+}
+
+
+//More total magic:
+//Run this on the jar file that gets made:
+//zip -d e39Rpi-linux-x64-1.0.0.jar 'META-INF/*.SF' 'META-INF/*.RSA' 'META-INF/*SF'
+//https://stackoverflow.com/questions/999489/invalid-signature-file-when-attempting-to-run-a-jar
+
+//https://foojay.io/today/azul-zulu-openjdk-15-on-raspberry-pi/

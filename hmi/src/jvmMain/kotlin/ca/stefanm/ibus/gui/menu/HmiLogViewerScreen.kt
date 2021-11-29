@@ -19,8 +19,8 @@ import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
-import ca.stefanm.ibus.lib.logging.LogDistributionHub
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.LogDistributionHub
+import ca.stefanm.ibus.logger.Logger
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -121,7 +121,7 @@ class HmiLogViewerScreen @Inject constructor(
                if (exception == null) {
                    "ERROR : $tag / $message"
                } else {
-                   "ERROR : $tag / $message exception:: ${exception.stackTraceToString()}"
+                   "ERROR : $tag / $message exception:: ${exception?.stackTraceToString()}"
                }
            }
         }

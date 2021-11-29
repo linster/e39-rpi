@@ -1,4 +1,4 @@
-package ca.stefanm.ibus.car.bordmonitor.input
+package ca.stefanm.ibus.car.conduit
 
 //https://github.com/tedsalmon/DroidIBus/blob/master/app/src/main/java/com/ibus/droidibus/ibus/IBusSystem.java#L155
 enum class IBusDevice(val deviceId: Int) {

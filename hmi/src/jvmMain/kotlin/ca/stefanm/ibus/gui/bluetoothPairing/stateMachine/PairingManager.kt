@@ -6,7 +6,7 @@ import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DBusConnectionOwne
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DeviceListProvider
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*

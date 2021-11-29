@@ -15,7 +15,7 @@ import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import javax.inject.Inject
 
 class NotificationSpammerDebug @Inject constructor(

@@ -1,4 +1,4 @@
-package ca.stefanm.ibus.car.bordmonitor.input
+package ca.stefanm.ibus.car.conduit
 
 sealed class InputEvent {
     object PrevTrack : InputEvent()

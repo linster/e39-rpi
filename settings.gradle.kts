@@ -7,5 +7,8 @@ pluginManagement {
 
 rootProject.name = "rpi"
 include(":hmi")
+include(":car")
+include(":carConduit")
+include(":logger")
 include(":autoDiscoveryAnnotations")
 include(":autoDiscovery")

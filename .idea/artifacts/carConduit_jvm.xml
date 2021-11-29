@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="carConduit-jvm">
+    <output-path>$PROJECT_DIR$/carConduit/build/libs</output-path>
+    <root id="archive" name="carConduit-jvm.jar">
+      <element id="module-output" name="rpi.carConduit.jvmMain" />
+    </root>
+  </artifact>
+</component>

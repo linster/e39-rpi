@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="logger-jvm">
+    <output-path>$PROJECT_DIR$/logger/build/libs</output-path>
+    <root id="archive" name="logger-jvm.jar">
+      <element id="module-output" name="rpi.logger.jvmMain" />
+    </root>
+  </artifact>
+</component>

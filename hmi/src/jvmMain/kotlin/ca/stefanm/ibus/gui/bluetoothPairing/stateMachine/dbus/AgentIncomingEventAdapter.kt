@@ -4,7 +4,7 @@
 //import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusConnectionOwningComponent
 //import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusSessionConnection
 //import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusSystemConnection
-//import ca.stefanm.ibus.lib.logging.Logger
+//import ca.stefanm.ibus.logger.Logger
 //import kotlinx.coroutines.Dispatchers
 //import kotlinx.coroutines.flow.MutableSharedFlow
 //import kotlinx.coroutines.flow.SharedFlow

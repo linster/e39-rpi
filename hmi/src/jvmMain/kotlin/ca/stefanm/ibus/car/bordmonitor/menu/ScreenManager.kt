@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.bordmonitor.menu
 
-import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.conduit.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.ScreenPainter
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.LongRunningService

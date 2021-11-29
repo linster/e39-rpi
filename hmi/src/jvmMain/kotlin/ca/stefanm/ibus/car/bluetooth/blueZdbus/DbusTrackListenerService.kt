@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.CoroutineDispatcher

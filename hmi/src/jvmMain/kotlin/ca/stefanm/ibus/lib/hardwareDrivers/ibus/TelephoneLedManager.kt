@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
+import ca.stefanm.ibus.car.conduit.IBusDevice
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.channels.Channel
 import javax.inject.Inject

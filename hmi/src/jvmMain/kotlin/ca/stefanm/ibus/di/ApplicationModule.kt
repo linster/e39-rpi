@@ -1,11 +1,9 @@
 package ca.stefanm.ibus.di
 
 import ca.stefanm.ibus.CliMain
-import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.conduit.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.lib.logging.Logger
-import ca.stefanm.ibus.lib.logging.StdOutLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -16,13 +14,14 @@ import ca.stefanm.ibus.gui.di.MapModule
 import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
 import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
-import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.DebugKnobService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.lib.logging.CompositeLogger
-import ca.stefanm.ibus.lib.logging.LogDistributionHub
+import ca.stefanm.ibus.logger.CompositeLogger
+import ca.stefanm.ibus.logger.LogDistributionHub
+import ca.stefanm.ibus.logger.Logger
+import ca.stefanm.ibus.logger.StdOutLogger
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -31,7 +30,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import java.util.*
 import javax.inject.Named
 import javax.inject.Scope
 
@@ -131,6 +129,14 @@ class ApplicationModule {
     @Provides
     @ApplicationScope
     fun provideCoroutineDispatcher() : CoroutineDispatcher = Dispatchers.IO
+
+    @Provides
+    @ApplicationScope
+    fun provideStdOutLogger() : StdOutLogger = StdOutLogger()
+
+    @Provides
+    @ApplicationScope
+    fun provideLogDistributionHub() : LogDistributionHub = LogDistributionHub()
 
     @Provides
     @ApplicationScope

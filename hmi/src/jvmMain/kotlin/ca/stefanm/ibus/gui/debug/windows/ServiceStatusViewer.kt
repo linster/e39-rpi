@@ -17,7 +17,7 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
 import ca.stefanm.ibus.car.platform.PlatformService
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import kotlinx.coroutines.GlobalScope
 import javax.inject.Inject
 

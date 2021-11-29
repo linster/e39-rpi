@@ -1,8 +1,8 @@
 package ca.stefanm.ibus.lib.logging.cli.debugPrinters
 
-import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.conduit.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import ca.stefanm.ibus.car.platform.*
 import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.CoroutineDispatcher

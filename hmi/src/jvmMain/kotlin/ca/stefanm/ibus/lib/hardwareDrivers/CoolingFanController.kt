@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers
 
-import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.logger.Logger
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
 import com.pi4j.system.SystemInfo
 import kotlinx.coroutines.CoroutineDispatcher

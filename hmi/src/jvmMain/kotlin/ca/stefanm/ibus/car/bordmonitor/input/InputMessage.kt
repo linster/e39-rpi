@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.car.bordmonitor.input
 
+import ca.stefanm.ibus.car.conduit.IBusDevice
+
 
 sealed class KeyInputMessage(
     val sourceDevice: IBusDevice = IBusDevice.BOARDMONITOR_BUTTONS,
