@@ -66,8 +66,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(project(":car"))
                 implementation(project(":carConduit"))
                 implementation(project(":logger"))
+                implementation(kotlin("stdlib"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
             }
         }
         val jvmMain by getting {
@@ -78,13 +81,14 @@ kotlin {
 
                 //https://stackoverflow.com/questions/62283259/generated-classes-with-kapt-in-metadata-dependency
 
-                println(configurations.asMap.map { it.key }.toString())
+                //println(configurations.asMap.map { it.key }.toString())
                 configurations["kapt"].dependencies.add(
                     project(":autoDiscovery")
                 )
                 implementation(project(":autoDiscovery"))
                 implementation(project(":autoDiscoveryAnnotations"))
                 implementation(project(":carConduit"))
+                implementation(project(":carDefs"))
                 implementation(project(":logger"))
 
                 api("com.google.dagger:dagger:2.35.1")

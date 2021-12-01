@@ -8,12 +8,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
-import ca.stefanm.ibus.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject

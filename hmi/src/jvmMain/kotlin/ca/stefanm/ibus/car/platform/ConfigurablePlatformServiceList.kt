@@ -3,22 +3,16 @@ package ca.stefanm.ibus.car.platform
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
+import ca.stefanm.ibus.car.hardware.CoolingFanController
+import ca.stefanm.ibus.car.serial.SerialListenerService
+import ca.stefanm.ibus.car.serial.SerialPublisherService
 import ca.stefanm.ibus.logger.Logger
-import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IbusInputEventCliPrinter
-import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IncomingIbusMessageCliPrinter
-import ca.stefanm.ibus.lib.logging.cli.debugPrinters.PlatformMetronomeLogger
-import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
+import ca.stefanm.ibus.car.debugPrinters.IbusInputEventCliPrinter
+import ca.stefanm.ibus.car.debugPrinters.IncomingIbusMessageCliPrinter
+import ca.stefanm.ibus.car.debugPrinters.PlatformMetronomeLogger
+import ca.stefanm.ibus.car.hardware.TelephoneButtonVideoSwitcherService
 import javax.inject.Inject
 
-
-data class PlatformServiceGroup(
-    val name : String,
-    val description: String,
-    val children : List<PlatformService>
-)
 
 @ConfiguredCarScope
 class PlatformServiceList @Inject constructor(

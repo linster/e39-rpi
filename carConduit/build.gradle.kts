@@ -12,12 +12,20 @@ kotlin {
 
     sourceSets {
         val commonMain by sourceSets.getting {
+            dependencies {
+                implementation(kotlin("stdlib"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+                implementation(project(":logger"))
+                implementation(project(":carDefs"))
 
+                implementation("com.squareup.okio:okio:2.6.0")
+            }
         }
         val jvmMain by getting {
             dependencies {
                 implementation(kotlin("stdlib"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+                implementation(project(":logger"))
 
                 implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
                 implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")

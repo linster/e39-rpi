@@ -3,8 +3,8 @@ package ca.stefanm.ibus.car.platform
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.configuration.CarPlatformConfiguration
-import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
+import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.car.conduit.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import kotlinx.coroutines.*

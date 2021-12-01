@@ -5,9 +5,9 @@ import ca.stefanm.ibus.car.conduit.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import ca.stefanm.ibus.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
+import ca.stefanm.ibus.car.conduit.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.gui.GuiMain
 import ca.stefanm.ibus.gui.di.GuiModule
 import ca.stefanm.ibus.gui.di.MapModule

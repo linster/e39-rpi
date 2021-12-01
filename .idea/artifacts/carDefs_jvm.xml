@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="carDefs-jvm">
+    <output-path>$PROJECT_DIR$/carDefs/build/libs</output-path>
+    <root id="archive" name="carDefs-jvm.jar">
+      <element id="module-output" name="rpi.carDefs.jvmMain" />
+    </root>
+  </artifact>
+</component>

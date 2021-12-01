@@ -9,6 +9,7 @@ rootProject.name = "rpi"
 include(":hmi")
 include(":car")
 include(":carConduit")
+include(":carDefs")
 include(":logger")
 include(":autoDiscoveryAnnotations")
 include(":autoDiscovery")

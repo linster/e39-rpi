@@ -9,7 +9,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.Notification
@@ -19,17 +18,13 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
-import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
-import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
+import ca.stefanm.ibus.car.conduit.RelayReaderWriter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import javax.inject.Inject
 
 @ApplicationScope
