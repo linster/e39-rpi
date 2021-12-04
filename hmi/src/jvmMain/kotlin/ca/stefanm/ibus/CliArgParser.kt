@@ -1,7 +1,7 @@
 package ca.stefanm.ibus
 
-import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
-import ca.stefanm.ibus.car.conduit.configuration.LaptopDeviceConfiguration
+import ca.stefanm.ibus.car.platform.CarPlatformConfiguration
+import ca.stefanm.ibus.car.platform.LaptopDeviceConfiguration
 import javax.inject.Inject
 
 class CliArgParser @Inject constructor() {

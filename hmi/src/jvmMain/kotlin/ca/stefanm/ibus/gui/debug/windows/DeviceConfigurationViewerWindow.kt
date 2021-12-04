@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
-import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.car.platform.CarPlatformConfiguration
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject

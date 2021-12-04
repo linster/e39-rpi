@@ -20,29 +20,29 @@ kotlin {
     sourceSets {
         val commonMain by sourceSets.getting {
             dependencies {
-                implementation(project(":carConduit"))
                 implementation(project(":carDefs"))
                 implementation(project(":logger"))
                 implementation(kotlin("stdlib"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
                 implementation("com.squareup.okio:okio:2.6.0")
+
+                implementation("com.google.dagger:dagger:2.35.1")
             }
         }
         val jvmMain by getting {
             dependencies {
 
                 //Only the JVM version depends on carConduit
-                implementation(project(":carConduit"))
-                implementation(project(":carDefs"))
-                implementation(project(":logger"))
+                api(project(":carDefs"))
+                api(project(":logger"))
 
 
                 //TODO Android versions will use the framework for decoupled
                 //TODO IPC. (Car in Android is a system service. Conduit
                 //TODO on android is a client to it).
 
-                implementation(kotlin("stdlib"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+                api(kotlin("stdlib"))
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 
                 api("com.google.dagger:dagger:2.35.1")
                 configurations["kapt"].dependencies
@@ -54,13 +54,25 @@ kotlin {
                         )
                     )
 
-                implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
-                implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
+                api( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
+                api( "com.github.hypfvieh:bluez-dbus:0.1.3")
 
-                implementation("com.pi4j:pi4j-core:1.1")
-                implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
+                api("com.pi4j:pi4j-core:1.1")
+                api("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
             }
         }
+
+        val desktopMain by creating {
+            dependsOn(commonMain)
+            dependsOn(jvmMain)
+
+            dependencies {
+                api(kotlin("stdlib"))
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.0")
+            }
+        }
+
         val jvmTest by getting {
             dependencies {
                 //testImplementation("junit:junit:4.12")

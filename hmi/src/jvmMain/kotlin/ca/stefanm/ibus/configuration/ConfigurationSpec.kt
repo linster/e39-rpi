@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.configuration
 
-import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.car.platform.CarPlatformConfiguration
 import com.javadocmd.simplelatlng.LatLng
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec

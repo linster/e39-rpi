@@ -2,7 +2,8 @@ package ca.stefanm.ibus.gui.menu.widgets.knobListener
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import ca.stefanm.ibus.car.conduit.InputEvent
+import ca.stefanm.ibus.car.data.InputEvent
+import ca.stefanm.ibus.car.di.QualifierNames
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
@@ -19,7 +20,7 @@ import javax.inject.Named
 @ApplicationScope
 @Stable
 class KnobListenerService @Inject constructor(
-    @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
+    @Named(QualifierNames.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
 ) {
 
     fun knobTurnEvents() : Flow<InputEvent> {

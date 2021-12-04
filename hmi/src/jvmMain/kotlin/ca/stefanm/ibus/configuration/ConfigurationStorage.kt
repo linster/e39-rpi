@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.configuration
 
-import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.car.platform.CarPlatformConfiguration
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer

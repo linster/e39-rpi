@@ -3,7 +3,7 @@ package ca.stefanm.ibus.gui.map
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ibus.car.conduit.InputEvent
+import ca.stefanm.ibus.car.data.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope

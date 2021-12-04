@@ -1,7 +1,8 @@
 package ca.stefanm.ibus.lib.messages
 
-import ca.stefanm.ibus.car.conduit.IBusDevice
-import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
+import ca.stefanm.ibus.car.data.IBusDevice
+import ca.stefanm.ibus.car.data.IBusMessage
+import ca.stefanm.ibus.car.data.IBusMessage.Companion.toIbusMessage
 import okio.Buffer
 import org.junit.Assert
 import org.junit.Test

@@ -1,13 +1,14 @@
 package ca.stefanm.ibus.di
 
 import ca.stefanm.ibus.CliMain
-import ca.stefanm.ibus.car.conduit.InputEvent
+import ca.stefanm.ibus.car.data.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ibus.lib.messages.IBusMessage
-import ca.stefanm.ibus.car.conduit.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.car.data.IBusMessage
+import ca.stefanm.ibus.car.di.QualifierNames
+import ca.stefanm.ibus.car.platform.CarPlatformConfiguration
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ibus.car.conduit.configuration.LaptopDeviceConfiguration
+import ca.stefanm.ibus.car.platform.LaptopDeviceConfiguration
 import ca.stefanm.ibus.gui.GuiMain
 import ca.stefanm.ibus.gui.di.GuiModule
 import ca.stefanm.ibus.gui.di.MapModule
@@ -84,7 +85,6 @@ class ApplicationModule {
 
     companion object {
         const val INITIAL_CONFIGURATION = "initial_configuration"
-        const val INPUT_EVENTS = "input_events"
         const val INPUT_EVENTS_WRITER = "input_events_writer"
         //Messages sent to rest of car
         const val IBUS_MESSAGE_INGRESS = "IbusInput"
@@ -97,7 +97,7 @@ class ApplicationModule {
     fun provideInputEventWriteStateFlow() : MutableSharedFlow<InputEvent> = MutableSharedFlow()
 
     @Provides
-    @Named(INPUT_EVENTS)
+    @Named(QualifierNames.INPUT_EVENTS)
     @ApplicationScope
     @JvmSuppressWildcards(suppress = false) //Magic.
     fun provideInputEventsStateFlow(
@@ -107,12 +107,12 @@ class ApplicationModule {
     }
 
     @Provides
-    @Named(IBUS_MESSAGE_INGRESS)
+    @Named(QualifierNames.IBUS_MESSAGE_INGRESS)
     @ApplicationScope
     fun provideIbusIngressChannel() : MutableSharedFlow<IBusMessage> = MutableSharedFlow<IBusMessage>()
 
     @Provides
-    @Named(IBUS_MESSAGE_OUTPUT_CHANNEL)
+    @Named(QualifierNames.IBUS_MESSAGE_OUTPUT_CHANNEL)
     @ApplicationScope
     fun provideIbusOuptutChannel() : Channel<IBusMessage> = Channel(capacity = Channel.UNLIMITED)
 
