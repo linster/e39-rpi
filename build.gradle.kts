@@ -38,7 +38,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 repositories {
     mavenCentral()
     google()
-    maven("https://kotlin.bintray.com/kotlinx")
+//    flatDir { dir("localJarLibs") }
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
@@ -50,6 +50,8 @@ repositories {
 //}
 
 dependencies {
+
+
     kapt(project(":autoDiscovery"))
     implementation(project(":autoDiscovery"))
     implementation(project(":autoDiscoveryAnnotations"))
