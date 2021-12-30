@@ -8,9 +8,9 @@ mkdir -p packages
 cp *deb packages
 
 # create image
-unzip 2021-10-30-raspios-bullseye-armhf-lite.zip
+unzip 2021-10-30-raspios-bullseye-arm64-lite.zip
 mkdir -p mnt
-mount -o loop,offset=$((512*532480)) 2021-10-30-raspios-bullseye-armhf-lite.img mnt/
+mount -o loop,offset=$((512*532480)) 2021-10-30-raspios-bullseye-arm64-lite.img mnt/
 
 # Add assets
 mkdir mnt/var/lib/e39
@@ -24,4 +24,4 @@ ln -s /lib/systemd/system/firstboot.service mnt/etc/systemd/system/default.targe
 umount mnt
 
 # Copy image to output if it exists
-[ -d /output ] && cp 2021-10-30-raspios-bullseye-armhf-lite.img /output
+[ -d /output ] && cp 2021-10-30-raspios-bullseye-arm64-lite.img /output
