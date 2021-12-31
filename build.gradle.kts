@@ -57,6 +57,7 @@ dependencies {
     implementation(project(":autoDiscoveryAnnotations"))
 
     implementation("com.squareup.okio:okio:2.6.0")
+//    implementation(compose.desktop.linux_arm64)
     implementation(compose.desktop.currentOs)
 
     implementation( "org.jetbrains.kotlin:kotlin-stdlib")

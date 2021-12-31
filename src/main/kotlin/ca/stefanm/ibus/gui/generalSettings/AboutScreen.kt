@@ -16,6 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.HmiVersion
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -27,7 +29,8 @@ import javax.inject.Inject
 
 @AutoDiscover
 class AboutScreen @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val configurationStorage: ConfigurationStorage
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -101,7 +104,7 @@ class AboutScreen @Inject constructor(
                 AboutLabel("Written by Stefan Martynkiw")
                 AboutLabel("https://stefanm.ca")
                 AboutLabel("")
-                AboutLabel("Version: 1.0")
+                AboutLabel("Version 1.0.0 : ${configurationStorage.versionConfig[HmiVersion.gitHash]}")
             }
         }
     }

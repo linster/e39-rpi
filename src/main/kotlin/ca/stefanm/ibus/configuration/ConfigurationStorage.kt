@@ -25,15 +25,25 @@ class ConfigurationStorage @Inject constructor(
     private val e39BaseFolder = File(homeFolder, ".e39")
 
     private val configFile = File(e39BaseFolder, "config.conf")
+    private val versionFile = File(e39BaseFolder, "version.conf")
 
     val config = Config { addSpec(E39Config) }
-        .from.hocon.file(configFile)
+        .from.hocon.file(configFile, optional = true)
 
+    val versionConfig = Config { addSpec(HmiVersion) }
+        .from.hocon.file(versionFile, optional = true)
 
     init {
+        if (!configFile.exists()) {
+            config.toHocon.toFile(configFile)
+        }
         config.afterSet { item, value ->
             logger.d(TAG, "Setting $item to $value")
             config.toHocon.toFile(configFile)
+        }
+
+        if (!versionFile.exists()) {
+            versionConfig.toHocon.toFile(versionFile)
         }
     }
 

@@ -4,6 +4,12 @@ import com.javadocmd.simplelatlng.LatLng
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 
+
+object HmiVersion : ConfigSpec() {
+    val gitHash by optional("<no version set>",
+        "gitHash", description = "Git Hash of the e39-rpi commit")
+}
+
 object E39Config : ConfigSpec() {
 
     object CarPlatformConfigSpec : ConfigSpec() {
@@ -106,7 +112,7 @@ object E39Config : ConfigSpec() {
         )
 
         val defaultMapCenter by optional(
-            LatLng(45.3154699,-75.9194058),
+            Pair(45.3154699,-75.9194058),
             "defaultMapCenter",
             "default LatLng to open all maps at. Default is in Kanata, ON, Canada."
         )
