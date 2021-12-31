@@ -114,7 +114,7 @@ class LoadingWindow @Inject constructor(
 
         if (configurationStorage.config[E39Config.LoadingWindowConfig.autoLaunchHmi]) {
             LaunchedEffect(true) {
-                delay(500)
+                delay(configurationStorage.config[E39Config.LoadingWindowConfig.autoLaunchHmiDelay].toLong())
                 openMenuWindow()
             }
         }

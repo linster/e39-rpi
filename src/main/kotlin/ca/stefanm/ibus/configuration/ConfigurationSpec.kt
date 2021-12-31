@@ -93,6 +93,12 @@ object E39Config : ConfigSpec() {
             "Should Open HMI automatically from loading window?"
         )
 
+        val autoLaunchHmiDelay by optional(
+            800,
+            "AutoLaunchHmiDelayMs",
+            "How long to delay launching the hmi?"
+        )
+
         val autoLaunchPlatformOnOpen by optional(
             true,
             "AutoLaunchCarPlatformOnOpen",

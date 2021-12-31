@@ -95,9 +95,17 @@ class WindowManager @Inject constructor(
         }
 
 
+        val isPi = configurationStorage.config[E39Config.CarPlatformConfigSpec._isPi]
+
         val mainWindowState = rememberWindowState(
             size = DEFAULT_SIZE,
+            placement = if (isPi) {
+                WindowPlacement.Maximized
+            } else {
+                WindowPlacement.Floating
+            }
         )
+
 
         Window(
             title = "BMW E39 Nav Loading",
@@ -107,8 +115,8 @@ class WindowManager @Inject constructor(
                 exitApplication()
             },
             resizable = false,
-            visible = true
-        //TODO set fullscreen if prod.
+            visible = true,
+            undecorated = isPi
         ) {
             loadingWindow.get().contents()()
         }
@@ -133,10 +141,15 @@ class WindowManager @Inject constructor(
                         }
                     },
                     size = DEFAULT_SIZE,
+                    placement = if (isPi) {
+                        WindowPlacement.Maximized
+                    } else {
+                        WindowPlacement.Floating
+                    }
                 ),
                 title = "E39 Menu",
-                undecorated = false,
-                resizable = false,
+                undecorated = !isPi,
+                resizable = !isPi,
                 alwaysOnTop = true,
                 enabled = true,
                 onCloseRequest = {

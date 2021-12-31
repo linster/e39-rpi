@@ -109,7 +109,9 @@ class MapScreen @Inject constructor(
         val parameters = (it?.requestParameters as? MapScreenParameters) ?: MapScreenParameters(
             persistUiStateOnClose = false,
             openMode = MapScreenParameters.MapScreenOpenMode.BrowsingMode(
-                center = configurationStorage.config[E39Config.MapConfig.defaultMapCenter]
+                center = configurationStorage.config[E39Config.MapConfig.defaultMapCenter].let {
+                    LatLng(it.first, it.second)
+                }
             )
         )
 

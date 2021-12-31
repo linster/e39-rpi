@@ -13,5 +13,8 @@ ADD combine.sh \
 	configure.sh \
 	install-e39.sh \
 	*.deb \
+	*.jar \
+	*.conf \
+	jwmrc \
 	./
 CMD [ "./combine.sh" ]
