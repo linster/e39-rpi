@@ -29,7 +29,8 @@ class IBusInputMessageParser @Inject constructor(
     bmBtSeekButtonMessageParser: BmBtSeekButtonMessageParser,
     bmBtShowRadioStatusMessageParser: BmBtShowRadioStatusMessageParser,
     bmBtMenuPressedMessageParser: BmBtMenuPressedMessageParser,
-    bmBtPhonePressedMessageParser: BmBtPhonePressedMessageParser
+    bmBtPhonePressedMessageParser: BmBtPhonePressedMessageParser,
+    navKnobMessageParser: NavKnobMessageParser
 ) : LongRunningLoopingService(coroutineScope, parsingDispatcher) {
 
     private val messageMatchers = listOf(
@@ -39,7 +40,8 @@ class IBusInputMessageParser @Inject constructor(
         bmBtSeekButtonMessageParser,
         bmBtShowRadioStatusMessageParser,
         bmBtMenuPressedMessageParser,
-        bmBtPhonePressedMessageParser
+        bmBtPhonePressedMessageParser,
+        navKnobMessageParser
     )
 
     @ExperimentalCoroutinesApi
@@ -179,6 +181,60 @@ class IBusInputMessageParser @Inject constructor(
             return message.sourceDevice == IBusDevice.BOARDMONITOR_BUTTONS
                     && message.destinationDevice == IBusDevice.BROADCAST
                     && message.data.toList().map { it.toInt() } == listOf(0x48, 0x08)
+        }
+    }
+
+    class NavKnobMessageParser @Inject constructor() : InputMessageMatcher {
+
+        private fun IBusMessage.pushDataMatches() = data.toList().map { it.toInt() } == listOf(0x48, 0x05)
+        private fun IBusMessage.longPushDataMatches() = data.toList().map { it.toInt() } == listOf(0x48, 0x45)
+        private fun IBusMessage.knobReleaseMatches() = data.toList().map { it.toInt() } == listOf(0x48, 0x85)
+        private fun IBusMessage.knobTurnMatches() = data.toList().map { it.toInt() } in listOf(
+            listOf(0x49, 0x01), listOf(0x49, 0x81),
+            listOf(0x49, 0x02), listOf(0x49, 0x82),
+            listOf(0x49, 0x03), listOf(0x49, 0x83),
+            listOf(0x49, 0x04), listOf(0x49, 0x84),
+            listOf(0x49, 0x05), listOf(0x49, 0x85),
+            listOf(0x49, 0x06), listOf(0x49, 0x86),
+            listOf(0x49, 0x07), listOf(0x49, 0x87),
+            listOf(0x49, 0x08), listOf(0x49, 0x88),
+            listOf(0x49, 0x09), listOf(0x49, 0x89),
+        )
+
+        override fun messageToInputEvent(message: IBusMessage): InputEvent? {
+
+            if (message.pushDataMatches()) {
+                return InputEvent.NavKnobPressed
+            }
+
+            if (message.knobTurnMatches()) {
+                val rotation = message.data.toList().map { it.toInt() }[1]
+
+                if (rotation - 0x80 in 1 .. 9) {
+                    return InputEvent.NavKnobTurned(
+                        direction = InputEvent.NavKnobTurned.Direction.RIGHT,
+                        clicks = rotation - 0x80
+                    )
+                }
+
+                if (rotation - 0x0 in 1..9) {
+                    return InputEvent.NavKnobTurned(
+                        direction = InputEvent.NavKnobTurned.Direction.LEFT,
+                        clicks = rotation
+                    )
+                }
+            }
+            return null
+        }
+
+        override fun rawMessageMatches(message: IBusMessage): Boolean {
+            return message.sourceDevice == IBusDevice.BOARDMONITOR_BUTTONS
+                    && message.destinationDevice == IBusDevice.NAV_VIDEOMODULE
+                    && (message.pushDataMatches() ||
+                        message.longPushDataMatches() ||
+                        message.knobReleaseMatches() ||
+                        message.knobTurnMatches()
+                    )
         }
     }
 }
