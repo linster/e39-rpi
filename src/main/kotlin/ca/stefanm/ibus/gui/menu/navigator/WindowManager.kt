@@ -148,7 +148,7 @@ class WindowManager @Inject constructor(
                     }
                 ),
                 title = "E39 Menu",
-                undecorated = !isPi,
+                undecorated = isPi,
                 resizable = !isPi,
                 alwaysOnTop = true,
                 enabled = true,
