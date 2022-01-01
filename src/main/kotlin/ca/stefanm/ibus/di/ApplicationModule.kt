@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import java.util.*
 import javax.inject.Named
 import javax.inject.Scope
+import javax.inject.Singleton
 
 @Scope
 annotation class ApplicationScope
@@ -91,12 +92,15 @@ class ApplicationModule {
         //Messages sent to rest of car
         const val IBUS_MESSAGE_INGRESS = "IbusInput"
         const val IBUS_MESSAGE_OUTPUT_CHANNEL = "IbusOutput"
+
+        private val inputEventsWriter = MutableSharedFlow<InputEvent>()
     }
 
     @Provides
     @Named(INPUT_EVENTS_WRITER)
     @ApplicationScope
-    fun provideInputEventWriteStateFlow() : MutableSharedFlow<InputEvent> = MutableSharedFlow()
+    @JvmSuppressWildcards(suppress = false) //Magic.
+    fun provideInputEventWriteStateFlow() : MutableSharedFlow<InputEvent> = inputEventsWriter // MutableSharedFlow()
 
     @Provides
     @Named(INPUT_EVENTS)

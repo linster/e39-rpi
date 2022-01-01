@@ -31,6 +31,7 @@ import java.lang.annotation.RetentionPolicy
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Scope
+import javax.inject.Singleton
 
 @Scope
 @Retention(AnnotationRetention.RUNTIME)
