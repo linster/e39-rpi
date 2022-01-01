@@ -26,7 +26,9 @@ class DebugLaunchpad @Inject constructor(
     private val paneManagerDebug: PaneManagerDebug,
     private val serviceStatusViewer: ServiceStatusViewer,
     private val notificationSpammerDebug: NotificationSpammerDebug,
-    private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow
+    private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow,
+
+    private val logViewerWindow: LogViewerWindow
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -63,6 +65,9 @@ class DebugLaunchpad @Inject constructor(
             }
             Button(onClick = { windowManager.openDebugWindow(hmiNavigatorDebugWindow) }) {
                 Text("HMI Navigator Debug")
+            }
+            Button(onClick = { windowManager.openDebugWindow(logViewerWindow) }) {
+                Text("Live Log Viewer")
             }
         }
     }
