@@ -8,7 +8,7 @@ plugins {
         kotlin("jvm") version "1.5.31"
         kotlin("kapt") version "1.5.31"
 //        id("org.jetbrains.compose") version "0.3.2"
-        id("org.jetbrains.compose") version "1.0.0-beta5"
+        id("org.jetbrains.compose") version "1.0.0"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"
