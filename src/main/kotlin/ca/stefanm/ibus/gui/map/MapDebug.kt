@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.map
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -39,7 +40,7 @@ class MapDebug @Inject constructor(
     override val tag: Any
         get() = this
 
-    override val size = DpSize(1480.dp, 1000.dp)
+    override val size = DpSize(1780.dp, 1200.dp)
     override val title = "Map Debug"
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
@@ -103,7 +104,15 @@ class MapDebug @Inject constructor(
                         0
                     )
                 }
+            }
 
+            NestingCard {
+                NestingCardHeader("POI")
+                OverlayManipulator { new ->
+                    overlayProperties.value = overlayProperties.value.copy(
+                        poiOverlay = new
+                    )
+                }
             }
         }
     }
@@ -353,4 +362,73 @@ class MapDebug @Inject constructor(
     }
 
 
+    @Composable
+    fun OverlayManipulator(
+        onPoisChanged : (new : PoiOverlay) -> Unit,
+    ) {
+
+        val pois = remember { mutableStateOf(PoiOverlay(pois = emptyList())) }
+
+        LaunchedEffect(pois.value) {
+            onPoisChanged(pois.value)
+        }
+
+        NestingCard {
+            NestingCardHeader("Fixed POI")
+
+            NestingCard {
+                pois.value.pois.forEach {
+                    Column(Modifier
+                        .padding(8.dp)
+                        .border(2.dp, Color.Black)
+                    ) {
+                        Text("label ${it.label}")
+                        Text("position ${it.position}")
+                        Text("icon ${it.icon}")
+                        Box(Modifier.size(16.dp)) {
+                            it.icon()
+                        }
+                    }
+                }
+            }
+
+            fun addPoiToList(poi : PoiOverlay.Poi) {
+                val newList = pois.value.pois.toMutableList().also {
+                    it.add(poi)
+                }
+
+                pois.value = pois.value.copy(pois = newList)
+            }
+
+            Row {
+                Button(onClick = {
+                    addPoiToList(
+                        PoiOverlay.Poi(
+                            label = "Kanata",
+                            position = LatLng(45.315467999999996, -75.919399),
+                            icon = PoiOverlay.Poi.ICON_BLUE_CIRCLE
+                        )
+                    )
+                }) {
+                    Text("Add Kanata Center")
+                }
+                Button(onClick = {
+                    addPoiToList(
+                        PoiOverlay.Poi(
+                            label = "Canadian Tire",
+                            position = LatLng(45.307368,-75.91812399999999),
+                            icon = PoiOverlay.Poi.ICON_BLUE_CIRCLE
+                        )
+                    )
+                }) {
+                    Text("Add Canadian Tire")
+                }
+                Button(onClick = {
+                    pois.value = PoiOverlay(emptyList())
+                }) {
+                    Text("Clear POI List")
+                }
+            }
+        }
+    }
 }

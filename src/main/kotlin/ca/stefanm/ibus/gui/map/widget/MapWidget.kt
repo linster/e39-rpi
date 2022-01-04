@@ -9,7 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.*
+import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
@@ -33,7 +35,9 @@ import kotlin.math.roundToInt
 data class OverlayProperties(
     val centerCrossHairsVisible: Boolean,
     val mapScaleVisible : Boolean,
-    val gpsReceptionIconVisible : Boolean
+    val gpsReceptionIconVisible : Boolean,
+    val route : Route? = null,
+    val poiOverlay: PoiOverlay? = null
 )
 
 //Defines how much of the world we can see
@@ -44,7 +48,7 @@ data class Extents(
 
 //This is the driving route we want to draw on the map.
 data class Route(
-    val path : List<GeoPosition>
+    val path : List<LatLng>
 )
 
 data class PoiOverlay(
@@ -52,8 +56,21 @@ data class PoiOverlay(
 ) {
     data class Poi(
         val label : String,
-        val position: GeoPosition
-    )
+        val position: LatLng,
+        val icon : @Composable () -> Unit = @Composable {}
+    ) {
+        companion object Icons {
+            val ICON_BLUE_CIRCLE = @Composable {
+                Canvas(Modifier.size(16.dp)){
+                    drawCircle(
+                        center = Offset(0F, 0F),
+                        radius = 32F,
+                        color = Color.Blue
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -213,13 +230,68 @@ fun MapViewer(
                     zoom = extents.mapScale.mapZoomLevel
                 )
 
+                var scaling = 2F
+                Canvas(Modifier.matchParentSize()) {
+                    scaling = this.size.height.dp.toPx() / this.size.height.dp.value
+                }
 
-                Canvas(Modifier.matchParentSize()){
-                    drawCircle(
-                        center = Offset(1792F, 10F),
-                        radius = 30F,
-                        color = Color.Red
-                    )
+                if (overlayProperties.poiOverlay != null) {
+                    overlayProperties.poiOverlay.pois.forEach { poi ->
+
+                        val canvasHeightMeters = LatLngTool.distance(
+                            LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
+                            LatLng(ExtentCalculator.tile2lat(endY + 1, zoom), extents.center.longitude),
+                            LengthUnit.METER
+                        )
+
+                        val actualMetersFromTop = LatLngTool.distance(
+                            LatLng(ExtentCalculator.tile2lat(startY, zoom), poi.position.longitude),
+                            poi.position,
+                            LengthUnit.METER
+                        )
+
+                        val poiPixelsFromTop =
+                            scaling * ((actualMetersFromTop / canvasHeightMeters) * (((endY + 1) - startY) * 256))
+
+                        val canvasWidthMeters = LatLngTool.distance(
+                            LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
+                            LatLng(extents.center.latitude, ExtentCalculator.tile2lon(endX + 1, zoom)),
+                            LengthUnit.METER
+                        )
+
+                        val actualMetersFromLeft = LatLngTool.distance(
+                            LatLng(poi.position.latitude, ExtentCalculator.tile2lon(startX, zoom)),
+                            poi.position,
+                            LengthUnit.METER
+                        )
+
+                        val poiPixelsFromLeft =
+                            scaling * ((actualMetersFromLeft / canvasWidthMeters) * (((endX + 1) - startX) * 256))
+
+                        with (DaggerApplicationComponent.create().logger()) {
+                            d("POI", "$poi")
+                            d("POI", "pixels from top: $poiPixelsFromTop")
+                            d("POI", "pixels from left: $poiPixelsFromLeft")
+                            d("POI", "scaling: $scaling")
+                        }
+
+                        Layout(
+                            modifier = Modifier.matchParentSize(),
+                            content = {
+                                poi.icon()
+                            }
+                        ) { measurables, constraints ->
+                            val placeables = measurables.map { it.measure(constraints) }
+                            layout(constraints.minWidth, constraints.minWidth) {
+                                placeables[0].place(
+                                    IntOffset(
+                                        poiPixelsFromLeft.roundToInt(),
+                                        poiPixelsFromTop.roundToInt(),
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
