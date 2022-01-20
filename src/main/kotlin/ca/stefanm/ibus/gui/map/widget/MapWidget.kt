@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
@@ -48,7 +49,11 @@ data class Extents(
 
 //This is the driving route we want to draw on the map.
 data class Route(
-    val path : List<LatLng>
+    val path : List<LatLng>,
+
+    val color : Color,
+    val stroke: Stroke
+    //Stroke??
 )
 
 data class PoiOverlay(
@@ -236,62 +241,18 @@ fun MapViewer(
                 }
 
                 if (overlayProperties.poiOverlay != null) {
-                    overlayProperties.poiOverlay.pois.forEach { poi ->
+                    PoiOverlayLayer(
+                        poiOverlay = overlayProperties.poiOverlay,
+                        extents = extents,
+                        startX, endX, startY, endY, zoom, scaling
+                    )
+                }
 
-                        val canvasHeightMeters = LatLngTool.distance(
-                            LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
-                            LatLng(ExtentCalculator.tile2lat(endY + 1, zoom), extents.center.longitude),
-                            LengthUnit.METER
-                        )
-
-                        val actualMetersFromTop = LatLngTool.distance(
-                            LatLng(ExtentCalculator.tile2lat(startY, zoom), poi.position.longitude),
-                            poi.position,
-                            LengthUnit.METER
-                        )
-
-                        val poiPixelsFromTop =
-                            scaling * ((actualMetersFromTop / canvasHeightMeters) * (((endY + 1) - startY) * 256))
-
-                        val canvasWidthMeters = LatLngTool.distance(
-                            LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
-                            LatLng(extents.center.latitude, ExtentCalculator.tile2lon(endX + 1, zoom)),
-                            LengthUnit.METER
-                        )
-
-                        val actualMetersFromLeft = LatLngTool.distance(
-                            LatLng(poi.position.latitude, ExtentCalculator.tile2lon(startX, zoom)),
-                            poi.position,
-                            LengthUnit.METER
-                        )
-
-                        val poiPixelsFromLeft =
-                            scaling * ((actualMetersFromLeft / canvasWidthMeters) * (((endX + 1) - startX) * 256))
-
-                        with (DaggerApplicationComponent.create().logger()) {
-                            d("POI", "$poi")
-                            d("POI", "pixels from top: $poiPixelsFromTop")
-                            d("POI", "pixels from left: $poiPixelsFromLeft")
-                            d("POI", "scaling: $scaling")
-                        }
-
-                        Layout(
-                            modifier = Modifier.matchParentSize(),
-                            content = {
-                                poi.icon()
-                            }
-                        ) { measurables, constraints ->
-                            val placeables = measurables.map { it.measure(constraints) }
-                            layout(constraints.minWidth, constraints.minWidth) {
-                                placeables[0].place(
-                                    IntOffset(
-                                        poiPixelsFromLeft.roundToInt(),
-                                        poiPixelsFromTop.roundToInt(),
-                                    )
-                                )
-                            }
-                        }
-                    }
+                if (overlayProperties.route != null) {
+                    RouteLineLayer(
+                        overlayProperties.route,
+                        extents, startX, endX, startY, endY, zoom, scaling
+                    )
                 }
             }
         }
@@ -330,8 +291,146 @@ fun MapViewer(
             }
         }
     }
+}
+
+@Composable
+fun BoxWithConstraintsScope.RouteLineLayer(
+    route: Route,
+    extents: Extents,
+    startX : Int,
+    endX :  Int,
+    startY : Int,
+    endY : Int,
+    zoom : Int,
+    scaling : Float = 2F
+) {
+
+    val canvasWidthPixels = ((endX + 1) - startX) * 256 * scaling
+    val canvasHeightPixels = ((endY + 1) - startX) * 256 * scaling
+
+
+    Canvas(
+        modifier = Modifier.matchParentSize()
+    ) {
+        route.path.windowed(2, 1, false).forEach {
+            val from = it[0]
+            val to = it[1]
+
+            drawLine(
+                color = route.color,
+                strokeWidth = route.stroke.width,
+                start = latLngToPixels(from, extents, startX, endX, startY, endY, zoom, scaling).let {
+                    Offset(
+                        x = it.fromLeft.toFloat().coerceIn(0F, canvasWidthPixels.toFloat()),
+                        y = it.fromTop.toFloat().coerceIn(0F, canvasHeightPixels.toFloat())
+                    )
+                },
+                end = latLngToPixels(to, extents, startX, endX, startY, endY, zoom, scaling).let {
+                    Offset(
+                        x = it.fromLeft.toFloat().coerceIn(0F, canvasWidthPixels.toFloat()),
+                        y = it.fromTop.toFloat().coerceIn(0F, canvasHeightPixels.toFloat())
+                    )
+                }
+            )
+        }
+    }
+
+
 
 }
+
+data class DoublePixelOffset(
+    val fromLeft : Double,
+    val fromTop : Double
+)
+
+fun latLngToPixels(
+    latLng: LatLng,
+    extents: Extents,
+    startX : Int,
+    endX :  Int,
+    startY : Int,
+    endY : Int,
+    zoom : Int,
+    scaling : Float = 2F
+) : DoublePixelOffset {
+    val canvasHeightMeters = LatLngTool.distance(
+        LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
+        LatLng(ExtentCalculator.tile2lat(endY + 1, zoom), extents.center.longitude),
+        LengthUnit.METER
+    )
+
+    val actualMetersFromTop = LatLngTool.distance(
+        LatLng(ExtentCalculator.tile2lat(startY, zoom), latLng.longitude),
+        latLng,
+        LengthUnit.METER
+    )
+
+    val poiPixelsFromTop =
+        scaling * ((actualMetersFromTop / canvasHeightMeters) * (((endY + 1) - startY) * 256))
+
+    val canvasWidthMeters = LatLngTool.distance(
+        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
+        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(endX + 1, zoom)),
+        LengthUnit.METER
+    )
+
+    val actualMetersFromLeft = LatLngTool.distance(
+        LatLng(latLng.latitude, ExtentCalculator.tile2lon(startX, zoom)),
+        latLng,
+        LengthUnit.METER
+    )
+
+    val poiPixelsFromLeft =
+        scaling * ((actualMetersFromLeft / canvasWidthMeters) * (((endX + 1) - startX) * 256))
+
+    return DoublePixelOffset(fromLeft = poiPixelsFromLeft, fromTop = poiPixelsFromTop)
+}
+
+@Composable
+fun BoxWithConstraintsScope.PoiOverlayLayer(
+    poiOverlay: PoiOverlay,
+    extents: Extents,
+    startX : Int,
+    endX :  Int,
+    startY : Int,
+    endY : Int,
+    zoom : Int,
+    scaling : Float = 2F
+) {
+    poiOverlay.pois.forEach { poi ->
+        val (poiPixelsFromLeft, poiPixelsFromTop) = latLngToPixels(
+            poi.position,
+            extents, startX, endX, startY, endY, zoom, scaling
+        )
+
+        with (DaggerApplicationComponent.create().logger()) {
+            d("POI", "$poi")
+            d("POI", "pixels from top: $poiPixelsFromTop")
+            d("POI", "pixels from left: $poiPixelsFromLeft")
+            d("POI", "scaling: $scaling")
+        }
+
+        Layout(
+            modifier = Modifier.matchParentSize(),
+            content = {
+                poi.icon()
+            }
+        ) { measurables, constraints ->
+            val placeables = measurables.map { it.measure(constraints) }
+            layout(constraints.minWidth, constraints.minWidth) {
+                placeables[0].place(
+                    IntOffset(
+                        poiPixelsFromLeft.roundToInt(),
+                        poiPixelsFromTop.roundToInt(),
+                    )
+                )
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun RawTileGrid(

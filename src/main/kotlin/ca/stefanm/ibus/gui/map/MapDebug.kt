@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
@@ -108,11 +109,14 @@ class MapDebug @Inject constructor(
 
             NestingCard {
                 NestingCardHeader("POI")
-                OverlayManipulator { new ->
-                    overlayProperties.value = overlayProperties.value.copy(
-                        poiOverlay = new
-                    )
-                }
+                OverlayManipulator(
+                    onPoisChanged = { new ->
+                        overlayProperties.value = overlayProperties.value.copy(poiOverlay = new)
+                    },
+                    onRoutePathChanged = {
+                        overlayProperties.value = overlayProperties.value.copy(route = it)
+                    }
+                )
             }
         }
     }
@@ -365,6 +369,7 @@ class MapDebug @Inject constructor(
     @Composable
     fun OverlayManipulator(
         onPoisChanged : (new : PoiOverlay) -> Unit,
+        onRoutePathChanged : (new : Route?) -> Unit,
     ) {
 
         val pois = remember { mutableStateOf(PoiOverlay(pois = emptyList())) }
@@ -430,5 +435,52 @@ class MapDebug @Inject constructor(
                 }
             }
         }
+
+        NestingCard {
+            NestingCardHeader("Route Path")
+
+            NestingCard {
+                Button(onClick = { onRoutePathChanged(null) }) { Text("Clear")}
+                Button(onClick = {
+                    onRoutePathChanged(
+                        Route(
+                            path = Kanata_path,
+                            color = Color.Blue,
+                            stroke = Stroke(width = 8F)
+                    ))
+                }) { Text("Add Kanata Loop (Blue)")}
+                Button(onClick = {
+                    onRoutePathChanged(
+                        Route(
+                            path = Kanata_path,
+                            color = Color.Magenta,
+                            stroke = Stroke(width = 8F)
+                    ))
+                }) { Text("Add Kanata Loop (Red)")}
+            }
+        }
     }
 }
+
+val Kanata_path = listOf(
+    LatLng(45.31599199535223, -75.91989904925909),
+    LatLng(45.31668722958348, -75.91999402998448),
+    LatLng(45.31772513748084, -75.91970829239939),
+    LatLng(45.3194084109557, -75.91874393299521),
+    LatLng(45.32023138257964, -75.91860052070723),
+    LatLng(45.320969173934, -75.91874702039361),
+    LatLng(45.32173958116149, -75.91898520947589),
+    LatLng(45.32227827257804, -75.91760220675201),
+    LatLng(45.32245534122872, -75.91566843411272),
+    LatLng(45.32303547637337, -75.91468806647295),
+    LatLng(45.32385970494828, -75.91406512881512),
+    LatLng(45.32446364373779, -75.9135762350286),
+    LatLng(45.32504811347403, -75.91249361333639),
+    LatLng(45.32514613838691, -75.91150636779972),
+    LatLng(45.32479752451673, -75.91043493930178),
+    LatLng(45.32346788409338, -75.90895443429137),
+    LatLng(45.32261021800634, -75.9074955513106),
+    LatLng(45.32180326616849, -75.90693159696134),
+    LatLng(45.32126471215737, -75.90602673401212),
+    LatLng(45.32034835430682, -75.90555126119544),
+)
