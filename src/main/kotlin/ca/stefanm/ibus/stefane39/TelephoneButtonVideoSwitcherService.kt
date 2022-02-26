@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.stefane39
 
+import ca.stefanm.ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
+import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.hardwareDrivers.VideoEnableRelayManager
@@ -13,6 +15,11 @@ import javax.inject.Inject
 import javax.inject.Named
 
 @ConfiguredCarScope
+@PlatformServiceInfo(
+    name = "TelephoneButtonVideoSwitcherService",
+    description = "Switches the TV Module video input on BMBT Telephone button press"
+)
+@PeripheralsServiceGroup
 class TelephoneButtonVideoSwitcherService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
 

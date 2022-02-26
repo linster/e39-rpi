@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
+import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
@@ -31,6 +32,7 @@ class LoadingWindow @Inject constructor(
     private val debugLaunchpad: DebugLaunchpad,
     private val paneManagerDebug: PaneManagerDebug,
     private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow,
+    private val platformConfigSetupWindow: PlatformConfigSetupWindow,
     private val windowManager : Provider<WindowManager>
 ) {
 
@@ -72,6 +74,10 @@ class LoadingWindow @Inject constructor(
                     "Restart Platform",
                     onClick = { restartPlatform() },
                     //shortcut = KeyStroke(Key.R)
+                )
+                Item(
+                    "Configure Platform",
+                    onClick = { windowManager.get().openDebugWindow(platformConfigSetupWindow)}
                 )
             }
             Menu("Debug") {

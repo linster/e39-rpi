@@ -1,0 +1,233 @@
+# For more options and information see
+# http://rpf.io/configtxt
+# Some settings may impact device functionality. See link above for details
+
+# uncomment if you get no picture on HDMI for a default "safe" mode
+#hdmi_safe=1
+
+# uncomment the following to adjust overscan. Use positive numbers if console
+# goes off screen, and negative if there is too much border
+overscan_left=48
+overscan_right=16
+overscan_top=48
+overscan_bottom=16
+
+# uncomment to force a console size. By default it will be display's size minus
+# overscan.
+#framebuffer_width=1280
+#framebuffer_height=720
+
+# uncomment if hdmi display is not detected and composite is being output
+#hdmi_force_hotplug=1
+
+# uncomment to force a specific HDMI mode (this will force VGA)
+#hdmi_group=1
+#hdmi_mode=1
+
+# uncomment to force a HDMI mode rather than DVI. This can make audio work in
+# DMT (computer monitor) modes
+#hdmi_drive=2
+
+# uncomment to increase signal to HDMI, if you have interference, blanking, or
+# no display
+config_hdmi_boost=3
+
+# uncomment for composite PAL
+#sdtv_mode=2
+
+#uncomment to overclock the arm. 700 MHz is the default.
+#arm_freq=800
+
+# Uncomment some or all of these to enable the optional hardware interfaces
+#dtparam=i2c_arm=on
+#dtparam=i2s=on
+#dtparam=spi=on
+
+dtparam=i2c_arm=off
+dtparam=spi=off
+
+# Uncomment this to enable infrared communication.
+#dtoverlay=gpio-ir,gpio_pin=17
+#dtoverlay=gpio-ir-tx,gpio_pin=18
+
+# Additional overlays and parameters are documented /boot/overlays/README
+
+# Enable audio (loads snd_bcm2835)
+dtparam=audio=on
+
+# Automatically load overlays for detected cameras
+camera_auto_detect=1
+
+# Automatically load overlays for detected DSI displays
+display_auto_detect=1
+
+# Enable DRM VC4 V3D driver
+#dtoverlay=vc4-kms-v3d
+
+#From vga_zero.txt. Not sure why it's here???
+dtoverlay=vc4-fkms-v3d-pi4
+
+max_framebuffers=2
+
+# Run in 64-bit mode
+arm_64bit=1
+
+# Disable compensation for displays with overscan
+#disable_overscan=1
+
+[cm4]
+# Enable host mode on the 2711 built-in XHCI USB controller.
+# This line should be removed if the legacy DWC2 controller is required
+# (e.g. for USB device mode) or if USB support is not required.
+otg_mode=1
+
+[all]
+
+[pi4]
+# Run as fast as firmware / board allows
+arm_boost=1
+
+[all]
+#overscan_left=48
+#overscan_right=-48
+#overscan_top=16
+#overscan_bottom=-64
+#sdtv_aspect=3
+#test_mode=0
+
+dtparam=i2c_arm=off
+#gpio=2-8,12-17,20-24=a2
+dpi_output_format=0x13
+enable_dpi_lcd=1
+display_default_lcd=1
+
+dtoverlay=vga565
+dpi_output_format=0x13
+#enable_dpi_lcd=1
+#display_default_lcd=1
+#dpi_group=2
+#dpi_mode=9
+
+dpi_group=2
+dpi_mode=87
+
+#overscan_left=0
+#overscan_right=0
+#overscan_top=0
+#overscan_bottom=0
+#framebuffer_width=800
+#framebuffer_height=480
+
+#hdmi_group=2
+#hdmi_mode=87
+#hdmi_timings=<h_active_pixels> <h_sync_polarity> <h_front_porch> <h_sync_pulse> <h_back_porch> <v_active_pixels> <h_sync_polarity> <h_front_porch> <h_sync_pulse> <h_back_porch> <v_active_lines> <v_sync_polarity> v_front_porch> <v_sync_pulse> <v_back_porch> <v_sync_offset_a> <v_sync_offset_b> <pixel_rep> <frame_rate> <interlaced> <pixel_freq> <aspect_ratio>
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 59.94 0 15658 3
+#hdmi_timings=800 0 41 56 119 480 1 25 3 32 0 0 0 59.94 1 15658 6
+#Kinda shows rpi-config for a bit
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 59.94 0 32370 6
+#hdmi_timings=800 1 41 56 119 480 1 25 3 3 0 0 0 59.94 0 30631 6
+#hdmi_timings=800 1 41 56 119 480 1 25 3 3 0 0 0 59.94 0 32370 6
+#hdmi_timings=800 1 16 64 120 480 1 25 4 16 0 0 0 59.94 0 15730 6
+#hdmi_timings=800 0 16 64 120 480 0 25 4 16 0 0 0 59.94 0 15730 6
+#hdmi_timings=800 0 16 64 120 480 0 250 4 16 0 0 0 29.96 0 15730 6
+#hdmi_timings=800 0 16 64 120 480 0 25 4 32 0 0 0 29.08 0 15730 6
+#hdmi_timings=800 0 48 64 132 480 0 25 4 32 0 0 0 29.08 0 16432 6
+#hdmi_timings=800 0 41 56 119 480 0 25 3 32 0 0 0 28.54 0 15658 6
+#hdmi_timings=800 0 32 128 128 600 0 1 9 14 0 0 0 5672 0 38507 6
+#hdmi_timings=640 0 16 96 48 480 0 11 2 32 0 0 0 59.93 0 25170 6
+#hdmi_timings=800 0 16 64 120 480 0 25 4 16 0 0 0 30 0 15750 6
+
+#hdmi_timings=800 0 26 69 84 480 0 25 3 32 0 0 0 44.76 0 15399 6
+
+#hdmi_timings=800 0 32 84 32 480 0 43 10 43 0 0 0 32.45 0 17720 6
+
+#not sure on refresh rate (50/30/25/59.94)
+#porches and timings from intel dtd
+#hdmi_timings=800 0 41 56 22 480 0 25 3 4 0 0 0 50 1 15911 6
+#THIS ONE ALMOST WORKS
+#hdmi_timings=800 0 41 56 119 480 0 25 3 32 0 0 0 50 0 15911000 6
+
+#Better
+#hdmi_timings=800 0 41 56 119 480 0 25 4 32 0 0 0 50 1 15911000 6
+#hdmi_timings=800 0 41 56 119 480 0 25 3 16 0 0 0 60 1 15911000 6
+
+#Stable but overlaps with itself
+#hdmi_timings=800 0 41 56 119 480 0 32 3 110 0 0 0 50 1 15911000 6
+
+#hdmi_timings=800 0 41 56 119 480 0 100 3 42 0 0 0 25 0 15911000 6
+#Moving upwards
+#hdmi_timings=800 0 41 56 119 480 0 126 3 16 0 0 0 50 1 15911000 6
+
+#THESE ARE BOTH KINDA STABLE. PIC TOO BIG. Only works when TV module
+#Region is set to GERMANY. 
+#hdmi_timings=800 0 41 56 119 480 0 139 3 3 0 0 0 50 1 15911000 6
+#hdmi_timings=800 0 41 56 119 480 0 3 3 139 0 0 0 50 1 15911000 6
+
+#KINDA WORKS ON NTSC. Two pictucres.
+
+
+#Kinda works when tvm set to usa version. 
+#hdmi_timings=800 0 41 56 119 480 0 25 3 17 0 0 0 30 1 15911000 3
+
+hdmi_timings=800 0 41 56 119 262 0 1 3 20 0 0 0 50 1 15735000 1
+
+
+
+#hdmi_timings=800 0 41 56 119 480 0 25 3 32 0 0 0 29.97 0 15911000 3
+
+
+#Vsync signal is 1 line longer. com'd from vbp
+#hdmi_timings=800 0 41 56 119 480 0 23 4 18 0 0 0 60 1 15735000 3
+
+#Vsync signal is 3 line longer. com'd from vbp
+#hdmi_timings=800 0 41 56 119 480 0 23 6 16 0 0 0 50 1 15625000 3
+
+#Experiment with visible lines matching PAL standard
+#Stable, no overlap when TV tuner sets TV format to Germany
+#hdmi_timings=800 0 31 56 129 288 0 1 3 20 0 0 0 50 1 15625000 3
+
+
+#hdmi_timings=800 0 31 56 129 576 0 25 3 21 0 0 0 25 1 15625000 3
+
+
+
+#hdmi_timings=800 0 41 56 119 480 0 32 3 110 0 0 0 50 1 15911000 6
+
+#hdmi_timings=800 0 91 56 69 480 0 25 3 32 0 0 0 50 1 15625000 3
+
+
+#hdmi_timings=800 0 41 56 119 480 0 25 3 32 0 0 0 29.97 1 15911000 6
+
+#hdmi_group=2
+#hdmi_mode=87
+#hdmi_timings=848 0 48 32 80 468 1 2 5 7 0 0 0 60 0 29750 3
+#hdmi_timings=640 0 32 64 96 512 0 1 3 22 0 0 0 60 26857
+#hdmi_timings=848 1 112 136 248 480 1 147 6 173 0 0 0 60 65095 3
+#hdmi_timings=848 1 24 80 104 480 1 3 5 12 0 0 0 30 0 31500 3
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 60 0 32198 3
+
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 30 0 16459 3
+#hdmi_timings=800 0 41 56 119 480 1 25 3 32 0 0 0 30 0 16459 3
+#hdmi_timings=800 0 41 56 119 480 0 25 3 32 0 0 0 30 0 16459 3
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 30 0 15658 3
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 30 0 15158 3
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 30 0 14265 3
+#hdmi_timings=800 1 40 60 141 480 1 25 5 64 0 0 0 30 0 17926 3
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 30 0 15658 3
+#hdmi_timings=800 1 41 56 119 480 1 25 3 32 0 0 0 30 0 15658 3
+#config_hdmi_boost=????
+#dpi_cvt=640 480 59.94 3 0 0 0
+
+#hdmi_group=2
+#hdmi_mode=8
+
+#hdmi_force_hotplug=1
+#hdmi_ignore_edid=0xa5000080
+#config_hdmi_boost=4
+#hdmi_group=1
+#hdmi_mode=4
+#disable_overscan=0
+#overscan_left=0
+#overscan_right=160
+#overscan_top=24
+#overscan_bottom=24

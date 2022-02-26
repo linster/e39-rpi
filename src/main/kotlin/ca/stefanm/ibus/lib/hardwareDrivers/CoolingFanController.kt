@@ -1,5 +1,8 @@
 package ca.stefanm.ibus.lib.hardwareDrivers
 
+import ca.stefanm.ca.stefanm.ibus.car.platform.Peripherals2ServiceGroup
+import ca.stefanm.ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
+import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
 import com.pi4j.system.SystemInfo
@@ -10,6 +13,12 @@ import java.io.IOException
 import javax.inject.Inject
 import kotlin.math.abs
 
+@PlatformServiceInfo(
+    name = "CoolingFanController",
+    description = "Turns on the cooling fan in the case."
+)
+@PeripheralsServiceGroup
+@Peripherals2ServiceGroup
 class CoolingFanController @Inject constructor(
     private val relayReaderWriter: RelayReaderWriter,
     private val logger : Logger,

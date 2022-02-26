@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.car.bluetooth
 
+import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
+import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusConnector
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusReconnector
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService
@@ -28,6 +30,11 @@ import javax.inject.Named
 //https://github.com/aguedes/bluez/blob/master/doc/media-api.txt
 
 @ConfiguredCarScope
+@PlatformServiceInfo(
+    name = "BluetoothService",
+    description = "Monolithic bluetooth service. TODO Should be split up."
+)
+@BluetoothServiceGroup
 class BluetoothService @Inject constructor(
     private val onScreenSetupManager: BluetoothOnScreenSetupManager,
     private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,

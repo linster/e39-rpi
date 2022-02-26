@@ -1,5 +1,8 @@
 package ca.stefanm.ibus.car.bordmonitor.input
 
+import ca.stefanm.ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
+import ca.stefanm.ibus.annotations.services.PlatformServiceGroup
+import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
@@ -14,6 +17,11 @@ import javax.inject.Named
 
 @ExperimentalCoroutinesApi
 @ConfiguredCarScope
+@PlatformServiceInfo(
+    name = "IbusInputMessageParser",
+    description = "Parses IBus packets into IBusInputMessages",
+)
+@SerialInterfaceServiceGroup
 class IBusInputMessageParser @Inject constructor(
 
     @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,

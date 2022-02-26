@@ -26,6 +26,8 @@ class WindowManager @Inject constructor(
 
     companion object {
         val DEFAULT_SIZE = DpSize(800.dp, 468.dp)
+
+        val DEFAULT_DEBUG_WINDOW_SIZE = DpSize(1024.dp, 768.dp)
     }
 
     interface E39Window {

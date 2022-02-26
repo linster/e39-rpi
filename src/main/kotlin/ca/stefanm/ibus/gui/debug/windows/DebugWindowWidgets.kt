@@ -17,9 +17,9 @@ fun NestingCard(
 ) {
     Card(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(3.dp)
             .then(modifier),
-        elevation = 8.dp
+        elevation = 3.dp
     ) {
         Column {
             contents()
@@ -78,5 +78,15 @@ fun NumericTextViewWithSpinnerButtons(
             }) { Text(" + ") }
         }
     }
+}
 
+@Composable
+fun CheckBoxWithLabel(isChecked : Boolean, onCheckChanged : (new : Boolean) -> Unit, label : String) {
+    Row(Modifier.wrapContentHeight()) {
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = { onCheckChanged(it)}
+        )
+        Text(label)
+    }
 }

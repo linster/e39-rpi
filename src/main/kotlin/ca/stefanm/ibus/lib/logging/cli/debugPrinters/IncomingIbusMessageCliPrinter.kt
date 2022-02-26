@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.lib.logging.cli.debugPrinters
 
+import ca.stefanm.ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
+import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
 import ca.stefanm.ibus.lib.logging.Logger
@@ -16,6 +18,11 @@ import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 import javax.inject.Named
 
+@PlatformServiceInfo(
+    name = "IncomingIbusMessageCliPrinter",
+    description = "Prints incoming IBusMessages to stdout"
+)
+@CliPrinterServiceGroup
 class IncomingIbusMessageCliPrinter @Inject constructor(
     @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,
 

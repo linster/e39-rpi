@@ -40,6 +40,8 @@ class PlatformServiceList @Inject constructor(
 
     ) {
 
+    //@Service(
+    //@ServiceGroup
     val list : List<PlatformServiceGroup> = listOf(
         PlatformServiceGroup(
             name = "Bluetooth",
