@@ -5,6 +5,8 @@ import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
@@ -13,10 +15,13 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @ApplicationScope
-class ConfigurablePlatform @Inject constructor() {
+class ConfigurablePlatform @Inject constructor(
+    private val configurationStorage: Provider<ConfigurationStorage>
+) {
 
     private var runStatusViewer : ConfigurablePlatformServiceRunStatusViewer? = null
     private val _servicesRunning = MutableStateFlow<List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>>(
@@ -25,8 +30,18 @@ class ConfigurablePlatform @Inject constructor() {
     val servicesRunning : StateFlow<List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>>
         get() = _servicesRunning.asStateFlow()
 
-    var configurablePlatformServiceRunner: ConfigurablePlatformServiceRunner? = null
-    var configuredCarComponent : ConfiguredCarComponent? = null
+    private companion object {
+        var _configurablePlatformServiceRunner: ConfigurablePlatformServiceRunner? = null
+        var _configuredCarComponent: ConfiguredCarComponent? = null
+    }
+
+    var configurablePlatformServiceRunner: ConfigurablePlatformServiceRunner?
+        get() = _configurablePlatformServiceRunner
+        set(value) { _configurablePlatformServiceRunner = value}
+    var configuredCarComponent: ConfiguredCarComponent?
+        get() = _configuredCarComponent
+        set(value) { _configuredCarComponent = value }
+
 
     var currentConfiguration : CarPlatformConfiguration? = null
         private set(value) {
@@ -65,7 +80,13 @@ class ConfigurablePlatform @Inject constructor() {
         configurablePlatformServiceRunner =
             configuredCarComponent?.configurablePlatformServiceRunner()
 
-        configurablePlatformServiceRunner?.runAll()
+        val startupServiceList = configurationStorage.get().config[E39Config.CarPlatformConfigSpec._listOfServiceGroupsOnStartup]
+        if (startupServiceList.isEmpty()) {
+            configurablePlatformServiceRunner?.runAll()
+        } else {
+            configurablePlatformServiceRunner?.startGroups(startupServiceList)
+        }
+
         currentConfiguration = configuration
 
         runStatusViewer = ConfigurablePlatformServiceRunStatusViewer(
@@ -87,6 +108,14 @@ class ConfigurablePlatformServiceRunner @Inject constructor(
         list.list.forEach { group ->
             group.children.forEach { service ->
                 service.onCreate()
+            }
+        }
+    }
+
+    fun startGroups(serviceGroupNames : List<String>) {
+        list.list.filter { it.name in serviceGroupNames }.forEach { platformServiceGroup ->
+            platformServiceGroup.children.forEach { platformService ->
+                platformService.onCreate()
             }
         }
     }
@@ -129,7 +158,7 @@ class ConfigurablePlatformServiceRunStatusViewer internal constructor(
         val stopService : () -> Unit
     )
 
-    val _records : MutableStateFlow<List<RunStatusRecordGroup>> = MutableStateFlow(listOf())
+    private val _records : MutableStateFlow<List<RunStatusRecordGroup>> = MutableStateFlow(listOf())
     val records : StateFlow<List<RunStatusRecordGroup>> get() = _records
 
 

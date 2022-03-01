@@ -32,6 +32,9 @@ interface CarPlatformConfiguration {
     enum class TrackInfoPrinterType { BMBT, CLI } //Do we stub out track info printing to the cli?
 
     val trackInfoPrinter : TrackInfoPrinterType
+
+    /** Empty list means start all service groups */
+    val listOfServiceGroupsOnStartup : List<String>
 }
 
 class Pi3BPlusDeviceConfiguration() : CarPlatformConfiguration {
@@ -51,6 +54,7 @@ class Pi3BPlusDeviceConfiguration() : CarPlatformConfiguration {
 
     override val trackInfoPrinter = CarPlatformConfiguration.TrackInfoPrinterType.BMBT
 
+    override val listOfServiceGroupsOnStartup: List<String> = emptyList()
 }
 
 class LaptopDeviceConfiguration : CarPlatformConfiguration {
@@ -71,4 +75,6 @@ class LaptopDeviceConfiguration : CarPlatformConfiguration {
     override val serialPortWriteMode = CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING
 
     override val trackInfoPrinter = CarPlatformConfiguration.TrackInfoPrinterType.CLI
+
+    override val listOfServiceGroupsOnStartup: List<String> = emptyList()
 }

@@ -65,4 +65,11 @@ class ConfigurationStorage @Inject constructor(
             )
         )
     }
+
+    fun setServiceGroupsOnStartup(
+        groupNames : List<String>
+    ) {
+        logger.d("configurationStorage", "Saving groups to run on startup: $groupNames")
+        config[E39Config.CarPlatformConfigSpec._listOfServiceGroupsOnStartup] = groupNames
+    }
 }

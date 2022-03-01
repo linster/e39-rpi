@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.car.di
 
+import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
+import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.CliTrackInfoPrinter
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.ScreenTrackInfoPrinter
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
@@ -8,21 +10,26 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TvModuleTextLengthConstraints
-import ca.stefanm.ibus.car.platform.ConfigurablePlatform
-import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunner
-import ca.stefanm.ibus.car.platform.PlatformServiceList
-import ca.stefanm.ibus.car.platform.PlatformServiceRunner
+import ca.stefanm.ibus.car.platform.*
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.di.ApplicationComponent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
+import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.RpiRelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.JSerialCommsAdapter
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortReader
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortWriter
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
+import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IbusInputEventCliPrinter
+import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IncomingIbusMessageCliPrinter
+import ca.stefanm.ibus.lib.logging.cli.debugPrinters.PlatformMetronomeLogger
+import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import dagger.*
+import dagger.multibindings.ElementsIntoSet
+import dagger.multibindings.IntoSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -42,11 +49,21 @@ annotation class ConfiguredCarScope
 interface ConfiguredCarComponent {
 
     fun inject(configurablePlatform: ConfigurablePlatform)
-    fun platformServiceList() : PlatformServiceList
-    fun legacyPlatformServiceRunner() : PlatformServiceRunner
-    fun configurablePlatformServiceRunner() : ConfigurablePlatformServiceRunner
-    fun ibusInputMessageParser() : IBusInputMessageParser
-    fun relayReaderWriter() : RelayReaderWriter
+    fun platformServiceList(): PlatformServiceList
+    fun legacyPlatformServiceRunner(): PlatformServiceRunner
+    fun configurablePlatformServiceRunner(): ConfigurablePlatformServiceRunner
+    fun ibusInputMessageParser(): IBusInputMessageParser
+    fun relayReaderWriter(): RelayReaderWriter
+
+    //I would've liked to auto-generate these. These should match ServicesAndServiceGroups.kt
+    fun discoveredServiceTelephoneButtonVideoSwitcherService() : TelephoneButtonVideoSwitcherService
+    fun discoveredServiceCoolingFanController() : CoolingFanController
+    fun discoveredServiceSerialPublisherService() : SerialPublisherService
+    fun discoveredServicePlatformMetronomeLogger() : PlatformMetronomeLogger
+    fun discoveredServiceIbusInputEventCliPrinter() : IbusInputEventCliPrinter
+    fun discoveredServiceIncomingIbusMessageCliPrinter() : IncomingIbusMessageCliPrinter
+    fun discoveredServiceIbusInputMessageParser() : IBusInputMessageParser
+    fun discoveredServiceBluetoothService() : BluetoothService
 }
 
 @Module
@@ -110,5 +127,10 @@ class ConfiguredCarModule(
             cliRelayReaderWriter
         }
     }
+
+//    @Provides
+//    fun provideAllServices() : Set<DiscoveredServiceGroups.DiscoveredServiceInfo> {
+//        return DiscoveredServiceGroups().getAllServiceInfos()
+//    }
 
 }

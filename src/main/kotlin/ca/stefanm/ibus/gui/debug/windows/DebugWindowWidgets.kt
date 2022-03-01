@@ -6,6 +6,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -82,7 +83,7 @@ fun NumericTextViewWithSpinnerButtons(
 
 @Composable
 fun CheckBoxWithLabel(isChecked : Boolean, onCheckChanged : (new : Boolean) -> Unit, label : String) {
-    Row(Modifier.wrapContentHeight()) {
+    Row(Modifier.wrapContentHeight(), verticalAlignment = Alignment.CenterVertically) {
         Checkbox(
             checked = isChecked,
             onCheckedChange = { onCheckChanged(it)}

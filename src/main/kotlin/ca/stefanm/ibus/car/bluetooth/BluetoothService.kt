@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.bluetooth
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
+import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusConnector
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusReconnector

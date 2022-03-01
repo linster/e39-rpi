@@ -1,6 +1,21 @@
-package ca.stefanm.ca.stefanm.ibus.car.platform
+package ca.stefanm.ibus.car.platform
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceGroup
+import ca.stefanm.ibus.car.di.ConfiguredCarComponent
+import ca.stefanm.ibus.car.platform.Service
+import kotlin.reflect.KClass
+
+data class DiscoveredPlatformServiceGroup(
+    val name: String,
+    val description: String
+)
+
+data class DiscoveredServiceInfo(
+    val name: String,
+    val description: String,
+    val implementingClass: KClass<*>,
+    val accessor: ConfiguredCarComponent.() -> Service
+)
 
 @PlatformServiceGroup(
     name = "Bluetooth",
@@ -31,3 +46,11 @@ annotation class PeripheralsServiceGroup
     description = "Peripherals for 2nd gen hardware"
 )
 annotation class Peripherals2ServiceGroup
+
+@PlatformServiceGroup(
+    name = "TelephoneControlSimulation",
+    description = "Simulate BMW Telephone Control Unit? May conflict with pre-installed " +
+            "telephone computer."
+)
+annotation class TelephoneControlSimulationServiceGroup
+

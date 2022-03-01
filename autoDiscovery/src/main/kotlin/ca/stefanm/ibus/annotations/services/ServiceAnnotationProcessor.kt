@@ -2,11 +2,12 @@ package ca.stefanm.ibus.annotations.services
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import java.lang.reflect.Type
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.TypeMirror
+import kotlin.reflect.KClass
 
 class ServiceAnnotationProcessor : AbstractProcessor() {
 
@@ -38,6 +39,16 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
         return true
     }
 
+    data class DiscoveredPlatformServiceGroup(
+        val name : String,
+        val description : String
+    )
+    data class DiscoveredServiceInfo(
+        val name : String,
+        val description : String,
+        val implementingClass : TypeMirror
+    )
+
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private fun generateSource(
         groups : Set<Element>,
@@ -51,51 +62,14 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
             "ServicesAndServiceGroups"
         )
 
-        data class DiscoveredPlatformServiceGroup(
-            val name : String,
-            val description : String
-        )
-        data class DiscoveredServiceInfo(
-            val name : String,
-            val description : String
-        )
-
-
         fileBuilder.addType(
             TypeSpec
                 .classBuilder("DiscoveredServiceGroups")
-                .addType(
-                    TypeSpec.classBuilder("DiscoveredPlatformServiceGroup")
-                        .addModifiers(KModifier.DATA)
-                        .addProperty(PropertySpec.builder("name", String::class.asTypeName()).initializer("name").build())
-                        .addProperty(PropertySpec.builder("description", String::class.asTypeName()).initializer("description").build())
-                        .primaryConstructor(
-                            FunSpec.constructorBuilder()
-                                .addParameter(name = "name", type = String::class,)
-                                .addParameter(name = "description", type = String::class, KModifier.PUBLIC)
-                                .build()
-                        )
-                        .build()
-                )
-                .addType(
-                    TypeSpec.classBuilder("DiscoveredServiceInfo")
-                        .addModifiers(KModifier.DATA)
-                        .addProperty(PropertySpec.builder("name", String::class.asTypeName()).initializer("name").build())
-                        .addProperty(PropertySpec.builder("description", String::class.asTypeName()).initializer("description").build())
-                        .primaryConstructor(
-                            FunSpec.constructorBuilder()
-                                .addParameter(name = "name", type = String::class,)
-                                .addParameter(name = "description", type = String::class, KModifier.PUBLIC)
-                                .build()
-                        )
-                        .build()
-                )
                 .addFunction(
                     FunSpec.builder("getAllGroups")
                         .returns(
                             SET.parameterizedBy(ClassName(
                                 "ca.stefanm.ibus.car.platform",
-                                "DiscoveredServiceGroups",
                                 "DiscoveredPlatformServiceGroup"
                             ))
                         )
@@ -131,7 +105,6 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
                         .returns(
                             SET.parameterizedBy(ClassName(
                             "ca.stefanm.ibus.car.platform",
-                            "DiscoveredServiceGroups",
                             "DiscoveredServiceInfo"
                             ))
                         )
@@ -139,10 +112,10 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
                             addCode(CodeBlock.builder()
                                 .add("return setOf(\n")
                                 .withIndent {
-                                    services.map {
-                                        it.getAnnotation(PlatformServiceInfo::class.java)
-                                    }.map {
-                                        add("DiscoveredServiceInfo(name= %S, description= %S), \n", it.name, it.description)
+                                    services.map { service ->
+                                        service.toDiscoveredServiceInfo()
+                                    }.map { discoveredService ->
+                                        discoveredService.toCode()(this)
                                     }
                                 }.add(")").build()
                             )
@@ -154,11 +127,9 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
                         .returns(
                             MAP.parameterizedBy(
                                 ClassName("ca.stefanm.ibus.car.platform",
-                                    "DiscoveredServiceGroups",
                                     "DiscoveredServiceInfo",
                                 ),
                                 LIST.parameterizedBy(ClassName("ca.stefanm.ibus.car.platform",
-                                "DiscoveredServiceGroups",
                                     "DiscoveredPlatformServiceGroup"
                                 ))
                             )
@@ -171,10 +142,7 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
                             //services.first().annotationMirrors.map { it.annotationType }.map { it.asElement() }[1].getAnnotation(PlatformServiceGroup::class.java)?.name
                             val data = services.map { service ->
                                 Pair(
-                                    DiscoveredServiceInfo(
-                                        name = service.getAnnotation(PlatformServiceInfo::class.java).name,
-                                        description = service.getAnnotation(PlatformServiceInfo::class.java).description
-                                    ),
+                                    service.toDiscoveredServiceInfo(),
                                     service
                                         .annotationMirrors
                                         .map { it.annotationType }
@@ -205,7 +173,13 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
                                                 }
                                                 .add(")").build()
                                         }
-                                        add("DiscoveredServiceInfo(name= %S, description= %S) to %L, \n", service.name, service.description, groupsFragment)
+                                        add("DiscoveredServiceInfo(name= %S, description= %S, implementingClass = %T::class, accessor = %L) to %L, \n",
+                                            service.name,
+                                            service.description,
+                                            service.implementingClass.asTypeName(),
+                                            CodeBlock.builder().add(" { discoveredService${service.name}() } ").build(),
+                                            groupsFragment
+                                        )
                                     }
                                 }
                                 .add(")")
@@ -220,17 +194,64 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
                         .returns(
                             MAP.parameterizedBy(
                                 ClassName("ca.stefanm.ibus.car.platform",
-                                    "DiscoveredServiceGroups",
-                                    "DiscoveredServiceInfo",
+                                    "DiscoveredPlatformServiceGroup"
                                 ),
                                 LIST.parameterizedBy(ClassName("ca.stefanm.ibus.car.platform",
-                                    "DiscoveredServiceGroups",
-                                    "DiscoveredPlatformServiceGroup"
+                                    "DiscoveredServiceInfo",
                                 ))
                             )
                         )
                         .apply {
                             //TODO don't bother re-doing the work above, re-use the result and munch the map.
+
+                            val groupsByServices = services.map { service ->
+                                service to service
+                                    .annotationMirrors
+                                    .map { it.annotationType }
+                                    .map { it.asElement() }
+                                    .filter { it.getAnnotation(PlatformServiceGroup::class.java) != null }
+                                    .map {
+                                        DiscoveredPlatformServiceGroup(
+                                            name = it.getAnnotation(PlatformServiceGroup::class.java).name,
+                                            description = it.getAnnotation(PlatformServiceGroup::class.java).description
+                                        )
+                                    }
+                            }.toMap()
+                                .mapKeys { it.key.toDiscoveredServiceInfo() }
+                                .mapValues { tuple -> tuple.value.map { it to tuple.key } }
+                                .entries
+                                .map { it.value }
+                                .flatten()
+                                .groupBy { it.first }
+                                .mapValues { it.value.map { it.second } }
+
+                            addCode(CodeBlock.builder()
+                                .add("return mapOf(")
+                                .withIndent {
+                                    for (group in groupsByServices.keys) {
+                                        val servicesList = if (groupsByServices[group]!!.isEmpty()) {
+                                            CodeBlock.builder().add("listOf()").build()
+                                        } else {
+                                            CodeBlock.builder()
+                                                .add("listOf(")
+                                                .withIndent innerBuilder@{
+                                                    groupsByServices[group]!!.forEach {
+                                                        it.toCode().invoke(this@innerBuilder)
+                                                    }
+                                                }
+                                                .add(")").build()
+                                        }
+                                        add(
+                                            "DiscoveredPlatformServiceGroup(name= %S, description= %S) to %L, \n",
+                                            group.name,
+                                            group.description,
+                                            servicesList
+                                        )
+                                    }
+                                }
+                                .add(")")
+                                .build()
+                            )
                         }
                         .build()
                 )
@@ -238,6 +259,17 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
         )
 
 
+//        fileBuilder.addType(TypeSpec.classBuilder("ServiceHolder")
+//            .addAnnotation(
+//                AnnotationSpec.builder(ClassName("ca.stefanm.ibus.car.di", "ConfiguredCarScope")).build()
+//            )
+//            .primaryConstructor(FunSpec
+//                .constructorBuilder()
+//                .addAnnotation(AnnotationSpec.builder(ClassName("javax.inject", "Inject")).build())
+//                .build()
+//            )
+//            .build()
+//        )
 
 
 
@@ -246,6 +278,29 @@ class ServiceAnnotationProcessor : AbstractProcessor() {
         file.writeTo(filer)
     }
 
+
+    private fun Element.toDiscoveredServiceInfo() : DiscoveredServiceInfo {
+        return DiscoveredServiceInfo(
+            name = this.getAnnotation(PlatformServiceInfo::class.java).name,
+            description = this.getAnnotation(PlatformServiceInfo::class.java).description,
+            implementingClass = this.asType()
+        )
+    }
+
+    private fun DiscoveredServiceInfo.toCode() : CodeBlock.Builder.() -> Unit {
+        val discoveredService = this
+        return {
+
+            val accessorLambda = CodeBlock.builder().add(" { discoveredService${discoveredService.name}() } ").build()
+
+            add("DiscoveredServiceInfo(name= %S, description= %S, implementingClass = %T::class, accessor = %L), \n",
+                discoveredService.name,
+                discoveredService.description,
+                discoveredService.implementingClass.asTypeName(),
+                accessorLambda
+            )
+        }
+    }
 
 }
 

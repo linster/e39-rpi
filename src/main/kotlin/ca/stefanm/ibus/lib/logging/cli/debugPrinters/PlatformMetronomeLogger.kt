@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.lib.logging.cli.debugPrinters
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
+import ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService

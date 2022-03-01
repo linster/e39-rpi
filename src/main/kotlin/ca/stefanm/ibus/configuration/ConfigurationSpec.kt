@@ -34,6 +34,7 @@ object E39Config : ConfigSpec() {
                 override val serialPortReadMode get() = config[_serialPortReadMode]
                 override val serialPortWriteMode get() = config[_serialPortWriteMode]
                 override val trackInfoPrinter get() = config[_trackInfoPrinter]
+                override val listOfServiceGroupsOnStartup: List<String> = config[_listOfServiceGroupsOnStartup]
             }
         }
 
@@ -67,6 +68,11 @@ object E39Config : ConfigSpec() {
             CarPlatformConfiguration.TrackInfoPrinterType.BMBT,
             "TrackInfoPrinter",
             "Which trackInfoPrinter to use?"
+        )
+        val _listOfServiceGroupsOnStartup by optional(
+            emptyList<String>(),
+            "ServiceGroupsOnStartup",
+            "List of PlatformServiceGroup names to start on platform start. Empty list is start all."
         )
     }
 

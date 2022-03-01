@@ -43,75 +43,78 @@ class ServiceStatusViewer @Inject constructor(
         ScrollableStatusList(list.value)
     }
 
-    @Composable
-    fun ScrollableStatusList(
-        list : List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>
-    ) {
+    companion object {
 
-        Box(
-            modifier = Modifier.fillMaxSize()
-                .background(color = Color(180, 180, 180))
-                .padding(10.dp)
+        @Composable
+        fun ScrollableStatusList(
+            list: List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>
         ) {
-            val stateVertical = rememberScrollState(0)
 
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(stateVertical)
-                    .padding(end = 12.dp, bottom = 12.dp)
+                modifier = Modifier.fillMaxSize()
+                    .background(color = Color(180, 180, 180))
+                    .padding(10.dp)
             ) {
-                ServiceStatusList(list)
+                val stateVertical = rememberScrollState(0)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(stateVertical)
+                        .padding(end = 12.dp, bottom = 12.dp)
+                ) {
+                    ServiceStatusList(list)
 
 
-            }
-            VerticalScrollbar(
-                modifier = Modifier.align(Alignment.CenterEnd)
-                    .fillMaxHeight(),
-                adapter = rememberScrollbarAdapter(stateVertical)
-            )
-        }
-    }
-
-    @Composable
-    fun ServiceStatusList(
-        list : List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>
-    ) {
-        Column {
-            list.forEach {
-                ServiceGroup(it)
-                Spacer(Modifier.height(10.dp))
+                }
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                        .fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(stateVertical)
+                )
             }
         }
-    }
 
-    @Composable
-    fun ServiceGroup(
-        group : ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup
-    ) {
-        Column(Modifier.background(Color.LightGray).fillMaxWidth().wrapContentHeight().padding(10.dp)){
-            Text("Name: ${group.name}")
-            Text("Description: ${group.description}")
-            Column(Modifier.padding(start = 32.dp)) {
-                group.children.forEach { Service(it) }
+        @Composable
+        fun ServiceStatusList(
+            list: List<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup>
+        ) {
+            Column {
+                list.forEach {
+                    ServiceGroup(it)
+                    Spacer(Modifier.height(10.dp))
+                }
             }
         }
-    }
 
-    @Composable
-    fun Service(
-        service : ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordService
-    ) {
-        val status = service.runStatus.collectAsState(PlatformService.RunStatus.STOPPED)
-        Column(Modifier.padding(10.dp)) {
-            Text("Name: ${service.name}")
-            Text("Description: ${service.description}")
-            Spacer(Modifier.height(5.dp))
-            Row {
-                Text("Status: ${status.value}")
-                Spacer(Modifier.width(32.dp))
-                Button(onClick = {service.startService()}) { Text("Start")}
-                Button(onClick = {service.stopService()}) { Text("Stop")}
+        @Composable
+        fun ServiceGroup(
+            group: ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordGroup
+        ) {
+            Column(Modifier.background(Color.LightGray).fillMaxWidth().wrapContentHeight().padding(10.dp)) {
+                Text("Name: ${group.name}")
+                Text("Description: ${group.description}")
+                Column(Modifier.padding(start = 32.dp)) {
+                    group.children.forEach { Service(it) }
+                }
+            }
+        }
+
+        @Composable
+        fun Service(
+            service: ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordService
+        ) {
+            val status = service.runStatus.collectAsState(PlatformService.RunStatus.STOPPED)
+            Column(Modifier.padding(10.dp)) {
+                Text("Name: ${service.name}")
+                Text("Description: ${service.description}")
+                Spacer(Modifier.height(5.dp))
+                Row {
+                    Text("Status: ${status.value}")
+                    Spacer(Modifier.width(32.dp))
+                    Button(onClick = { service.startService() }) { Text("Start") }
+                    Button(onClick = { service.stopService() }) { Text("Stop") }
+                }
             }
         }
     }

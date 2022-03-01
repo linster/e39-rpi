@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.stefane39
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
+import ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarScope

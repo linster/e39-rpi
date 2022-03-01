@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.bordmonitor.input
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
+import ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarScope

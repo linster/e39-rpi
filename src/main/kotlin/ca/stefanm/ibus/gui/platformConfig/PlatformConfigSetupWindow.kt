@@ -4,14 +4,17 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowScope
+import ca.stefanm.ibus.car.platform.DiscoveredPlatformServiceGroup
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
@@ -21,6 +24,9 @@ import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
+import ca.stefanm.ibus.car.platform.DiscoveredServiceGroups
+import ca.stefanm.ibus.gui.debug.windows.ServiceStatusViewer
+import kotlinx.coroutines.GlobalScope
 
 
 @ApplicationScope
@@ -38,7 +44,7 @@ class PlatformConfigSetupWindow @Inject constructor(
 
         Row(Modifier.fillMaxSize()) {
             val leftPaneScrollState = rememberScrollState()
-            Box(Modifier.wrapContentWidth()) {
+            Box(Modifier.fillMaxWidth(0.45F).wrapContentHeight()) {
                 this@Row.PlatformConfigPane()
                 VerticalScrollbar(
                     modifier = Modifier.align(Alignment.CenterEnd)
@@ -52,35 +58,96 @@ class PlatformConfigSetupWindow @Inject constructor(
 
     @Composable
     private fun RowScope.PlatformConfigPane() {
-        Column(Modifier.weight(0.25f, true)) {
-                NestingCardHeader("Platform Service Startup Config")
+        Column(Modifier) {
+            Text("Platform Service Startup Config",
+                fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(vertical = 8.dp)
+            )
+            NestingCard {
                 Text(
                     "Set which platform services should be running " +
-                            "when the car platform is started. Disable services " +
-                            "that may conflict with other hardware fitted to your " +
+                            "when the car platform is started."
+                )
+                Text(
+                    "Disable services that may conflict with other hardware fitted to your " +
                             "IBus car."
                 )
+                CardSpacer()
+                Text(
+                    """
+                Platform configuration and feature flags is accomplished by enabling and disabling service groups to run at startup. A particular service may belong to one or more service groups.
+                
+                Set which groups should be enabled at startup, and save the configuration to a configuration file. On startup, e39-rpi will read the configuration file and automatically start selected services.
+                
+                Only platform groups' startup status may be configured. Disabling a service by itself is not a persistable option.
+            """.trimIndent()
+                )
+            }
 
-                NestingCard {
-                    Row {
-                        Button(onClick = {
-                            val config = E39Config.CarPlatformConfigSpec
-                                .toCarPlatformConfiguration(config = configurationStorage.config)
-                            configurablePlatform.run(config)
-                        }) { Text("Start Platform") }
-                        Button(onClick = {
-                            configurablePlatform.stop()
-                        }) { Text("Stop Platform") }
-                    }
-                }
 
-                NestingCard(Modifier.fillMaxWidth()) {
-                    NestingCardHeader("Profile Generation Options")
+            val services = remember { mutableStateMapOf(
+                *DiscoveredServiceGroups().getAllGroups().map { it.name to true }.toTypedArray()
+            ) }
 
-                    ProfileGenerationOptions()
+            fun loadStatusFromFile() {
+                val allGroups = DiscoveredServiceGroups().getAllGroups()
+                val fileEnabledGroups =
+                    configurationStorage
+                        .config[E39Config.CarPlatformConfigSpec._listOfServiceGroupsOnStartup]
+                        .map { fileGroup -> allGroups.first { it.name == fileGroup } }
+                        .associateWith { true }
 
+                services.clear()
+                if (fileEnabledGroups.isEmpty()) {
+                    services.putAll(
+                        allGroups.associate { it.name to true }
+                    )
+                } else {
+                    services.putAll(
+                        allGroups.associateWith {
+                            fileEnabledGroups.getOrDefault(it, false)
+                        }.mapKeys { it.key.name }
+                    )
                 }
             }
+
+            fun saveStatusToFile() {
+                configurationStorage.setServiceGroupsOnStartup(
+                    services.filterValues { it }.keys.toList()
+                )
+            }
+
+            LaunchedEffect(Unit) {
+                loadStatusFromFile()
+            }
+
+            Row {
+                Button(onClick = {
+                    saveStatusToFile()
+                    loadStatusFromFile()
+                }) {
+                    Text("Save Config to file")
+                }
+                Button(onClick = {
+                    loadStatusFromFile()
+                }) { Text("Reload Config from file") }
+            }
+
+            Row {
+                Button(onClick = { configurablePlatform.stop() }) { Text("Stop Platform") }
+                Button(onClick = {
+                    val config = E39Config.CarPlatformConfigSpec
+                        .toCarPlatformConfiguration(config = configurationStorage.config)
+                    configurablePlatform.run(config)
+                }) { Text("Start Platform") }
+            }
+
+            PlatformGroupSelections(
+                existingConfig = services,
+                onPlatformGroupSelectionChanged = { group, enabled ->
+                    services[group.name] = enabled
+                }
+            )
+        }
     }
 
     @Composable
@@ -89,74 +156,34 @@ class PlatformConfigSetupWindow @Inject constructor(
     }
 
     @Composable
-    private fun ProfileGenerationOptions(
-
+    private fun PlatformGroupSelections(
+        existingConfig: SnapshotStateMap<String, Boolean>,
+        onPlatformGroupSelectionChanged: (group : DiscoveredPlatformServiceGroup, enabled : Boolean) -> Unit
     ) {
         NestingCard {
-            NestingCardHeader("Telephone Control Simulation")
-            Text(
-                "Simulate BMW Telephone Control Unit? May conflict with pre-installed " +
-                        "telephone computer."
-            )
-            CheckBoxWithLabel(false, {}, "Simulate TCU")
-            CardSpacer()
-            Text("Illuminate Telephone LEDs as e39-rpi state? May conflict with pre-installed telephone computer.")
-            CheckBoxWithLabel(false, {}, "Telephone LEDs as e39-rpi state")
-            CardSpacer()
-        }
-
-        NestingCard {
-            NestingCardHeader("Bluetooth Button Services")
-            Text(
-                "These services should be disabled if a BlueBus is installed in the car, " +
-                        "as it will cause the same events to trigger multiple track changes."
-            )
-            CardSpacer()
-            CheckBoxWithLabel(false, {}, "BT Steering wheel and BMBT button listeners")
-            CardSpacer()
-        }
-
-        NestingCard {
-            NestingCardHeader("Case peripherals")
-            Text(
-                "Services to control peripherals for the 1st prototype Pi Case only. " +
-                        "Physical hardware might not exist on subsequent versions."
-            )
-            CardSpacer()
-            CheckBoxWithLabel(
-                false,
-                {},
-                "Cooling fan controller. Uses I2C Relay Board to turn on cooling fan"
-            )
-            CardSpacer()
-            CheckBoxWithLabel(
-                false,
-                {},
-                "I2C Relay Board HMI enable? If false, disable the I2C relay board page in settings."
-            )
-        }
-
-        NestingCard {
-            NestingCardHeader("Video Output Configuration")
-            Text("Services which functon to code modules (TV, BMBT) for NTSC/PAL video output")
-            CardSpacer()
-            Text(
-                "This system assumed all modules coded to NTSC due to video timing constraints. \n" +
-                        "(The VGA output is calibrated for NTSC output only) \n" +
-                        "These services can be enabled to ensure that coding."
-            )
+            NestingCardHeader("Platform Service Groups")
+            DiscoveredServiceGroups().getAllGroups().map {
+                Column(Modifier.background(Color.LightGray).fillMaxWidth().wrapContentHeight().padding(10.dp)) {
+                    Text(it.name, fontWeight = FontWeight.Bold)
+                    Text(it.description)
+                    CardSpacer()
+                    CheckBoxWithLabel(
+                        isChecked = existingConfig.getOrDefault(it.name, false),
+                        label = "Run at startup",
+                        onCheckChanged = { new ->
+                            onPlatformGroupSelectionChanged(it, new)
+                        }
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+            }
         }
     }
 
     @Composable
     private fun ServiceListViewer() {
-        val scope = rememberCoroutineScope()
-        val list = configurablePlatform.servicesRunning.collectAsState(scope.coroutineContext)
-
-        Column {
-            for (item in list.value) {
-                Text("${item.name} ${item.description}")
-            }
-        }
+        ServiceStatusViewer.ScrollableStatusList(
+            configurablePlatform.servicesRunning.collectAsState(rememberCoroutineScope().coroutineContext).value
+        )
     }
 }

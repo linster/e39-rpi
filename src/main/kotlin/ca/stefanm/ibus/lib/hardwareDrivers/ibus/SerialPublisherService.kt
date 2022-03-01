@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
+import ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
