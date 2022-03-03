@@ -89,6 +89,24 @@ object E39Config : ConfigSpec() {
             "DEBUG_HMI_SHIFT_RIGHT",
             "Open HMI window shifted to the right. True for debug."
         )
+
+        val hmiWindowUndecorated by optional(
+            true,
+            "DEBUG_HMI_DECORATION",
+            "Open Main Window with titlebar chrome. False for debug."
+        )
+
+        val hmiWindowSize by optional(
+            Pair(400, 234),
+            "HmiWindowSize",
+            "Size in px of the HMI window"
+        )
+
+        val hmiWindowOffset by optional(
+            Pair(0, 0),
+            "HmiWindowOffset",
+            "Pixels to offset HMI window from top-left"
+        )
     }
 
     object LoadingWindowConfig : ConfigSpec() {
@@ -109,6 +127,18 @@ object E39Config : ConfigSpec() {
             true,
             "AutoLaunchCarPlatformOnOpen",
             "Do we start the platform on opening the loading window?"
+        )
+
+        val hideMenuBehindLoading by optional(
+            false,
+            "HideMenuBehindLoading",
+            "Instead of drawing the config menubar, hide it behind a string"
+        )
+
+        val hiddenMenuString by optional(
+            "Loading...",
+            "hiddenMenuLoadingString",
+            "The string to use when hiding the loading menu."
         )
 
         //Auto-launch platform on open?

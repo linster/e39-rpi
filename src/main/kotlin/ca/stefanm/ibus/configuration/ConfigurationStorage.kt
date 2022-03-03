@@ -47,6 +47,10 @@ class ConfigurationStorage @Inject constructor(
         }
     }
 
+    fun saveConfigAsFile(filename : String) {
+        config.toHocon.toFile(File(e39BaseFolder, filename))
+    }
+
     fun setBMBTPairedPhone(
         currentDevice: CurrentDeviceViewer.CurrentDevice
     ) {

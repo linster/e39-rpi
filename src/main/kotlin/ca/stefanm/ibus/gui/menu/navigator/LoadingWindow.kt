@@ -4,20 +4,23 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
 import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
+import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.debug.windows.*
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.time.ExperimentalTime
@@ -33,6 +36,7 @@ class LoadingWindow @Inject constructor(
     private val paneManagerDebug: PaneManagerDebug,
     private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow,
     private val platformConfigSetupWindow: PlatformConfigSetupWindow,
+    private val windowManagerConfigSetupWindow: WindowManagerConfigSetupWindow,
     private val windowManager : Provider<WindowManager>
 ) {
 
@@ -49,60 +53,93 @@ class LoadingWindow @Inject constructor(
 
         MenuBar {
 
-            Menu("Quit") {
-                Item(
-                    "Quit",
-                    onClick = { windowManager.get().exitApplication() },
-                    //shortcut = KeyStroke(Key.Q)
-                )
+            val isHidden = remember {
+                mutableStateOf(configurationStorage.config[E39Config.LoadingWindowConfig.hideMenuBehindLoading])
             }
 
-            Menu("Platform") {
-                Item(
-                    "Start Platform",
-                    onClick = { startPlatform() },
-                    //shortcut = KeyStroke(Key.S)
-                )
-                Item(
-                    "Stop Platform",
-                    onClick = { configurablePlatform.stop() },
-                    //shortcut = KeyStroke(Key.E)
-                )
-                Item(
-                    "Restart Platform",
-                    onClick = { restartPlatform() },
-                    //shortcut = KeyStroke(Key.R)
-                )
-                Item(
-                    "Configure Platform",
-                    onClick = { windowManager.get().openDebugWindow(platformConfigSetupWindow)}
-                )
-            }
-            Menu("Debug") {
-                Item(
-                    "Key Event Simulator",
-                    onClick = { windowManager.get().openDebugWindow(keyEventSimulator) },
-                    //shortcut = KeyStroke(Key.K)
-                )
-                Item(
-                    "Debug Launchpad",
-                    onClick = { windowManager.get().openDebugWindow(debugLaunchpad) },
-                    //shortcut = KeyStroke(Key.D)
-                )
-                Item(
-                    "Pane Manager Debugger",
-                    onClick = { windowManager.get().openDebugWindow(paneManagerDebug) },
-                    //shortcut = KeyStroke(Key.P)
-                )
-                Item(
-                    "Navigation Hmi Debugger",
-                    onClick = { windowManager.get().openDebugWindow(hmiNavigatorDebugWindow) },
-                )
-            }
-            Menu("Configuration") {
-                Item("View Device Configuration",
-                    onClick = { windowManager.get().openDebugWindow(deviceConfigurationViewerWindow) }
-                )
+            if (isHidden.value) {
+                Menu(
+                    configurationStorage.config[E39Config.LoadingWindowConfig.hiddenMenuString]
+                ) {
+                    Item(
+                        "Enable Debug Menu and Quit",
+                        onClick = {
+                            configurationStorage.config[E39Config.LoadingWindowConfig.hideMenuBehindLoading] = false
+                            windowManager.get().exitApplication()
+                        }
+                    )
+                    Item(
+                        "Quit",
+                        onClick = { windowManager.get().exitApplication()}
+                    )
+                }
+            } else {
+                Menu("Quit") {
+                    Item(
+                        "Quit",
+                        onClick = { windowManager.get().exitApplication() },
+                        //shortcut = KeyStroke(Key.Q)
+                    )
+                }
+
+                Menu("Platform") {
+                    Item(
+                        "Start Platform",
+                        onClick = { startPlatform() },
+                        //shortcut = KeyStroke(Key.S)
+                    )
+                    Item(
+                        "Stop Platform",
+                        onClick = { configurablePlatform.stop() },
+                        //shortcut = KeyStroke(Key.E)
+                    )
+                    Item(
+                        "Restart Platform",
+                        onClick = { restartPlatform() },
+                        //shortcut = KeyStroke(Key.R)
+                    )
+                    Item(
+                        "Configure Platform",
+                        onClick = { windowManager.get().openDebugWindow(platformConfigSetupWindow) }
+                    )
+                }
+                Menu("Debug") {
+                    Item(
+                        "Key Event Simulator",
+                        onClick = { windowManager.get().openDebugWindow(keyEventSimulator) },
+                        //shortcut = KeyStroke(Key.K)
+                    )
+                    Item(
+                        "Debug Launchpad",
+                        onClick = { windowManager.get().openDebugWindow(debugLaunchpad) },
+                        //shortcut = KeyStroke(Key.D)
+                    )
+                    Item(
+                        "Pane Manager Debugger",
+                        onClick = { windowManager.get().openDebugWindow(paneManagerDebug) },
+                        //shortcut = KeyStroke(Key.P)
+                    )
+                    Item(
+                        "Navigation Hmi Debugger",
+                        onClick = { windowManager.get().openDebugWindow(hmiNavigatorDebugWindow) },
+                    )
+                }
+                Menu("Configuration") {
+                    Item(
+                        "Disable Debug Menu and Quit",
+                        onClick = {
+                            configurationStorage.config[E39Config.LoadingWindowConfig.hideMenuBehindLoading] = true
+                            windowManager.get().exitApplication()
+                        }
+                    )
+                    Item("View Device Configuration",
+                        onClick = { windowManager.get().openDebugWindow(deviceConfigurationViewerWindow) }
+                    )
+                    Item(
+                        "Configure Window Manager",
+                        onClick = { windowManager.get().openDebugWindow(windowManagerConfigSetupWindow) }
+                    )
+                }
             }
         }
 
