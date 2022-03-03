@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.menu.HmiLogViewerScreen
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class CarPlatformConfigScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val configurationStorage: ConfigurationStorage,
-    private val modalMenuService: ModalMenuService
+    private val modalMenuService: ModalMenuService,
+    private val configurablePlatform: ConfigurablePlatform
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -35,6 +37,10 @@ class CarPlatformConfigScreen @Inject constructor(
                 TextMenuItem(
                     "Go Back",
                     onClicked = {navigationNodeTraverser.goBack()}
+                ),
+                TextMenuItem(
+                    "Restart Car Platform",
+                        onClicked = { restartCarPlatformPrompt() }
                 ),
                 TextMenuItem(
                     "Set Serial Port",
@@ -94,6 +100,39 @@ class CarPlatformConfigScreen @Inject constructor(
                     TextMenuItem(
                         title = "Go Back",
                         onClicked = {
+                            modalMenuService.closeSidePaneOverlay(true)
+                        }
+                    )
+                )
+            )
+        }
+    }
+
+    private fun restartCarPlatformPrompt() {
+        modalMenuService.showSidePaneOverlay(true) {
+            SidePanelMenu.SidePanelMenu(
+                "Restart Car Platform?",
+                text = @Composable {
+                    SidePanelMenu.InfoLabel("Warning", FontWeight.Bold)
+                    SidePanelMenu.InfoLabel("")
+                    SidePanelMenu.InfoLabel("Restarting the Car Platform with invalid settings while driving" +
+                            " might make it un-usable in a vehicle environment. Make sure you have access to SSH, " +
+                            "or a keyboard and mouse to fix any issues that may arise.")
+                    SidePanelMenu.InfoLabel("")
+                    SidePanelMenu.InfoLabel("Do you wish to continue?")
+                },
+                buttons = listOf(
+                    TextMenuItem(
+                        title = "Go Back",
+                        onClicked = {
+                            modalMenuService.closeSidePaneOverlay(true)
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "Reboot Car Platform",
+                        onClicked = {
+                            configurablePlatform.stop()
+                            configurablePlatform.run()
                             modalMenuService.closeSidePaneOverlay(true)
                         }
                     )

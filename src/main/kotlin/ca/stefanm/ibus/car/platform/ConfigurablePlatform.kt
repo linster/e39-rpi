@@ -58,6 +58,12 @@ class ConfigurablePlatform @Inject constructor(
 
     private var serviceListJob : Job? = null
 
+    fun run() {
+        val config = E39Config.CarPlatformConfigSpec
+            .toCarPlatformConfiguration(config = configurationStorage.get().config)
+        run(config)
+    }
+
     fun run(initialConfiguration: CarPlatformConfiguration = LaptopDeviceConfiguration()) {
         onNewDeviceConfiguration(currentConfiguration ?: initialConfiguration)
     }

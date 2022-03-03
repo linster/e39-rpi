@@ -37,9 +37,7 @@ class LoadingWindow @Inject constructor(
 ) {
 
     private fun startPlatform() {
-        val config = E39Config.CarPlatformConfigSpec
-            .toCarPlatformConfiguration(config = configurationStorage.config)
-        configurablePlatform.run(config)
+        configurablePlatform.run()
     }
 
     private fun restartPlatform() {

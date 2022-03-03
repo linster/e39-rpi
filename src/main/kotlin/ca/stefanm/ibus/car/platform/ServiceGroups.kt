@@ -54,3 +54,8 @@ annotation class Peripherals2ServiceGroup
 )
 annotation class TelephoneControlSimulationServiceGroup
 
+@PlatformServiceGroup(
+    name = "Empty Group",
+    description = "Enable this group and disable all others if for some reason you don't want any services to run."
+)
+annotation class EmptyServiceGroup

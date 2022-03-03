@@ -135,9 +135,7 @@ class PlatformConfigSetupWindow @Inject constructor(
             Row {
                 Button(onClick = { configurablePlatform.stop() }) { Text("Stop Platform") }
                 Button(onClick = {
-                    val config = E39Config.CarPlatformConfigSpec
-                        .toCarPlatformConfiguration(config = configurationStorage.config)
-                    configurablePlatform.run(config)
+                    configurablePlatform.run()
                 }) { Text("Start Platform") }
             }
 

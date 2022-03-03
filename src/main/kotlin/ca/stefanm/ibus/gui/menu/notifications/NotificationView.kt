@@ -35,12 +35,14 @@ import ca.stefanm.ibus.gui.menu.Notification
             Column(
                 Modifier.padding(15.dp)
             ) {
-                Text(
-                    text = this@toView.topText,
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                if (this@toView.topText.isNotEmpty()) {
+                    Text(
+                        text = this@toView.topText,
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
                 if (this@toView.contentText.isNotEmpty()) {
                     Text(
                         text = this@toView.contentText,
@@ -93,12 +95,14 @@ import ca.stefanm.ibus.gui.menu.Notification
                     Modifier.weight(0.75F)
                         .padding(15.dp)
                 ) {
-                    Text(
-                        text = this@toView.topText,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    if (this@toView.topText.isNotEmpty()) {
+                        Text(
+                            text = this@toView.topText,
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
                     if (this@toView.contentText.isNotEmpty()) {
                         Text(
                             text = this@toView.contentText,
