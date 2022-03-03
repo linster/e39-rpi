@@ -78,10 +78,22 @@ class CarServiceConfigScreen @Inject constructor(
             "Service Group Info",
             text = @Composable {
                 InfoLabel("${group.name}", FontWeight.Bold)
-                InfoLabel("")
+                InfoLabel("TODO ENABLED ON START?", FontWeight.Light)
                 InfoLabel("${group.description}")
             },
             buttons = listOf(
+                TextMenuItem(
+                    title = "Enable on Startup",
+                    onClicked = {
+                        TODO("CONFIG FOR SERVICE RUNSTATES")
+                    }
+                ),
+                TextMenuItem(
+                    title = "Disable on Startup",
+                    onClicked = {
+                        TODO("CONFIG FOR SERVICE RUNSTATES")
+                    }
+                ),
                 TextMenuItem(
                     title = "Go Back",
                     onClicked = {
@@ -114,12 +126,6 @@ class CarServiceConfigScreen @Inject constructor(
                     title = "Stop Service",
                     onClicked = {
                         service.stopService()
-                    }
-                ),
-                TextMenuItem(
-                    title = "Set as Default",
-                    onClicked = {
-                        TODO("CONFIG FOR SERVICE RUNSTATES")
                     }
                 ),
                 TextMenuItem(
