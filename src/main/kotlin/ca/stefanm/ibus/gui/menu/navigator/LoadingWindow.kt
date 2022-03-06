@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorDebugWindow
 import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
 import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
@@ -37,6 +38,7 @@ class LoadingWindow @Inject constructor(
     private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow,
     private val platformConfigSetupWindow: PlatformConfigSetupWindow,
     private val windowManagerConfigSetupWindow: WindowManagerConfigSetupWindow,
+    private val themeSelectorDebugWindow: ThemeSelectorDebugWindow,
     private val windowManager : Provider<WindowManager>
 ) {
 
@@ -122,6 +124,10 @@ class LoadingWindow @Inject constructor(
                     Item(
                         "Navigation Hmi Debugger",
                         onClick = { windowManager.get().openDebugWindow(hmiNavigatorDebugWindow) },
+                    )
+                    Item(
+                        "Theme Selector",
+                        onClick = { windowManager.get().openDebugWindow(themeSelectorDebugWindow)}
                     )
                 }
                 Menu("Configuration") {

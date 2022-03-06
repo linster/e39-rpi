@@ -21,8 +21,10 @@ class ConfigurationStorage @Inject constructor(
 
     private val TAG = "ConfigurationStorage"
 
-    private val homeFolder = System.getProperty("user.home")
-    private val e39BaseFolder = File(homeFolder, ".e39")
+    companion object {
+        val homeFolder = System.getProperty("user.home")
+        val e39BaseFolder = File(homeFolder, ".e39")
+    }
 
     private val configFile = File(e39BaseFolder, "config.conf")
     private val versionFile = File(e39BaseFolder, "version.conf")

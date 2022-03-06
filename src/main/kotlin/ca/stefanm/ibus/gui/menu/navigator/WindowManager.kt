@@ -142,7 +142,7 @@ class WindowManager @Inject constructor(
                             it
                         }
                     },
-                    size = DEFAULT_SIZE,
+                    size = hmiWindow.size,
                     placement = if (isPi) {
                         WindowPlacement.Maximized
                     } else {

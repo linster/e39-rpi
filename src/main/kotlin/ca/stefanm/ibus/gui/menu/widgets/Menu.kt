@@ -16,30 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
 
-@Composable
-fun BmwFullScreenMenu(
-    header : @Composable () -> Unit = {},
-    optionalSubHeader : @Composable (() -> Unit)? = null,
-    content: @Composable () -> Unit
-) {
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column {
-            header()
-            optionalSubHeader?.invoke()
-            content()
-            BmwFullScreenBottomBar()
-        }
-    }
-}
-
-interface BmwFullScreenMenuScope {
-    //Put in gizmos here, like in box.kt
-}
-
-
 
 @Composable
 fun BmwSingleLineHeader(
@@ -137,21 +113,21 @@ fun CenterGradientWithEdgeHighlight(
     }
 }
 
-@Composable
-fun BmwFullScreenMenuItem(
-    label: String,
-    isSelected: Boolean = true,
-    onClick: () -> Unit = {}
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .background(Color.Cyan)
-            .then(if (isSelected) { Modifier.border(5.dp, Color.Red) } else { Modifier })
-    ) {
-        Box(Modifier.padding(15.dp)) {
-            Text(label)
-        }
-    }
-}
+//@Composable
+//fun BmwFullScreenMenuItem(
+//    label: String,
+//    isSelected: Boolean = true,
+//    onClick: () -> Unit = {}
+//) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .clickable { onClick() }
+//            .background(Color.Cyan)
+//            .then(if (isSelected) { Modifier.border(5.dp, Color.Red) } else { Modifier })
+//    ) {
+//        Box(Modifier.padding(15.dp)) {
+//            Text(label)
+//        }
+//    }
+//}

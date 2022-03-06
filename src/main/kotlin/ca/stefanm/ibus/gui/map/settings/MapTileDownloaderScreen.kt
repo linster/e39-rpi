@@ -17,7 +17,6 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ibus.gui.menu.widgets.BmwFullScreenMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
