@@ -4,15 +4,22 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
+import ca.stefanm.ibus.lib.logging.StaticLogger
+import ca.stefanm.ibus.lib.logging.StdOutLogger
 
 enum class SpecialTags {
     Tab,
@@ -65,21 +72,24 @@ internal fun QwertyKeyDefinition.toView(
     isUpperCase : Boolean = false,
     onMouseClick : () -> Unit = {}
 ) {
+    val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
+
+    fun Dp.halveIfNotPixelDoubled() : Dp = if (!isPixelDoubled) (this.value / 2F).dp else this
 
     Box(Modifier.border(
-        width = 4.dp,
+        width = 4.dp.halveIfNotPixelDoubled(),
         color = if (isSelected) {
-            ChipItemColors.SelectedColor
+            ThemeWrapper.ThemeHandle.current.colors.selectedColor
         } else {
-            ChipItemColors.MenuBackground
+            ThemeWrapper.ThemeHandle.current.colors.menuBackground
         })
-        .height(38.dp)
+        .height(38.dp.halveIfNotPixelDoubled())
         .then(if (keySize == QwertyKeyDefinition.KeySize.FLEX) {
             //This is probably a good place for Intrinsics?
             if (specialTag == SpecialTags.Return) {
-                Modifier.width(85.dp)
+                Modifier.width(85.dp.halveIfNotPixelDoubled())
             } else {
-                Modifier.widthIn(38.dp, (3 * 38).dp).fillMaxWidth()
+                Modifier.widthIn(38.dp.halveIfNotPixelDoubled(), (3 * 38).dp.halveIfNotPixelDoubled()).fillMaxWidth()
             }
         } else {
             Modifier.aspectRatio(keySize.scale.toFloat())
@@ -90,7 +100,8 @@ internal fun QwertyKeyDefinition.toView(
         Text(
             text = if (isUpperCase) { upperCaseLabel } else { lowerCaseLabel },
             color = Color.White,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = if (isPixelDoubled) 16.sp else 8.sp
         )
     }
 }

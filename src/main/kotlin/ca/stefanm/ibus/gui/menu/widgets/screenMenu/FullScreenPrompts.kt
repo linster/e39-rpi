@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
@@ -33,7 +34,7 @@ object FullScreenPrompts {
     ) {
         //Full screen Yes, no
         Column(
-            Modifier.background(ChipItemColors.MenuBackground),
+            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             BmwSingleLineHeader(header)

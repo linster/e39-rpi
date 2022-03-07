@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
@@ -27,7 +28,7 @@ object FullScreenMenu {
         items : List<MenuItem>
     ) {
         Box(modifier = Modifier
-            .background(ChipItemColors.MenuBackground)
+            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             .fillMaxSize()
         ) {
             HalfScreenMenu.OneColumn(items, fullWidth = true)
@@ -40,7 +41,7 @@ object FullScreenMenu {
         rightItems : List<MenuItem>
     ) {
         Box(modifier = Modifier
-            .background(ChipItemColors.MenuBackground)
+            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             .fillMaxSize()
         ) {
             HalfScreenMenu.TwoColumn(leftItems, rightItems)
@@ -125,7 +126,7 @@ object FullScreenMenu {
         }
 
         Box(
-            Modifier.background(ChipItemColors.MenuBackground)
+            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                 .fillMaxWidth()
                 .fillMaxHeight()
         ) {

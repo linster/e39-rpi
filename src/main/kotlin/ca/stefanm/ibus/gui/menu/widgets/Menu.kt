@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
 
 
@@ -27,9 +28,9 @@ fun BmwSingleLineHeader(
         ) {
             Text(
                 text = text.toUpperCase(),
-                fontSize = 18.sp,
+                fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color(229, 255, 255, 255)
+                color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor
             )
         }
     }
@@ -75,7 +76,7 @@ fun TrackInfoText(text: String, size : Int = 18) {
         text = text.toUpperCase(),
         fontSize = size.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(229, 255, 255, 255)
+        color = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent
     )
 }
 
@@ -92,21 +93,23 @@ fun CenterGradientWithEdgeHighlight(
             modifier = Modifier
                 .background(
                     Brush.horizontalGradient(
-                        listOf(
-                            Color(68, 128, 192, 255),
-                            Color(61, 112, 176, 255),
-                            Color(68, 128, 192, 255)
-                        )
+                        ThemeWrapper.ThemeHandle.current.centerGradientWithEdgeHighlight.backgroundGradientColorList
                     )
                 )
-                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
+                .apply {
+                    ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.headerPadding.let {
+                        padding(start = it.start, end = it.end, top = it.top, bottom = it.bottom)
+                    }
+                }
         ) {
             content()
         }
         Spacer(
             modifier = Modifier
-                .background(Color(86, 139, 191, 255))
-                .height(4.dp)
+                .background(ThemeWrapper.ThemeHandle.current.centerGradientWithEdgeHighlight.edgeHighlightColor)
+                .height(
+                    ThemeWrapper.ThemeHandle.current.centerGradientWithEdgeHighlight.edgeHighlightHeight
+                )
                 .align(highlightAlignment)
                 .fillMaxWidth()
         )

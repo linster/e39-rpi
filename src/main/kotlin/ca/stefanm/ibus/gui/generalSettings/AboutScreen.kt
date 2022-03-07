@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.HmiVersion
@@ -39,7 +40,7 @@ class AboutScreen @Inject constructor(
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
         Column(
-            Modifier.background(ChipItemColors.MenuBackground),
+            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             BmwSingleLineHeader("About E39-rpi")

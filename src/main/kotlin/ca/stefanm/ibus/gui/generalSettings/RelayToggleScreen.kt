@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
@@ -113,7 +114,7 @@ class RelayToggleScreen @Inject constructor(
     ) {
         fun Boolean?.toUiState() = if (this == null) "null" else if (this) "On" else "Off"
 
-        Column(Modifier.background(ChipItemColors.MenuBackground).fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground).fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             BmwSingleLineHeader("Relay Toggle")
 
             Column(Modifier.padding(horizontal = 120.dp, vertical = 40.dp)) {

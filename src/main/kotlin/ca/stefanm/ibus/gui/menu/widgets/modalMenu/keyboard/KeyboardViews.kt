@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 
 object KeyboardViews {
@@ -21,17 +22,16 @@ object KeyboardViews {
         maxHeight : Float = 0.6F,
         contents: @Composable () -> Unit
     ) {
+        val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
         Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
             Box(
                 Modifier
-                    .border(width = 2.dp, color = Color(48, 72, 107, 255))
+                    .border(
+                        width = if (isPixelDoubled) 2.dp else 1.dp,
+                        color = ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                     .background(
                         Brush.horizontalGradient(
-                            listOf(
-                                Color(68, 128, 192, 255),
-                                Color(61, 112, 176, 255),
-                                Color(68, 128, 192, 255)
-                            )
+                            ThemeWrapper.ThemeHandle.current.centerGradientWithEdgeHighlight.backgroundGradientColorList
                         )
                     )
                     .fillMaxWidth()
@@ -50,12 +50,13 @@ object KeyboardViews {
         pendingText: String,
         cursorAfterIndex: Int //After which character 0-indexed is the cursor located
     ) {
+        val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
         Box(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .background(ChipItemColors.MenuBackground)
-                .padding(4.dp)
+                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                .padding(if (isPixelDoubled) 4.dp else 2.dp)
         ) {
             Row {
 
@@ -64,7 +65,7 @@ object KeyboardViews {
                     Text(
                         text = " $char ",
                         color = ChipItemColors.TEXT_WHITE,
-                        fontSize = 24.sp,
+                        fontSize = if (isPixelDoubled) 24.sp else 12.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         modifier = Modifier
@@ -76,10 +77,10 @@ object KeyboardViews {
                     Text(
                         text = " ",
                         color = ChipItemColors.TEXT_WHITE,
-                        fontSize = 24.sp,
+                        fontSize = if (isPixelDoubled) 24.sp else 12.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
-                        modifier = Modifier.background(ChipItemColors.SelectedColor)
+                        modifier = Modifier.background(ThemeWrapper.ThemeHandle.current.colors.selectedColor)
                     )
                 }
 

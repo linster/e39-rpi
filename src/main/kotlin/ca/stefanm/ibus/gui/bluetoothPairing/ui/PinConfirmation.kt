@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -57,7 +58,7 @@ class BluetoothPinConfirmationScreen @Inject constructor(
             )
         ) {
             Column(
-                Modifier.background(ChipItemColors.MenuBackground)
+                Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             ) {
                 Text("Do you want to pair with this device?", color = Color.White, fontSize = 28.sp)
                 Text("", color = Color.White, fontSize = 28.sp)

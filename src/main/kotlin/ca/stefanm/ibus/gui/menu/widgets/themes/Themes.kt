@@ -44,9 +44,15 @@ object Themes {
 
 
     val BmwBlueDoubledPixels = Theme(
+        isPixelDoubled = true,
         colors = Theme.Colors.BmwBlue,
         smallItem = Theme.MenuItemMeasurements.Companion.PixelDoubled.SMALL,
         bigItem = Theme.MenuItemMeasurements.Companion.PixelDoubled.BIG,
+        hmiHeaderFooter = Theme.HmiHeaderFooter(
+            fontSize = Theme.HmiHeaderFooter.PixelDoubledSize,
+            fontColor = Theme.HmiHeaderFooter.bmwBlueColor,
+            headerPadding = Theme.HmiHeaderFooter.PixelDoubledHeaderPadding
+        ),
         centerGradientWithEdgeHighlight = Theme.CenterGradientWithEdgeHighlight(
             backgroundGradientColorList = Theme.CenterGradientWithEdgeHighlight.BmwBlueColorList,
             edgeHighlightColor = Theme.CenterGradientWithEdgeHighlight.edgeHighlightColorBmwBlue,
@@ -56,9 +62,15 @@ object Themes {
     )
 
     val BmwBlackDoubledPixels = Theme(
+        isPixelDoubled = true,
         colors = Theme.Colors.BmwBlack,
         smallItem = Theme.MenuItemMeasurements.Companion.PixelDoubled.SMALL,
         bigItem = Theme.MenuItemMeasurements.Companion.PixelDoubled.BIG,
+        hmiHeaderFooter = Theme.HmiHeaderFooter(
+            fontSize = Theme.HmiHeaderFooter.PixelDoubledSize,
+            fontColor = Theme.HmiHeaderFooter.bmwBlackColor,
+            headerPadding = Theme.HmiHeaderFooter.PixelDoubledHeaderPadding
+        ),
         centerGradientWithEdgeHighlight = Theme.CenterGradientWithEdgeHighlight(
             backgroundGradientColorList = Theme.CenterGradientWithEdgeHighlight.BmwBlackColorList,
             edgeHighlightColor = Theme.CenterGradientWithEdgeHighlight.edgeHighlightColorBmwBlack,
@@ -68,9 +80,15 @@ object Themes {
     )
 
     val BmwBlueNormalSize = Theme(
+        isPixelDoubled = false,
         colors = Theme.Colors.BmwBlue,
         smallItem = Theme.MenuItemMeasurements.Companion.NormalSized.SMALL,
         bigItem = Theme.MenuItemMeasurements.Companion.NormalSized.BIG,
+        hmiHeaderFooter = Theme.HmiHeaderFooter(
+            fontSize = Theme.HmiHeaderFooter.normalSize,
+            fontColor = Theme.HmiHeaderFooter.bmwBlueColor,
+            headerPadding = Theme.HmiHeaderFooter.NormalSizedHeaderPadding
+        ),
         centerGradientWithEdgeHighlight = Theme.CenterGradientWithEdgeHighlight(
             backgroundGradientColorList = Theme.CenterGradientWithEdgeHighlight.BmwBlueColorList,
             edgeHighlightColor = Theme.CenterGradientWithEdgeHighlight.edgeHighlightColorBmwBlue,
@@ -80,9 +98,15 @@ object Themes {
     )
 
     val BmwBlackNormalSize = Theme(
+        isPixelDoubled = false,
         colors = Theme.Colors.BmwBlack,
         smallItem = Theme.MenuItemMeasurements.Companion.NormalSized.SMALL,
         bigItem = Theme.MenuItemMeasurements.Companion.NormalSized.BIG,
+        hmiHeaderFooter = Theme.HmiHeaderFooter(
+            fontSize = Theme.HmiHeaderFooter.normalSize,
+            fontColor = Theme.HmiHeaderFooter.bmwBlackColor,
+            headerPadding = Theme.HmiHeaderFooter.NormalSizedHeaderPadding
+        ),
         centerGradientWithEdgeHighlight = Theme.CenterGradientWithEdgeHighlight(
             backgroundGradientColorList = Theme.CenterGradientWithEdgeHighlight.BmwBlackColorList,
             edgeHighlightColor = Theme.CenterGradientWithEdgeHighlight.edgeHighlightColorBmwBlack,
@@ -110,10 +134,12 @@ object Themes {
 }
 
 data class Theme(
+    val isPixelDoubled : Boolean,
     val windowSize : DpSize,
     val colors: Colors,
     val smallItem: MenuItemMeasurements,
     val bigItem: MenuItemMeasurements,
+    val hmiHeaderFooter: HmiHeaderFooter,
     val centerGradientWithEdgeHighlight: CenterGradientWithEdgeHighlight
 ) {
     data class Colors(
@@ -140,6 +166,40 @@ data class Theme(
                 menuBackground = Color(148, 172, 107, 255),
                 textMenuColorAccent = Color(229, 55, 255, 255),
                 selectedColor = Color(240, 189, 176, 255),
+            )
+        }
+    }
+
+    data class HmiHeaderFooter(
+        val fontSize : TextUnit,
+        val fontColor : Color,
+        val headerPadding: HeaderPadding
+    ) {
+
+        data class HeaderPadding(
+            val start : Dp,
+            val end : Dp,
+            val top : Dp,
+            val bottom : Dp
+        )
+
+        companion object {
+            val bmwBlueColor = Color(229, 255, 255, 255)
+            val bmwBlackColor = Color(229, 255, 255, 255)
+            val PixelDoubledSize = 18.sp
+            val normalSize = 9.sp
+
+            val PixelDoubledHeaderPadding = HeaderPadding(
+                start = 12.dp,
+                end = 12.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+            val NormalSizedHeaderPadding = HeaderPadding(
+                start = 6.dp,
+                end = 6.dp,
+                top = 4.dp,
+                bottom = 4.dp
             )
         }
     }

@@ -14,31 +14,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.Notification
 
 @Composable fun Notification.toView() {
+    val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
+
     Row(
         Modifier.fillMaxSize()
             //.background(Color(48, 72, 107, 255))
-            .border(width = 2.dp, color = Color(48, 72, 107, 255))
+            .border(
+                width = if (isPixelDoubled) 2.dp else 1.dp,
+                color = ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             .background(
                 Brush.horizontalGradient(
-                    listOf(
-                        Color(68, 128, 192, 255),
-                        Color(61, 112, 176, 255),
-                        Color(68, 128, 192, 255)
-                    )
+                    ThemeWrapper.ThemeHandle.current.centerGradientWithEdgeHighlight.backgroundGradientColorList
                 )
             )
     ) {
         if (this@toView.image == Notification.NotificationImage.NONE) {
             Column(
-                Modifier.padding(15.dp)
+                Modifier.padding(
+                    if (isPixelDoubled) 16.dp else 8.dp
+                )
             ) {
                 if (this@toView.topText.isNotEmpty()) {
                     Text(
                         text = this@toView.topText,
-                        fontSize = 48.sp,
+                        fontSize = if (isPixelDoubled) 48.sp else 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -46,7 +49,7 @@ import ca.stefanm.ibus.gui.menu.Notification
                 if (this@toView.contentText.isNotEmpty()) {
                     Text(
                         text = this@toView.contentText,
-                        fontSize = 36.sp,
+                        fontSize = if(isPixelDoubled) 36.sp else 18.sp,
                         color = Color.White
                     )
                 }
@@ -93,12 +96,12 @@ import ca.stefanm.ibus.gui.menu.Notification
 
                 Column(
                     Modifier.weight(0.75F)
-                        .padding(15.dp)
+                        .padding(if (isPixelDoubled) 16.dp else 8.dp)
                 ) {
                     if (this@toView.topText.isNotEmpty()) {
                         Text(
                             text = this@toView.topText,
-                            fontSize = 32.sp,
+                            fontSize = if (isPixelDoubled) 32.sp else 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -106,7 +109,7 @@ import ca.stefanm.ibus.gui.menu.Notification
                     if (this@toView.contentText.isNotEmpty()) {
                         Text(
                             text = this@toView.contentText,
-                            fontSize = 26.sp,
+                            fontSize = if (isPixelDoubled) 26.sp else 13.sp,
                             color = Color.White
                         )
                     }

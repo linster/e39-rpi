@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
 //A "Chip" is the little nubbin shown to indicate a scrollable item
 //https://cdn.shopify.com/s/files/1/0366/7093/products/21c061cb-1bd7-4183-b72e-4a72a4b211a7_zpshihdw7rj.jpg?v=1571438673
@@ -38,7 +39,7 @@ object ChipItemColors {
 
     val MenuBackground = Color(48, 72, 107, 255)
 
-    val SelectedColor = Color(240, 189, 176, 255)
+//    val SelectedColor = Color(240, 189, 176, 255)
 }
 
 @Composable
@@ -77,7 +78,11 @@ fun MenuItem(
     onClicked : () -> Unit
 ) {
 
-    val measurements = if (isSmallSize) MenuItemMeasurements.SMALL else MenuItemMeasurements.BIG
+    val measurements = if (isSmallSize)
+        ThemeWrapper.ThemeHandle.current.smallItem
+    else
+        ThemeWrapper.ThemeHandle.current.bigItem
+
 
     val chipWidth = measurements.chipWidth
     val chipColor = Color(121, 181, 220, 255)

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -87,7 +88,7 @@ class HmiLogViewerScreen @Inject constructor(
                     Modifier
                         .fillMaxSize()
                         .verticalScroll(stateVertical)
-                        .background(ChipItemColors.MenuBackground)
+                        .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                         .padding(20.dp)
                 ) {
 

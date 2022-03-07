@@ -7,6 +7,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toName
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.di.ApplicationScope
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.hocon
@@ -21,7 +22,7 @@ import javax.inject.Inject
 
 object ThemeWrapper {
 
-    val defaultTheme = Themes.BmwBlackDoubledPixels
+    val defaultTheme = Themes.BmwBlueDoubledPixels
     val ThemeHandle = compositionLocalOf { defaultTheme }
 
     @Composable
@@ -36,6 +37,7 @@ object ThemeWrapper {
 
 //TODO We need a way to serialize a theme, and deserialize to Konf
 //TODO for now, just store some preset themes instead of all the params
+@ApplicationScope
 class ThemeConfigurationStorage @Inject constructor(
     private val configurationStorage: ConfigurationStorage
 ) {

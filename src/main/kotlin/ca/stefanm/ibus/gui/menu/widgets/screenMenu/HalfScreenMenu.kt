@@ -11,6 +11,7 @@ import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import androidx.compose.runtime.snapshots.StateObject
 import androidx.compose.runtime.snapshots.StateRecord
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.reduceUpdateOnClick
@@ -108,7 +109,7 @@ object HalfScreenMenu {
 
         Box (
             Modifier
-                .background(ChipItemColors.MenuBackground)
+                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                 .fillMaxWidth()
         ){
             Row(Modifier.fillMaxWidth().wrapContentHeight(),
@@ -191,7 +192,7 @@ object HalfScreenMenu {
 
         Box(
             Modifier
-                .background(ChipItemColors.MenuBackground)
+                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                 .fillMaxWidth()
         ) {
             Row(Modifier.fillMaxWidth().wrapContentHeight()) {

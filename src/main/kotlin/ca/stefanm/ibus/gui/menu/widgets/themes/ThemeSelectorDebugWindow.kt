@@ -10,14 +10,17 @@ import androidx.compose.ui.window.WindowScope
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IbusInputEventCliPrinter
 import javax.inject.Inject
 import javax.inject.Provider
 
 class ThemeSelectorDebugWindow @Inject constructor(
     private val themeConfigurationStorage: ThemeConfigurationStorage,
-    private val windowManager: Provider<WindowManager>
+    private val windowManager: Provider<WindowManager>,
+    private val notificationHub: NotificationHub
 ): WindowManager.E39Window {
 
     override val title: String = "Theme Selector"
@@ -45,6 +48,18 @@ class ThemeSelectorDebugWindow @Inject constructor(
                         themeConfigurationStorage.setTheme(name.toTheme())
                     }) { Text(name) }
                 }
+            }
+
+            NestingCard {
+                Button(onClick = {
+                    notificationHub.postNotificationBackground(
+                        Notification(
+                            Notification.NotificationImage.ALERT_CIRCLE,
+                            topText = "Test Notification",
+                            contentText = "This is a notification test thing."
+                        )
+                    )
+                }) { Text("Post Notification")}
             }
         }
     }

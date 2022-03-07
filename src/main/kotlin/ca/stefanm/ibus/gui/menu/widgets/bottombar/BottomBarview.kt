@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
@@ -29,16 +30,16 @@ fun BmwFullScreenBottomBar(
         ) {
             Text(
                 text = time,
-                fontSize = 18.sp,
+                fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color(229, 255, 255, 255)
+                color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor
             )
             centerContent()
             Text(
                 text = date,
-                fontSize = 18.sp,
+                fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color(229, 255, 255, 255)
+                color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor
             )
         }
     }

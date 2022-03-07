@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.MapScreen
@@ -74,7 +75,7 @@ class MapTileDownloaderScreen @Inject constructor(
         Column {
             BmwSingleLineHeader("Download Map Tiles")
 
-            Column(Modifier.background(ChipItemColors.MenuBackground)) {
+            Column(Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)) {
                 TextMenuItem(
                     title = if (downloadLocation != null) {
                         val lat = downloadLocation.latitude.toString().slice(0..7)

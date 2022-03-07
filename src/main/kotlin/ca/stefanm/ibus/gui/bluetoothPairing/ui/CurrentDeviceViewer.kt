@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -81,7 +82,7 @@ class CurrentDeviceViewer @Inject constructor(
                 ) ?: return@content
 
             Column(
-                Modifier.background(ChipItemColors.MenuBackground),
+                Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 BmwSingleLineHeader("Current Device")
@@ -94,7 +95,7 @@ class CurrentDeviceViewer @Inject constructor(
                         .fillMaxWidth(0.8F)
                 ) {
                     Column(
-                        Modifier.background(ChipItemColors.MenuBackground)
+                        Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                     ) {
                         Text("Alias: ${currentDevice.value.alias}", color = Color.White, fontSize = 28.sp)
                         Text("Paired: ${currentDevice.value.isPaired.toCheckBox()}", color = Color.White, fontSize = 28.sp)

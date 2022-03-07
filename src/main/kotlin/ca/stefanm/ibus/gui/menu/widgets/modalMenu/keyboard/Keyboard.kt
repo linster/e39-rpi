@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import kotlinx.coroutines.delay
@@ -34,11 +35,12 @@ object Keyboard {
     ) : @Composable () -> Unit = {
         //This might actually be a good use-case for a CompositionLocal.
 
+        val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
         KeyboardViews.KeyboardPane(
             maxHeight = when (type) {
-                KeyboardType.FULL -> 0.6F
-                KeyboardType.NUMERIC -> 0.4f
-                KeyboardType.TELEPHONE -> 0.6F
+                KeyboardType.FULL -> if (isPixelDoubled) 0.6F else 0.68F
+                KeyboardType.NUMERIC -> if (isPixelDoubled) 0.4f else 0.45F
+                KeyboardType.TELEPHONE -> if (isPixelDoubled) 0.6F else 0.68F
             }
         ) {
             when (type) {
