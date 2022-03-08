@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.di
 
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.CliMain
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
@@ -56,6 +57,7 @@ interface ApplicationComponent {
 
 
     fun configurationStorage() : ConfigurationStorage
+    fun themeConfigurationStorage() : ThemeConfigurationStorage
 
     fun tileFetcher() : TileFetcher
     fun tileCacheClearer() : TileServerImageCacheClearer

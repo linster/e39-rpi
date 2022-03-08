@@ -2,9 +2,12 @@ package ca.stefanm.ibus.gui.map.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
@@ -72,36 +75,38 @@ class MapTileDownloaderScreen @Inject constructor(
             }
         }
 
-        Column {
+        Column(
+            Modifier.fillMaxHeight().background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+        ) {
             BmwSingleLineHeader("Download Map Tiles")
 
-            Column(Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)) {
-                TextMenuItem(
-                    title = if (downloadLocation != null) {
+            @Composable
+            fun InfoLabel(text : String, weight : FontWeight = FontWeight.Normal) {
+                Text(
+                    text = text,
+                    color = ChipItemColors.TEXT_WHITE,
+                    fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 20.sp else 11.sp,
+                    fontWeight = weight
+                )
+            }
+
+            Column(Modifier
+                .fillMaxWidth()
+            ) {
+                InfoLabel(if (downloadLocation != null) {
                         val lat = downloadLocation.latitude.toString().slice(0..7)
                         val lng = downloadLocation.longitude.toString().slice(0..7)
                         "Download center: $lat, $lng"
                     } else {
                         "No Download Center Selected"
-                    },
-                    isSelectable = false,
-                    onClicked = {}
-                ).toView(ItemChipOrientation.NONE)()
-                TextMenuItem(
-                    title = if (isDownloading.value) {
+                    })
+                InfoLabel(if (isDownloading.value) {
                         "Downloading tile ${downloadedCurrent.value} / ${downloadingTotal.value}"
                     } else {
                         "Download not running."
-                    },
-                    isSelectable = false,
-                    onClicked = {}
-                ).toView(ItemChipOrientation.NONE)()
+                    })
 
-                TextMenuItem(
-                    title = "Download zooms: ${downloadClosestZoom.value.displayString} - ${downloadRadius.value.displayString}",
-                    isSelectable = false,
-                    onClicked = {}
-                ).toView(ItemChipOrientation.NONE)()
+                InfoLabel("Download zooms: ${downloadClosestZoom.value.displayString} - ${downloadRadius.value.displayString}")
             }
 
 
@@ -161,8 +166,10 @@ class MapTileDownloaderScreen @Inject constructor(
                         title = "Clear Tile Cache",
                         onClicked = {
                             modalMenuService.showModalMenu(
-                                menuTopLeft = IntOffset(1200, 600),
-                                menuWidth = 384,
+                                dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                                    menuTopLeft = IntOffset(1200, 600),
+                                    menuWidth = 384,
+                                ).toNormalModalMenuDimensions(),
                                 menuData = ModalMenu(
                                     chipOrientation = ItemChipOrientation.E,
                                     items = listOf(

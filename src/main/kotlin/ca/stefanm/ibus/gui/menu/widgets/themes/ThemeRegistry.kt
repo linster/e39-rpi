@@ -1,13 +1,19 @@
 package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes
 
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toName
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.di.DaggerApplicationComponent
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.hocon
@@ -22,7 +28,10 @@ import javax.inject.Inject
 
 object ThemeWrapper {
 
-    val defaultTheme = Themes.BmwBlueDoubledPixels
+    val defaultTheme = DaggerApplicationComponent.create()
+        .themeConfigurationStorage()
+        .getStoredTheme()
+
     val ThemeHandle = compositionLocalOf { defaultTheme }
 
     @Composable
@@ -30,7 +39,18 @@ object ThemeWrapper {
         CompositionLocalProvider(
             ThemeHandle provides theme
         ) {
-            content()
+
+            LaunchedEffect(Unit) {
+                val themeStorage = DaggerApplicationComponent.create().themeConfigurationStorage()
+                themeStorage.setTheme(themeStorage.getStoredTheme())
+            }
+
+            val isPixelDoubled = ThemeHandle.current.isPixelDoubled
+            ProvideTextStyle(
+                    TextStyle(fontSize = if (isPixelDoubled) 16.sp else 8.sp)
+            ) {
+                content()
+            }
         }
     }
 }
@@ -44,7 +64,7 @@ class ThemeConfigurationStorage @Inject constructor(
 
     private object ThemeConfigSpec : ConfigSpec() {
         val themeOverridesWindowSize by optional(true, "Theme setting for windowsize takes precedence over main conf file")
-        val themeName by optional(ThemeWrapper.defaultTheme.toName())
+        val themeName by optional("BmwBlueDoubledPixels")
     }
 
     private val themeConfigFile = File(ConfigurationStorage.e39BaseFolder, "theme.conf")
@@ -52,10 +72,13 @@ class ThemeConfigurationStorage @Inject constructor(
     private val themeConfig = Config { addSpec(ThemeConfigSpec) }
         .from.hocon.file(themeConfigFile, optional = true)
 
+    private val currentTheme = MutableStateFlow(ThemeWrapper.defaultTheme)
+
     init {
         if (!themeConfigFile.exists()) {
             themeConfig.toHocon.toFile(themeConfigFile)
         }
+        currentTheme.value = themeConfig[ThemeConfigSpec.themeName].toTheme()
         themeConfig.afterSet { item, value ->
             if (item == ThemeConfigSpec.themeName) {
                 val theme = themeConfig[ThemeConfigSpec.themeName].toTheme()
@@ -71,13 +94,15 @@ class ThemeConfigurationStorage @Inject constructor(
         }
     }
 
-    private val currentTheme = MutableStateFlow(ThemeWrapper.defaultTheme)
-
     fun setTheme(theme: Theme) {
         themeConfig[ThemeConfigSpec.themeName] = theme.toName()
     }
 
     fun getTheme() : Flow<Theme> {
         return currentTheme
+    }
+
+    fun getStoredTheme() : Theme{
+        return themeConfig[ThemeConfigSpec.themeName].toTheme()
     }
 }

@@ -262,8 +262,10 @@ class MapScreen @Inject constructor(
         currentCenterAcessor : () -> LatLng
     ) {
         modalMenuService.showModalMenu(
-            menuTopLeft = IntOffset(32, 32),
-            menuWidth = 384,
+            dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                menuTopLeft = IntOffset(32, 32),
+                menuWidth = 384,
+            ).toNormalModalMenuDimensions(),
             autoCloseOnSelect = true,
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
@@ -349,8 +351,10 @@ class MapScreen @Inject constructor(
     
     private fun showGuidanceMenu(currentOverlayStateBus : MutableStateFlow<MapOverlayState>) {
         modalMenuService.showModalMenu(
-            menuTopLeft = IntOffset(32, 32),
-            menuWidth = 512,
+            dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                menuTopLeft = IntOffset(32, 32),
+                menuWidth = 512,
+            ).toNormalModalMenuDimensions(),
             autoCloseOnSelect = true,
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,

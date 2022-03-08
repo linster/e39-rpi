@@ -24,6 +24,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
@@ -73,17 +74,17 @@ class AboutScreen @Inject constructor(
         Text(
             text = text,
             color = ChipItemColors.TEXT_WHITE,
-            fontSize = 22.sp,
+            fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 22.sp else 11.sp,
             fontWeight = weight
         )
     }
 
     @Composable
     private fun aboutInfo() {
-        Box(Modifier.padding(top = 30.dp)) {
+        Box(Modifier.padding(top = 30.dp.halveIfNotPixelDoubled())) {
 
             Column(Modifier
-                .width(200.dp)
+                .width(200.dp.halveIfNotPixelDoubled())
                 .align(Alignment.TopEnd)
                 .fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally)
@@ -94,14 +95,14 @@ class AboutScreen @Inject constructor(
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth(0.8f)
                 )
-                Text("Powered by Linux", Modifier.padding(top = 10.dp), textAlign = TextAlign.Center, color = Color.White)
+                Text("Powered by Linux", Modifier.padding(top = 10.dp.halveIfNotPixelDoubled()), textAlign = TextAlign.Center, color = Color.White)
             }
 
 
             Column(Modifier.fillMaxHeight(0.9F).fillMaxWidth()) {
                 AboutLabel("Home-brew BMW IBus Navigation System")
                 AboutLabel("https://github.com/linster/e39-rpi")
-                AboutLabel("")
+                //AboutLabel("")
                 AboutLabel("Written by Stefan Martynkiw")
                 AboutLabel("https://stefanm.ca")
                 AboutLabel("")

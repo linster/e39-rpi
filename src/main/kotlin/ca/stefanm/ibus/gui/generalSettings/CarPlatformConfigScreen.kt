@@ -83,10 +83,10 @@ class CarPlatformConfigScreen @Inject constructor(
             SidePanelMenu.SidePanelMenu(
                 "Serial Port",
                 text = {
-                    SidePanelMenu.InfoLabel("Set the tty for the LIN transceiver", FontWeight.Bold)
+                    SidePanelMenu.InfoLabel("Set TTY for the LIN transceiver", FontWeight.Bold)
                     SidePanelMenu.InfoLabel(configurationStorage.config[E39Config.CarPlatformConfigSpec._iBusInterfaceUri], FontWeight.Light)
-                    SidePanelMenu.InfoLabel("")
-                    SidePanelMenu.InfoLabel("Be careful when setting this option. Car buttons and user input won't work if E39-RPi can't communicate with the car.")
+                    //SidePanelMenu.InfoLabel("")
+                    //SidePanelMenu.InfoLabel("Be careful when setting this option. Car buttons and user input won't work if E39-RPi can't communicate with the car.")
                 },
                 buttons = availablePorts.map {
                     TextMenuItem(
@@ -116,8 +116,7 @@ class CarPlatformConfigScreen @Inject constructor(
                     SidePanelMenu.InfoLabel("Warning", FontWeight.Bold)
                     SidePanelMenu.InfoLabel("")
                     SidePanelMenu.InfoLabel("Restarting the Car Platform with invalid settings while driving" +
-                            " might make it un-usable in a vehicle environment. Make sure you have access to SSH, " +
-                            "or a keyboard and mouse to fix any issues that may arise.")
+                            " might make it un-usable in a vehicle environment. Make sure you have access to SSH first.")
                     SidePanelMenu.InfoLabel("")
                     SidePanelMenu.InfoLabel("Do you wish to continue?")
                 },

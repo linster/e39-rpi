@@ -62,26 +62,11 @@ class HmiLogViewerScreen @Inject constructor(
                 )
             ))
 
-
             val stateVertical = rememberScrollState(0)
 
             LaunchedEffect(messages.size) {
                 stateVertical.scrollTo(stateVertical.maxValue)
             }
-
-
-//            Column(
-//                Modifier.fillMaxSize().background(Color.Cyan)
-//            ) {
-//                for (message in messages) {
-//                        Text(
-//                            text = message.toMessage(),
-//                            color = ChipItemColors.TEXT_WHITE,
-//                            fontSize = 18.sp,
-//                            fontWeight = FontWeight.Light
-//                        )
-//                }
-//            }
 
             Box(Modifier.fillMaxSize()) {
                 Box(
@@ -100,7 +85,7 @@ class HmiLogViewerScreen @Inject constructor(
                                 Text(
                                     text = message.toMessage(),
                                     color = ChipItemColors.TEXT_WHITE,
-                                    fontSize = 18.sp,
+                                    fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 18.sp else 9.sp,
                                     fontWeight = FontWeight.Light
                                 )
                             }

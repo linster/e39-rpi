@@ -21,6 +21,7 @@ import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
@@ -99,7 +100,7 @@ class RelayToggleScreen @Inject constructor(
         Text(
             text = text,
             color = ChipItemColors.TEXT_WHITE,
-            fontSize = 30.sp,
+            fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 30.sp else 9.sp,
             fontWeight = weight
         )
     }
@@ -117,7 +118,7 @@ class RelayToggleScreen @Inject constructor(
         Column(Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground).fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             BmwSingleLineHeader("Relay Toggle")
 
-            Column(Modifier.padding(horizontal = 120.dp, vertical = 40.dp)) {
+            Column(Modifier.padding(horizontal = 120.dp.halveIfNotPixelDoubled(), vertical = 40.dp.halveIfNotPixelDoubled())) {
                 Row(Modifier.wrapContentHeight().fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     InfoLabel("Relay 1: ${relay1Status.toUiState()}")
                     InfoLabel("Relay 3: ${relay3Status.toUiState()}")

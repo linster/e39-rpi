@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -15,9 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
@@ -34,9 +37,10 @@ object SidePanelMenu {
         text : @Composable () -> Unit,
         buttons : List<TextMenuItem>
     ) {
+
         SidePanelMenu(title) {
             Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
-                Column(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
+                Column(Modifier.padding(horizontal = 10.dp.halveIfNotPixelDoubled(), vertical = 10.dp.halveIfNotPixelDoubled())) {
                     text()
                 }
                 HalfScreenMenu.OneColumn(
@@ -54,8 +58,8 @@ object SidePanelMenu {
             Modifier
                 .fillMaxSize()
                 .background(ChipItemColors.MenuBackground)
-                .border(width = 4.dp, color = Color(61, 112, 176, 255))
-                .shadow(4.dp, RectangleShape)
+                .border(width = 4.dp.halveIfNotPixelDoubled(), color = Color(61, 112, 176, 255))
+                .shadow(4.dp.halveIfNotPixelDoubled(), RectangleShape)
         ) {
             if (title != null) {
                 BmwSingleLineHeader(title)
@@ -69,7 +73,7 @@ object SidePanelMenu {
         Text(
             text = text,
             color = ChipItemColors.TEXT_WHITE,
-            fontSize = 18.sp,
+            fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 18.sp else 9.sp,
             fontWeight = weight
         )
     }
@@ -93,17 +97,36 @@ class ModalMenuService @Inject constructor(
     private val _sidePaneOverlay = MutableStateFlow(SidePaneOverlay())
     val sidePaneOverlay = _sidePaneOverlay.asStateFlow()
 
+    interface ModalMenuDimensions {
+        val menuTopLeft: IntOffset
+        val menuWidth: Int
+    }
+    data class PixelDoubledModalMenuDimensions(
+        override val menuTopLeft: IntOffset,
+        override val menuWidth: Int
+    ) : ModalMenuDimensions {
+        fun toNormalModalMenuDimensions() = NormalModalMenuDimensions(
+            menuTopLeft = menuTopLeft.let {
+                IntOffset(it.x / 2, it.y / 2)
+            },
+            menuWidth = menuWidth / 2
+        )
+    }
+
+    data class NormalModalMenuDimensions(
+        override val menuTopLeft: IntOffset,
+        override val menuWidth: Int
+    ) : ModalMenuDimensions
+
     fun showModalMenu(
-        menuTopLeft : IntOffset,
-        menuWidth : Int, //The height can be automatically calculated.
+        dimensions: NormalModalMenuDimensions,
         menuData : ModalMenu,
         autoCloseOnSelect : Boolean = true
     ) {
-        _modalMenuOverlay.value = {
+        _modalMenuOverlay.value = @Composable {
             ModalChipMenuWindowOverlay(
-                menuTopLeft = menuTopLeft,
-                menuWidth = menuWidth,
-                //TODO, put in an operator to manage the scroll button control state.
+                menuTopLeft = dimensions.menuTopLeft,
+                menuWidth = dimensions.menuWidth,
                 menuData = menuData.copy(
                     items = menuData.items
                         .reduceUpdateOnClick { existingOnClick ->

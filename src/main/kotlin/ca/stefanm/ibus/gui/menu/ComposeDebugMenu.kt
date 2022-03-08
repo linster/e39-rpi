@@ -48,8 +48,10 @@ class ComposeDebugMenu @Inject constructor(
 
                 Button(onClick = {
                     modalMenuService.showModalMenu(
-                        menuTopLeft = IntOffset(400, 100),
-                        menuWidth = 280,
+                        dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                            menuTopLeft = IntOffset(400, 100),
+                            menuWidth = 280
+                        ).toNormalModalMenuDimensions(),
                         menuData = ModalMenu(
                             chipOrientation = ItemChipOrientation.E,
                             onOpen = {},

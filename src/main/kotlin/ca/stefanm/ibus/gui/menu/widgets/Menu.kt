@@ -88,6 +88,8 @@ fun CenterGradientWithEdgeHighlight(
     highlightAlignment: Alignment = Alignment.BottomCenter,
     content: @Composable () -> Unit
 ) {
+    val hp = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.headerPadding
+
     Box {
         Box(
             modifier = Modifier
@@ -96,11 +98,7 @@ fun CenterGradientWithEdgeHighlight(
                         ThemeWrapper.ThemeHandle.current.centerGradientWithEdgeHighlight.backgroundGradientColorList
                     )
                 )
-                .apply {
-                    ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.headerPadding.let {
-                        padding(start = it.start, end = it.end, top = it.top, bottom = it.bottom)
-                    }
-                }
+                .padding(start = hp.start, end = hp.end, top = hp.top, bottom = hp.bottom)
         ) {
             content()
         }

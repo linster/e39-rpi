@@ -101,8 +101,10 @@ class DebugHmiMenuTestTwoColumn @Inject constructor(
                     title = "Open Modal",
                     onClicked = {
                         modalMenuService.showModalMenu(
-                            menuTopLeft = IntOffset(300, 200),
-                            menuWidth = 400,
+                            dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                                menuTopLeft = IntOffset(300, 200),
+                                menuWidth = 400
+                            ).toNormalModalMenuDimensions(),
                             menuData = ModalMenu(
                                 chipOrientation = ItemChipOrientation.E,
                                 items = listOf(
@@ -130,8 +132,10 @@ class DebugHmiMenuTestTwoColumn @Inject constructor(
                     title = "Modal 2",
                     onClicked = {
                         modalMenuService.showModalMenu(
-                            menuTopLeft = IntOffset(800, 200),
-                            menuWidth = 400,
+                            dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                                menuTopLeft = IntOffset(800, 200),
+                                menuWidth = 400
+                            ).toNormalModalMenuDimensions(),
                             menuData = ModalMenu(
                                 chipOrientation = ItemChipOrientation.E,
                                 items = listOf(
@@ -211,8 +215,10 @@ class DebugHmiMenuTestOneColumn @Inject constructor(
                         title = "3",
                         onClicked = {
                             modalMenuService.showModalMenu(
-                                menuTopLeft = IntOffset(500, 300),
-                                menuWidth = 500,
+                                dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                                    menuTopLeft = IntOffset(500, 300),
+                                    menuWidth = 500
+                                ).toNormalModalMenuDimensions(),
                                 menuData = ModalMenu(
                                     chipOrientation = ItemChipOrientation.E,
                                     items = listOf(

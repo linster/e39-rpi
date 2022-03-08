@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,6 +21,10 @@ import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
 //A "Chip" is the little nubbin shown to indicate a scrollable item
 //https://cdn.shopify.com/s/files/1/0366/7093/products/21c061cb-1bd7-4183-b72e-4a72a4b211a7_zpshihdw7rj.jpg?v=1571438673
+
+@Composable
+fun Dp.halveIfNotPixelDoubled() : Dp = if (!ThemeWrapper.ThemeHandle.current.isPixelDoubled) (this.value / 2F).dp else this
+
 
 enum class ItemChipOrientation{
     NONE,
@@ -78,6 +83,9 @@ fun MenuItem(
     onClicked : () -> Unit
 ) {
 
+    @Composable
+    fun Dp.halveIfNotPixelDoubled() : Dp = if (!ThemeWrapper.ThemeHandle.current.isPixelDoubled) (this.value / 2F).dp else this
+
     val measurements = if (isSmallSize)
         ThemeWrapper.ThemeHandle.current.smallItem
     else
@@ -100,17 +108,21 @@ fun MenuItem(
                     when (chipOrientation) {
                         ItemChipOrientation.NW,
                         ItemChipOrientation.NE -> {
-                            Modifier.padding(top = (chipWidth).dp, bottom = highlightWidth.dp, start = (chipWidth * 1.5).dp)
+                            Modifier.padding(top = (chipWidth).dp.halveIfNotPixelDoubled(), bottom = highlightWidth.dp.halveIfNotPixelDoubled(), start = (chipWidth * 1.5).dp)
                         }
                         ItemChipOrientation.SW,
                         ItemChipOrientation.SE -> {
-                            Modifier.padding(bottom = (chipWidth * 1.5).dp, top = 5.dp, end = highlightWidth.dp, start = (chipWidth * 1.5).dp)
+                            Modifier.padding(bottom = (chipWidth * 1.5).dp, top = 5.dp.halveIfNotPixelDoubled(), end = highlightWidth.dp, start = (chipWidth * 1.5).dp)
                         }
                         ItemChipOrientation.W -> {
-                            Modifier.padding(start = (chipWidth * 1.5).dp, top = 5.dp, bottom = 5.dp)
+                            Modifier.padding(start = (chipWidth * 1.5).dp, top = 5.dp.halveIfNotPixelDoubled(), bottom = 5.dp.halveIfNotPixelDoubled())
                         }
                         else -> {
-                            Modifier.padding(top = 5.dp, bottom = 5.dp, start = 25.dp)
+                            Modifier.padding(
+                                top = 5.dp.halveIfNotPixelDoubled(),
+                                bottom = 5.dp.halveIfNotPixelDoubled(),
+                                start = 25.dp.halveIfNotPixelDoubled()
+                            )
                         }
                     }
                 )
