@@ -91,6 +91,8 @@ class ThemeConfigurationStorage @Inject constructor(
                         )
                 }
             }
+
+            themeConfig.toHocon.toFile(themeConfigFile)
         }
     }
 

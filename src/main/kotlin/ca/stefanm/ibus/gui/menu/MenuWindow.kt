@@ -76,7 +76,7 @@ class MenuWindow @Inject constructor(
         val providedKnobListenerService = remember { mutableStateOf(realKnobListenerService) }
 
         ThemeWrapper.ThemedUiWrapper(
-            themeConfigurationStorage.getTheme().collectAsState(ThemeWrapper.defaultTheme).value
+            themeConfigurationStorage.getTheme().collectAsState(themeConfigurationStorage.getStoredTheme()).value
         ) {
             PaneManager(
                 banner = null,
