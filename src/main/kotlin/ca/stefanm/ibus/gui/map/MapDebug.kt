@@ -1,11 +1,13 @@
 package ca.stefanm.ibus.gui.map
 
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.DpSize
@@ -420,7 +422,15 @@ class MapDebug @Inject constructor(
                         PoiOverlay.PoiOverlayItem(
                             label = "Canadian Tire",
                             position = LatLng(45.307368,-75.91812399999999),
-                            icon = PoiOverlay.PoiOverlayItem.ICON_BLUE_CIRCLE
+                            icon = {@Composable {
+                                Canvas(Modifier.size(16.dp)){
+                                    drawCircle(
+                                        center = Offset(0F, 0F),
+                                        radius = 32F,
+                                        color = Color.Magenta
+                                    )
+                                }
+                            }}()
                         )
                     )
                 }) {

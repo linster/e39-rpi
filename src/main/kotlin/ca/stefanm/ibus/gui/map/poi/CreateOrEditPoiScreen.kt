@@ -164,7 +164,7 @@ class CreateOrEditPoiScreen @Inject constructor(
                             ImageMenuItem(
                                 image = painterResource(icon.fileName),
                                 tintColor = icon.tint,
-                                imageModifier = Modifier.size(64.dp)
+                                imageModifier = Modifier.size(48.dp)
                                     .aspectRatio(1.0F),
                                 isSelectable = false,
                                 onClicked = {}
@@ -279,7 +279,8 @@ class CreateOrEditPoiScreen @Inject constructor(
         return PoiRepository.Poi(
             name,
             location = position,
-            icon = icon
+            icon = icon,
+            isVisible = false
         )
     }
     private fun savePoi(
@@ -288,7 +289,7 @@ class CreateOrEditPoiScreen @Inject constructor(
     ) {
         poiRepository.saveOrUpdatePoi(
             existing = existingPoi,
-            new = newPoi
+            new = newPoi.copy(isVisible = existingPoi?.isVisible ?: false),
         )
     }
 }

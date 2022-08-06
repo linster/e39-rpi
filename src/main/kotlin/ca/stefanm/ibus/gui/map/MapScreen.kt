@@ -2,7 +2,8 @@ package ca.stefanm.ibus.gui.map
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -22,9 +23,7 @@ import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
@@ -40,7 +39,8 @@ class MapScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val knobListenerService: KnobListenerService,
     private val logger : Logger,
-    private val configurationStorage: ConfigurationStorage
+    private val configurationStorage: ConfigurationStorage,
+    private val poiRepository: PoiRepository
 ) : NavigationNode<MapScreen.MapScreenResult> {
 
     companion object {
@@ -69,6 +69,26 @@ class MapScreen @Inject constructor(
                 MapScreenParameters(
                     persistUiStateOnClose = false,
                     openMode = MapScreenParameters.MapScreenOpenMode.LocationSelection(
+                        center = centerOn
+                    )
+                )
+            )
+        }
+
+        fun openForBrowsingAtLocation(
+            navigationNodeTraverser: NavigationNodeTraverser,
+            centerOn: LatLng,
+            clearBackStack : Boolean = false
+        ) {
+            if (clearBackStack) {
+                navigationNodeTraverser.navigateToRoot()
+            }
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                MapScreen::class.java,
+                MapScreenParameters(
+                    persistUiStateOnClose = false,
+                    usePersistedStateOnOpen = true,
+                    openMode = MapScreenParameters.MapScreenOpenMode.BrowsingMode(
                         center = centerOn
                     )
                 )
@@ -113,6 +133,7 @@ class MapScreen @Inject constructor(
         object NoOverlay : MapOverlayState
         object ModifyViewMenu : MapOverlayState
         object GuidanceMenu : MapOverlayState
+        object PoiMenu : MapOverlayState
         object PanLeftRight : MapOverlayState
         object PanUpDown : MapOverlayState
         object ChangeZoom : MapOverlayState
@@ -122,7 +143,7 @@ class MapScreen @Inject constructor(
 
 
         val parameters = (it?.requestParameters as? MapScreenParameters) ?: MapScreenParameters(
-            persistUiStateOnClose = false,
+            persistUiStateOnClose = true,
             openMode = MapScreenParameters.MapScreenOpenMode.BrowsingMode(
                 center = configurationStorage.config[E39Config.MapConfig.defaultMapCenter].let {
                     LatLng(it.first, it.second)
@@ -250,6 +271,9 @@ class MapScreen @Inject constructor(
             if (currentOverlayState.value == MapOverlayState.GuidanceMenu) {
                 showGuidanceMenu(currentOverlayStateBus)
             }
+            if (currentOverlayState.value == MapOverlayState.PoiMenu) {
+                showPoiOverlaymenu(currentOverlayStateBus)
+            }
         }
 
 
@@ -261,7 +285,19 @@ class MapScreen @Inject constructor(
                     currentOverlayState.value == MapOverlayState.PanUpDown ||
                             currentOverlayState.value == MapOverlayState.PanLeftRight ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
-                gpsReceptionIconVisible = false
+                gpsReceptionIconVisible = false,
+                poiOverlay = poiRepository.getAllPoisFlow().collectAsState(emptyList()).value.let { list ->
+                    logger.d("POI LIST", list.toString())
+                    PoiOverlay(
+                        pois = list.map { poi ->
+                            PoiOverlay.PoiOverlayItem(
+                                label = poi.name,
+                                position = poi.location,
+                                icon = PoiRepository.Poi.toViewForMapScreen(poi.icon)
+                            )
+                        }
+                    )
+                }
             ),
             extents = extents.value,
             onCenterPositionUpdated = {
@@ -305,13 +341,20 @@ class MapScreen @Inject constructor(
                         )
                     )
 
-                    val guidanceEntries = if (mapScreenOpenMode is MapScreenParameters.MapScreenOpenMode.BrowsingMode) {
+                    val browsingEntries = if (mapScreenOpenMode is MapScreenParameters.MapScreenOpenMode.BrowsingMode) {
                         listOf(
                             ModalMenu.ModalMenuItem(
                                 title = "Guidance",
                                 onClicked = {
                                     modalMenuService.closeModalMenu()
                                     currentOverlayStateBus.value = MapOverlayState.GuidanceMenu
+                                }
+                            ),
+                            ModalMenu.ModalMenuItem(
+                                title = "POIs",
+                                onClicked = {
+                                    modalMenuService.closeModalMenu()
+                                    currentOverlayStateBus.value = MapOverlayState.PoiMenu
                                 }
                             )
                         )
@@ -358,7 +401,7 @@ class MapScreen @Inject constructor(
                     }
 
 
-                    zoomControls + guidanceEntries + closingEntries
+                    zoomControls + browsingEntries + closingEntries
                 }
             )
         )
@@ -395,6 +438,53 @@ class MapScreen @Inject constructor(
                         title = "Repeat Direction",
                         onClicked = {
 
+                        }
+                    )
+                )
+            )
+        )
+    }
+
+    private fun showPoiOverlaymenu(currentOverlayStateBus: MutableStateFlow<MapOverlayState>) {
+        modalMenuService.showModalMenu(
+            dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                menuTopLeft = IntOffset(32, 32),
+                menuWidth = 512
+            ).toNormalModalMenuDimensions(),
+            autoCloseOnSelect = false,
+            menuData = ModalMenu(
+                chipOrientation = ItemChipOrientation.W,
+                onClose = {
+                    currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                },
+                items = listOf(
+                    ModalMenu.ModalMenuItem(
+                        title = "Back",
+                        onClicked = {
+                            currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                        }
+                    ),
+                    ModalMenu.ModalMenuItem(
+                        title = "Open Address Book...",
+                        onClicked = {
+                            modalMenuService.closeModalMenu()
+                            navigationNodeTraverser.navigateToNode(PoiManagerScreen::class.java)
+                        }
+                    ),
+                    ModalMenu.ModalMenuItem(
+                        title = "Hide All POIs",
+                        onClicked = {
+                            poiRepository.hideAllPois()
+                            modalMenuService.closeModalMenu()
+                            currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                        }
+                    ),
+                    ModalMenu.ModalMenuItem(
+                        title = "Show All Stored POIs",
+                        onClicked = {
+                            poiRepository.showAllPois()
+                            modalMenuService.closeModalMenu()
+                            currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
                         }
                     )
                 )

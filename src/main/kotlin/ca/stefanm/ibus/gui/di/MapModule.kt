@@ -13,18 +13,21 @@ class MapModule {
     companion object {
         const val COROUTINE_SCOPE_TILE_CLIENT = "tile_client_scope"
         const val TILE_CLIENT = "tileClient"
-    }
 
-    @Provides
-    @Named(TILE_CLIENT)
-    fun provideHttpClient() : HttpClient {
-        return HttpClient {
+        val httpClient = HttpClient {
 
             install(Logging) {
                 logger = Logger.SIMPLE
                 level = LogLevel.HEADERS
             }
         }
+    }
+
+    @Provides
+    @Named(TILE_CLIENT)
+    fun provideHttpClient() : HttpClient {
+        //Lazy-init this since TileFetcher is eager.
+        return httpClient
     }
 
 

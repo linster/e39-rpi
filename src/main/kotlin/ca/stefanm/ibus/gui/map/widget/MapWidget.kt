@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.map
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import org.jxmapviewer.viewer.GeoPosition
 import androidx.compose.ui.Alignment
@@ -16,6 +17,7 @@ import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
+import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
@@ -67,6 +69,14 @@ data class PoiOverlay(
                     )
                 }
             }
+
+
+            //We can't fully support free-form composable icons because
+            //The Composable Lambda has to be a constant at run-time.
+            //It cannot be passed along how we think it should be. We also
+            //can't do composable function references.
+            //So, we'll hack around it here, but hard-coding each lambda we'd ever need.
+
         }
     }
 }
@@ -412,6 +422,10 @@ fun BoxWithConstraintsScope.PoiOverlayLayer(
         ) { measurables, constraints ->
             val placeables = measurables.map { it.measure(constraints) }
             layout(constraints.minWidth, constraints.minWidth) {
+                if (placeables.isEmpty()) {
+                    StdOutLogger().w("WAT WAT", "Placables is empty!")
+                    return@layout
+                }
                 placeables[0].place(
                     IntOffset(
                         poiPixelsFromLeft.roundToInt(),

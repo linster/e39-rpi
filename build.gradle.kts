@@ -5,8 +5,8 @@ plugins {
 
     if (true) {
         // __KOTLIN_COMPOSE_VERSION__
-        kotlin("jvm") version "1.5.31"
-        kotlin("kapt") version "1.5.31"
+        kotlin("jvm") version "1.5.31" //TODO https://github.com/Kotlin/kotlinx.serialization/issues/1417#issuecomment-1021545236
+        kotlin("kapt") version "1.5.31" //TODO update to 1.6.20+ to get sealed interface seriaization working.
 //        id("org.jetbrains.compose") version "0.3.2"
         id("org.jetbrains.compose") version "1.0.0"
     } else {
