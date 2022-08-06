@@ -4,13 +4,18 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import ca.stefanm.ibus.gui.menu.MenuWindow
+import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.reduceUpdateOnClick
 import com.ginsberg.cirkle.circular
 import java.awt.Menu
 import kotlin.math.ceil
@@ -172,6 +177,7 @@ object ScrollMenu {
         //knows to draw them differently
         conjoinedItemSpecialToken : P,
 
+        //TODO make this a scope, and have current page, and current selected item index be on it.
         presentation : @Composable (visibleListSlice : List<ConjoinedListRecord<MenuItem, P>>) -> Unit
     ) {
 
@@ -260,27 +266,97 @@ object ScrollMenu {
 
     @Composable
     fun SmoothOneColumnScroll(
-        items : List<MenuItem>
+        itemsPerPage: Int = 5,
+        items : List<MenuItem>,
+        alignment: Alignment.Horizontal = Alignment.Start,
+        fullWidth : Boolean = false
     ) {
 
-        val scrollState = rememberScrollState(0)
+        //TODO have a variable here that holds the current selected item,
+        //TODO then a derived state of the index of that item
+        //TODO then auto-update the page.
 
-
-        //We want to listen to each item become selected, and produce a state of
-        //the current selected item.
-
-        val foo = produceState(items.firstOrNull { it.isSelected } ?: 0) {
-
-        }
-
-        Box(
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        ) {
-            //Make the scrollbar mostly transparent in the BMW style.
-            VerticalScrollbar(rememberScrollbarAdapter(scrollState))
-            FullScreenMenu.OneColumn(items)
-        }
+//        val columnContents : @Composable ColumnScope.() -> Unit = {
+//
+//            val colItems = items.reduceUpdateOnClick { it() ; println("items") }.let {
+//                MenuWindow.MenuWindowKnobListener.current.listenForKnob(
+//                    listData = items,
+//
+//                    onItemClickAdapter = { it.onClicked() },
+//                    onSelectAdapter = { item, isNowSelected ->
+//
+//                        if (isNowSelected) {
+//
+//                        }
+//
+//                        when (item) {
+//                            is TextMenuItem -> item.copy(isSelected = isNowSelected)
+//                            is CheckBoxMenuItem -> item.copy(isSelected = isNowSelected)
+//                            is ImageMenuItem -> item.copy(isSelected = isNowSelected)
+//                            else -> error("Unsupported type")
+//                        }
+//                    },
+//                    isSelectableAdapter = { it.isSelectable }
+//                ).value
+//            }
+//            for (item in colItems) {
+//                item.toView(
+//                    chipOrientation = if (!item.isSelectable) {
+//                        ItemChipOrientation.NONE
+//                    } else {
+//                        if (alignment == Alignment.Start) ItemChipOrientation.W else ItemChipOrientation.E
+//                    },
+//                )()
+//            }
+//        }
+//
+//        val sourceList : List<ConjoinedListRecord<MenuItem, P>>,
+//
+//
+//        val displayOptions = ScrollListOptions(
+//            itemsPerPage = itemsPerPage,
+//            isExitItemOnEveryPage = false,
+//            isPageCountItemVisible = true,
+//            showSpacerRow = false
+//        )
+//
+//
+//        val sourceItemsPerSlice = displayOptions.itemsPerPage + 1 -
+//                if (displayOptions.isExitItemOnEveryPage) 1 else 0 -
+//                        if (displayOptions.isPageCountItemVisible) 1 else 0 -
+//                                1 - //prev item
+//                                1 - //next item
+//                                if (displayOptions.showSpacerRow) 1 else 0   //spacer item
+//
+//        val totalPages = ceil(sourceList.count().toDouble() / sourceItemsPerSlice.toDouble()).toInt()
+//
+//        val sourceItemsByPage = sourceList
+//            .windowed(
+//                size = sourceItemsPerSlice,
+//                step = sourceItemsPerSlice,
+//                partialWindows = true
+//            ).map { pageItems ->
+//                listOf(*pageItems.toTypedArray())
+//            }
+//
+//        val scrollState = rememberScrollState(0)
+//
+//
+//        //We want to listen to each item become selected, and produce a state of
+//        //the current selected item.
+//
+//        val foo = produceState(items.firstOrNull { it.isSelected } ?: 0) {
+//
+//        }
+//
+//        Box(
+//            Modifier
+//                .fillMaxSize()
+//                .verticalScroll(scrollState)
+//        ) {
+//            //Make the scrollbar mostly transparent in the BMW style.
+//            VerticalScrollbar(rememberScrollbarAdapter(scrollState))
+//            FullScreenMenu.OneColumn(items)
+//        }
     }
 }

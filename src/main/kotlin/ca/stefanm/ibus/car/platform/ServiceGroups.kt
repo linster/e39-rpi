@@ -59,3 +59,9 @@ annotation class TelephoneControlSimulationServiceGroup
     description = "Enable this group and disable all others if for some reason you don't want any services to run."
 )
 annotation class EmptyServiceGroup
+
+@PlatformServiceGroup(
+    name = "TvModuleAnnounceSim",
+    description = "Simlate the Announce Req/Resp cycle so that the Rpi can be wired into RGBS white conn on TV Module."
+)
+annotation class TvModuleAnnounceSim

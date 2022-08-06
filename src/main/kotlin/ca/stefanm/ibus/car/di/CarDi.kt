@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.car.di
 
+import ca.stefanm.ca.stefanm.ibus.car.tvmodule.NavigationAnnounceService
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.CliTrackInfoPrinter
@@ -19,10 +20,7 @@ import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.RpiRelayReaderWriter
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.JSerialCommsAdapter
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortReader
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPortWriter
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.*
 import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IbusInputEventCliPrinter
 import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IncomingIbusMessageCliPrinter
 import ca.stefanm.ibus.lib.logging.cli.debugPrinters.PlatformMetronomeLogger
@@ -56,8 +54,10 @@ interface ConfiguredCarComponent {
     fun relayReaderWriter(): RelayReaderWriter
 
     //I would've liked to auto-generate these. These should match ServicesAndServiceGroups.kt
+    fun discoveredServiceNavigationAnnounceService() : NavigationAnnounceService
     fun discoveredServiceTelephoneButtonVideoSwitcherService() : TelephoneButtonVideoSwitcherService
     fun discoveredServiceCoolingFanController() : CoolingFanController
+    fun discoveredServiceSerialListenerService() : SerialListenerService
     fun discoveredServiceSerialPublisherService() : SerialPublisherService
     fun discoveredServicePlatformMetronomeLogger() : PlatformMetronomeLogger
     fun discoveredServiceIbusInputEventCliPrinter() : IbusInputEventCliPrinter

@@ -16,6 +16,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
@@ -33,6 +34,7 @@ import kotlin.math.E
 class HmiLogViewerScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val logDistributionHub: LogDistributionHub,
+    private val windowManager: WindowManager
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -59,6 +61,10 @@ class HmiLogViewerScreen @Inject constructor(
                 TextMenuItem(
                     title = "Go Back",
                     onClicked = { navigationNodeTraverser.goBack() }
+                ),
+                TextMenuItem(
+                    title = "Quit HMI",
+                    onClicked = { windowManager.closeHmiMainWindow() }
                 )
             ))
 

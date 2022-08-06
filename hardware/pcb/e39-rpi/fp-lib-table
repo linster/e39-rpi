@@ -1,0 +1,7 @@
+(fp_lib_table
+  (lib (name ul_1-963539-1)(type KiCad)(uri ${KIPRJMOD}/ul_1-963539-1/KiCAD/2022-03-19_16-59-52/footprints.pretty)(options "")(descr ""))
+  (lib (name ul_TS3V330D)(type KiCad)(uri ${KIPRJMOD}/ul_TS3V330D/KiCAD/2022-03-19_16-28-06/footprints.pretty)(options "")(descr ""))
+  (lib (name OSTVN04A150)(type KiCad)(uri /home/stefan/BMW/e39-rpi/hardware/pcb/e39-rpi/ul_OSTVN04A150/KiCAD/2022-03-21_21-19-33/footprints.pretty)(options "")(descr ""))
+  (lib (name 2022-03-21_21-40-43)(type KiCad)(uri ${KIPRJMOD}/ul_MCP2021A-330E-SN/KiCAD/2022-03-21_21-40-43)(options "")(descr ""))
+  (lib (name lin33)(type KiCad)(uri /home/stefan/BMW/e39-rpi/hardware/pcb/e39-rpi/ul_MCP2021A-330E-SN/KiCAD/2022-03-21_21-40-43/footprints.pretty)(options "")(descr ""))
+)

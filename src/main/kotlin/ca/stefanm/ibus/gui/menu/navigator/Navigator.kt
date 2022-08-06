@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ibus.di.*
@@ -64,6 +65,7 @@ class NavigationModule {
         debughmikeyboard: DebugHmiKeyboard,
         debughmimenutesttwocolumn: DebugHmiMenuTestTwoColumn,
         debughmimenutestonecolumn: DebugHmiMenuTestOneColumn,
+        smoothScrollTest: SmoothScrollTest,
         debughmiroot: DebugHmiRoot,
         optionPromptTest: OptionPromptTest,
         mapScreen: MapScreen,
@@ -92,6 +94,7 @@ class NavigationModule {
         debughmikeyboard,
         debughmimenutesttwocolumn,
         debughmimenutestonecolumn,
+        smoothScrollTest,
         debughmiroot,
         optionPromptTest,
         mapScreen,

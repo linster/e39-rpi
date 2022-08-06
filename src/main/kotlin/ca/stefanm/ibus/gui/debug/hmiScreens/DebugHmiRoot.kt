@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.Notification
@@ -55,6 +56,10 @@ class DebugHmiRoot @Inject constructor(
                         title = "DebugHmiMenuTests",
                         onClicked = { navigationNodeTraverser.navigateToNode(DebugHmiMenuTest::class.java) }
                     ),
+                    TextMenuItem(
+                        title = "Smooth Scroll test",
+                        onClicked = { navigationNodeTraverser.navigateToNode(SmoothScrollTest::class.java)}
+                    )
 //                    TextMenuItem(
 //                        title = "DBus-BlueZ",
 //                        onClicked = { }
