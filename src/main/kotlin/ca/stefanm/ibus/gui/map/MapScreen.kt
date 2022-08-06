@@ -59,6 +59,21 @@ class MapScreen @Inject constructor(
                 )
             )
         }
+
+        fun openForUserLocationSelection(
+            navigationNodeTraverser: NavigationNodeTraverser,
+            centerOn : LatLng
+        ) {
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                MapScreen::class.java,
+                MapScreenParameters(
+                    persistUiStateOnClose = false,
+                    openMode = MapScreenParameters.MapScreenOpenMode.LocationSelection(
+                        center = centerOn
+                    )
+                )
+            )
+        }
     }
 
     sealed class MapScreenResult {
@@ -94,13 +109,13 @@ class MapScreen @Inject constructor(
         val mapOverlayState: MapOverlayState
     )
 
-    private sealed class MapOverlayState(val nextStateOnClick : MapOverlayState?, val previousStateOnBack : MapOverlayState?) {
-        object NoOverlay : MapOverlayState(nextStateOnClick = ModifyViewMenu, previousStateOnBack = null)
-        object ModifyViewMenu : MapOverlayState(nextStateOnClick = null, previousStateOnBack = NoOverlay)
-        object GuidanceMenu : MapOverlayState(nextStateOnClick = null, previousStateOnBack = ModifyViewMenu)
-        object PanLeftRight : MapOverlayState(nextStateOnClick = ModifyViewMenu, previousStateOnBack = null)
-        object PanUpDown : MapOverlayState(nextStateOnClick = ModifyViewMenu, previousStateOnBack = null)
-        object ChangeZoom : MapOverlayState(nextStateOnClick = ModifyViewMenu, previousStateOnBack = null)
+    private sealed interface MapOverlayState {
+        object NoOverlay : MapOverlayState
+        object ModifyViewMenu : MapOverlayState
+        object GuidanceMenu : MapOverlayState
+        object PanLeftRight : MapOverlayState
+        object PanUpDown : MapOverlayState
+        object ChangeZoom : MapOverlayState
     }
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
@@ -270,7 +285,7 @@ class MapScreen @Inject constructor(
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
                 onClose = {
-                    currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu.previousStateOnBack!!
+                    currentOverlayStateBus.value = MapOverlayState.NoOverlay
                 },
                 items = let {
                     val zoomControls = listOf(
@@ -359,7 +374,7 @@ class MapScreen @Inject constructor(
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
                 onClose = {
-                    currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu.previousStateOnBack!!
+                    currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
                 },
                 items = listOf(
                     ModalMenu.ModalMenuItem(

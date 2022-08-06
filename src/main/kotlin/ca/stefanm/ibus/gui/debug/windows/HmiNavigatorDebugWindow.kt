@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.debug.windows
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn
@@ -86,6 +88,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
                     ScreenHotKey(BMWMainMenu::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(DebugHmiMenuTestTwoColumn::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(DebugHmiKeyboard::class.java as Class<NavigationNode<*>>)
+                    ScreenHotKey(CreateOrEditPoiScreen::class.java as Class<NavigationNode<*>>)
                 }
             }
 
@@ -128,11 +131,12 @@ class HmiNavigatorDebugWindow @Inject constructor(
         ) {
             Text("Navigate to Registered Node V")
             DropdownMenu(
+                modifier = Modifier.width(800.dp),
                 offset = DpOffset(0.dp, (-1000).dp),
                 expanded = isMenuOpen.value,
                 onDismissRequest = { isMenuOpen.value = false }
             ) {
-                allNodes.get().forEach {
+                allNodes.get().sortedBy { it.thisClass.canonicalName }.forEach {
                     DropdownMenuItem(
                         onClick = {
                             navigationNodeTraverser.get().navigateToNode(it.thisClass)

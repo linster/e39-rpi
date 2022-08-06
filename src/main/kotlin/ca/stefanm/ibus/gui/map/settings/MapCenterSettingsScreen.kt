@@ -58,7 +58,7 @@ class MapCenterSettingsScreen @Inject constructor(
                     title = "Map Center: ${center.value.latitude}, ${center.value.longitude}",
                     isSelectable = false,
                     onClicked = {}
-                ).toView(ItemChipOrientation.NONE)()
+                ).toView(Modifier.fillMaxWidth(), ItemChipOrientation.NONE)()
 
                 Column(Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Bottom) {
                     HalfScreenMenu.OneColumn(

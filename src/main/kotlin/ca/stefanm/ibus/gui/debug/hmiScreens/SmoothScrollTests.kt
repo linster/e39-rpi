@@ -20,16 +20,16 @@ class SmoothScrollTest @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
-        val items = listOf(
-            TextMenuItem("Go Back", onClicked = {navigationNodeTraverser.goBack() })
-        ) + (1..50).map {
-            TextMenuItem(
-                title = "Item $it",
-                onClicked = {}
-            )
-        }
-
-        ScrollMenu.SmoothOneColumnScroll(items)
+//        val items = listOf(
+//            TextMenuItem("Go Back", onClicked = {navigationNodeTraverser.goBack() })
+//        ) + (1..50).map {
+//            TextMenuItem(
+//                title = "Item $it",
+//                onClicked = {}
+//            )
+//        }
+//
+//        ScrollMenu.SmoothOneColumnScroll(items)
 
     }
 }

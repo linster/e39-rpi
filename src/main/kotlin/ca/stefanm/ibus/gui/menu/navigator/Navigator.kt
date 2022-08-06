@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
+import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ibus.di.*
@@ -76,7 +77,8 @@ class NavigationModule {
         relayToggleScreen: RelayToggleScreen,
         mapSettingsMainScreen: MapSettingsMainScreen,
         mapCenterSettingsScreen: MapCenterSettingsScreen,
-        themeSelectorScreen: ThemeSelectorScreen
+        themeSelectorScreen: ThemeSelectorScreen,
+        createOrEditPoiScreen: CreateOrEditPoiScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -105,7 +107,8 @@ class NavigationModule {
         relayToggleScreen,
         mapSettingsMainScreen,
         mapCenterSettingsScreen,
-        themeSelectorScreen
+        themeSelectorScreen,
+        createOrEditPoiScreen
     )
 }
 

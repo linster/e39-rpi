@@ -1,7 +1,6 @@
 package ca.stefanm.ibus.gui.map
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import org.jxmapviewer.viewer.GeoPosition
@@ -16,17 +15,11 @@ import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
-import ca.stefanm.ibus.gui.map.widget.tile.OSMTileServerInfo
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import com.javadocmd.simplelatlng.util.LengthUnit
-import com.javadocmd.simplelatlng.window.LatLngWindow
-import org.jxmapviewer.OSMTileFactoryInfo
-import org.jxmapviewer.viewer.util.GeoUtil
-import java.awt.geom.Point2D
-import java.math.BigDecimal
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -57,9 +50,9 @@ data class Route(
 )
 
 data class PoiOverlay(
-    val pois : List<Poi>
+    val pois : List<PoiOverlayItem>
 ) {
-    data class Poi(
+    data class PoiOverlayItem(
         val label : String,
         val position: LatLng,
         val icon : @Composable () -> Unit = @Composable {}
@@ -113,8 +106,8 @@ fun MapViewer(
             val stateVertical = rememberScrollState(0)
             val stateHorizontal = rememberScrollState(0)
 
-            val numPreLoadedTilesX = (maxWidth / 256.dp) * 3
-            val numPreLoadedTilesY = (maxWidth / 256.dp) * 3 //We want this to be square so we a line diagonally across passes through the center.
+            val numPreLoadedTilesX = (maxWidth / 256.dp) * 6
+            val numPreLoadedTilesY = (maxWidth / 256.dp) * 6 //We want this to be square so we a line diagonally across passes through the center.
 
             val centerContainingTile = ExtentCalculator.getTileNumber(
                 extents.center.latitude,

@@ -1,7 +1,6 @@
 package ca.stefanm.ibus.gui.map
 
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -12,7 +11,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
@@ -397,7 +395,7 @@ class MapDebug @Inject constructor(
                 }
             }
 
-            fun addPoiToList(poi : PoiOverlay.Poi) {
+            fun addPoiToList(poi : PoiOverlay.PoiOverlayItem) {
                 val newList = pois.value.pois.toMutableList().also {
                     it.add(poi)
                 }
@@ -408,10 +406,10 @@ class MapDebug @Inject constructor(
             Row {
                 Button(onClick = {
                     addPoiToList(
-                        PoiOverlay.Poi(
+                        PoiOverlay.PoiOverlayItem(
                             label = "Kanata",
                             position = LatLng(45.315467999999996, -75.919399),
-                            icon = PoiOverlay.Poi.ICON_BLUE_CIRCLE
+                            icon = PoiOverlay.PoiOverlayItem.ICON_BLUE_CIRCLE
                         )
                     )
                 }) {
@@ -419,10 +417,10 @@ class MapDebug @Inject constructor(
                 }
                 Button(onClick = {
                     addPoiToList(
-                        PoiOverlay.Poi(
+                        PoiOverlay.PoiOverlayItem(
                             label = "Canadian Tire",
                             position = LatLng(45.307368,-75.91812399999999),
-                            icon = PoiOverlay.Poi.ICON_BLUE_CIRCLE
+                            icon = PoiOverlay.PoiOverlayItem.ICON_BLUE_CIRCLE
                         )
                     )
                 }) {

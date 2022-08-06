@@ -24,6 +24,7 @@ import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +36,7 @@ object SidePanelMenu {
     fun SidePanelMenu(
         title : String? = null,
         text : @Composable () -> Unit,
-        buttons : List<TextMenuItem>
+        buttons : List<MenuItem>
     ) {
 
         SidePanelMenu(title) {

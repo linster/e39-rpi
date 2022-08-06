@@ -3,21 +3,12 @@ package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ca.stefanm.ibus.di.DaggerApplicationComponent
-import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import androidx.compose.runtime.snapshots.StateObject
-import androidx.compose.runtime.snapshots.StateRecord
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.MenuWindow
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.reduceUpdateOnClick
-import kotlinx.coroutines.flow.MutableSharedFlow
-import org.intellij.lang.annotations.JdkConstants
-import kotlin.math.E
 
 
 object HalfScreenMenu {
@@ -236,6 +227,71 @@ object HalfScreenMenu {
                 }
             }
         }
+    }
+
+    data class GridMenuConjoinedLIst(
+        val row : Int,
+        val positionInRow : Int,
+        val originalItem : MenuItem,
+        val calculatedChipOrientation: ItemChipOrientation
+    )
+
+    @Composable
+    fun GridMenu(
+        items : List<List<MenuItem>>, //LTR, TTL (Left to right, top to bottom)
+    ) {
+
+       val conjoinedItems = items.mapIndexed { rowIndexInGrid, rowList ->
+            rowList.mapIndexed { itemIndexInRow, menuItem ->
+
+                val isFirstRow = rowIndexInGrid == 0
+                val isLastRow = rowIndexInGrid == items.lastIndex
+
+                val isFirstItemInRow = itemIndexInRow == 0
+                val isLastItemInRow = itemIndexInRow == rowList.lastIndex
+
+                val chipOrientation = when {
+                    isFirstRow && isFirstItemInRow -> ItemChipOrientation.NW
+                    isFirstRow && !isFirstItemInRow && !isLastItemInRow -> ItemChipOrientation.N
+                    isFirstRow && isLastItemInRow -> ItemChipOrientation.NE
+
+                    !isFirstRow && !isLastRow && isFirstItemInRow -> ItemChipOrientation.W
+                    !isFirstRow && !isLastRow && isLastItemInRow -> ItemChipOrientation.E
+
+                    isLastRow && isFirstItemInRow -> ItemChipOrientation.SW
+                    isLastRow && !isFirstItemInRow &&!isLastItemInRow -> ItemChipOrientation.S
+                    isLastRow && isLastItemInRow -> ItemChipOrientation.SE
+
+                    else -> ItemChipOrientation.NONE
+                }
+
+                GridMenuConjoinedLIst(
+                    row = rowIndexInGrid,
+                    positionInRow = itemIndexInRow,
+                    originalItem = menuItem,
+                    calculatedChipOrientation = chipOrientation
+                )
+            }
+       }.flatten()
+
+        val observableConjoinedItems = MenuWindow.MenuWindowKnobListener.current.listenForKnob(
+            listData = conjoinedItems,
+            onItemClickAdapter = {item -> item.originalItem.onClicked() },
+            onSelectAdapter = { item, isNowSelected ->  item.copy(originalItem = item.originalItem.copyAndSetIsSelected(isNowSelected)) },
+            isSelectableAdapter = {item -> item.originalItem.isSelectable }
+        ).value
+
+        Column {
+            observableConjoinedItems.groupBy { it.row }.forEach {
+                Row(Modifier.wrapContentWidth(),horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                    it.value.sortedBy { it.positionInRow }.forEach {
+                        it.originalItem.toView(Modifier.wrapContentSize(), it.calculatedChipOrientation)()
+                    }
+                }
+            }
+        }
+
+
     }
 
 }

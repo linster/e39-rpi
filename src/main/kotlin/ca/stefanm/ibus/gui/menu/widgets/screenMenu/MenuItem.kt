@@ -1,17 +1,21 @@
 package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshots.StateObject
 import androidx.compose.runtime.snapshots.StateRecord
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
+import ca.stefanm.ibus.gui.menu.widgets.ImageMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
@@ -22,6 +26,7 @@ interface MenuItem {
     val onClicked : () -> Unit
 
     fun toView(
+        boxModifier: Modifier = Modifier.fillMaxWidth(),
         chipOrientation: ItemChipOrientation
     ): @Composable () -> Unit
 
@@ -82,8 +87,9 @@ data class TextMenuItem(
         fun Boolean.toCheckBox() : String = if (this) CHECKBOX_CHECKED else CHECKBOX_UNCHECKED
     }
 
-    override fun toView(chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
+    override fun toView(boxModifier : Modifier, chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
         MenuItem(
+            boxModifier = boxModifier,
             label = title,
             chipOrientation = chipOrientation,
             labelColor = labelColor,
@@ -101,8 +107,9 @@ data class CheckBoxMenuItem(
     override val isSelected : Boolean = false,
     override val onClicked : () -> Unit
 ) : MenuItem {
-    override fun toView(chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
+    override fun toView(boxModifier: Modifier, chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
         MenuItem(
+            boxModifier = boxModifier,
             label = " ${if (isChecked) "[X]" else "[ ]"} $title",
             chipOrientation = chipOrientation,
             labelColor = labelColor,
@@ -113,13 +120,24 @@ data class CheckBoxMenuItem(
 }
 
 data class ImageMenuItem(
-    val image : ImageBitmap,
+    val image : Painter,
+    val imageModifier : Modifier = Modifier,
+    val tintColor : Color? = null,
     override val isSelectable : Boolean = true,
     override val isSelected : Boolean = false,
     override val onClicked : () -> Unit
 ) : MenuItem {
-    override fun toView(chipOrientation: ItemChipOrientation): () -> Unit {
-        TODO("Not yet implemented")
+    override fun toView(boxModifier: Modifier, chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
+        ImageMenuItem(
+            boxModifier = boxModifier,
+            painter = image,
+            imageModifier = imageModifier,
+            alignment = Alignment.Center,
+            tintColor = tintColor,
+            chipOrientation = chipOrientation,
+            isSelected = isSelected,
+            onClicked = onClicked
+        )
     }
 }
 
