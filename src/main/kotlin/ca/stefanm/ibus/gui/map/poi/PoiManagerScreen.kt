@@ -3,10 +3,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.map.poi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -30,6 +27,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.lib.logging.StdOutLogger
 import kotlinx.coroutines.flow.filter
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
@@ -93,7 +91,12 @@ class PoiManagerScreen @Inject constructor(
                                         PoiOverlay.PoiOverlayItem(
                                             label = poi.name,
                                             position = poi.location,
-                                            icon = PoiRepository.Poi.toViewForMapScreen(poi.icon)
+                                            icon = { Box{
+                                                when (poi.icon) {
+                                                    is PoiRepository.Poi.PoiIcon.ColoredCircle -> PoiOverlay.PoiOverlayItem.CIRCLE_COLOR.invoke(poi.icon.color)
+                                                    is PoiRepository.Poi.PoiIcon.BundledIcon -> PoiOverlay.PoiOverlayItem.ICON_FILE.invoke(poi.icon.fileName, poi.icon.tint)
+                                                }
+                                            }}
                                         )
                                     }
                                 ))

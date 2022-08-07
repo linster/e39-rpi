@@ -32,8 +32,8 @@ class EmptyMenu @Inject constructor(
         )
 
         LaunchedEffect(true) {
-//            navigationNodeTraverser.navigateToNode(BMWMainMenu::class.java)
-            navigationNodeTraverser.navigateToNode(PoiManagerScreen::class.java)
+            navigationNodeTraverser.navigateToNode(BMWMainMenu::class.java)
+//            navigationNodeTraverser.navigateToNode(PoiManagerScreen::class.java)
         }
     }
 }

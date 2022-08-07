@@ -84,39 +84,6 @@ class PoiRepository @Inject constructor(
                 isVisible = isVisible
             )
         }
-
-        companion object {
-            fun toViewForMapScreen(icon: PoiIcon) : @Composable () -> Unit = {
-                when (icon) {
-                    is PoiIcon.NoIcon -> {
-                        Canvas(Modifier.size(148.dp)) {
-                            drawCircle(
-                                center = Offset(this.size.width / 2, this.size.height / 2),
-                                radius = 18F,
-                                color = Color.Red
-                            )
-                        }
-                    }
-                    is PoiIcon.ColoredCircle -> {
-                        Canvas(Modifier.size(148.dp)) {
-                            drawCircle(
-                                center = Offset(this.size.width / 2, this.size.height / 2),
-                                radius = 8F,
-                                color = icon.color
-                            )
-                        }
-                    }
-                    is PoiIcon.BundledIcon -> {
-                        Image(
-                            painter = painterResource(icon.fileName),
-                            contentDescription = null,
-                            modifier = Modifier.size(128.dp),
-                            colorFilter = null //icon.tint?.let { ColorFilter.tint(icon.tint, BlendMode.SrcAtop) }
-                        )
-                    }
-                }
-            }
-        }
     }
 
     data class SerializablePoi(
@@ -133,7 +100,7 @@ class PoiRepository @Inject constructor(
                 location = LatLng(location.first, location.second),
                 icon = when (iconType) {
                     "NoIcon" -> Poi.PoiIcon.NoIcon
-                    "ColoredCircled" -> Poi.PoiIcon.ColoredCircle(Color(iconColor!!))
+                    "ColoredCircle" -> Poi.PoiIcon.ColoredCircle(Color(iconColor!!))
                     "BundledIcon" -> Poi.PoiIcon.BundledIcon(fileName = iconFileName!!, Color(iconColor!!))
                     else -> Poi.PoiIcon.NoIcon
                 },
@@ -147,9 +114,12 @@ class PoiRepository @Inject constructor(
         existing : Poi? = null,
         new : Poi
     ) {
-        if (existing != null && poiConfig[PoiConfig.savedPois].contains(existing.toSerializablePoi())) {
+
+        if (poiConfig[PoiConfig.savedPois].any { it.location == new.toSerializablePoi().location }) {
             //Update
-            poiConfig[PoiConfig.savedPois].remove(existing.toSerializablePoi())
+            poiConfig[PoiConfig.savedPois].removeAll(
+                poiConfig[PoiConfig.savedPois].filter { it.location == new.toSerializablePoi().location }
+            )
             poiConfig[PoiConfig.savedPois].add(new.toSerializablePoi())
         } else {
             poiConfig[PoiConfig.savedPois].add(new.toSerializablePoi())

@@ -74,11 +74,21 @@ class CreateOrEditPoiScreen @Inject constructor(
     }
 
     private var savedInProgressPoi : PoiRepository.Poi? = null
+    //if we opened a POI to edit, this is the one we edited before we saved anything.
+    private var openedExistingPoi : PoiRepository.Poi? = null
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { params ->
 
         val existingPoi = (params?.requestParameters as? OpenMode)?.let {
             (it as? OpenMode.EditExistingPoi)?.poi
+        }
+        if (existingPoi != null) {
+            openedExistingPoi = existingPoi
+        }
+
+        if (params?.requestParameters as? OpenMode == OpenMode.NewPoi) {
+            savedInProgressPoi = null
+            openedExistingPoi = null
         }
 
         val wipPoi = savedInProgressPoi
@@ -199,7 +209,9 @@ class CreateOrEditPoiScreen @Inject constructor(
                         }
 
                         savePoi(
-                            existingPoi = existingPoi,
+                            //So we don't forget we're editing an existing when we really have just poorly recreated
+                            //Android saved instance state problems. This screen shows some flaws in the framework.
+                            existingPoi = openedExistingPoi ?: existingPoi,
                             uiStateToPoi(
                                 name = poiName.value,
                                 icon = poiIcon.value,

@@ -8,9 +8,12 @@ import org.jxmapviewer.viewer.GeoPosition
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
@@ -69,13 +72,31 @@ data class PoiOverlay(
                     )
                 }
             }
-
-
             //We can't fully support free-form composable icons because
             //The Composable Lambda has to be a constant at run-time.
             //It cannot be passed along how we think it should be. We also
             //can't do composable function references.
-            //So, we'll hack around it here, but hard-coding each lambda we'd ever need.
+
+            //It's not a tax, it's a shift -- Stephane Dion
+            //It's not a new function on the fly, it's calling the same one with a new parameter.
+            val CIRCLE_COLOR : @Composable (color : Color) -> Unit = { color ->
+                Canvas(Modifier.size(16.dp)){
+                    drawCircle(
+                        center = Offset(0F, 0F),
+                        radius = 32F,
+                        color = color
+                    )
+                }
+            }
+
+            val ICON_FILE : @Composable (iconFile : String, tint : Color?) -> Unit = { fileName, tint ->
+                Image(
+                    painter = painterResource(fileName),
+                    contentDescription = null,
+                    modifier = Modifier.size(42.dp),
+                    colorFilter = tint?.let { ColorFilter.tint(tint, BlendMode.SrcAtop) }
+                )
+            }
 
         }
     }
