@@ -23,6 +23,7 @@ import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ImageMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
@@ -266,7 +267,7 @@ class CreateOrEditPoiScreen @Inject constructor(
                                 )
                                 is PoiRepository.Poi.PoiIcon.BundledIcon -> ImageMenuItem(
                                     image = painterResource(icon.fileName),
-                                    imageModifier = Modifier.size(48.dp)
+                                    imageModifier = Modifier.size(48.dp.halveIfNotPixelDoubled())
                                         .aspectRatio(1.0F),
                                     tintColor = icon.tint,
                                     onClicked = {

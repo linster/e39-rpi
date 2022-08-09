@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
@@ -97,10 +98,10 @@ class CurrentDeviceViewer @Inject constructor(
                     Column(
                         Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                     ) {
-                        Text("Alias: ${currentDevice.value.alias}", color = Color.White, fontSize = 28.sp)
-                        Text("Paired: ${currentDevice.value.isPaired.toCheckBox()}", color = Color.White, fontSize = 28.sp)
-                        Text("Connected: ${currentDevice.value.isConnected.toCheckBox()}", color = Color.White, fontSize = 28.sp)
-                        Text("MAC: ${currentDevice.value.address}", color = Color.White, fontSize = 28.sp)
+                        Text("Alias: ${currentDevice.value.alias}", color = Color.White, fontSize = 28.sp.halveIfNotPixelDoubled())
+                        Text("Paired: ${currentDevice.value.isPaired.toCheckBox()}", color = Color.White, fontSize = 28.sp.halveIfNotPixelDoubled())
+                        Text("Connected: ${currentDevice.value.isConnected.toCheckBox()}", color = Color.White, fontSize = 28.sp.halveIfNotPixelDoubled())
+                        Text("MAC: ${currentDevice.value.address}", color = Color.White, fontSize = 28.sp.halveIfNotPixelDoubled())
                     }
                 }
 

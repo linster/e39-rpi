@@ -6,8 +6,10 @@ import com.uchuhimo.konf.ConfigSpec
 
 
 object HmiVersion : ConfigSpec() {
-    val gitHash by optional("<no version set>",
-        "gitHash", description = "Git Hash of the e39-rpi commit")
+    val sdHash by optional("<no version set>",
+        "sdHash", description = "Git Hash of the e39-rpi OS image")
+    val hmiHash by optional("<no version set>",
+        "hmiHash", description = "Git Hash of the e39-rpi HMI")
 }
 
 object E39Config : ConfigSpec() {
@@ -106,6 +108,12 @@ object E39Config : ConfigSpec() {
             Pair(0, 0),
             "HmiWindowOffset",
             "Pixels to offset HMI window from top-left"
+        )
+
+        val brightnessCompensation by optional(
+            1.0F,
+            "brightnessCompensation",
+            "Tint HMI to work around failing BMBT."
         )
     }
 

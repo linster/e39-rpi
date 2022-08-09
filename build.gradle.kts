@@ -57,8 +57,15 @@ dependencies {
     implementation(project(":autoDiscoveryAnnotations"))
 
     implementation("com.squareup.okio:okio:2.6.0")
+
+    println(System.getenv("BUILD_PI"))
+    if (System.getenv("BUILD_PI") == "true") {
+        implementation(compose.desktop.linux_arm64)
+    } else {
+        implementation(compose.desktop.currentOs)
+    }
 //    implementation(compose.desktop.linux_arm64)
-    implementation(compose.desktop.currentOs)
+//    implementation(compose.desktop.currentOs)
 
     implementation( "org.jetbrains.kotlin:kotlin-stdlib")
     implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")

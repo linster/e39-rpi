@@ -1,7 +1,12 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
@@ -158,7 +163,16 @@ class WindowManager @Inject constructor(
                     closeHmiMainWindow()
                 }
             ) {
+
+                //1F means fully bright (because white on black in calibration)
+                val tint = configurationStorage.config[E39Config.WindowManagerConfig.brightnessCompensation]
+
+                Box {
                     hmiWindow.content()()
+                    Box(Modifier.fillMaxSize().background(
+                        color = Color(0F, 0F, 0F, tint)
+                    ))
+                }
             }
         }
 

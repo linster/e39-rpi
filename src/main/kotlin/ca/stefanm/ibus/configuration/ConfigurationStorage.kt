@@ -3,6 +3,7 @@ package ca.stefanm.ibus.configuration
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.lib.logging.Logger
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
@@ -10,6 +11,7 @@ import com.uchuhimo.konf.source.hocon
 import com.uchuhimo.konf.source.hocon.toHocon
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Provider
 
 //https://github.com/russhwolf/multiplatform-settings
 
@@ -77,5 +79,9 @@ class ConfigurationStorage @Inject constructor(
     ) {
         logger.d("configurationStorage", "Saving groups to run on startup: $groupNames")
         config[E39Config.CarPlatformConfigSpec._listOfServiceGroupsOnStartup] = groupNames
+    }
+
+    fun setBrightnessCompensation(tint : Float) {
+        config[E39Config.WindowManagerConfig.brightnessCompensation] = tint
     }
 }

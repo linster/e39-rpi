@@ -30,7 +30,11 @@ import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
 @Composable
 fun Dp.halveIfNotPixelDoubled() : Dp = if (!ThemeWrapper.ThemeHandle.current.isPixelDoubled) (this.value / 2F).dp else this
+@Composable
+fun TextUnit.halveIfNotPixelDoubled() : TextUnit = if (!ThemeWrapper.ThemeHandle.current.isPixelDoubled) (this.value / 2F).sp else this
 
+@Composable
+fun Float.halveIfNotPixelDoubled() : Float = if (!ThemeWrapper.ThemeHandle.current.isPixelDoubled) (this / 2F) else this
 
 enum class ItemChipOrientation{
     NONE,

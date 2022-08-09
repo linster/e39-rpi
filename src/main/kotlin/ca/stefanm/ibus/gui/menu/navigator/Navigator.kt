@@ -2,10 +2,12 @@ package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
+import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
 import ca.stefanm.ibus.di.*
 import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
@@ -80,7 +82,9 @@ class NavigationModule {
         mapCenterSettingsScreen: MapCenterSettingsScreen,
         themeSelectorScreen: ThemeSelectorScreen,
         createOrEditPoiScreen: CreateOrEditPoiScreen,
-        poiManagerScreen: PoiManagerScreen
+        poiManagerScreen: PoiManagerScreen,
+        networkInfoScreen: NetworkInfoScreen,
+        brightnessCompensationScreen: BrightnessCompensationScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -111,7 +115,9 @@ class NavigationModule {
         mapCenterSettingsScreen,
         themeSelectorScreen,
         createOrEditPoiScreen,
-        poiManagerScreen
+        poiManagerScreen,
+        networkInfoScreen,
+        brightnessCompensationScreen
     )
 }
 

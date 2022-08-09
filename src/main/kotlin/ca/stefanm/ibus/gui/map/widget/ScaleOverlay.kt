@@ -27,9 +27,12 @@ enum class MapScale(
     METERS_400(displayString = "400 m", meters = 400, mapZoomLevel = 15),
     METERS_800(displayString = "800 m", meters = 800, mapZoomLevel = 14),
     KILOMETERS_1_6(displayString = "1.6 km", meters = 1600, mapZoomLevel = 13),
+    KILOMETERS_3_2(displayString = "3.2 km", meters = 3200, mapZoomLevel = 12), //Distance was a guess
+    KILOMETERS_7(displayString = "7 km", meters = 7000, mapZoomLevel = 11), // Distance was a guess
     KILOMETERS_25(displayString = "25 km", meters = 25600, mapZoomLevel = 9),
     KILOMETERS_50(displayString = "50 km", meters = 51200, mapZoomLevel = 8),
     KILOMETERS_100(displayString = "100 km", meters = 102400, mapZoomLevel = 7),
+    KILOMETERS_200(displayString = "200 km", meters = 204800, mapZoomLevel = 6), //Distance was a guess
 }
 
 //TODO we need a function to calculate a new map center given
@@ -48,7 +51,7 @@ fun MapScaleWidget(
     //How many meters wide is a tile?
     val tileWidthMeters = (40_075_016.686 * cos(Math.toRadians(mapCenter.latitude))) / (2.0.pow(osmZoom))
     val tilePixelsPerMeter = 256.0 / tileWidthMeters
-    val scaleLength = scale.meters * tilePixelsPerMeter
+    val scaleLength = scale.meters * tilePixelsPerMeter //LOL this might only be true at the center or top of th tile.
 
     val debugScaleLength = false
 

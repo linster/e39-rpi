@@ -106,7 +106,9 @@ class AboutScreen @Inject constructor(
                 AboutLabel("Written by Stefan Martynkiw")
                 AboutLabel("https://stefanm.ca")
                 AboutLabel("")
-                AboutLabel("Version 1.0.0 : ${configurationStorage.versionConfig[HmiVersion.gitHash]}")
+                AboutLabel("Version 1.0.0")
+                AboutLabel("     HMI: ${configurationStorage.versionConfig[HmiVersion.hmiHash]}")
+                AboutLabel("     OS : ${configurationStorage.versionConfig[HmiVersion.sdHash]}")
             }
         }
     }

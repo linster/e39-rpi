@@ -20,6 +20,7 @@ import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
@@ -80,10 +81,11 @@ data class PoiOverlay(
             //It's not a tax, it's a shift -- Stephane Dion
             //It's not a new function on the fly, it's calling the same one with a new parameter.
             val CIRCLE_COLOR : @Composable (color : Color) -> Unit = { color ->
+                val circleRadius = 32F.halveIfNotPixelDoubled()
                 Canvas(Modifier.size(16.dp)){
                     drawCircle(
                         center = Offset(0F, 0F),
-                        radius = 32F,
+                        radius = circleRadius,
                         color = color
                     )
                 }
@@ -93,7 +95,7 @@ data class PoiOverlay(
                 Image(
                     painter = painterResource(fileName),
                     contentDescription = null,
-                    modifier = Modifier.size(42.dp),
+                    modifier = Modifier.size(42.dp.halveIfNotPixelDoubled()),
                     colorFilter = tint?.let { ColorFilter.tint(tint, BlendMode.SrcAtop) }
                 )
             }
@@ -295,10 +297,10 @@ fun MapViewer(
         }
 
         if (overlayProperties.centerCrossHairsVisible) {
+            val strokeWidth = 8F.halveIfNotPixelDoubled()
             Canvas(
                 modifier = Modifier.matchParentSize()
             ) {
-                val strokeWidth = 8F
                 drawLine(
                     color = Color.DarkGray,
                     strokeWidth = strokeWidth,
