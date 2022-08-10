@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.map
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -273,7 +274,10 @@ class MapScreen @Inject constructor(
                 showGuidanceMenu(currentOverlayStateBus)
             }
             if (currentOverlayState.value == MapOverlayState.PoiMenu) {
-                showPoiOverlaymenu(currentOverlayStateBus)
+                showPoiOverlaymenu(
+                    currentCenter.value.let { LatLng(it.latitude, it.longitude) },
+                    currentOverlayStateBus
+                )
             }
         }
 
@@ -452,7 +456,10 @@ class MapScreen @Inject constructor(
         )
     }
 
-    private fun showPoiOverlaymenu(currentOverlayStateBus: MutableStateFlow<MapOverlayState>) {
+    private fun showPoiOverlaymenu(
+        currentCenter: LatLng,
+        currentOverlayStateBus: MutableStateFlow<MapOverlayState>
+    ) {
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                 menuTopLeft = IntOffset(32, 32),
@@ -476,6 +483,16 @@ class MapScreen @Inject constructor(
                         onClicked = {
                             modalMenuService.closeModalMenu()
                             navigationNodeTraverser.navigateToNode(PoiManagerScreen::class.java)
+                        }
+                    ),
+                    ModalMenu.ModalMenuItem(
+                        title = "New POI on Center",
+                        onClicked = {
+                            modalMenuService.closeModalMenu()
+                            CreateOrEditPoiScreen.newPoiAtLocation(
+                                navigationNodeTraverser,
+                                currentCenter
+                            )
                         }
                     ),
                     ModalMenu.ModalMenuItem(

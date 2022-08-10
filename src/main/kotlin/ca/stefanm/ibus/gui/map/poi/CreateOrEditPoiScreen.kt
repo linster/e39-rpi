@@ -61,6 +61,13 @@ class CreateOrEditPoiScreen @Inject constructor(
             )
         }
 
+        fun newPoiAtLocation(navigationNodeTraverser: NavigationNodeTraverser, center: LatLng) {
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                CreateOrEditPoiScreen::class.java,
+                OpenMode.NewPoiAtLocation(center)
+            )
+        }
+
         fun editExistingPoi(navigationNodeTraverser: NavigationNodeTraverser, existingPoi: PoiRepository.Poi) {
             navigationNodeTraverser.navigateToNodeWithParameters(
                 CreateOrEditPoiScreen::class.java,
@@ -71,6 +78,7 @@ class CreateOrEditPoiScreen @Inject constructor(
 
     private sealed interface OpenMode {
         object NewPoi : OpenMode
+        data class NewPoiAtLocation(val center : LatLng) : OpenMode
         data class EditExistingPoi(val poi : PoiRepository.Poi) : OpenMode
     }
 
@@ -92,12 +100,21 @@ class CreateOrEditPoiScreen @Inject constructor(
             openedExistingPoi = null
         }
 
+
         val wipPoi = savedInProgressPoi
 
         val emptyName = existingPoi?.name ?: wipPoi?.name ?: "<no name>"
         val poiName = remember { mutableStateOf(emptyName) }
 
         val poiLocation = remember { mutableStateOf(existingPoi?.location ?: wipPoi?.location) }
+
+
+        if ((params?.requestParameters as? OpenMode) is OpenMode.NewPoiAtLocation) {
+            savedInProgressPoi = null
+            openedExistingPoi = null
+
+            poiLocation.value = (params.requestParameters as OpenMode.NewPoiAtLocation).center
+        }
 
         val poiIcon = remember { mutableStateOf(
             existingPoi?.icon ?: wipPoi?.icon ?: PoiRepository.Poi.PoiIcon.NoIcon

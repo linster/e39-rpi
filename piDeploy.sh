@@ -25,7 +25,7 @@ sshpass -f ~/.ssh/pi_pass ssh `echo $PI_USER`@`echo $PI_IP` hocon -f /home/pi/.e
 
 sshpass -f ~/.ssh/pi_pass ssh -t `echo $PI_USER`@`echo $PI_IP` sudo systemctl restart display-manager
 
-sshpass -f ~/.ssh/pi_pass ssh -tt `echo $PI_USER`@`echo $PI_IP` stdbuf -oL tail -f /home/pi/hmi.log &
+sshpass -f ~/.ssh/pi_pass ssh -tt `echo $PI_USER`@`echo $PI_IP` stdbuf -oL tail -f /home/pi/hmi.log
 
 
 #sudo systemctl restart display-manager
