@@ -39,6 +39,8 @@ class GuidanceService @Inject constructor(
         .getCurrentSessionFlow()
         .map { it.sessionState }
 
+    fun getInstantaneousGuidanceSessionState() = guidanceSessionStorage.currentSession.sessionState
+
     fun getCurrentSession() = guidanceSessionStorage.getCurrentSessionFlow()
 
     fun clearCurrentSession() {
@@ -97,6 +99,15 @@ class GuidanceService @Inject constructor(
 
         guidanceSessionStorage.currentSession.terminateGuidance()
         guidanceSessionStorage.updateWithCurrent()
+
+        notificationHub.postNotificationBackground(Notification(
+            Notification.NotificationImage.MAP_GENERAL,
+            "Ended Guidance"
+        ))
+    }
+
+    fun repeatLastDirection() {
+
     }
 }
 

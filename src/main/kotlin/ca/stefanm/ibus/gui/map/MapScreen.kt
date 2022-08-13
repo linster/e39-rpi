@@ -3,6 +3,8 @@ package ca.stefanm.ibus.gui.map
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
@@ -11,6 +13,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -42,7 +45,8 @@ class MapScreen @Inject constructor(
     private val knobListenerService: KnobListenerService,
     private val logger : Logger,
     private val configurationStorage: ConfigurationStorage,
-    private val poiRepository: PoiRepository
+    private val poiRepository: PoiRepository,
+    private val guidanceService: GuidanceService,
 ) : NavigationNode<MapScreen.MapScreenResult> {
 
     companion object {
@@ -438,17 +442,28 @@ class MapScreen @Inject constructor(
                         }
                     ),
                     ModalMenu.ModalMenuItem(
-                        title = "Enter Address",
-                        onClicked = { currentOverlayStateBus.value = MapOverlayState.PanLeftRight }
+                        title = let{
+                            if (guidanceService.getInstantaneousGuidanceSessionState() != GuidanceSession.SessionState.IN_GUIDANCE) {
+                                "Setup..."
+                            } else {
+                                "Direction Options"
+                            }
+                       },
+                        onClicked = {
+                            modalMenuService.closeModalMenu()
+                            navigationNodeTraverser.navigateToNode(GuidanceSetupScreen::class.java)
+                        }
                     ),
                     ModalMenu.ModalMenuItem(
                         title = "Terminate Guidance",
-                        onClicked = { currentOverlayStateBus.value = MapOverlayState.PanUpDown }
+                        onClicked = {
+                            guidanceService.stopGuidance()
+                        }
                     ),
                     ModalMenu.ModalMenuItem(
                         title = "Repeat Direction",
                         onClicked = {
-
+                            guidanceService.repeatLastDirection()
                         }
                     )
                 )
