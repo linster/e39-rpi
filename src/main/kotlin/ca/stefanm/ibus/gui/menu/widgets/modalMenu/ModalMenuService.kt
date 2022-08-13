@@ -16,8 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.map.Extents
+import ca.stefanm.ibus.gui.map.MapViewer
+import ca.stefanm.ibus.gui.map.OverlayProperties
+import ca.stefanm.ibus.gui.map.PoiOverlay
+import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
@@ -26,9 +32,11 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
 
 object SidePanelMenu {
@@ -76,6 +84,53 @@ object SidePanelMenu {
             color = ChipItemColors.TEXT_WHITE,
             fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 18.sp else 9.sp,
             fontWeight = weight
+        )
+    }
+
+    @Composable
+    fun LatLngDetailSidePanelMenu(
+        title: String?,
+        poi : PoiRepository.Poi,
+        centerCrossHairsVisible : Boolean = true,
+        mapScale : MapScale = MapScale.METERS_400,
+        buttons : List<MenuItem>
+    ) {
+        SidePanelMenu(
+            title = title,
+            text = @Composable {
+                Box(Modifier.fillMaxWidth(0.66F).aspectRatio(1F), contentAlignment = Alignment.TopCenter) {
+                    MapViewer(
+                        overlayProperties = OverlayProperties(
+                            centerCrossHairsVisible = centerCrossHairsVisible,
+                            mapScaleVisible = false,
+                            gpsReceptionIconVisible = false,
+                            route = null,
+                            poiOverlay = PoiOverlay(listOf(
+                                poi.let {
+                                    //TODO this could be moved to a central spot.
+                                    PoiOverlay.PoiOverlayItem(
+                                        label = poi.name,
+                                        position = poi.location,
+                                        icon = { Box{
+                                            when (poi.icon) {
+                                                is PoiRepository.Poi.PoiIcon.ColoredCircle -> PoiOverlay.PoiOverlayItem.CIRCLE_COLOR.invoke(poi.icon.color)
+                                                is PoiRepository.Poi.PoiIcon.BundledIcon -> PoiOverlay.PoiOverlayItem.ICON_FILE.invoke(poi.icon.fileName, poi.icon.tint)
+                                            }
+                                        }}
+                                    )
+                                }
+                            ))
+                        ),
+                        extents = Extents(
+                            center = poi.location.let { GeoPosition(it.latitude, it.longitude) },
+                            mapScale = mapScale
+                        ),
+                        onCenterPositionUpdated = {}
+                    )
+                }
+
+            },
+            buttons
         )
     }
 }

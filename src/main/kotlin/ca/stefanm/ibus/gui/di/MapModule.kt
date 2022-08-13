@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.gui.di
 
+import ca.stefanm.ibus.gui.map.guidance.DummyRouteCalculator
+import ca.stefanm.ibus.gui.map.guidance.RouteCalculator
 import dagger.Module
 import dagger.Provides
 import io.ktor.client.*
@@ -29,6 +31,11 @@ class MapModule {
         //Lazy-init this since TileFetcher is eager.
         return httpClient
     }
+
+    @Provides
+    fun provideRouteCalculator(
+        dummyRouteCalculator: DummyRouteCalculator
+    ) : RouteCalculator = dummyRouteCalculator
 
 
 }

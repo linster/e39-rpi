@@ -424,7 +424,7 @@ class MapScreen @Inject constructor(
                 menuTopLeft = IntOffset(32, 32),
                 menuWidth = 512,
             ).toNormalModalMenuDimensions(),
-            autoCloseOnSelect = true,
+            autoCloseOnSelect = false,
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
                 onClose = {

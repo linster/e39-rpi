@@ -75,41 +75,11 @@ class PoiManagerScreen @Inject constructor(
 
             val isVisible : State<Boolean>
 
-            SidePanelMenu.SidePanelMenu(
+            SidePanelMenu.LatLngDetailSidePanelMenu(
                 title = "POI: ${poi.name}",
-                text = @Composable {
-                    Box(Modifier.fillMaxWidth(0.66F).aspectRatio(1F), contentAlignment = Alignment.TopCenter) {
-                        MapViewer(
-                            overlayProperties = OverlayProperties(
-                                centerCrossHairsVisible = true,
-                                mapScaleVisible = false,
-                                gpsReceptionIconVisible = false,
-                                route = null,
-                                poiOverlay = PoiOverlay(listOf(
-                                    poi.let {
-                                        //TODO this could be moved to a central spot.
-                                        PoiOverlay.PoiOverlayItem(
-                                            label = poi.name,
-                                            position = poi.location,
-                                            icon = { Box{
-                                                when (poi.icon) {
-                                                    is PoiRepository.Poi.PoiIcon.ColoredCircle -> PoiOverlay.PoiOverlayItem.CIRCLE_COLOR.invoke(poi.icon.color)
-                                                    is PoiRepository.Poi.PoiIcon.BundledIcon -> PoiOverlay.PoiOverlayItem.ICON_FILE.invoke(poi.icon.fileName, poi.icon.tint)
-                                                }
-                                            }}
-                                        )
-                                    }
-                                ))
-                            ),
-                            extents = Extents(
-                                center = poi.location.let { GeoPosition(it.latitude, it.longitude) },
-                                mapScale = MapScale.METERS_400
-                            ),
-                            onCenterPositionUpdated = {}
-                        )
-                    }
-
-                },
+                poi = poi,
+                centerCrossHairsVisible = true,
+                mapScale = MapScale.METERS_400,
                 buttons = listOf(
 //                    CheckBoxMenuItem(
 //                        title = "Visible on Map?",
@@ -132,35 +102,35 @@ class PoiManagerScreen @Inject constructor(
                             modalMenuService.showModalMenu(
                                 dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                                     menuWidth = 512,
-                                    menuTopLeft = IntOffset(1200, 600)
+                                    menuTopLeft = IntOffset(1200, 300)
                                 ).toNormalModalMenuDimensions(),
                                 autoCloseOnSelect = false,
                                 menuData = ModalMenu(
                                     chipOrientation = ItemChipOrientation.E,
                                     items = listOf(
-                                    ModalMenu.ModalMenuItem(
-                                        title = "Edit",
-                                        onClicked = {
-                                            modalMenuService.closeModalMenu()
-                                            modalMenuService.closeSidePaneOverlay(true)
-                                            CreateOrEditPoiScreen.editExistingPoi(navigationNodeTraverser, poi)
-                                        }
-                                    ),
-                                    ModalMenu.ModalMenuItem(
-                                        title = "Delete",
-                                        onClicked = {
-                                            modalMenuService.closeModalMenu()
-                                            modalMenuService.closeSidePaneOverlay(true)
-                                            poiRepository.deletePoi(poi)
-                                        }
-                                    ),
-                                    ModalMenu.ModalMenuItem(
-                                        title = "Go Back",
-                                        onClicked = {
-                                            modalMenuService.closeModalMenu()
-                                        }
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Edit",
+                                            onClicked = {
+                                                modalMenuService.closeModalMenu()
+                                                modalMenuService.closeSidePaneOverlay(true)
+                                                CreateOrEditPoiScreen.editExistingPoi(navigationNodeTraverser, poi)
+                                            }
+                                        ),
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Delete",
+                                            onClicked = {
+                                                modalMenuService.closeModalMenu()
+                                                modalMenuService.closeSidePaneOverlay(true)
+                                                poiRepository.deletePoi(poi)
+                                            }
+                                        ),
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Go Back",
+                                            onClicked = {
+                                                modalMenuService.closeModalMenu()
+                                            }
+                                        )
                                     )
-                                )
                                 )
                             )
 

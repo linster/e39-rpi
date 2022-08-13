@@ -3,8 +3,10 @@ package ca.stefanm.ibus.gui.menu.navigator
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSetupScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
@@ -83,6 +85,8 @@ class NavigationModule {
         themeSelectorScreen: ThemeSelectorScreen,
         createOrEditPoiScreen: CreateOrEditPoiScreen,
         poiManagerScreen: PoiManagerScreen,
+        poiSelectorScreen: PoiSelectorScreen,
+        guidanceSetupScreen: GuidanceSetupScreen,
         networkInfoScreen: NetworkInfoScreen,
         brightnessCompensationScreen: BrightnessCompensationScreen
     ) : Set<NavigationNode<*>> = setOf(
@@ -116,6 +120,8 @@ class NavigationModule {
         themeSelectorScreen,
         createOrEditPoiScreen,
         poiManagerScreen,
+        poiSelectorScreen,
+        guidanceSetupScreen,
         networkInfoScreen,
         brightnessCompensationScreen
     )
@@ -322,6 +328,11 @@ class NavigationNodeTraverser @Inject constructor(
                 navigator.get().navigateToNodeAndAwaitResult(it, parameters) as R
             }
         }
+    }
+
+    fun isNodeVisible(node : Class<out NavigationNode<*>>) : Boolean {
+        val nodeClass = allNodes.get().find { it.thisClass == node }
+        return navigator.get().mainContentScreen.value.node.thisClass == nodeClass
     }
 }
 

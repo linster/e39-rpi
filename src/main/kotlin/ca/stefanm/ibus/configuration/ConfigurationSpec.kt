@@ -1,8 +1,10 @@
 package ca.stefanm.ibus.configuration
 
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.PersistedGuidanceSession
 import com.javadocmd.simplelatlng.LatLng
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.optional
 
 
 object HmiVersion : ConfigSpec() {
@@ -174,5 +176,29 @@ object E39Config : ConfigSpec() {
                 "API Token for HERE Maps Guidance service."
             )
         }
+    }
+
+    object GuidanceConfig : ConfigSpec() {
+        val currentSession by optional(PersistedGuidanceSession.DEFAULT,
+            "guidanceSession",
+            "The current guidance session"
+        )
+
+        val replayableSessions by optional(listOf<PersistedGuidanceSession>(),
+            "replayableSessions",
+            "Navigation routes that are stored and can be replayed for offline use"
+        )
+
+        val notificationInstructionConsumerIsEnabled by optional(
+            true,
+            "notificationInstructionConsumerIsEnabled",
+            "Whether to show notifications of guidance instructins?"
+        )
+
+        enum class SidePanelInstructionEnablementState { NEVER, ONLY_OVER_MAP, ALWAYS}
+        val sidePanelScreenInstructionConsumerIsEnabled by optional(
+            SidePanelInstructionEnablementState.ONLY_OVER_MAP,
+            "sidePanelScreenInstructionConsumerIsEnabled"
+        )
     }
 }
