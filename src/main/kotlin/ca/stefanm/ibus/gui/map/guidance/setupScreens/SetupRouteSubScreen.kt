@@ -1,19 +1,20 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance
+package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.map.MapScreen
-import ca.stefanm.ibus.gui.map.guidance.GuidanceInstructionConsumer
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSetupScreenInstructionConsumer
 import ca.stefanm.ibus.gui.map.widget.MapScale
@@ -26,11 +27,9 @@ import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
-import io.ktor.sessions.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
@@ -38,23 +37,25 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @AutoDiscover
-class GuidanceSetupScreen @Inject constructor(
+class SetupRouteSubScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
     private val configurationStorage: ConfigurationStorage,
     private val guidanceService: GuidanceService,
-    private val guidanceInstructionConsumer: GuidanceSetupScreenInstructionConsumer,
     private val coroutineScope: CoroutineScope,
     private val logger: Logger
-) : NavigationNode<Nothing> {
+) : NavigationNode<GuidanceSetupScreen.SubScreenResult> {
 
     companion object {
-        private const val TAG = "GuidanceSetupScreen"
+        private const val TAG = "SetupRouteSubScreen"
     }
 
-    override val thisClass: Class<out NavigationNode<Nothing>>
-        get() = GuidanceSetupScreen::class.java
+    override val thisClass: Class<out NavigationNode<GuidanceSetupScreen.SubScreenResult>> = SetupRouteSubScreen::class.java
+
+
+    enum class LocationResponseFor { START_LOCATION, END_LOCATION }
+    private var locationResponseFor : LocationResponseFor? = null
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { params ->
 
@@ -85,15 +86,27 @@ class GuidanceSetupScreen @Inject constructor(
         }
 
         val currentSession = guidanceService.getCurrentSession().collectAsState(GuidanceSession())
+        val sessionState = guidanceService.getGuidanceSessionState().collectAsState(null)
 
-        when (currentSession.value.sessionState) {
+        LaunchedEffect(sessionState.value) {
+            logger.d(TAG, "Session state is : ${sessionState.value}")
+        }
+
+        when (sessionState.value) {
             GuidanceSession.SessionState.SETTING_UP,
             GuidanceSession.SessionState.READY_TO_CALCULATE,
             GuidanceSession.SessionState.ROUTE_CALCULATED -> SetupRouteScreen(currentSession.value)
-            GuidanceSession.SessionState.IN_GUIDANCE -> InGuidanceScreen()
-            GuidanceSession.SessionState.TERMINATED -> RouteTerminatedScreen()
+            GuidanceSession.SessionState.IN_GUIDANCE,
+            GuidanceSession.SessionState.TERMINATED -> {
+                navigationNodeTraverser.setResultAndGoBack(
+                    this, GuidanceSetupScreen.SubScreenResult.STATE_CHANGED
+                )
+            }
         }
+
+
     }
+
 
     @Composable
     fun SetupRouteScreen(session: GuidanceSession) {
@@ -104,20 +117,27 @@ class GuidanceSetupScreen @Inject constructor(
                 listOf(
                     TextMenuItem(
                         title = "Go Back",
-                        onClicked = { navigationNodeTraverser.goBack() }
+                        onClicked = { navigationNodeTraverser.setResultAndGoBack(this@SetupRouteSubScreen, GuidanceSetupScreen.SubScreenResult.GO_BACK) }
                     ),
                     TextMenuItem(
-                        title = "Set Start Location",
-                        isSelectable = session.sessionState in listOf(GuidanceSession.SessionState.SETTING_UP, GuidanceSession.SessionState.READY_TO_CALCULATE)
+                        title = "${checkBoxIfLocationNotNull { session.startPoint } }Set Start Location",
+                        isSelectable = session.sessionState in listOf(
+                            GuidanceSession.SessionState.SETTING_UP,
+                            GuidanceSession.SessionState.READY_TO_CALCULATE
+                        )
                     ) {
                         openLocatonChooser(
-                            title = "${checkBoxIfLocationNotNull { session.startPoint } }Set Start Location",
+                            title = "Set Start Location",
                             { session.startPoint ?: getDefaultMapSelectionLocation() },
-                            LocationResponseFor.START_LOCATION)
+                            LocationResponseFor.START_LOCATION
+                        )
                     },
                     TextMenuItem(
                         title = "${checkBoxIfLocationNotNull { session.endPoint } }Set End Location",
-                        isSelectable = session.sessionState in listOf(GuidanceSession.SessionState.SETTING_UP, GuidanceSession.SessionState.READY_TO_CALCULATE)
+                        isSelectable = session.sessionState in listOf(
+                            GuidanceSession.SessionState.SETTING_UP,
+                            GuidanceSession.SessionState.READY_TO_CALCULATE
+                        )
                     ) {
                         openLocatonChooser("Set End Location",
                             { session.endPoint ?: getDefaultMapSelectionLocation() },
@@ -161,7 +181,7 @@ class GuidanceSetupScreen @Inject constructor(
                                 title = "Clear Route Setup",
                                 onClicked = {
                                     guidanceService.clearCurrentSession()
-                                    navigationNodeTraverser.goBack()
+                                    navigationNodeTraverser.setResultAndGoBack(this@SetupRouteSubScreen, GuidanceSetupScreen.SubScreenResult.GO_BACK)
                                 }
                             ),
                         )
@@ -170,41 +190,6 @@ class GuidanceSetupScreen @Inject constructor(
             )
         }
     }
-
-    private fun calculateRoute() {
-
-        coroutineScope.launch(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
-            notificationHub.postNotification(Notification(
-                Notification.NotificationImage.MAP_GENERAL,
-                "Calculating Route",
-                "Please wait."
-            ))
-
-            guidanceService.calculateRoute()
-
-            notificationHub.postNotification(
-                Notification(
-                Notification.NotificationImage.MAP_GENERAL,
-                    "Calculated Route",
-                    "Start Navigation and have a safe trip."
-            ))
-        }
-    }
-
-    private fun startGuidance() {
-        guidanceService.startGuidance()
-    }
-
-    private fun checkBoxIfLocationNotNull(accessor : () -> LatLng?) : String {
-        return if (accessor() != null) { "✓ " } else { ""}
-    }
-
-    private fun getDefaultMapSelectionLocation() : LatLng {
-        return configurationStorage.config[E39Config.MapConfig.defaultMapCenter].let { LatLng(it.first, it.second) }
-    }
-
-    enum class LocationResponseFor { START_LOCATION, END_LOCATION }
-    private var locationResponseFor : LocationResponseFor? = null
 
     fun openLocatonChooser(
         title : String,
@@ -255,39 +240,20 @@ class GuidanceSetupScreen @Inject constructor(
     }
 
 
-
-    @Composable
-    fun InGuidanceScreen() {
-        //Have option to terminate guidance
-        //Show map screen of next driving instruction
-        //
-
-        val instruction = guidanceInstructionConsumer.instructionFlow.collectAsState(null)
-
-
-        //TODO have a button here to temrinate guidance
-        //TODO also put one in the guidance menu on the map.
+    private fun calculateRoute() {
+        guidanceService.calculateRoute()
     }
 
-    @Composable
-    fun RouteTerminatedScreen() {
-        //Offer to save the route to replay storage.
-        //Show a big map of where the route was.
 
-
-        Column(Modifier.fillMaxSize()) {
-            BmwSingleLineHeader("Guidance Setup")
-
-            HalfScreenMenu.BottomHalfTwoColumn(
-                listOf(
-                    TextMenuItem(
-                        title = "Go Back",
-                        onClicked = { navigationNodeTraverser.goBack() }
-                    )
-                ),
-                listOf()
-            )
-        }
+    private fun startGuidance() {
+        guidanceService.startGuidance()
     }
 
+    private fun checkBoxIfLocationNotNull(accessor : () -> LatLng?) : String {
+        return if (accessor() != null) { "✓ " } else { ""}
+    }
+
+    private fun getDefaultMapSelectionLocation() : LatLng {
+        return configurationStorage.config[E39Config.MapConfig.defaultMapCenter].let { LatLng(it.first, it.second) }
+    }
 }

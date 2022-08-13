@@ -3,7 +3,10 @@ package ca.stefanm.ibus.gui.menu.navigator
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSetupScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.InGuidanceSubScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.RouteTerminatedSubScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.SetupRouteSubScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
@@ -87,6 +90,9 @@ class NavigationModule {
         poiManagerScreen: PoiManagerScreen,
         poiSelectorScreen: PoiSelectorScreen,
         guidanceSetupScreen: GuidanceSetupScreen,
+        setupRouteSubScreen: SetupRouteSubScreen,
+        inGuidanceSubScreen: InGuidanceSubScreen,
+        routeTerminatedSubScreen: RouteTerminatedSubScreen,
         networkInfoScreen: NetworkInfoScreen,
         brightnessCompensationScreen: BrightnessCompensationScreen
     ) : Set<NavigationNode<*>> = setOf(
@@ -122,6 +128,9 @@ class NavigationModule {
         poiManagerScreen,
         poiSelectorScreen,
         guidanceSetupScreen,
+        setupRouteSubScreen,
+        inGuidanceSubScreen,
+        routeTerminatedSubScreen,
         networkInfoScreen,
         brightnessCompensationScreen
     )

@@ -26,6 +26,7 @@ import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import com.javadocmd.simplelatlng.util.LengthUnit
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -53,7 +54,30 @@ data class Route(
     val color : Color,
     val stroke: Stroke
     //Stroke??
-)
+) {
+    companion object {
+        val DefaultStroke = Stroke(width = 8F)
+
+
+        fun findCenter(path : List<LatLng>) : LatLng {
+            return LatLng(
+                (path.minOf { it.latitude } + path.maxOf { it.latitude }) / 2.0,
+                (path.minOf { it.longitude } + path.maxOf { it.longitude }) / 2.0
+            )
+        }
+
+        fun findMapScaleForOverview(path : List<LatLng>) : MapScale {
+            val topLeft = LatLng(path.minOf { it.latitude },  path.minOf { it.longitude })
+            val bottomRight = LatLng(path.maxOf { it.latitude }, path.maxOf { it.longitude })
+
+            //Hypotenuse.
+            val distance = LatLngTool.distance(topLeft, bottomRight, LengthUnit.METER)
+
+            //Match a close-ish "osm distance".
+            return MapScale.values().minByOrNull { abs(distance - it.meters) } ?: MapScale.METERS_50
+        }
+    }
+}
 
 data class PoiOverlay(
     val pois : List<PoiOverlayItem>
