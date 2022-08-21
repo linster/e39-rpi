@@ -33,6 +33,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -56,22 +57,26 @@ class GuidanceSetupScreen @Inject constructor(
         object STATE_CHANGED : SubScreenResult
     }
 
-    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { params ->
+    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = content@ { params ->
+        BmwSingleLineHeader("Guidance Setup")
 
-        (params?.result as? SubScreenResult)?.let {
-            if (it is SubScreenResult.GO_BACK) {
-                navigationNodeTraverser.goBack()
+        LaunchedEffect(Unit) {
+            val result = params?.result
+
+            if (result == null) {
+                val instantaneousState = guidanceService.getInstantaneousGuidanceSessionState()
+                navigationNodeTraverser.navigateToNode(instantaneousState.toScreenClass())
+            } else {
+                if (result is SubScreenResult.GO_BACK) {
+                    logger.d(TAG, "Going Back!")
+                    delay(5)
+                    navigationNodeTraverser.goBack()
+                }
+                if (result is SubScreenResult.STATE_CHANGED) {
+                    val instantaneousState = guidanceService.getInstantaneousGuidanceSessionState()
+                    navigationNodeTraverser.navigateToNode(instantaneousState.toScreenClass())
+                }
             }
-        }
-
-        val sessionState = guidanceService.getGuidanceSessionState().collectAsState(null)
-
-        LaunchedEffect(sessionState.value) {
-            logger.d(TAG, "Session state is : ${sessionState.value}")
-        }
-
-        sessionState.value?.let {
-            navigationNodeTraverser.navigateToNode(it.toScreenClass())
         }
     }
 

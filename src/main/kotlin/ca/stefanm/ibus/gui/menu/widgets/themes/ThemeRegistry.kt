@@ -46,11 +46,13 @@ object ThemeWrapper {
             }
 
             val isPixelDoubled = ThemeHandle.current.isPixelDoubled
-            ProvideTextStyle(
-                    TextStyle(fontSize = if (isPixelDoubled) 16.sp else 8.sp)
-            ) {
-                content()
-            }
+//            ProvideTextStyle(
+//                    TextStyle(fontSize = if (isPixelDoubled) 16.sp else 8.sp)
+//            ) {
+//                content()
+//            }
+
+            content()
         }
     }
 }

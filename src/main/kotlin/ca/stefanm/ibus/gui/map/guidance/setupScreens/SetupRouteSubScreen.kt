@@ -247,6 +247,10 @@ class SetupRouteSubScreen @Inject constructor(
 
     private fun startGuidance() {
         guidanceService.startGuidance()
+        navigationNodeTraverser.setResultAndGoBack(
+            this@SetupRouteSubScreen,
+            GuidanceSetupScreen.SubScreenResult.STATE_CHANGED
+        )
     }
 
     private fun checkBoxIfLocationNotNull(accessor : () -> LatLng?) : String {

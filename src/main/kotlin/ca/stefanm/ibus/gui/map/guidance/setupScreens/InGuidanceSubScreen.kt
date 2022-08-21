@@ -1,5 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
@@ -10,6 +11,8 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
 
 @AutoDiscover
@@ -26,7 +29,7 @@ class InGuidanceSubScreen @Inject constructor(
         when (currentSession.value) {
             null -> { /* Do nothing, flow hasn't read from disk yet. */ }
             GuidanceSession.SessionState.IN_GUIDANCE -> {
-                InGuidanceSubScreen()
+                Contents()
             }
             GuidanceSession.SessionState.SETTING_UP,
             GuidanceSession.SessionState.READY_TO_CALCULATE,
@@ -41,7 +44,7 @@ class InGuidanceSubScreen @Inject constructor(
     }
 
     @Composable
-    fun InGuidanceSubScreen() {
+    fun Contents() {
         //Have option to terminate guidance
         //Show map screen of next driving instruction
         //
@@ -49,10 +52,28 @@ class InGuidanceSubScreen @Inject constructor(
         //TODO have a button here to temrinate guidance
         //TODO also put one in the guidance menu on the map.
 
-        BmwSingleLineHeader("InGuidance")
+        Column {
+            BmwSingleLineHeader("InGuidance")
 
 
-        val instruction = guidanceInstructionConsumer.instructionFlow.collectAsState(null)
+            val instruction = guidanceInstructionConsumer.instructionFlow.collectAsState(null)
+
+            HalfScreenMenu.BottomHalfTwoColumn(
+                leftItems = listOf(
+                    TextMenuItem(
+                        title = "Go Back",
+                        onClicked = {
+                            navigationNodeTraverser.setResultAndGoBack(
+                                this@InGuidanceSubScreen,
+                                GuidanceSetupScreen.SubScreenResult.GO_BACK
+                            )
+                        }
+                    )
+                ),
+                rightItems = listOf()
+            )
+
+        }
 
     }
 

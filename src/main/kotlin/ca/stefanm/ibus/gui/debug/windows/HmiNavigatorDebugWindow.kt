@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.debug.windows
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.DropdownMenu
@@ -24,6 +25,7 @@ import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.navigator.*
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -36,6 +38,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
     private val navigator: Provider<Navigator>,
     private val navigationNodeTraverser: Provider<NavigationNodeTraverser>,
     @Named(NavigationModule.ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
+    private val modalMenuService: ModalMenuService
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -102,6 +105,10 @@ class HmiNavigatorDebugWindow @Inject constructor(
 
             NestingCard {
                 UnregisteredNodes()
+            }
+
+            NestingCard {
+                OverlayServiceDebug()
             }
         }
     }
@@ -222,5 +229,14 @@ class HmiNavigatorDebugWindow @Inject constructor(
             Text("Class: ${currentScreen.value?.node?.thisClass?.simpleName}")
             Text("Incoming Result: ${currentScreen.value?.incomingResult.toString()}")
         }
+    }
+
+    @Composable
+    fun OverlayServiceDebug() {
+        val menuOverlayVisible = modalMenuService.modalMenuOverlay.value != null
+        val sidebarOverlayVisible = modalMenuService.sidePaneOverlay.value.ui != null
+
+        Text("Menu overlay visible: ${menuOverlayVisible}")
+        Text("Sidebar overlay visible: ${sidebarOverlayVisible}")
     }
 }

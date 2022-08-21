@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceDebugWindow
 import ca.stefanm.ibus.gui.map.MapDebug
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
@@ -28,6 +29,8 @@ class DebugLaunchpad @Inject constructor(
     private val notificationSpammerDebug: NotificationSpammerDebug,
     private val hmiNavigatorDebugWindow: HmiNavigatorDebugWindow,
 
+    private val guidanceDebugWindow: GuidanceDebugWindow,
+
     private val logViewerWindow: LogViewerWindow
 ) : WindowManager.E39Window {
 
@@ -35,7 +38,7 @@ class DebugLaunchpad @Inject constructor(
         get() = this
 
     override val title = "Debug Launchpad"
-    override val size = DpSize(300.dp, 500.dp)
+    override val size = DpSize(300.dp, 700.dp)
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
@@ -68,6 +71,9 @@ class DebugLaunchpad @Inject constructor(
             }
             Button(onClick = { windowManager.openDebugWindow(logViewerWindow) }) {
                 Text("Live Log Viewer")
+            }
+            Button(onClick = { windowManager.openDebugWindow(guidanceDebugWindow)}) {
+                Text("Guidance Debug Window")
             }
         }
     }

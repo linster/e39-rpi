@@ -2,6 +2,8 @@ package ca.stefanm.ibus.gui.map
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
@@ -27,6 +29,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -165,21 +168,18 @@ class MapScreen @Inject constructor(
         )) }
 
         val currentCenter = remember { mutableStateOf(extents.value.center) }
-
         val currentOverlayState = remember { mutableStateOf<MapOverlayState>(MapOverlayState.NoOverlay) }
-        //Adapter because modalMenu doesn't have Composable on-Click methods.
-        val currentOverlayStateBus = MutableStateFlow(currentOverlayState.value)
-        rememberCoroutineScope().launch {
-            currentOverlayStateBus.collect { currentOverlayState.value = it }
-        }
 
 
-        LaunchedEffect(currentOverlayState.value) {
+        val scope = rememberCoroutineScope()
+
+        scope.launch(Dispatchers.IO) {
             knobListenerService.knobTurnEvents().collect { event ->
 
-                logger.d(TAG, "collect turn $event")
+                logger.d(TAG, "collect turn $event, current state: ${currentOverlayState.value}")
                 if (currentOverlayState.value == MapOverlayState.NoOverlay) {
                     if (event is InputEvent.NavKnobPressed) {
+                        logger.d(TAG, "setting state to ModifyViewMenu")
                         currentOverlayState.value = MapOverlayState.ModifyViewMenu
                     }
                 }
@@ -246,7 +246,7 @@ class MapScreen @Inject constructor(
 
         LaunchedEffect(parameters.usePersistedStateOnOpen) {
             extents.value = browsingState?.extents ?: return@LaunchedEffect
-            currentOverlayStateBus.value = browsingState?.mapOverlayState ?: return@LaunchedEffect
+            currentOverlayState.value = browsingState?.mapOverlayState ?: return@LaunchedEffect
         }
 
         DisposableEffect(currentOverlayState.value, extents.value) {
@@ -269,18 +269,18 @@ class MapScreen @Inject constructor(
             logger.d(TAG, "Overlay State: ${currentOverlayState.value}")
             if (currentOverlayState.value == MapOverlayState.ModifyViewMenu) {
                 showModifyViewMenu(
-                    currentOverlayStateBus,
                     parameters.openMode,
-                    currentCenterAcessor = { currentCenter.value.let { center -> LatLng(center.latitude, center.longitude) }}
+                    currentCenterAcessor = { currentCenter.value.let { center -> LatLng(center.latitude, center.longitude) }},
+                    onOverlayStateChanged = { currentOverlayState.value = it }
                 )
             }
             if (currentOverlayState.value == MapOverlayState.GuidanceMenu) {
-                showGuidanceMenu(currentOverlayStateBus)
+                showGuidanceMenu { currentOverlayState.value = it }
             }
             if (currentOverlayState.value == MapOverlayState.PoiMenu) {
                 showPoiOverlaymenu(
                     currentCenter.value.let { LatLng(it.latitude, it.longitude) },
-                    currentOverlayStateBus
+                    onOverlayStateChanged = { currentOverlayState.value = it }
                 )
             }
         }
@@ -312,6 +312,25 @@ class MapScreen @Inject constructor(
                             )
                         }
                     )
+                },
+                route = let {
+                    //TODO this block infinte loops and I'm not sure why yet.
+                    val sessionState = guidanceService.getGuidanceSessionState().collectAsState(GuidanceSession.SessionState.SETTING_UP)
+                    logger.d(TAG, "Guidance session state: $sessionState")
+                    if (sessionState.value == GuidanceSession.SessionState.IN_GUIDANCE) {
+                        val session = guidanceService.getCurrentSessionInstantaneous()
+                        val route = session.route ?: listOf()
+                        LaunchedEffect(route) {
+                            logger.d(TAG, "Route changed: ${route.size}")
+                        }
+                        Route(
+                            path = route,
+                            color = Color.Magenta,
+                            stroke = Stroke(8F)
+                        )
+                    } else {
+                        null //Don't draw a route
+                    }
                 }
             ),
             extents = extents.value,
@@ -323,9 +342,9 @@ class MapScreen @Inject constructor(
     }
 
     private fun showModifyViewMenu(
-        currentOverlayStateBus : MutableStateFlow<MapOverlayState>,
         mapScreenOpenMode: MapScreenParameters.MapScreenOpenMode,
-        currentCenterAcessor : () -> LatLng
+        currentCenterAcessor : () -> LatLng,
+        onOverlayStateChanged : (new : MapOverlayState) -> Unit,
     ) {
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
@@ -336,23 +355,23 @@ class MapScreen @Inject constructor(
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
                 onClose = {
-                    currentOverlayStateBus.value = MapOverlayState.NoOverlay
+                    onOverlayStateChanged(MapOverlayState.NoOverlay)
                 },
                 items = let {
                     val zoomControls = listOf(
                         ModalMenu.ModalMenuItem(
                             title = "Zoom",
                             onClicked = {
-                                currentOverlayStateBus.value = MapOverlayState.ChangeZoom
+                                onOverlayStateChanged(MapOverlayState.ChangeZoom)
                             }
                         ),
                         ModalMenu.ModalMenuItem(
                             title = "Pan ⬌",
-                            onClicked = { currentOverlayStateBus.value = MapOverlayState.PanLeftRight }
+                            onClicked = { onOverlayStateChanged(MapOverlayState.PanLeftRight) }
                         ),
                         ModalMenu.ModalMenuItem(
                             title = "Pan ⬍",
-                            onClicked = { currentOverlayStateBus.value = MapOverlayState.PanUpDown }
+                            onClicked = { onOverlayStateChanged(MapOverlayState.PanUpDown) }
                         )
                     )
 
@@ -362,14 +381,14 @@ class MapScreen @Inject constructor(
                                 title = "Guidance",
                                 onClicked = {
                                     modalMenuService.closeModalMenu()
-                                    currentOverlayStateBus.value = MapOverlayState.GuidanceMenu
+                                    onOverlayStateChanged(MapOverlayState.GuidanceMenu)
                                 }
                             ),
                             ModalMenu.ModalMenuItem(
                                 title = "POIs",
                                 onClicked = {
                                     modalMenuService.closeModalMenu()
-                                    currentOverlayStateBus.value = MapOverlayState.PoiMenu
+                                    onOverlayStateChanged(MapOverlayState.PoiMenu)
                                 }
                             )
                         )
@@ -422,7 +441,7 @@ class MapScreen @Inject constructor(
         )
     }
     
-    private fun showGuidanceMenu(currentOverlayStateBus : MutableStateFlow<MapOverlayState>) {
+    private fun showGuidanceMenu(onOverlayStateChanged : (new : MapOverlayState) -> Unit) {
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                 menuTopLeft = IntOffset(32, 32),
@@ -432,13 +451,14 @@ class MapScreen @Inject constructor(
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
                 onClose = {
-                    currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                    onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
                 },
                 items = listOf(
                     ModalMenu.ModalMenuItem(
                         title = "Back",
                         onClicked = {
-                            currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                            modalMenuService.closeModalMenu()
+                            onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
                         }
                     ),
                     ModalMenu.ModalMenuItem(
@@ -457,7 +477,9 @@ class MapScreen @Inject constructor(
                     ModalMenu.ModalMenuItem(
                         title = "Terminate Guidance",
                         onClicked = {
+                            modalMenuService.closeModalMenu()
                             guidanceService.stopGuidance()
+                            onOverlayStateChanged(MapOverlayState.NoOverlay)
                         }
                     ),
                     ModalMenu.ModalMenuItem(
@@ -473,7 +495,7 @@ class MapScreen @Inject constructor(
 
     private fun showPoiOverlaymenu(
         currentCenter: LatLng,
-        currentOverlayStateBus: MutableStateFlow<MapOverlayState>
+        onOverlayStateChanged : (new : MapOverlayState) -> Unit
     ) {
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
@@ -484,13 +506,14 @@ class MapScreen @Inject constructor(
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
                 onClose = {
-                    currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                    onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
                 },
                 items = listOf(
                     ModalMenu.ModalMenuItem(
                         title = "Back",
                         onClicked = {
-                            currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                            modalMenuService.closeModalMenu()
+                            onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
                         }
                     ),
                     ModalMenu.ModalMenuItem(
@@ -515,7 +538,7 @@ class MapScreen @Inject constructor(
                         onClicked = {
                             poiRepository.hideAllPois()
                             modalMenuService.closeModalMenu()
-                            currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                            onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
                         }
                     ),
                     ModalMenu.ModalMenuItem(
@@ -523,7 +546,7 @@ class MapScreen @Inject constructor(
                         onClicked = {
                             poiRepository.showAllPois()
                             modalMenuService.closeModalMenu()
-                            currentOverlayStateBus.value = MapOverlayState.ModifyViewMenu
+                            onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
                         }
                     )
                 )

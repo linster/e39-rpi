@@ -40,7 +40,7 @@ class GuidanceService @Inject constructor(
         .map { it.sessionState }
 
     fun getInstantaneousGuidanceSessionState() = guidanceSessionStorage.currentSession.sessionState
-
+    fun getCurrentSessionInstantaneous() = guidanceSessionStorage.currentSession
     fun getCurrentSession() = guidanceSessionStorage.getCurrentSessionFlow()
 
     fun clearCurrentSession() {
@@ -81,6 +81,7 @@ class GuidanceService @Inject constructor(
     private val guidanceThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     private val guidanceSuperVisorJob = SupervisorJob()
     fun startGuidance() {
+        logger.d(TAG, "Ask to guidance.")
         coroutineScope.launch(guidanceSuperVisorJob + guidanceThread) {
             logger.d(TAG, "Started guidance.")
 

@@ -75,6 +75,10 @@ class GuidanceSession {
         sessionState = SessionState.valueOf(session.sessionState)
         route = if (session.routeIsNull) null else (session.route?.map { LatLng(it.first, it.second) } ?: listOf())
     }
+
+    companion object {
+        val DEFAULT = GuidanceSession(PersistedGuidanceSession.DEFAULT)
+    }
 }
 
 data class PersistedGuidanceSession(
