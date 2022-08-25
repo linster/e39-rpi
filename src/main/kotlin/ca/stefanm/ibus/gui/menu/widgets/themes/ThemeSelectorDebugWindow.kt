@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes
+package ca.stefanm.ibus.gui.menu.widgets.themes
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
+import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.menu.Notification

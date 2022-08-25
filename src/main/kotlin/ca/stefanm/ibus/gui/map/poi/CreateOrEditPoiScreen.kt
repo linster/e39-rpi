@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.poi
+package ca.stefanm.ibus.gui.map.poi
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable

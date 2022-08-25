@@ -1,21 +1,17 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.poi
+package ca.stefanm.ibus.gui.map.poi
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import ca.stefanm.e39.navigation.db.NavigationDb
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
+import com.squareup.sqldelight.db.SqlDriver
+import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.hocon
@@ -27,10 +23,33 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
+
+
 @ApplicationScope
 class PoiRepository @Inject constructor(
     private val logger : Logger
 ){
+
+
+    private val driver : SqlDriver = JdbcSqliteDriver(
+        "jdbc:sqlite:" + ConfigurationStorage.e39BaseFolder.absolutePath + "/poi.sqlite"
+    )
+
+    init {
+        NavigationDb.Schema.create(driver)
+        val database = NavigationDb(driver)
+//        PoiQueries.insertPoi()
+        logger.d("DBWAT", database.poiQueries.selectAll().executeAsList().toString())
+
+
+        database.poiQueries.insertPoi(
+            PoiTable("foo", 1.0, 2.0, null, null, null)
+        )
+
+
+    }
+
 
     companion object {
         private val poiFile = File(ConfigurationStorage.e39BaseFolder, "poi.conf")

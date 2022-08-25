@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.configuration
 
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.PersistedGuidanceSession
+import ca.stefanm.ibus.gui.map.guidance.PersistedGuidanceSession
 import com.javadocmd.simplelatlng.LatLng
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec

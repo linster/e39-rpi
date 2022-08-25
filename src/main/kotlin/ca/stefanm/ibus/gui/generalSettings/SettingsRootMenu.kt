@@ -4,10 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
-import ca.stefanm.ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
-import ca.stefanm.ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
+import ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
+import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
+import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot

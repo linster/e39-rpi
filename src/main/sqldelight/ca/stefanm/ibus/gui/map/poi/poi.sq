@@ -1,0 +1,28 @@
+
+-- POI Table
+-- Used to store the POI address book
+
+CREATE TABLE poiTable (
+    name_string TEXT,
+    latitude_long REAL AS Double DEFAULT 0.0,
+    longitude_long REAL AS Double DEFAULT 0.0,
+    iconType_string TEXT DEFAULT "NoIcon",
+    iconFileName_string TEXT,
+    isVisible INTEGER AS Boolean DEFAULT 1
+);
+
+selectAll:
+SELECT * FROM poiTable;
+
+selectByname:
+SELECT * FROM poiTable WHERE name_string == ?;
+
+selectByNameLike:
+SELECT * FROM poiTable WHERE name_string LIKE ?;
+
+deleteByName:
+DELETE FROM poiTable WHERE name_string == ?;
+
+insertPoi:
+INSERT INTO poiTable
+VALUES ?;

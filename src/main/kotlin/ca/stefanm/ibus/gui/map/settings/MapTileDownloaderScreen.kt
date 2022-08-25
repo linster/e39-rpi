@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.MapScreen

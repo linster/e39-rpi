@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens
+package ca.stefanm.ibus.gui.map.guidance.setupScreens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
+import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSetupScreenInstructionConsumer

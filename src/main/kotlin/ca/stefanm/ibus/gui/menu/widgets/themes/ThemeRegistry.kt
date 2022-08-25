@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes
+package ca.stefanm.ibus.gui.menu.widgets.themes
 
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.ProvideTextStyle
@@ -8,8 +8,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toName
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
+import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toName
+import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope

@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.di
 
-import ca.stefanm.ca.stefanm.ibus.car.tvmodule.NavigationAnnounceService
+import ca.stefanm.ibus.car.tvmodule.NavigationAnnounceService
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.CliTrackInfoPrinter

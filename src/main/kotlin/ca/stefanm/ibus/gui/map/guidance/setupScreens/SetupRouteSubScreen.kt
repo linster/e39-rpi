@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens
+package ca.stefanm.ibus.gui.map.guidance.setupScreens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,9 +8,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
+import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
+import ca.stefanm.ibus.gui.map.poi.PoiRepository
+import ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
@@ -246,6 +246,9 @@ class SetupRouteSubScreen @Inject constructor(
 
 
     private fun startGuidance() {
+        if (guidanceService.getInstantaneousGuidanceSessionState() == GuidanceSession.SessionState.IN_GUIDANCE) {
+            //
+        }
         guidanceService.startGuidance()
         navigationNodeTraverser.setResultAndGoBack(
             this@SetupRouteSubScreen,

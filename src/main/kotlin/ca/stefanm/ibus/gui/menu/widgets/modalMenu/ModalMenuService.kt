@@ -16,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.map.poi.PoiRepository
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.Extents
 import ca.stefanm.ibus.gui.map.MapViewer

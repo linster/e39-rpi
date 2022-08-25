@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceDebugWindow
+import ca.stefanm.ibus.gui.map.guidance.GuidanceDebugWindow
 import ca.stefanm.ibus.gui.map.MapDebug
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject

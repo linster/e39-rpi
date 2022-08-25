@@ -8,8 +8,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope

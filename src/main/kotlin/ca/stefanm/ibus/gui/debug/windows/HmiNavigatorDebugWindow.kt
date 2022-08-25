@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
+import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn

@@ -1,5 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance
+package ca.stefanm.ibus.gui.map.guidance
 
+import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.javadocmd.simplelatlng.LatLng
 
 
@@ -50,7 +51,7 @@ class GuidanceSession {
                 sessionState = SessionState.ROUTE_CALCULATED
             } else {
                 if (route != null) {
-                    error("Incorrect state ${sessionState} for setting route $route.")
+                    StdOutLogger().d("GuidanceSession", "Incorrect state ${sessionState} for setting route $route.")
                 }
             }
         }

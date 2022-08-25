@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.gui.map.guidance
 
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
+import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.Kanata_path
 import kotlinx.coroutines.delay
 import javax.inject.Inject

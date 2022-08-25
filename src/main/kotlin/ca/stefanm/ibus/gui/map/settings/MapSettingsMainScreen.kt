@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.settings
+package ca.stefanm.ibus.gui.map.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

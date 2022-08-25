@@ -5,11 +5,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiRepository
+import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
+import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
+import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
+import ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
+import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -328,6 +328,7 @@ class MapScreen @Inject constructor(
                             color = Color.Magenta,
                             stroke = Stroke(8F)
                         )
+                        null
                     } else {
                         null //Don't draw a route
                     }

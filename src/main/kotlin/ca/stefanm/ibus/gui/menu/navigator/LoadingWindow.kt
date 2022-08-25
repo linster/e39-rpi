@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorDebugWindow
-import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
-import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorDebugWindow
+import ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
+import ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config

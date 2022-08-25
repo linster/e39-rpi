@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens
+package ca.stefanm.ibus.gui.debug.hmiScreens
 
 import androidx.compose.runtime.Composable
 import ca.stefanm.ibus.autoDiscover.AutoDiscover

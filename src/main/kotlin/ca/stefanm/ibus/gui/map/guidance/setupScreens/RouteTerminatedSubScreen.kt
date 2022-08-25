@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens
+package ca.stefanm.ibus.gui.map.guidance.setupScreens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -7,8 +7,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.BrowsableRouteStorage
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
+import ca.stefanm.gui.map.guidance.BrowsableRouteStorage
+import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.Extents
 import ca.stefanm.ibus.gui.map.MapViewer

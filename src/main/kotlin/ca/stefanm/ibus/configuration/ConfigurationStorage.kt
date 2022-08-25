@@ -42,7 +42,7 @@ class ConfigurationStorage @Inject constructor(
             config.toHocon.toFile(configFile)
         }
         config.afterSet { item, value ->
-            logger.d(TAG, "Setting $item to $value")
+            logger.d(TAG, "Setting ${item.name} to $value")
             config.toHocon.toFile(configFile)
         }
 

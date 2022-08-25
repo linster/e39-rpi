@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.gui.map.guidance
 
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSession
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceSessionStorage
+import ca.stefanm.gui.map.guidance.GuidanceSessionStorage
+import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
@@ -57,8 +57,9 @@ class GuidanceService @Inject constructor(
         guidanceSessionStorage.updateWithCurrent()
     }
 
+    private val routeCalculatorDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     fun calculateRoute() {
-        coroutineScope.launch(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+        coroutineScope.launch(routeCalculatorDispatcher) {
             notificationHub.postNotification(
                 Notification(
                     Notification.NotificationImage.MAP_GENERAL,
@@ -70,6 +71,8 @@ class GuidanceService @Inject constructor(
             guidanceSessionStorage.currentSession = routeCalculator
                 .calculateRoute(guidanceSessionStorage.currentSession)
 
+            guidanceSessionStorage.updateWithCurrent()
+
             notificationHub.postNotification(Notification(
                 Notification.NotificationImage.MAP_GENERAL,
                 "Calculated Route",
@@ -79,10 +82,16 @@ class GuidanceService @Inject constructor(
     }
 
     private val guidanceThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-    private val guidanceSuperVisorJob = SupervisorJob()
+    private var guidanceJob : Job? = null
     fun startGuidance() {
         logger.d(TAG, "Ask to guidance.")
-        coroutineScope.launch(guidanceSuperVisorJob + guidanceThread) {
+
+        if (guidanceSessionStorage.currentSession.sessionState == GuidanceSession.SessionState.IN_GUIDANCE) {
+            logger.d(TAG, "Not starting guidance, already in guidance.")
+            return
+        }
+
+        guidanceJob = coroutineScope.launch(guidanceThread) {
             logger.d(TAG, "Started guidance.")
 
             guidanceSessionStorage.currentSession.startGuidance()
@@ -94,9 +103,8 @@ class GuidanceService @Inject constructor(
 
         logger.d(TAG, "Stopping guidance.")
 
-        if (guidanceSuperVisorJob.isActive) {
-            guidanceSuperVisorJob.complete()
-        }
+        guidanceJob?.cancel()
+        guidanceJob = null
 
         guidanceSessionStorage.currentSession.terminateGuidance()
         guidanceSessionStorage.updateWithCurrent()

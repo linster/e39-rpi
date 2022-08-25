@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkInfo
+package ca.stefanm.ibus.gui.networkInfo
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

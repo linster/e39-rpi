@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.generalSettings
+package ca.stefanm.ibus.gui.generalSettings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage

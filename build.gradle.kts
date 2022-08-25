@@ -1,6 +1,16 @@
 import org.jetbrains.compose.compose
 import org.jetbrains.kotlin.daemon.common.configureDaemonJVMOptions
 
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.squareup.sqldelight:gradle-plugin:1.5.3")
+    }
+}
 plugins {
 
     if (true) {
@@ -16,6 +26,20 @@ plugins {
     }
     id("com.github.johnrengelman.shadow") version "7.1.0"
     id("java")
+
+    id("com.squareup.sqldelight") version "1.5.3"
+}
+
+
+sqldelight {
+    database("NavigationDb") {
+        packageName = "ca.stefanm.e39.navigation.db"
+        //sourceFolders = listOf("db")
+        schemaOutputDirectory = file("build/dbs")
+        //dependency(project(":OtherProject"))
+        dialect = "sqlite:3.24"
+        verifyMigrations = true
+    }
 }
 
 kapt {
@@ -43,11 +67,14 @@ repositories {
 }
 
 
+
 //jar {
 //    manifest {
 //        attributes 'Main-Class': 'ca.stefanm.ibus.MainKt'
 //    }
 //}
+
+
 
 dependencies {
 
@@ -93,6 +120,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
     testImplementation("junit:junit:4.12")
 
+
+    implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
+    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.3")
 
     //Web
     val ktor_version = "1.6.4"

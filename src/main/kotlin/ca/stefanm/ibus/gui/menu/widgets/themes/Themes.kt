@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes
+package ca.stefanm.ibus.gui.menu.widgets.themes
 
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.*
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
+import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 
 
 object Themes {

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.platformConfig
+package ca.stefanm.ibus.gui.platformConfig
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

@@ -2,8 +2,8 @@ package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
+import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
+import ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot

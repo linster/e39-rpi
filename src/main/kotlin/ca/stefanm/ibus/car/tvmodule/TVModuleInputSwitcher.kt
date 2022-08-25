@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.tvmodule
+package ca.stefanm.ibus.car.tvmodule
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
