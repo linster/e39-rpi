@@ -8,9 +8,13 @@ import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -36,6 +40,7 @@ import javax.inject.Named
 )
 @BluetoothServiceGroup
 class BluetoothService @Inject constructor(
+    private val configurablePlatform: ConfigurablePlatform,
     private val onScreenSetupManager: BluetoothOnScreenSetupManager,
     private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,
     private val trackInfoPrinter: TrackInfoPrinter,
@@ -73,6 +78,19 @@ class BluetoothService @Inject constructor(
                 requestBluetoothSetup()
             }
             getPairedPhone()
+        }
+
+        if (pairedPhone == null) {
+            logger.d("BT", "Don't have a phone, shutting down service")
+            DaggerApplicationComponent.create().notificationHub().postNotification(
+                Notification(
+                    Notification.NotificationImage.BLUETOOTH,
+                    "Stopping Bluetooth Service",
+                    "No phone paired"
+                )
+            )
+            configurablePlatform.configurablePlatformServiceRunner?.stopByName("BluetoothService")
+            return
         }
 
         val btPhone = dbusConnector.getDevice(pairedPhone.macAddress)

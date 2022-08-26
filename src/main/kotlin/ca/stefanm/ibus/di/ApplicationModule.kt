@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.di
 
+import ca.stefanm.ca.stefanm.ibus.gui.map.MapDatabaseModule
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.CliMain
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
@@ -19,6 +20,7 @@ import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.DebugKnobService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
@@ -44,6 +46,7 @@ annotation class ApplicationScope
     ApplicationModule::class,
     GuiModule::class,
     NavigationModule::class,
+    MapDatabaseModule::class,
 //    NavigationBindsModule::class,
     MapModule::class
 ])
@@ -69,6 +72,7 @@ interface ApplicationComponent {
 
     fun knobListenerService() : KnobListenerService
     fun modalMenuService() : ModalMenuService
+    fun notificationHub() : NotificationHub
 //    @Named(ApplicationModule.INPUT_EVENTS) fun inputEvents() : SharedFlow<InputEvent>
 
 

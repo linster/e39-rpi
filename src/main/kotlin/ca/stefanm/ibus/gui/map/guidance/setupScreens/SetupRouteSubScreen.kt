@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
@@ -14,9 +13,9 @@ import ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
-import ca.stefanm.ibus.gui.map.MapScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
-import ca.stefanm.ibus.gui.map.guidance.GuidanceSetupScreenInstructionConsumer
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -31,9 +30,6 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
-import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @AutoDiscover
@@ -60,8 +56,8 @@ class SetupRouteSubScreen @Inject constructor(
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { params ->
 
         LaunchedEffect(params) {
-            val mapSelectionResult = if (params?.resultFrom == MapScreen::class.java && params.result is MapScreen.MapScreenResult) {
-                (params.result as? MapScreen.MapScreenResult.PointSelectedResult)?.point
+            val mapSelectionResult = if (params?.resultFrom == MapScreen::class.java && params.result is MapScreenResult) {
+                (params.result as? MapScreenResult.PointSelectedResult)?.point
             } else { null }
 
             val poiSelectionResult = if (params?.resultFrom == PoiSelectorScreen::class.java && params.result is PoiSelectorScreen.PoiSelectionResult) {

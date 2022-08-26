@@ -5,38 +5,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.gui.map.MapScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ibus.gui.menu.widgets.ImageMenuItem
-import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.SidePanelMenu
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.GridKeyboard
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ImageMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.javadocmd.simplelatlng.LatLng
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 
 @AutoDiscover
@@ -120,8 +112,8 @@ class CreateOrEditPoiScreen @Inject constructor(
             existingPoi?.icon ?: wipPoi?.icon ?: PoiRepository.Poi.PoiIcon.NoIcon
         )}
 
-        if (params?.resultFrom == MapScreen::class.java && params.result is MapScreen.MapScreenResult) {
-            val chosenLocation = (params.result as? MapScreen.MapScreenResult.PointSelectedResult)?.point
+        if (params?.resultFrom == MapScreen::class.java && params.result is MapScreenResult) {
+            val chosenLocation = (params.result as? MapScreenResult.PointSelectedResult)?.point
             if (chosenLocation != null) {
                 poiLocation.value = chosenLocation
             }
@@ -318,7 +310,6 @@ class CreateOrEditPoiScreen @Inject constructor(
         newPoi : PoiRepository.Poi
     ) {
         poiRepository.saveOrUpdatePoi(
-            existing = existingPoi,
             new = newPoi.copy(isVisible = existingPoi?.isVisible ?: false),
         )
     }

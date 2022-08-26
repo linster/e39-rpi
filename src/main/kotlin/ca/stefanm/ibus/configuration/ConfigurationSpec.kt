@@ -53,11 +53,8 @@ object E39Config : ConfigSpec() {
             CarPlatformConfiguration.DisplayDriver.MK4,
             "DisplayDriver",
             "Which Nav Computer is installed in the car driving the stock display?")
-        val _pairedPhone by optional(
-            CarPlatformConfiguration.PairedPhone(
-                friendlyName = "Stefan's Pixel 2",
-                macAddress = listOf(0x40, 0x4E, 0x36, 0xB9, 0x47, 0x3E)
-            ),
+        val _pairedPhone by optional<CarPlatformConfiguration.PairedPhone?>(
+            null,
             "PairedPhone",
             "Which phone is being used for track changing and printing?")
         val _serialPortReadMode by optional(

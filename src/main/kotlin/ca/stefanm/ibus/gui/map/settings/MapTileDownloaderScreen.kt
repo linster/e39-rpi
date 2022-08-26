@@ -11,11 +11,11 @@ import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.gui.map.MapScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
 import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCache
-import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -26,19 +26,12 @@ import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.ginsberg.cirkle.circular
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FileUtils.byteCountToDisplaySize
-import java.util.*
 import javax.inject.Inject
 
 @ApplicationScope
@@ -58,8 +51,8 @@ class MapTileDownloaderScreen @Inject constructor(
 
         val scope = rememberCoroutineScope()
 
-        val downloadLocation = if (it?.resultFrom == MapScreen::class.java && it.result is MapScreen.MapScreenResult) {
-            (it.result as? MapScreen.MapScreenResult.PointSelectedResult)?.point
+        val downloadLocation = if (it?.resultFrom == MapScreen::class.java && it.result is MapScreenResult) {
+            (it.result as? MapScreenResult.PointSelectedResult)?.point
         } else { null }
 
         val downloadRadius = remember { mutableStateOf(MapScale.KILOMETERS_50) }

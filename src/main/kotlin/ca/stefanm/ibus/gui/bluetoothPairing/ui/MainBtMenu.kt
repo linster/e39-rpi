@@ -75,7 +75,13 @@ class MainBtMenu @Inject constructor(
                     )
                 ),
                 se = listOf(
-
+                    TextMenuItem(
+                        title = "Clear BMBT Device",
+                        onClicked = {
+                            pairingManager.clearCarPlatformBtDevice()
+                            pairingManager.onGoToBtMainMenu()
+                        }
+                    )
                 ),
                 sw = listOf(
                     TextMenuItem(

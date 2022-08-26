@@ -8,7 +8,7 @@ interface CarPlatformConfiguration {
 
     enum class DisplayDriver { TV_MODULE, MK4 }
 
-    val pairedPhone : PairedPhone
+    val pairedPhone : PairedPhone?
 
     data class PairedPhone(
         val friendlyName : String,

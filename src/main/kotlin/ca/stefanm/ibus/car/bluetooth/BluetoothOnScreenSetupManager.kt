@@ -9,7 +9,7 @@ import javax.inject.Inject
 //TODO to choose which device to pair to (and unpair from).
 @ConfiguredCarScope
 class BluetoothOnScreenSetupManager @Inject constructor(
-    private val pairedPhone: CarPlatformConfiguration.PairedPhone
+    private val pairedPhone: CarPlatformConfiguration.PairedPhone?
 ) {
 
     suspend fun isPhonePaired() = true

@@ -7,12 +7,16 @@ CREATE TABLE poiTable (
     latitude_long REAL AS Double DEFAULT 0.0,
     longitude_long REAL AS Double DEFAULT 0.0,
     iconType_string TEXT DEFAULT "NoIcon",
+    iconColor_int INTEGER AS Int,
     iconFileName_string TEXT,
     isVisible INTEGER AS Boolean DEFAULT 1
 );
 
 selectAll:
 SELECT * FROM poiTable;
+
+selectAllVisible:
+SELECT * FROM poiTable WHERE isVisible == 1;
 
 selectByname:
 SELECT * FROM poiTable WHERE name_string == ?;
@@ -23,6 +27,25 @@ SELECT * FROM poiTable WHERE name_string LIKE ?;
 deleteByName:
 DELETE FROM poiTable WHERE name_string == ?;
 
+hideAllPois:
+UPDATE poiTable SET isVisible = 0;
+
+showAllPois:
+UPDATE poiTable SET isVisible = 1;
+
+
 insertPoi:
 INSERT INTO poiTable
 VALUES ?;
+
+poiExists:
+SELECT COUNT(*) FROM poiTable p WHERE
+    p.name_string = :name_string AND
+    p.latitude_long = :latitude AND
+    p.longitude_long = :longitude;
+
+deletePoi:
+DELETE FROM poiTable WHERE
+    name_string = :name_string AND
+    latitude_long = :latitude AND
+    longitude_long = :longitude;

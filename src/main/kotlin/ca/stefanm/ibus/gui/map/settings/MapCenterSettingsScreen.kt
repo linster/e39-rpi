@@ -9,14 +9,13 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
-import ca.stefanm.ibus.gui.map.MapScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.javadocmd.simplelatlng.LatLng
@@ -32,8 +31,8 @@ class MapCenterSettingsScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { params ->
 
-        val chosenCenter = if (params?.resultFrom == MapScreen::class.java && params.result is MapScreen.MapScreenResult) {
-            (params.result as? MapScreen.MapScreenResult.PointSelectedResult)?.point
+        val chosenCenter = if (params?.resultFrom == MapScreen::class.java && params.result is MapScreenResult) {
+            (params.result as? MapScreenResult.PointSelectedResult)?.point
         } else { null }
 
         if (chosenCenter != null) {

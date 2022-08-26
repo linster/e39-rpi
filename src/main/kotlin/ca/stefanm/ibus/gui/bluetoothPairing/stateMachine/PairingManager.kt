@@ -60,15 +60,16 @@ class PairingManager @Inject constructor(
 
     private fun cleanupDBus() {
         if (isDBusSetup) {
-            listOf(
-                dBusConnectionOwningComponent,
-                deviceListProvider
-            ).asReversed().forEach { it.onCleanup() }
+            deviceListProvider.onCleanup()
+
             try {
                 cleanupAgent()
             } catch (e : Exception) {
                 logger.e(TAG, "Cleanup agent", e)
+                throw e
             }
+
+            dBusConnectionOwningComponent.onCleanup()
             isDBusSetup = false
         }
     }
@@ -312,5 +313,9 @@ class PairingManager @Inject constructor(
                 configurationStorage.setBMBTPairedPhone(uiResult.device)
             }
         }
+    }
+
+    fun clearCarPlatformBtDevice() {
+        configurationStorage.clearBMBTPairedPhone()
     }
 }

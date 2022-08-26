@@ -65,9 +65,16 @@ class DbusReconnector @Inject constructor(
 
     @Synchronized
     fun reconnect() : Pair<DBusConnection?, MediaPlayer1?>{
-        logger.d("RECONNECTOR", "Attempting DBus Reconnect.")
+
         with (dbusConnector) {
-            return Pair(connection, getPlayer(getDevice(deviceConfiguration.pairedPhone.macAddress)))
+            val pairedPhone = deviceConfiguration.pairedPhone
+            return if (pairedPhone != null) {
+                logger.d("RECONNECTOR", "Attempting DBus Reconnect.")
+                Pair(connection, getPlayer(getDevice(pairedPhone.macAddress)))
+            } else {
+                logger.d("RECONNECTOR", "No paired phone in config, skipping reconnect attempt.")
+                Pair(null, null)
+            }
         }
 
     }

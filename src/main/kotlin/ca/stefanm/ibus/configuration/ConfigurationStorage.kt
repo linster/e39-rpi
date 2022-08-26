@@ -74,6 +74,15 @@ class ConfigurationStorage @Inject constructor(
         )
     }
 
+    fun clearBMBTPairedPhone() {
+        config[E39Config.CarPlatformConfigSpec._pairedPhone] = null
+        configurablePlatform.onNewDeviceConfiguration(
+            E39Config.CarPlatformConfigSpec.toCarPlatformConfiguration(
+                config
+            )
+        )
+    }
+
     fun setServiceGroupsOnStartup(
         groupNames : List<String>
     ) {

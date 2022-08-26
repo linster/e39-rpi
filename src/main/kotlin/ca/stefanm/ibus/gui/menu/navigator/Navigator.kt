@@ -18,7 +18,7 @@ import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.generalSettings.*
-import ca.stefanm.ibus.gui.map.MapScreen
+import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.map.settings.MapCenterSettingsScreen
 import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
 import ca.stefanm.ibus.gui.menu.*
@@ -308,6 +308,10 @@ class NavigationNodeTraverser @Inject constructor(
         findNode(node)?.let { newNode ->
             navigator.get().navigateToNodeWithParameters(newNode, parameters)
         }
+    }
+
+    fun <R> setResultAndGoBack(node : Class<out NavigationNode<*>>, result : R) {
+        setResultAndGoBack(findNode(node) as NavigationNode<R>, result)
     }
 
     fun <R> setResultAndGoBack(node : NavigationNode<R>, result : R) {

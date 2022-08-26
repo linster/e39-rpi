@@ -89,7 +89,7 @@ class ConfiguredCarModule(
 
     @Provides
     @ConfiguredCarScope
-    fun providePairedPhone(deviceConfiguration: CarPlatformConfiguration) : CarPlatformConfiguration.PairedPhone = deviceConfiguration.pairedPhone
+    fun providePairedPhone(deviceConfiguration: CarPlatformConfiguration) : CarPlatformConfiguration.PairedPhone? = deviceConfiguration.pairedPhone
 
     @Provides
     @ConfiguredCarScope

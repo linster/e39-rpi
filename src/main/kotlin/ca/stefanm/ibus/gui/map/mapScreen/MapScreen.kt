@@ -1,4 +1,4 @@
-package ca.stefanm.ibus.gui.map
+package ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
@@ -15,7 +15,11 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.map.*
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.mapScreen.MapOverlayState
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -29,8 +33,6 @@ import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.jxmapviewer.viewer.GeoPosition
@@ -50,7 +52,7 @@ class MapScreen @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val poiRepository: PoiRepository,
     private val guidanceService: GuidanceService,
-) : NavigationNode<MapScreen.MapScreenResult> {
+) : NavigationNode<MapScreenResult> {
 
     companion object {
         const val TAG = "MapScreen"
@@ -105,48 +107,14 @@ class MapScreen @Inject constructor(
         }
     }
 
-    sealed class MapScreenResult {
-        data class PointSelectedResult(val point : LatLng?) : MapScreenResult()
-    }
-
     override val thisClass: Class<out NavigationNode<MapScreenResult>>
         get() = MapScreen::class.java
 
-    private data class MapScreenParameters(
-        /* If true, store the map zoom and center state so it can be reused on the next open */
-        val persistUiStateOnClose : Boolean = false,
-        /* If true, use the stored map zoom and center state when opening */
-        val usePersistedStateOnOpen : Boolean = false,
-
-        val openMode : MapScreenOpenMode
-    ) {
-        sealed class MapScreenOpenMode(
-            open val center : LatLng
-        ) {
-            /* The user is just browsing around on the map */
-            data class BrowsingMode(
-                override val center : LatLng,
-                val persistedState: BrowsingState? = null,
-            ) : MapScreenOpenMode(center = center)
-            data class LocationSelection(override val center : LatLng) : MapScreenOpenMode(center = center)
-        }
-    }
-
     private var browsingState : BrowsingState? = null
-    private data class BrowsingState(
+    data class BrowsingState(
         val extents: Extents,
         val mapOverlayState: MapOverlayState
     )
-
-    private sealed interface MapOverlayState {
-        object NoOverlay : MapOverlayState
-        object ModifyViewMenu : MapOverlayState
-        object GuidanceMenu : MapOverlayState
-        object PoiMenu : MapOverlayState
-        object PanLeftRight : MapOverlayState
-        object PanUpDown : MapOverlayState
-        object ChangeZoom : MapOverlayState
-    }
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
@@ -162,10 +130,12 @@ class MapScreen @Inject constructor(
 
 
 
-        val extents = remember { mutableStateOf(Extents(
+        val extents = remember { mutableStateOf(
+            Extents(
             center = parameters.openMode.center.let { center -> GeoPosition(center.latitude, center.longitude) },
             mapScale = MapScale.KILOMETERS_1_6
-        )) }
+        )
+        ) }
 
         val currentCenter = remember { mutableStateOf(extents.value.center) }
         val currentOverlayState = remember { mutableStateOf<MapOverlayState>(MapOverlayState.NoOverlay) }
@@ -173,7 +143,7 @@ class MapScreen @Inject constructor(
 
         val scope = rememberCoroutineScope()
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch() {
             knobListenerService.knobTurnEvents().collect { event ->
 
                 logger.d(TAG, "collect turn $event, current state: ${currentOverlayState.value}")
@@ -184,7 +154,11 @@ class MapScreen @Inject constructor(
                     }
                 }
 
-                if (currentOverlayState.value in listOf(MapOverlayState.ChangeZoom, MapOverlayState.PanUpDown, MapOverlayState.PanLeftRight)) {
+                if (currentOverlayState.value in listOf(
+                        MapOverlayState.ChangeZoom,
+                        MapOverlayState.PanUpDown,
+                        MapOverlayState.PanLeftRight
+                    )) {
                     if (event is InputEvent.NavKnobPressed) {
                         currentOverlayState.value = MapOverlayState.NoOverlay
                         modalMenuService.closeModalMenu()
@@ -295,7 +269,7 @@ class MapScreen @Inject constructor(
                             currentOverlayState.value == MapOverlayState.PanLeftRight ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
                 gpsReceptionIconVisible = false,
-                poiOverlay = poiRepository.getAllPoisFlow().collectAsState(emptyList()).value.let { list ->
+                poiOverlay = poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList()).value.let { list ->
                     logger.d("POI LIST", list.toString())
                     PoiOverlay(
                         pois = list.map { poi ->
