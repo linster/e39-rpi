@@ -29,6 +29,8 @@ interface CarPlatformConfiguration {
     val serialPortReadMode : SerialPortReadMode
     val serialPortWriteMode : SerialPortWriteMode
 
+    //TODO expose 8N1, 8E1, and baudrate here.
+
     enum class TrackInfoPrinterType { BMBT, CLI } //Do we stub out track info printing to the cli?
 
     val trackInfoPrinter : TrackInfoPrinterType

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProtobufLanguageSettings">
+    <option name="autoConfigEnabled" value="false" />
+    <option name="importPathEntries">
+      <list>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/src/test/kotlin" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/build/generated/sqldelight/code/NavigationDb" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/build/generated/source/kapt/main" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/build/generated/source/kaptKotlin/main" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/src/main/kotlin" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/src/main/resources" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/autoDiscovery/build/generated/source/kapt/main" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/autoDiscovery/build/generated/source/kaptKotlin/main" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/autoDiscovery/src/main/kotlin" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/autoDiscovery/src/main/resources" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/autoDiscoveryAnnotations/src/main/kotlin" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$USER_HOME$/.cache/JetBrains/IntelliJIdea2022.3/protoeditor" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/src/main/kotlin/ca/stefanm/ibus/car/pico/proto" />
+        </ImportPathEntry>
+      </list>
+    </option>
+    <option name="descriptorPath" value="google/protobuf/descriptor.proto" />
+  </component>
+</project>

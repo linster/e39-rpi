@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package ca.stefanm.e39.proto;
+
+message ConfigProto {
+  string str = 1;
+
+  bool isIbusLogOutputEnabled = 2;
+
+  enum LoggingLevels {
+    DEBUG = 0; INFO = 1; WARN = 2; ERROR = 3; WTF = 4;
+  }
+
+  LoggingLevels enabledMaxLogLevelForIbusLog = 3;
+  LoggingLevels enabledMaxLogLevelForPrintfLog = 4;
+
+  //If enabled, always turn on the Pi4 power supply when we start up.
+  bool alwaysTurnOnRpiOnStatup = 5;
+
+  //If enabled, send a packet to turn on BMBT screen
+  bool alwaysTurnOnScreenOnIbusActivity = 6;
+
+  enum ScanProgram {
+    NONE = 0;
+    CLOCK = 1;
+    LINSTEROS_BOOTSPLASH = 2;
+    GOOSE_BOOTSPLASH = 3;
+    BMW_BOOTSPLASH = 4;
+    MENU = 5;
+  }
+  ScanProgram scanProgramOnBoot = 7;
+
+  enum VideoSource {
+      RVC = 0x0; UPSTREAM = 0x1; PICO = 0x2; PI = 0x3;
+  }
+  VideoSource videoSourceOnBoot = 8;
+
+
+
+  //    https://github.com/piersholt/wilhelm-docs/blob/master/bmbt/4f.md
+  bool sendBMBTEncodingPacketOnBootup = 9;
+  enum VideoEncoding {
+    NTSC = 0; PAL = 1;
+  }
+
+  enum AspectRatio {
+    FourThree = 0; SixteenNine = 1; Zoom = 2;
+  }
+
+  VideoEncoding videoEncoding = 10;
+  AspectRatio aspectRatio = 11;
+
+}

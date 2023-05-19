@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package ca.stefanm.e39.proto;
+
+import "ConfigProto.proto";
+
+message PicoToPi {
+  enum MessageType {
+    HeartbeatRequest = 0;
+    HeartbeatResponse = 1;
+
+    //For the logger on the pico to shuttle to Rpi.
+    LogStatement = 2;
+
+    //Dump the config object
+    ConfigStatusResponse = 3;
+
+    //TODO we could have a mechanism where the pi sends to the pico
+    //TODO the number of ibus events it processed (knob turn messages?)
+    //TODO and if the pico isn't receiveng this heartbeat often enough,
+    //TODO it could auto-restart the PI.
+    PiSoftPowerRestartX = 4; //Ask the RPI to restart the X server
+    PiSoftPowerRestartPi = 5; //Ask the RPI to legit restart
+  }
+
+  MessageType messageType = 1;
+
+  optional ConfigProto existingConfig = 2;
+
+  optional string loggerStatement = 3;
+}
