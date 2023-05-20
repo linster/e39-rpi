@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
 import ca.stefanm.ibus.car.platform.PlatformService
+import ca.stefanm.ibus.car.platform.SerialInterfaceServiceDebugGroup
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import kotlinx.coroutines.GlobalScope
 
@@ -32,14 +33,32 @@ fun HorizontalServiceControlStrip(
         .firstOrNull { it.name == "SerialInterface"}
         ?.children?.firstOrNull { it.name == "SerialPublisherService" }
 
+    val serialListenerDebugService = servicesRunning.value
+        .firstOrNull { it.name == "SerialInterfaceDebug"}
+        ?.children?.firstOrNull { it.name == "SerialListenerDebugService" }
+    val serialWriterDebugService = servicesRunning.value
+        .firstOrNull { it.name == "SerialInterfaceDebug"}
+        ?.children?.firstOrNull { it.name == "SerialWriterDebugService" }
+
+    val syntheticIBusInputEventDebugLoggerService = servicesRunning.value
+        .firstOrNull { it.name == "SerialInterfaceDebug"}
+        ?.children?.firstOrNull { it.name == "SyntheticIBusInputEventDebugLoggerService" }
+
+    val services = listOf(
+        serialListenerService,
+        serialPublisherService,
+        serialListenerDebugService,
+        serialWriterDebugService,
+        syntheticIBusInputEventDebugLoggerService
+    )
+
     Row(modifier, horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
-        if (serialListenerService != null && serialPublisherService != null) {
-            Column {
-                CheckboxForService(serialListenerService)
-                CheckboxForService(serialPublisherService)
-            }
-        } else {
+        if (services.any { it == null }) {
             Text("Platform is not running?")
+        } else {
+            Column {
+                services.forEach { CheckboxForService(it!!) }
+            }
         }
     }
 }
@@ -51,7 +70,7 @@ private fun CheckboxForService(
     NestingCard {
         Row {
             Text("Name: ${service.name}")
-            Text("RunStatus: ${service.runStatus.collectAsState(PlatformService.RunStatus.ZOMBIE)}")
+            Text("RunStatus: ${service.runStatus.collectAsState(PlatformService.RunStatus.ZOMBIE).value}")
             Button(onClick = service.startService) { Text("Start") }
             Button(onClick = service.stopService) { Text("Stop") }
         }

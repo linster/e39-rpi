@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug.PicoCommsDebugWindow
 import ca.stefanm.ibus.gui.map.guidance.GuidanceDebugWindow
 import ca.stefanm.ibus.gui.map.MapDebug
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
@@ -31,7 +32,9 @@ class DebugLaunchpad @Inject constructor(
 
     private val guidanceDebugWindow: GuidanceDebugWindow,
 
-    private val logViewerWindow: LogViewerWindow
+    private val logViewerWindow: LogViewerWindow,
+
+    private val picoCommsDebugWindow: PicoCommsDebugWindow
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -74,6 +77,10 @@ class DebugLaunchpad @Inject constructor(
             }
             Button(onClick = { windowManager.openDebugWindow(guidanceDebugWindow)}) {
                 Text("Guidance Debug Window")
+            }
+
+            Button(onClick = { windowManager.openDebugWindow(picoCommsDebugWindow)}) {
+                Text("Pico Comms Debug")
             }
         }
     }

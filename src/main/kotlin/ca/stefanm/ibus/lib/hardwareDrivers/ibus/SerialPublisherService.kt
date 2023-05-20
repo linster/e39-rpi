@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
+import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialWriterDebugService
 import ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.di.ApplicationModule
@@ -22,6 +23,7 @@ class SerialPublisherService @Inject constructor(
     @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) private val messagesOut : Channel<IBusMessage>,
     private val logger: Logger,
     private val serialPortWriter: SerialPortWriter,
+    private val serialWriterDebugService: SerialWriterDebugService,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
@@ -29,6 +31,8 @@ class SerialPublisherService @Inject constructor(
         messagesOut.consumeEach {
             logger.d("SerialPublisherService", "Writing message to serial port: $it")
             serialPortWriter.writeRawBytes(it.toWireBytes())
+
+            serialWriterDebugService.logMessage(it)
         }
     }
 }

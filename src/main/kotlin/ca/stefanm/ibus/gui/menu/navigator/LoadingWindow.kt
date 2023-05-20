@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
+import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug.PicoCommsDebugWindow
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorDebugWindow
 import ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
 import ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
@@ -39,6 +40,7 @@ class LoadingWindow @Inject constructor(
     private val platformConfigSetupWindow: PlatformConfigSetupWindow,
     private val windowManagerConfigSetupWindow: WindowManagerConfigSetupWindow,
     private val themeSelectorDebugWindow: ThemeSelectorDebugWindow,
+    private val picoCommsDebugWindow: PicoCommsDebugWindow,
     private val windowManager : Provider<WindowManager>
 ) {
 
@@ -128,6 +130,10 @@ class LoadingWindow @Inject constructor(
                     Item(
                         "Theme Selector",
                         onClick = { windowManager.get().openDebugWindow(themeSelectorDebugWindow)}
+                    )
+                    Item(
+                        "Pico Comms Debug",
+                        onClick = { windowManager.get().openDebugWindow(picoCommsDebugWindow)}
                     )
                 }
                 Menu("Configuration") {

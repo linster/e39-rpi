@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
+import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerDebugService
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
@@ -32,12 +33,16 @@ class SerialListenerService @Inject constructor(
 
     private val logger: Logger,
     private val serialPortReader: SerialPortReader,
+
+    private val serialListenerDebugService: SerialListenerDebugService,
+
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
 ) : LongRunningLoopingService(coroutineScope, parsingDispatcher) {
     override suspend fun doWork() {
         serialPortReader.readMessages().collect {
             incomingMessages.emit(it)
+            serialListenerDebugService.logMessage(it)
         }
     }
 }

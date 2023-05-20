@@ -1,5 +1,8 @@
 package ca.stefanm.ibus.car.di
 
+import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerDebugService
+import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialWriterDebugService
+import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SyntheticIBusInputEventDebugLoggerService
 import ca.stefanm.ibus.car.tvmodule.NavigationAnnounceService
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
@@ -64,6 +67,9 @@ interface ConfiguredCarComponent {
     fun discoveredServiceIncomingIbusMessageCliPrinter() : IncomingIbusMessageCliPrinter
     fun discoveredServiceIbusInputMessageParser() : IBusInputMessageParser
     fun discoveredServiceBluetoothService() : BluetoothService
+    fun discoveredServiceSerialListenerDebugService() : SerialListenerDebugService
+    fun discoveredServiceSerialWriterDebugService() : SerialWriterDebugService
+    fun discoveredServiceSyntheticIBusInputEventDebugLoggerService() : SyntheticIBusInputEventDebugLoggerService
 }
 
 @Module

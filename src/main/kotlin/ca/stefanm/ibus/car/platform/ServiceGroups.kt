@@ -36,6 +36,12 @@ annotation class CliPrinterServiceGroup
 annotation class SerialInterfaceServiceGroup
 
 @PlatformServiceGroup(
+    name = "SerialInterfaceDebug",
+    description = "Services at attach to SerialInterfaceServiceGroup services to provide debug information"
+)
+annotation class SerialInterfaceServiceDebugGroup
+
+@PlatformServiceGroup(
     name = "Peripherals",
     description = "Various peripherals for RPI Case",
 )

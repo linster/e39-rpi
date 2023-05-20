@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.di
 
 import ca.stefanm.ca.stefanm.ibus.gui.map.MapDatabaseModule
+import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.CliMain
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
@@ -100,6 +101,9 @@ class ApplicationModule {
         const val IBUS_MESSAGE_OUTPUT_CHANNEL = "IbusOutput"
 
         private val inputEventsWriter = MutableSharedFlow<InputEvent>()
+
+        const val IBUS_COMMS_DEBUG_CHANNEL = "IbusCommsDebug"
+        private val ibusCommsDebugChannel = MutableSharedFlow<IbusCommsDebugMessage>()
     }
 
     @Provides
@@ -129,6 +133,12 @@ class ApplicationModule {
     fun provideIbusOuptutChannel() : Channel<IBusMessage> = Channel(capacity = Channel.UNLIMITED)
 
 
+
+    @Provides
+    @Named(IBUS_COMMS_DEBUG_CHANNEL)
+    @ApplicationScope
+    @JvmSuppressWildcards(suppress = false)
+    fun provideIbusCommsDebugChannel() : MutableSharedFlow<IbusCommsDebugMessage> = ibusCommsDebugChannel
 
     //TODO
     //TODO https://arunkumar.dev/introducing-scabbard-a-tool-to-visualize-dagger-2-dependency-graphs/
