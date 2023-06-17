@@ -6,8 +6,8 @@
 package ca.stefanm.e39.proto;
 
 @kotlin.jvm.JvmName("-initializepicoToPi")
-public inline fun picoToPi(block: ca.stefanm.e39.proto.PicoToPiKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi =
-  ca.stefanm.e39.proto.PicoToPiKt.Dsl._create(ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.newBuilder()).apply { block() }._build()
+public inline fun picoToPi(block: ca.stefanm.e39.proto.PicoToPiKt.Dsl.() -> kotlin.Unit): PicoToPiOuterClass.PicoToPi =
+  ca.stefanm.e39.proto.PicoToPiKt.Dsl._create(PicoToPiOuterClass.PicoToPi.newBuilder()).apply { block() }._build()
 /**
  * Protobuf type `ca.stefanm.e39.proto.PicoToPi`
  */
@@ -15,22 +15,22 @@ public object PicoToPiKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.Builder
+    private val _builder: PicoToPiOuterClass.PicoToPi.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: PicoToPiOuterClass.PicoToPi.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi = _builder.build()
+    internal fun _build(): PicoToPiOuterClass.PicoToPi = _builder.build()
 
     /**
      * `.ca.stefanm.e39.proto.PicoToPi.MessageType messageType = 1;`
      */
-    public var messageType: ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType
+    public var messageType: PicoToPiOuterClass.PicoToPi.MessageType
       @JvmName("getMessageType")
       get() = _builder.getMessageType()
       @JvmName("setMessageType")
@@ -54,7 +54,7 @@ public object PicoToPiKt {
     /**
      * `optional .ca.stefanm.e39.proto.ConfigProto existingConfig = 2;`
      */
-    public var existingConfig: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
+    public var existingConfig: ConfigProtoOuterClass.ConfigProto
       @JvmName("getExistingConfig")
       get() = _builder.getExistingConfig()
       @JvmName("setExistingConfig")
@@ -74,7 +74,7 @@ public object PicoToPiKt {
     public fun hasExistingConfig(): kotlin.Boolean {
       return _builder.hasExistingConfig()
     }
-    public val PicoToPiKt.Dsl.existingConfigOrNull: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto?
+    public val PicoToPiKt.Dsl.existingConfigOrNull: ConfigProtoOuterClass.ConfigProto?
       get() = _builder.existingConfigOrNull
 
     /**
@@ -103,9 +103,9 @@ public object PicoToPiKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.copy(block: ca.stefanm.e39.proto.PicoToPiKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi =
+public inline fun PicoToPiOuterClass.PicoToPi.copy(block: ca.stefanm.e39.proto.PicoToPiKt.Dsl.() -> kotlin.Unit): PicoToPiOuterClass.PicoToPi =
   ca.stefanm.e39.proto.PicoToPiKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
-public val ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPiOrBuilder.existingConfigOrNull: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto?
+public val PicoToPiOuterClass.PicoToPiOrBuilder.existingConfigOrNull: ConfigProtoOuterClass.ConfigProto?
   get() = if (hasExistingConfig()) getExistingConfig() else null
 

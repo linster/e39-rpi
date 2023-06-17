@@ -8,8 +8,6 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.SerialInterfaceServiceDebugGroup
-import ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
-import ca.stefanm.ibus.car.platform.Service
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
@@ -18,7 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import java.time.Instant
 import javax.inject.Inject

@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,12 +20,10 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
-import ca.stefanm.ibus.gui.debug.windows.ServiceStatusViewer
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.lib.hardwareDrivers.SunroofOpener
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch

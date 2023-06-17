@@ -91,7 +91,20 @@ fun IbusMessageView(message: IbusCommsDebugMessage) {
             is IbusCommsDebugMessage.OutgoingMessage.RawMessage -> {
                 Text(text = message.outgoingMessage.toString(), modifier = Modifier.padding(10.dp))
             }
-            else -> {}
+            is IbusCommsDebugMessage.OutgoingMessage.SyntheticPiToPicoMessage -> {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text(text = message.message.toString(), modifier = Modifier.padding(10.dp))
+                    Column(modifier = Modifier.border(1.dp, Color.Black)) {
+                        Text(text = "Pi to Pico Message")
+                        Text(text = message.piToPicoMessage.toString())
+                    }
+                    Text(text = "Created at: ${message.createdAt.toHttpDateString()}", modifier = Modifier)
+                    Text(text = "Sent at: ${message.sentAt.toHttpDateString()}", modifier = Modifier)
+                }
+            }
+            else -> {
+                Text("Message type: ${message::class.simpleName}")
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers
 
 import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
-import ca.stefanm.e39.proto.PicoToPiOuterClass
 import ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
@@ -14,7 +13,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

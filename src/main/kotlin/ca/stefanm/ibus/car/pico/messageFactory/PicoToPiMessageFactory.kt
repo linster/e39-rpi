@@ -2,7 +2,6 @@ package ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory
 
 import ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
 import ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType
-import ca.stefanm.e39.proto.configProto
 import ca.stefanm.e39.proto.picoToPi
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.lib.messages.IBusMessage

@@ -11,7 +11,6 @@ import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
 import javax.inject.Named
