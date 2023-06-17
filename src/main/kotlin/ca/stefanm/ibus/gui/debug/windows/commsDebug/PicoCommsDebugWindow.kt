@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,8 +19,10 @@ import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
 import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PicoToPiMessageFactory
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.e39.proto.PiToPicoOuterClass
+import ca.stefanm.e39.proto.PicoToPiOuterClass
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.debug.windows.CheckBoxWithLabel
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
@@ -36,6 +41,8 @@ class PicoCommsDebugWindow @Inject constructor(
 
     @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) val outgoingMessages : Channel<IBusMessage>,
 
+    @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,
+
     private val piToPicoMessageFactory: PiToPicoMessageFactory,
     private val picoToPiMessageFactory: PicoToPiMessageFactory,
 
@@ -51,7 +58,7 @@ class PicoCommsDebugWindow @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = DpSize(1280.dp, 1024.dp)
+    override val size = DpSize(1680.dp, 1024.dp)
 
     override fun content(): @Composable WindowScope.() -> Unit = {
         Row(modifier = Modifier, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -62,6 +69,7 @@ class PicoCommsDebugWindow @Inject constructor(
                 PlatformControls(configurablePlatform)
                 Row {
                     MessageSendCard()
+                    SimulatePicoMessagesCard()
                 }
                 SendTestMessages()
             }
@@ -145,7 +153,85 @@ class PicoCommsDebugWindow @Inject constructor(
             NestingCardHeader("Simulate Pico Messages")
 
             //TODO Checkbox here for "Real, or simulated"
+            val dryRun = remember { mutableStateOf(false) }
+            CheckBoxWithLabel(
+                isChecked = dryRun.value,
+                onCheckChanged = { dryRun.value = it },
+                label = "Dry Run"
+            )
+
+            val scope = rememberCoroutineScope()
+
+            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { heartbeatRequest() } } }) {
+                Text("Heartbeat Request")
+            }
+
+            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { heartbeatResponse() } } }) {
+                Text("Heartbeat Response")
+            }
+
+            val logStatement1 = "Some short log statement from the raspberry pi pico board."
+            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { logStatement(logStatement1) } } }) {
+                Text("Log Statement 1 (Len: ${logStatement1.length}) ")
+            }
+
+
+            val logStatement2 = "Some longer log statement from the raspberry pi pico board that is sketchily long and" +
+                    "shouldn't really fit into one ibus packet, yet here we are."
+            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { logStatement(logStatement2) } } }) {
+                Text("Log Statement 2 (Len: ${logStatement2.length} )")
+            }
+
+
+            val logStatement3 = "Some longer log statement from the raspberry pi pico board that is sketchily long and" +
+                    "shouldn't really fit into one ibus packet, yet here we are. And we're going to keep going and going" +
+                    "until we are over the character limit and lets just keep on going and going for days and days and then" +
+                    "what we will do is ramble on and on until the software explodes in our faces."
+            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { logStatement(logStatement3) } } }) {
+                Text("Log Statement 3 (Len: ${logStatement3.length} )")
+            }
+
+            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { softRestartX() } } }) {
+                Text("Request restart X")
+            }
+
+
+            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { softRestartPi() } } }) {
+                Text("Request restart Pi")
+            }
+
         }
+    }
+
+    suspend fun simulatePicoToPiMessage(
+        dryRun : Boolean, //If true, only register a simulated event, don't also send it to incoming parsers
+        block : PicoToPiMessageFactory.() -> IBusMessage
+    ) {
+
+        val ibusMessage = with (picoToPiMessageFactory) { block() }
+
+
+        val picoToPiMessage = try {
+            PicoToPiOuterClass.PicoToPi.parseFrom(ibusMessage.data.toByteArray())
+        } catch (e: Throwable) {
+            logger.e("PicoCommsDebugWindow", "simulatePicoToPiMessage could not parse message", e)
+            null
+        }
+
+        if (picoToPiMessage != null) {
+            commsDebugChannel.emit(
+                IbusCommsDebugMessage.IncomingMessage.SyntheticPicoToPiMessage(
+                    rawMessage = ibusMessage,
+                    recievedAt = Instant.now(),
+                    picoToPiMessage = picoToPiMessage
+                )
+            )
+
+            if (!dryRun) {
+                incomingMessages.emit(ibusMessage)
+            }
+        }
+
     }
 
     @Composable

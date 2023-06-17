@@ -88,6 +88,18 @@ fun IbusMessageView(message: IbusCommsDebugMessage) {
                     Text(text = "Received at: ${message.recievedAt.toHttpDateString()}", modifier = Modifier)
                 }
             }
+            is IbusCommsDebugMessage.IncomingMessage.SyntheticPicoToPiMessage -> {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text(text = message.message.toString(), modifier = Modifier.padding(10.dp))
+                    Text(text = "Raw message length: ${message.rawMessage.toWireBytes().size}")
+                    Column(modifier = Modifier.border(1.dp, Color.Black)) {
+                        Text(text = "Pico to Pi Message")
+                        Text(text = message.picoToPiMessage.toString())
+                    }
+                    Text(text = "Created at: ${message.createdAt.toHttpDateString()}", modifier = Modifier)
+                    Text(text = "Sent at: ${message.recievedAt.toHttpDateString()}", modifier = Modifier)
+                }
+            }
             is IbusCommsDebugMessage.OutgoingMessage.RawMessage -> {
                 Text(text = message.outgoingMessage.toString(), modifier = Modifier.padding(10.dp))
             }
