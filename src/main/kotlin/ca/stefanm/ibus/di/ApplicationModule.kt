@@ -106,6 +106,9 @@ class ApplicationModule {
 
         const val IBUS_COMMS_DEBUG_CHANNEL = "IbusCommsDebug"
         private val ibusCommsDebugChannel = MutableSharedFlow<IbusCommsDebugMessage>()
+
+
+        private val ibusIngress = MutableSharedFlow<IBusMessage>()
     }
 
     @Provides
@@ -127,7 +130,7 @@ class ApplicationModule {
     @Provides
     @Named(IBUS_MESSAGE_INGRESS)
     @ApplicationScope
-    fun provideIbusIngressChannel() : MutableSharedFlow<IBusMessage> = MutableSharedFlow<IBusMessage>()
+    fun provideIbusIngressChannel() : MutableSharedFlow<IBusMessage> = ibusIngress
 
     @Provides
     @Named(IBUS_MESSAGE_OUTPUT_CHANNEL)
