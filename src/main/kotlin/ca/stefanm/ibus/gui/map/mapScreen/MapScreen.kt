@@ -280,6 +280,7 @@ class MapScreen @Inject constructor(
                                     when (poi.icon) {
                                         is PoiRepository.Poi.PoiIcon.ColoredCircle -> PoiOverlay.PoiOverlayItem.CIRCLE_COLOR.invoke(poi.icon.color)
                                         is PoiRepository.Poi.PoiIcon.BundledIcon -> PoiOverlay.PoiOverlayItem.ICON_FILE.invoke(poi.icon.fileName, poi.icon.tint)
+                                        else -> {}
                                     }
                                 }
                                 }

@@ -1,8 +1,8 @@
 package ca.stefanm.ibus.gui.menu
 
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 
 @ExperimentalTime
 data class Notification(

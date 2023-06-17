@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import org.bluez.MediaPlayer1
@@ -77,7 +78,7 @@ class DbusTrackListenerService @Inject constructor(
                     val track = newTrackMap.getTrackField("Title")
                     val artist = newTrackMap.getTrackField("Artist")
                     val album = newTrackMap.getTrackField("Album")
-                    newTracksChannel.sendBlocking(NewTrackInfo(track, artist, album))
+                    newTracksChannel.trySendBlocking(NewTrackInfo(track, artist, album))
                 }
             }
         }

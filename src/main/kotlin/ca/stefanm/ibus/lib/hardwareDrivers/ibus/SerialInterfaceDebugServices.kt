@@ -1,5 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
+import ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
@@ -46,7 +47,7 @@ sealed class IbusCommsDebugMessage(val createdAt : Instant) {
 
         data class PicoToPiMessage(
             override val recievedAt: Instant,
-            val rawMessage: IBusMessage
+            val rawMessage: IBusMessage,
         ) : IncomingMessage(recievedAt, rawMessage)
 
         data class SyntheticPicoToPiMessage(
@@ -66,7 +67,8 @@ sealed class IbusCommsDebugMessage(val createdAt : Instant) {
 
         data class SyntheticPiToPicoMessage(
             val outgoingMessage: IBusMessage,
-            override val sentAt: Instant
+            override val sentAt: Instant,
+            val piToPicoMessage: PiToPico
         ) : OutgoingMessage(sentAt, outgoingMessage)
     }
 }

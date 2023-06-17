@@ -58,6 +58,7 @@ class RouteTerminatedSubScreen @Inject constructor(
                 )
             }
             GuidanceSession.SessionState.TERMINATED -> RouteTerminatedScreen()
+            else -> {}
         }
     }
 

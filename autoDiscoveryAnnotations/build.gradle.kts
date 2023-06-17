@@ -16,6 +16,6 @@ dependencies {
     implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     //Only to access the annotations
-    implementation("com.google.dagger:dagger:2.35.1")
+    implementation("com.google.dagger:dagger:2.45")
 
 }

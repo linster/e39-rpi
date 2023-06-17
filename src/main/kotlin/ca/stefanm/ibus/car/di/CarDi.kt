@@ -1,5 +1,9 @@
 package ca.stefanm.ibus.car.di
 
+import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.HeartbeatRequestParser
+import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.LogMessageParser
+import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.RestartPiParser
+import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.RestartXParser
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerDebugService
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialWriterDebugService
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SyntheticIBusInputEventDebugLoggerService
@@ -70,6 +74,11 @@ interface ConfiguredCarComponent {
     fun discoveredServiceSerialListenerDebugService() : SerialListenerDebugService
     fun discoveredServiceSerialWriterDebugService() : SerialWriterDebugService
     fun discoveredServiceSyntheticIBusInputEventDebugLoggerService() : SyntheticIBusInputEventDebugLoggerService
+
+    fun discoveredServicePicoHeartbeatRequestParser() : HeartbeatRequestParser
+    fun discoveredServiceLogMessageParser() : LogMessageParser
+    fun discoveredServiceRestartPiParser() : RestartPiParser
+    fun discoveredServiceRestartXParser() : RestartXParser
 }
 
 @Module

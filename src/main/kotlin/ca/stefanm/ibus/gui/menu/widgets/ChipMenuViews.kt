@@ -253,6 +253,7 @@ fun MenuItem(
                         strokeWidth = highlightWidth
                     )
                 }
+                else -> {}
             }
 
             if (isSelected) {
@@ -490,6 +491,7 @@ fun ImageMenuItem(
                         strokeWidth = highlightWidth
                     )
                 }
+                else -> {}
             }
 
             if (isSelected) {

@@ -67,6 +67,7 @@ class ScreenPainter @Inject constructor(
                             )
                         )
                     }
+                    else -> {}
                 }
             }
 

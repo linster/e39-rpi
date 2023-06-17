@@ -51,6 +51,7 @@ class ScreenManager(
             InputEvent.BMBTPhonePressed -> {
                 clearBackStack(entryPointScreen)
             }
+            else -> {}
         }
     }
 

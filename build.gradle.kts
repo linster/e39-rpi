@@ -15,10 +15,10 @@ plugins {
 
     if (true) {
         // __KOTLIN_COMPOSE_VERSION__
-        kotlin("jvm") version "1.5.31" //TODO https://github.com/Kotlin/kotlinx.serialization/issues/1417#issuecomment-1021545236
-        kotlin("kapt") version "1.5.31" //TODO update to 1.6.20+ to get sealed interface seriaization working.
+        kotlin("jvm") version "1.8.20" //TODO https://github.com/Kotlin/kotlinx.serialization/issues/1417#issuecomment-1021545236
+        kotlin("kapt") version "1.8.20" //TODO update to 1.6.20+ to get sealed interface seriaization working.
 //        id("org.jetbrains.compose") version "0.3.2"
-        id("org.jetbrains.compose") version "1.0.0"
+        id("org.jetbrains.compose") version "1.4.0"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"
@@ -27,7 +27,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.0"
     id("java")
 
-    id("com.squareup.sqldelight") version "1.5.3"
+    id("com.squareup.sqldelight") version "1.5.5"
 }
 
 
@@ -112,8 +112,8 @@ dependencies {
 
     implementation("com.ginsberg:cirkle:1.0.1")
 
-    api("com.google.dagger:dagger:2.35.1")
-    kapt("com.google.dagger:dagger-compiler:2.35.1")
+    api("com.google.dagger:dagger:2.45")
+    kapt("com.google.dagger:dagger-compiler:2.45")
 
     implementation("com.pi4j:pi4j-core:1.1")
 
@@ -123,8 +123,8 @@ dependencies {
     testImplementation("junit:junit:4.12")
 
 
-    implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
-    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.3")
+    implementation("com.squareup.sqldelight:sqlite-driver:1.5.5")
+    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.5")
 
     //Web
     val ktor_version = "1.6.4"

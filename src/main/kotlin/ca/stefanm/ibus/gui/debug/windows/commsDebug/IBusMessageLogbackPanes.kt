@@ -88,9 +88,10 @@ fun IbusMessageView(message: IbusCommsDebugMessage) {
                     Text(text = "Received at: ${message.recievedAt.toHttpDateString()}", modifier = Modifier)
                 }
             }
-            is IbusCommsDebugMessage.OutgoingMessage -> {
+            is IbusCommsDebugMessage.OutgoingMessage.RawMessage -> {
                 Text(text = message.outgoingMessage.toString(), modifier = Modifier.padding(10.dp))
             }
+            else -> {}
         }
     }
 }

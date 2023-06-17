@@ -213,6 +213,7 @@ class BluetoothEventDispatcherService @Inject constructor(
             when (event) {
                 InputEvent.PrevTrack -> mediaPlayer1?.Previous()
                 InputEvent.NextTrack -> mediaPlayer1?.Next()
+                else -> {}
             }
         } catch (e : UnknownObject) {
             logger.e("BT Dispatcher", "Unknown object?", e)

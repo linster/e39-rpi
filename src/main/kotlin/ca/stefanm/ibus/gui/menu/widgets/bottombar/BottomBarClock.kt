@@ -13,6 +13,7 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class BottomBarClock @Inject constructor() {
 
@@ -33,7 +34,7 @@ class BottomBarClock @Inject constructor() {
             _dateFlow.value = currentTime.let {
                 "${it.dayOfMonth}/${it.month.value}/${it.year}"
             }
-            delay(Duration.Companion.seconds(45))
+            delay(45.seconds)
             yield()
         }
     }

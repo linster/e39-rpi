@@ -98,6 +98,7 @@ class SetupRouteSubScreen @Inject constructor(
                     this, GuidanceSetupScreen.SubScreenResult.STATE_CHANGED
                 )
             }
+            else -> {}
         }
 
 

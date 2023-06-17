@@ -27,9 +27,9 @@ dependencies {
 
 
     //Only to access the annotations
-    implementation("com.google.dagger:dagger:2.35.1")
+    implementation("com.google.dagger:dagger:2.45")
 
     implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.squareup:kotlinpoet:1.9.0")
+    implementation("com.squareup:kotlinpoet:1.12.0")
     implementation(project(":autoDiscoveryAnnotations"))
 }

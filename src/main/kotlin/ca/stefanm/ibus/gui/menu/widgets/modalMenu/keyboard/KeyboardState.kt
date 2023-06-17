@@ -92,6 +92,7 @@ internal fun StateManagedKeyboard(
                         cursorPosition.value = cursorPosition.value - 1
                     }
                 }
+                else -> {}
             }
         }
     }
