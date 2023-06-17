@@ -91,9 +91,6 @@ dependencies {
     } else {
         implementation(compose.desktop.currentOs)
     }
-//    implementation(compose.desktop.linux_arm64)
-//    implementation(compose.desktop.currentOs)
-
     implementation( "org.jetbrains.kotlin:kotlin-stdlib")
     implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 
@@ -101,6 +98,11 @@ dependencies {
     implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
 
     implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
+
+
+    implementation("com.google.protobuf:protobuf-java:3.23.0")
+    implementation("com.google.protobuf:protobuf-kotlin:3.23.0")
+    implementation("com.google.protobuf:protobuf-java-util:3.23.0")
 
     implementation("com.javadocmd:simplelatlng:1.3.1")
     implementation("org.jxmapviewer:jxmapviewer2:2.5")

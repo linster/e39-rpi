@@ -100,6 +100,8 @@ class ApplicationModule {
         const val IBUS_MESSAGE_INGRESS = "IbusInput"
         const val IBUS_MESSAGE_OUTPUT_CHANNEL = "IbusOutput"
 
+        private val ibusOutputChannel = Channel<IBusMessage>(capacity = Channel.UNLIMITED)
+
         private val inputEventsWriter = MutableSharedFlow<InputEvent>()
 
         const val IBUS_COMMS_DEBUG_CHANNEL = "IbusCommsDebug"
@@ -130,7 +132,7 @@ class ApplicationModule {
     @Provides
     @Named(IBUS_MESSAGE_OUTPUT_CHANNEL)
     @ApplicationScope
-    fun provideIbusOuptutChannel() : Channel<IBusMessage> = Channel(capacity = Channel.UNLIMITED)
+    fun provideIbusOuptutChannel() : Channel<IBusMessage> = ibusOutputChannel
 
 
 

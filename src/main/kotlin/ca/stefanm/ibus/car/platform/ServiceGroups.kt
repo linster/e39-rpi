@@ -68,6 +68,13 @@ annotation class EmptyServiceGroup
 
 @PlatformServiceGroup(
     name = "TvModuleAnnounceSim",
-    description = "Simlate the Announce Req/Resp cycle so that the Rpi can be wired into RGBS white conn on TV Module."
+    description = "Simulate the Announce Req/Resp cycle so that the Rpi can be wired into RGBS white conn on TV Module."
 )
 annotation class TvModuleAnnounceSim
+
+
+@PlatformServiceGroup(
+    name = "PicoToPiParsers",
+    description = "Services that listen for PicoToPi messages and do their action"
+)
+annotation class PicoToPiParserGroup

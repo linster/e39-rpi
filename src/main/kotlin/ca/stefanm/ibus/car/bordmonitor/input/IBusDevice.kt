@@ -30,5 +30,9 @@ enum class IBusDevice(val deviceId: Int) {
     /* Board monitor buttons that aren't the radio buttons */
     BOARDMONITOR_BUTTONS(0xF0),
 
-    DIS(0x3f)
+    DIS(0x3f),
+
+    /* Borrow the two MINI D-BUS addresses. */
+    PICO(0x31),
+    PI(0x81)
 }

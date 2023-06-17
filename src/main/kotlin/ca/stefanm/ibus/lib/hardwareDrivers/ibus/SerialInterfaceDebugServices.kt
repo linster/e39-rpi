@@ -44,14 +44,31 @@ sealed class IbusCommsDebugMessage(val createdAt : Instant) {
         ) : IncomingMessage(recievedAt, IBusMessage(IBusDevice.BROADCAST, IBusDevice.BROADCAST, UByteArray(0)))
 
 
+        data class PicoToPiMessage(
+            override val recievedAt: Instant,
+            val rawMessage: IBusMessage
+        ) : IncomingMessage(recievedAt, rawMessage)
 
-        //TODO Put in PicoToPi messages here once Protobufs work.
+        data class SyntheticPicoToPiMessage(
+            override val recievedAt: Instant,
+            val rawMessage: IBusMessage,
+        ) : IncomingMessage(recievedAt, rawMessage)
     }
 
-    data class OutgoingMessage(
-        val outgoingMessage: IBusMessage,
-        val sentAt : Instant
-    ) : IbusCommsDebugMessage(createdAt = sentAt)
+    sealed class OutgoingMessage(
+        open val sentAt: Instant,
+        val message: IBusMessage
+    ) : IbusCommsDebugMessage(createdAt = sentAt){
+        data class RawMessage(
+            val outgoingMessage: IBusMessage,
+            override val sentAt : Instant
+        ) : OutgoingMessage(sentAt = sentAt, message = outgoingMessage)
+
+        data class SyntheticPiToPicoMessage(
+            val outgoingMessage: IBusMessage,
+            override val sentAt: Instant
+        ) : OutgoingMessage(sentAt, outgoingMessage)
+    }
 }
 
 //These two services exist so that we can start and stop them independently
@@ -179,8 +196,14 @@ class SyntheticIBusInputEventDebugLoggerService @Inject constructor(
 @ConfiguredCarScope
 class SerialWriterDebugService @Inject constructor(
     @Named(ApplicationModule.IBUS_COMMS_DEBUG_CHANNEL) private val commsDebugChannel : MutableSharedFlow<IbusCommsDebugMessage>,
-    private val logger: Logger
-) : Service {
+    private val logger: Logger,
+    coroutineScope: CoroutineScope,
+    parsingDispatcher: CoroutineDispatcher
+) : LongRunningService(coroutineScope, parsingDispatcher) {
+
+    private companion object {
+        val messagePipe = MutableSharedFlow<IbusCommsDebugMessage>(extraBufferCapacity = 256, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    }
 
     override fun onCreate() {
         logger.d("SerialWriterDebugService", "onCreate()")
@@ -190,14 +213,24 @@ class SerialWriterDebugService @Inject constructor(
         logger.d("SerialWriterDebugService", "onShutdown()")
     }
 
+    override suspend fun doWork() {
+        messagePipe.collect {
+            commsDebugChannel.emit(it)
+        }
+    }
+
     suspend fun logMessage(iBusMessage: IBusMessage) {
         logger.d("SerialWriterDebugService", "Writing message to IBUS_COMMS_DEBUG_CHANNEL")
-        commsDebugChannel.emit(
-            IbusCommsDebugMessage.OutgoingMessage(
+        messagePipe.emit(
+            IbusCommsDebugMessage.OutgoingMessage.RawMessage(
                 outgoingMessage = iBusMessage,
                 sentAt = Instant.now()
             )
         )
         logger.d("SerialWriterDebugService", "Wrote message to IBUS_COMMS_DEBUG_CHANNEL")
+    }
+
+    suspend fun logPiToPicoMessage() {
+
     }
 }

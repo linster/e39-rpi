@@ -1,5 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +16,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.lib.logging.StaticLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
+import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -36,7 +38,7 @@ fun IbusMessageLogbackPane(
             }
         }
     }
-    
+
     val stateVertical = rememberScrollState(0)
 
     LaunchedEffect(messages.size) {
@@ -44,9 +46,12 @@ fun IbusMessageLogbackPane(
     }
 
 
+
     NestingCard {
         Row {
             Button(onClick = { messages.clear() }) { Text("Clear Logback") }
+
+            Text("Logback size: ${messages.size}")
         }
 
         Box(Modifier.fillMaxSize().verticalScroll(stateVertical).padding(16.dp)) {
@@ -56,10 +61,7 @@ fun IbusMessageLogbackPane(
                 }
             }
         }
-
     }
-
-
 }
 
 
@@ -69,6 +71,26 @@ fun IbusMessageView(message: IbusCommsDebugMessage) {
         modifier = Modifier.border(2.dp, Color.Black).padding(10.dp)
     ) {
         //TODO we can dress up these messages.
-        Text(text = message.toString(), modifier = Modifier.padding(10.dp))
+
+        when (message) {
+            is IbusCommsDebugMessage.IncomingMessage.RawMessage -> {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text(text = message.message.toString(), modifier = Modifier.padding(10.dp))
+                    Text(text = "Created at: ${message.createdAt.toHttpDateString()}", modifier = Modifier)
+                    Text(text = "Received at: ${message.recievedAt.toHttpDateString()}", modifier = Modifier)
+                }
+            }
+            is IbusCommsDebugMessage.IncomingMessage.InputEventMessage -> {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text(text = message.inputEvent.toString(), modifier = Modifier.padding(10.dp).background(Color.Green))
+                    Text(text = message.message.toString(), modifier = Modifier.padding(10.dp))
+                    Text(text = "Created at: ${message.createdAt.toHttpDateString()}", modifier = Modifier)
+                    Text(text = "Received at: ${message.recievedAt.toHttpDateString()}", modifier = Modifier)
+                }
+            }
+            is IbusCommsDebugMessage.OutgoingMessage -> {
+                Text(text = message.outgoingMessage.toString(), modifier = Modifier.padding(10.dp))
+            }
+        }
     }
 }
