@@ -9,11 +9,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.colorspace.ColorSpace
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
@@ -30,10 +30,16 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
-
+@ScreenDoc(
+    screenName = "BrightnessCompensationScreen",
+    description = "A screen to configure a transparent black overlay over the HMI so that failing BMBT displays " +
+            "don't show a green tint on brighter colors (and potentially lose sync)."
+)
+@ScreenDoc.AllowsGoBack
+@ScreenDoc.OpensSubScreen("introductionScreen")
+@ScreenDoc.OpensSubScreen("brightnessTestingScreen")
 @AutoDiscover
 class BrightnessCompensationScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
@@ -63,6 +69,7 @@ class BrightnessCompensationScreen @Inject constructor(
         }
     }
 
+
     @Composable
     private fun InfoLabel(text : String, weight : FontWeight = FontWeight.Normal) {
         Text(
@@ -74,6 +81,12 @@ class BrightnessCompensationScreen @Inject constructor(
         )
     }
 
+    @ScreenDoc.SubScreen(
+        screenName = "introductionScreen",
+        paneDescription = "Shows an intro message for the screen adjust."
+    )
+    @ScreenDoc.SubScreen.AllowsCloseParent
+    @ScreenDoc.SubScreen.NavigateToSubscreen("brightnessTestingScreen")
     @Composable
     fun introductionScreen(
         onViewStateChanged : (new : ViewState) -> Unit
@@ -111,6 +124,11 @@ class BrightnessCompensationScreen @Inject constructor(
         }
     }
 
+    @ScreenDoc.SubScreen(
+        screenName = "brightnessTestingScreen",
+        paneDescription = "Captures the knob rotations to change a blank white screen to a shade of grey."
+    )
+    @ScreenDoc.SubScreen.NavigateToSubscreen("introductionScreen")
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun brightnessTestingScreen(

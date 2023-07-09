@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -29,6 +30,11 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "AboutScreen",
+    description = "Shows author, and version number of e39-rpi system"
+)
+@ScreenDoc.AllowsGoBack
 @AutoDiscover
 class AboutScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
