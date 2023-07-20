@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -17,6 +18,11 @@ import javax.inject.Inject
 
 //This is an empty menu that depends on a knob scroll listener so
 //that the root menu that needs one works well.
+@ScreenDoc(
+    screenName = "EmptyMenu",
+    description = "The GUI entrypoint. Immediately goe to BMWMainMenu"
+)
+@ScreenDoc.NavigateTo(BMWMainMenu::class)
 @AutoDiscover
 class EmptyMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser

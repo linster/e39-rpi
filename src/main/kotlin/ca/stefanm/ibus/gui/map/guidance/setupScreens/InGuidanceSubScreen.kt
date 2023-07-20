@@ -3,6 +3,9 @@ package ca.stefanm.ibus.gui.map.guidance.setupScreens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import ca.stefanm.ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
+import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
@@ -15,6 +18,15 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "InGuidanceSubScreen",
+    description = "When a guidance session is in progress, this is the screen that a map " +
+            "`Route Guidance` action goes to to allow the user to modify or end the guidance" +
+            " session."
+)
+@ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Back to Map")
+@ScreenDoc.AllowsGoBack
+@GuidanceScreenDocPartition
 @AutoDiscover
 class InGuidanceSubScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

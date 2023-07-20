@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ca.stefanm.ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
@@ -14,6 +15,7 @@ import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.map.widget.MapScale
@@ -32,6 +34,18 @@ import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "SetupRouteSubScreen",
+    description = "Allows the user to setup a guidance session."
+)
+@ScreenDoc.OpensSubScreen("openLocatonChooser")
+@ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Select Start Location")
+@ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Select End Location")
+@ScreenDoc.NavigateTo(PoiSelectorScreen::class, linkDescription = "Select Start Location")
+@ScreenDoc.NavigateTo(PoiSelectorScreen::class, linkDescription = "Select End Location")
+@GuidanceScreenDocPartition
+@ScreenDoc.AllowsGoBack(optionalTag = "Go Back")
+@ScreenDoc.AllowsGoBack(optionalTag = "Start Guidance")
 @AutoDiscover
 class SetupRouteSubScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
@@ -188,6 +202,10 @@ class SetupRouteSubScreen @Inject constructor(
         }
     }
 
+    @ScreenDoc.SubScreen(
+        " v",
+        paneDescription = "Shows a `SelectOnMap` link to let the use rpick a point."
+    )
     fun openLocatonChooser(
         title : String,
         existingLocationAccessor : () -> LatLng,

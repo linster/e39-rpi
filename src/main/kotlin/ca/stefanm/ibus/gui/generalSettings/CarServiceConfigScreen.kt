@@ -3,6 +3,8 @@ package ca.stefanm.ibus.gui.generalSettings
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.font.FontWeight
+import ca.stefanm.ca.stefanm.ibus.gui.docs.CarPlatformScreenDocPartition
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
@@ -23,6 +25,12 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.flow.asFlow
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "CarServiceConfigScreen",
+    description = "Enable, Disable, Restarts car platform services."
+)
+@ScreenDoc.AllowsGoBack
+@CarPlatformScreenDocPartition
 @AutoDiscover
 class CarServiceConfigScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

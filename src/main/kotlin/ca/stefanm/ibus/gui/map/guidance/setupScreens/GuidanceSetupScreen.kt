@@ -2,6 +2,8 @@ package ca.stefanm.ibus.gui.map.guidance.setupScreens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import ca.stefanm.ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
@@ -13,6 +15,12 @@ import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "GuidanceSetupScreen",
+    description = "Sets up the Guidance (routing), and when a guidance session is active, allows the user to cancel it, and repeat instructions."
+)
+@ScreenDoc.AllowsGoBack
+@GuidanceScreenDocPartition
 @AutoDiscover
 class GuidanceSetupScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
 import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
@@ -20,6 +21,18 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "SettingsRootMenu",
+    description = "The Root menu for visible settings"
+)
+@ScreenDoc.AllowsGoRoot
+@ScreenDoc.NavigateTo(BluetoothPairingMenu::class)
+@ScreenDoc.NavigateTo(MapSettingsMainScreen::class)
+@ScreenDoc.NavigateTo(CarPlatformConfigScreen::class)
+@ScreenDoc.NavigateTo(ThemeSelectorScreen::class)
+@ScreenDoc.NavigateTo(NetworkInfoScreen::class)
+@ScreenDoc.NavigateTo(BrightnessCompensationScreen::class)
+@ScreenDoc.NavigateTo(AboutScreen::class)
 @AutoDiscover
 class SettingsRootMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser

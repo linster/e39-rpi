@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
 import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -19,6 +20,13 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "BMWMainMenu",
+    description = "The main menu of the HMI"
+)
+@ScreenDoc.NavigateTo(MapScreen::class)
+@ScreenDoc.NavigateTo(SettingsRootMenu::class)
+@ScreenDoc.AllowsGoRoot
 @AutoDiscover
 class BMWMainMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser

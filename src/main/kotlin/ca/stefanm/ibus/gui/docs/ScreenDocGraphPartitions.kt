@@ -44,4 +44,10 @@ annotation class NavigationScreenDocPartition
 )
 annotation class GuidanceScreenDocPartition
 
+@ScreenDoc.GraphPartition(
+    partitionName = "CarPlatform",
+    description = "All screens for configuring the Car Platform"
+)
+annotation class CarPlatformScreenDocPartition
+
 

@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
@@ -21,6 +22,11 @@ import com.pi4j.system.NetworkInterface
 import com.pi4j.system.SystemInfo
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "NetworkInfoScreen",
+    description = "Shows the current IP Address of the Rpi so the user can SSH in"
+)
+@ScreenDoc.AllowsGoBack
 @AutoDiscover
 class NetworkInfoScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

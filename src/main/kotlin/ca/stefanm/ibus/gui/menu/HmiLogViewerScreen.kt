@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.docs.CarPlatformScreenDocPartition
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
@@ -28,7 +30,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.E
 
-
+@ScreenDoc(
+    screenName = "HmiLogViewerScreen",
+    description = "Views the logger output onto the screen."
+)
+@CarPlatformScreenDocPartition
 @AutoDiscover
 @ApplicationScope
 class HmiLogViewerScreen @Inject constructor(

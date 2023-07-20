@@ -3,6 +3,8 @@ package ca.stefanm.ibus.gui.map.poi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import ca.stefanm.ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceChooser
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -15,6 +17,13 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "PoiSelectorScreen",
+    description = "Allows the user to select a point on a map from the POI addressbook."
+)
+@ScreenDoc.AllowsGoBack(optionalTag = "Location Selected")
+@ScreenDoc.AllowsGoBack(optionalTag = "No selection")
+@GuidanceScreenDocPartition
 @AutoDiscover
 class PoiSelectorScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

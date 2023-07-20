@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.gui.docs.CarPlatformScreenDocPartition
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
@@ -34,6 +36,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "RelayToggleScreen",
+    description = "A screen to write to I2C to toggle an optional relay board."
+)
+@ScreenDoc.AllowsGoBack
+@CarPlatformScreenDocPartition
 @ApplicationScope
 @AutoDiscover
 class RelayToggleScreen @Inject constructor(

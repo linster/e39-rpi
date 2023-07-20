@@ -7,7 +7,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import ca.stefanm.ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
 import ca.stefanm.gui.map.guidance.BrowsableRouteStorage
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.Extents
@@ -29,6 +31,13 @@ import kotlinx.coroutines.flow.map
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "RouteTerminatedSubScreen",
+    description = "When a route is terminated (user cancelled a guidance session), this screen" +
+            "is visible to allow the user to cancel the session."
+)
+@ScreenDoc.NavigateTo(GuidanceSetupScreen::class)
+@GuidanceScreenDocPartition
 @AutoDiscover
 class RouteTerminatedSubScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

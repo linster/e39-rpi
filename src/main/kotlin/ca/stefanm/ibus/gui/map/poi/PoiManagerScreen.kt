@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -19,6 +20,13 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import javax.inject.Inject
 
+@ScreenDoc(
+    screenName = "PoiManagerScreen",
+    description = "List, Create, Edit, Delete, NavigateTo all the POIs."
+)
+@ScreenDoc.NavigateTo(CreateOrEditPoiScreen::class)
+@ScreenDoc.AllowsGoBack
+@ScreenDoc.OpensSubScreen("viewPoi")
 @AutoDiscover
 class PoiManagerScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
@@ -57,6 +65,8 @@ class PoiManagerScreen @Inject constructor(
         }
     }
 
+    @ScreenDoc.SubScreen(screenName = "viewPoi", paneDescription = "A confirmation pane that asks " +
+            "the user to Edit, Delete, or (future) Navigate To the chosen POI.")
     private fun viewPoi(poi: PoiRepository.Poi) {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
 

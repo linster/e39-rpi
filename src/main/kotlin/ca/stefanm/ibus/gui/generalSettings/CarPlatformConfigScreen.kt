@@ -3,6 +3,8 @@ package ca.stefanm.ibus.gui.generalSettings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
+import ca.stefanm.ca.stefanm.ibus.gui.docs.CarPlatformScreenDocPartition
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -19,6 +21,24 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.fazecast.jSerialComm.SerialPort
 import javax.inject.Inject
 
+
+
+
+@ScreenDoc(
+    screenName = "CarPlatformConfigScreen",
+    description = "Configures the Car Platform, the part of the e39-Rpi Hmi that interfaces with the car."
+)
+@ScreenDoc.AllowsGoBack
+@ScreenDoc.OpensSubScreen("serialPortPrompt")
+@ScreenDoc.OpensSubScreen("restartCarPlatformPrompt")
+@ScreenDoc.NavigateTo(
+    CarServiceConfigScreen::class,
+    linkDescription = "",
+    targetDescription = "Screen to enable, disable, restart car services while running."
+)
+@ScreenDoc.NavigateTo(HmiLogViewerScreen::class)
+@ScreenDoc.NavigateTo(RelayToggleScreen::class)
+@CarPlatformScreenDocPartition
 @AutoDiscover
 class CarPlatformConfigScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
@@ -75,6 +95,10 @@ class CarPlatformConfigScreen @Inject constructor(
         }
     }
 
+    @ScreenDoc.SubScreen(
+        screenName = "serialPortPrompt",
+        paneDescription = "Prompts which serial port the Rpi uses (TtyACM0, TtyUSB0, etc..)"
+    )
     private fun serialPortPrompt() {
 
         val availablePorts = SerialPort.getCommPorts().map { it.systemPortName }
@@ -108,6 +132,10 @@ class CarPlatformConfigScreen @Inject constructor(
         }
     }
 
+    @ScreenDoc.SubScreen(
+        screenName = "restartCarPlatformPrompt",
+        paneDescription = "Prompts the user to restart the car platform."
+    )
     private fun restartCarPlatformPrompt() {
         modalMenuService.showSidePaneOverlay(true) {
             SidePanelMenu.SidePanelMenu(
