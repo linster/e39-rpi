@@ -36,13 +36,16 @@ import javax.inject.Inject
 
 @ScreenDoc(
     screenName = "SetupRouteSubScreen",
-    description = "Allows the user to setup a guidance session."
+    description = "Allows the user to setup a guidance session.",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Select Start Location"),
+        ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Select End Location"),
+        ScreenDoc.NavigateTo(PoiSelectorScreen::class, linkDescription = "Select Start Location"),
+        ScreenDoc.NavigateTo(PoiSelectorScreen::class, linkDescription = "Select End Location")
+    ]
 )
 @ScreenDoc.OpensSubScreen("openLocatonChooser")
-@ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Select Start Location")
-@ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Select End Location")
-@ScreenDoc.NavigateTo(PoiSelectorScreen::class, linkDescription = "Select Start Location")
-@ScreenDoc.NavigateTo(PoiSelectorScreen::class, linkDescription = "Select End Location")
+
 @GuidanceScreenDocPartition
 @ScreenDoc.AllowsGoBack(optionalTag = "Go Back")
 @ScreenDoc.AllowsGoBack(optionalTag = "Start Guidance")

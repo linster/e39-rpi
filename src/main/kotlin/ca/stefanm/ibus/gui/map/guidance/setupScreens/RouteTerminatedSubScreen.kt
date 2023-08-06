@@ -34,9 +34,12 @@ import javax.inject.Inject
 @ScreenDoc(
     screenName = "RouteTerminatedSubScreen",
     description = "When a route is terminated (user cancelled a guidance session), this screen" +
-            "is visible to allow the user to cancel the session."
+            "is visible to allow the user to cancel the session.",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(GuidanceSetupScreen::class)
+    ]
 )
-@ScreenDoc.NavigateTo(GuidanceSetupScreen::class)
+
 @GuidanceScreenDocPartition
 @AutoDiscover
 class RouteTerminatedSubScreen @Inject constructor(

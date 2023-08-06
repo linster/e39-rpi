@@ -22,9 +22,12 @@ import javax.inject.Inject
     screenName = "InGuidanceSubScreen",
     description = "When a guidance session is in progress, this is the screen that a map " +
             "`Route Guidance` action goes to to allow the user to modify or end the guidance" +
-            " session."
+            " session.",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Back to Map")
+    ]
 )
-@ScreenDoc.NavigateTo(MapScreen::class, linkDescription = "Back to Map")
+
 @ScreenDoc.AllowsGoBack
 @GuidanceScreenDocPartition
 @AutoDiscover

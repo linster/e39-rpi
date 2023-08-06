@@ -26,18 +26,21 @@ import javax.inject.Inject
 
 @ScreenDoc(
     screenName = "CarPlatformConfigScreen",
-    description = "Configures the Car Platform, the part of the e39-Rpi Hmi that interfaces with the car."
+    description = "Configures the Car Platform, the part of the e39-Rpi Hmi that interfaces with the car.",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(
+            CarServiceConfigScreen::class,
+            linkDescription = "",
+            targetDescription = "Screen to enable, disable, restart car services while running."
+        ),
+        ScreenDoc.NavigateTo(HmiLogViewerScreen::class),
+        ScreenDoc.NavigateTo(RelayToggleScreen::class)
+    ]
 )
 @ScreenDoc.AllowsGoBack
 @ScreenDoc.OpensSubScreen("serialPortPrompt")
 @ScreenDoc.OpensSubScreen("restartCarPlatformPrompt")
-@ScreenDoc.NavigateTo(
-    CarServiceConfigScreen::class,
-    linkDescription = "",
-    targetDescription = "Screen to enable, disable, restart car services while running."
-)
-@ScreenDoc.NavigateTo(HmiLogViewerScreen::class)
-@ScreenDoc.NavigateTo(RelayToggleScreen::class)
+
 @CarPlatformScreenDocPartition
 @AutoDiscover
 class CarPlatformConfigScreen @Inject constructor(

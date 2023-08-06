@@ -22,10 +22,13 @@ import javax.inject.Inject
 
 @ScreenDoc(
     screenName = "BMWMainMenu",
-    description = "The main menu of the HMI"
+    description = "The main menu of the HMI",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(MapScreen::class),
+        ScreenDoc.NavigateTo(SettingsRootMenu::class)
+    ]
 )
-@ScreenDoc.NavigateTo(MapScreen::class)
-@ScreenDoc.NavigateTo(SettingsRootMenu::class)
+
 @ScreenDoc.AllowsGoRoot
 @AutoDiscover
 class BMWMainMenu @Inject constructor(

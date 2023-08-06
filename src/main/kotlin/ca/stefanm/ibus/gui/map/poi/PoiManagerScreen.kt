@@ -22,9 +22,12 @@ import javax.inject.Inject
 
 @ScreenDoc(
     screenName = "PoiManagerScreen",
-    description = "List, Create, Edit, Delete, NavigateTo all the POIs."
+    description = "List, Create, Edit, Delete, NavigateTo all the POIs.",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(CreateOrEditPoiScreen::class)
+    ]
 )
-@ScreenDoc.NavigateTo(CreateOrEditPoiScreen::class)
+
 @ScreenDoc.AllowsGoBack
 @ScreenDoc.OpensSubScreen("viewPoi")
 @AutoDiscover

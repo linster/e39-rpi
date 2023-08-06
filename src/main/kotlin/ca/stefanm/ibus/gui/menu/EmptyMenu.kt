@@ -20,9 +20,11 @@ import javax.inject.Inject
 //that the root menu that needs one works well.
 @ScreenDoc(
     screenName = "EmptyMenu",
-    description = "The GUI entrypoint. Immediately goe to BMWMainMenu"
+    description = "The GUI entrypoint. Immediately goe to BMWMainMenu",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(BMWMainMenu::class)
+    ]
 )
-@ScreenDoc.NavigateTo(BMWMainMenu::class)
 @AutoDiscover
 class EmptyMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser

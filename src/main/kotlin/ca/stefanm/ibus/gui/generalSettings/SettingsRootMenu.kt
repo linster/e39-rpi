@@ -23,16 +23,19 @@ import javax.inject.Inject
 
 @ScreenDoc(
     screenName = "SettingsRootMenu",
-    description = "The Root menu for visible settings"
+    description = "The Root menu for visible settings",
+    navigatesTo = [
+        ScreenDoc.NavigateTo(BluetoothPairingMenu::class),
+        ScreenDoc.NavigateTo(MapSettingsMainScreen::class),
+        ScreenDoc.NavigateTo(CarPlatformConfigScreen::class),
+        ScreenDoc.NavigateTo(ThemeSelectorScreen::class),
+        ScreenDoc.NavigateTo(NetworkInfoScreen::class),
+        ScreenDoc.NavigateTo(BrightnessCompensationScreen::class),
+        ScreenDoc.NavigateTo(AboutScreen::class)
+    ]
 )
 @ScreenDoc.AllowsGoRoot
-@ScreenDoc.NavigateTo(BluetoothPairingMenu::class)
-@ScreenDoc.NavigateTo(MapSettingsMainScreen::class)
-@ScreenDoc.NavigateTo(CarPlatformConfigScreen::class)
-@ScreenDoc.NavigateTo(ThemeSelectorScreen::class)
-@ScreenDoc.NavigateTo(NetworkInfoScreen::class)
-@ScreenDoc.NavigateTo(BrightnessCompensationScreen::class)
-@ScreenDoc.NavigateTo(AboutScreen::class)
+
 @AutoDiscover
 class SettingsRootMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser

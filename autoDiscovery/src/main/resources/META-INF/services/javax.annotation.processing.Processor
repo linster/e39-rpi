@@ -1,2 +1,3 @@
 ca.stefanm.ibus.autoDiscover.NodeDiscoveryProcessor
 ca.stefanm.ibus.annotations.services.ServiceAnnotationProcessor
+ca.stefanm.ibus.annotations.screendoc.ScreenDocAnnotationProcessor

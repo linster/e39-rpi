@@ -9,6 +9,8 @@ import kotlin.reflect.KClass
 annotation class ScreenDoc(
     val screenName : String,
     val description : String,
+    //These can't be a repeatable annotation for the class.
+    val navigatesTo : Array<NavigateTo> = []
 ) {
 
     /** Use this to provide hints for graph slices to make */
@@ -22,10 +24,6 @@ annotation class ScreenDoc(
         val description : String
     )
 
-    @Qualifier
-    @Target(AnnotationTarget.CLASS)
-    @Retention(AnnotationRetention.RUNTIME)
-    @Repeatable
     annotation class NavigateTo(
         /** Use a KClass of a NavigationNode, not an annotation */
         val targetClass : KClass<*>,
@@ -39,7 +37,6 @@ annotation class ScreenDoc(
     @Qualifier
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    @Repeatable
     annotation class AllowsGoBack(
         val optionalTag : String = ""
     )
