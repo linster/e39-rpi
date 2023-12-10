@@ -97,7 +97,8 @@ dependencies {
     implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
     implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
 
-    implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
+//    implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
+    implementation("com.fazecast:jSerialComm:2.10.1")
 
 
     implementation("com.google.protobuf:protobuf-java:3.23.0")

@@ -7,7 +7,7 @@ import "ConfigProto.proto";
 message PiToPico {
   //TODO Someday this could be a union proto type, but not this release.
   enum MessageType {
-    HeartbeatRequest = 0;
+    HeartbeatRequest = 0; //TODO this being zero breaks everything. (Empty packet).
     HeartbeatResponse = 1;
 
     ConfigStatusRequest = 2; //Instruct the pico to tell us what it's config object is

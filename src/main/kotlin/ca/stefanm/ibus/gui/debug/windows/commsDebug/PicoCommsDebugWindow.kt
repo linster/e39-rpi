@@ -85,46 +85,80 @@ class PicoCommsDebugWindow @Inject constructor(
             CannedMessageTypes(modifier = Modifier, onMessageTypeSelected = {
                 when (it) {
                     PiToPicoNoArgCannedMessageType.HeartbeatRequest -> {
-                        scope.launch { sendMessage { heartbeatRequest() } }
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.HeartbeatRequest.name
+                            ) { heartbeatRequest() }
+                        }
                     }
                     PiToPicoNoArgCannedMessageType.HeartbeatResponse -> {
-                        scope.launch { sendMessage { heartbeatResponse() } }
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.HeartbeatResponse.name
+                            ) { heartbeatResponse() }
+                        }
                     }
                     PiToPicoNoArgCannedMessageType.ConfigStatusRequest -> {
-                        scope.launch { sendMessage { configStatusRequest() } }
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.ConfigStatusRequest.name
+                            ) { configStatusRequest() }
+                        }
                     }
                     PiToPicoNoArgCannedMessageType.PicoVideoRequestUpstream -> {
-                        scope.launch { sendMessage { videoSourceRequest(
-                            PiToPicoMessageFactory.PicoVideoRequestSource.Upstream
-                        ) }}
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.PicoVideoRequestUpstream.name
+                            ) { videoSourceRequest(
+                                PiToPicoMessageFactory.PicoVideoRequestSource.Upstream
+                            ) }
+                        }
                     }
                     PiToPicoNoArgCannedMessageType.PicoVideoRequestPico -> {
-                        scope.launch { sendMessage { videoSourceRequest(
-                            PiToPicoMessageFactory.PicoVideoRequestSource.Pico
-                        ) }}
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.PicoVideoRequestPico.name
+                            ) { videoSourceRequest(
+                                PiToPicoMessageFactory.PicoVideoRequestSource.Pico
+                            ) }
+                        }
                     }
                     PiToPicoNoArgCannedMessageType.PicoVideoRequestRpi -> {
-                        scope.launch { sendMessage { videoSourceRequest(
-                            PiToPicoMessageFactory.PicoVideoRequestSource.Rpi
-                        ) }}
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.PicoVideoRequestRpi.name
+                            ) { videoSourceRequest(
+                                PiToPicoMessageFactory.PicoVideoRequestSource.Rpi
+                            ) }
+                        }
                     }
                     PiToPicoNoArgCannedMessageType.PicoVideoRequestRVC -> {
-                        scope.launch { sendMessage { videoSourceRequest(
-                            PiToPicoMessageFactory.PicoVideoRequestSource.RVC
-                        ) }}
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.PicoVideoRequestRVC.name
+                            ) { videoSourceRequest(
+                                PiToPicoMessageFactory.PicoVideoRequestSource.RVC
+                            ) }
+                        }
                     }
                     PiToPicoNoArgCannedMessageType.PicoPowerRequestOn -> {
-                        scope.launch { sendMessage { piHardPowerSwitch(true) } }
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.PicoPowerRequestOn.name
+                            ) { piHardPowerSwitch(true) } }
                     }
                     PiToPicoNoArgCannedMessageType.PicoPowerRequestOff -> {
-                        scope.launch { sendMessage { piHardPowerSwitch(false) } }
+                        scope.launch {
+                            sendMessage(
+                                PiToPicoNoArgCannedMessageType.PicoPowerRequestOff.name
+                            ) { piHardPowerSwitch(false) } }
                     }
                 }
             })
         }
     }
 
-    suspend fun sendMessage( block : PiToPicoMessageFactory.() -> IBusMessage) {
+    suspend fun sendMessage(name: String = "", block : PiToPicoMessageFactory.() -> IBusMessage) {
         val rawMessage = with (piToPicoMessageFactory) { block() }
 
         outgoingMessages.send(rawMessage)
@@ -137,6 +171,10 @@ class PicoCommsDebugWindow @Inject constructor(
         }
 
         if (piToPicoMessage != null) {
+            logger.d("PicoCommsWindow", "Sending message: $name " +
+                    "bytes: ${rawMessage.toWireBytes().toUByteArray().map {
+                        it.toUInt().toString(radix = 16)
+                    }}")
             commsDebugChannel.emit(
                 IbusCommsDebugMessage.OutgoingMessage.SyntheticPiToPicoMessage(
                     rawMessage,
@@ -162,23 +200,39 @@ class PicoCommsDebugWindow @Inject constructor(
 
             val scope = rememberCoroutineScope()
 
-            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { heartbeatRequest() } } }) {
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi HeartbeatRequest"
+                ) { heartbeatRequest() } } }) {
                 Text("Heartbeat Request")
             }
 
-            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { heartbeatResponse() } } }) {
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi HeartbeatResponse"
+                ) { heartbeatResponse() } } }) {
                 Text("Heartbeat Response")
             }
 
             val logStatement1 = "Some short log statement from the raspberry pi pico board."
-            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { logStatement(logStatement1) } } }) {
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi LogStatement"
+                ) { logStatement(logStatement1) } } }) {
                 Text("Log Statement 1 (Len: ${logStatement1.length}) ")
             }
 
 
             val logStatement2 = "Some longer log statement from the raspberry pi pico board that is sketchily long and" +
                     "shouldn't really fit into one ibus packet, yet here we are."
-            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { logStatement(logStatement2) } } }) {
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi LogStatement"
+                ) { logStatement(logStatement2) } } }) {
                 Text("Log Statement 2 (Len: ${logStatement2.length} )")
             }
 
@@ -187,16 +241,28 @@ class PicoCommsDebugWindow @Inject constructor(
                     "shouldn't really fit into one ibus packet, yet here we are. And we're going to keep going and going" +
                     "until we are over the character limit and lets just keep on going and going for days and days and then" +
                     "what we will do is ramble on and on until the software explodes in our faces."
-            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { logStatement(logStatement3) } } }) {
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi LogStatement"
+                ) { logStatement(logStatement3) } } }) {
                 Text("Log Statement 3 (Len: ${logStatement3.length} )")
             }
 
-            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { softRestartX() } } }) {
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi RestartX"
+                ) { softRestartX() } } }) {
                 Text("Request restart X")
             }
 
 
-            Button(onClick = { scope.launch { simulatePicoToPiMessage(dryRun = dryRun.value) { softRestartPi() } } }) {
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi RestartPi"
+                ) { softRestartPi() } } }) {
                 Text("Request restart Pi")
             }
 
@@ -205,6 +271,7 @@ class PicoCommsDebugWindow @Inject constructor(
 
     suspend fun simulatePicoToPiMessage(
         dryRun : Boolean, //If true, only register a simulated event, don't also send it to incoming parsers
+        name : String = "",
         block : PicoToPiMessageFactory.() -> IBusMessage
     ) {
 
@@ -219,6 +286,10 @@ class PicoCommsDebugWindow @Inject constructor(
         }
 
         if (picoToPiMessage != null) {
+            logger.d("PicoCommsWindow", "Sending message: $name " +
+                    "bytes: ${ibusMessage.toWireBytes().toUByteArray().map {
+                        it.toUInt().toString(radix = 16)
+                    }}")
             commsDebugChannel.emit(
                 IbusCommsDebugMessage.IncomingMessage.SyntheticPicoToPiMessage(
                     rawMessage = ibusMessage,

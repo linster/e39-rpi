@@ -2,6 +2,7 @@ package ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory
 
 import ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
 import ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType
+import ca.stefanm.e39.proto.configProto
 import ca.stefanm.e39.proto.picoToPi
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.lib.messages.IBusMessage
@@ -52,6 +53,12 @@ class PicoToPiMessageFactory @Inject constructor() {
             destinationDevice = IBusDevice.PI,
             data = picoToPi {
                 messageTypeValue = MessageType.PiSoftPowerRestartX_VALUE
+
+                //Pico always puts in an empty string for this field, even though
+                //it's optional.
+//                loggerStatement = ""
+
+//                existingConfig = configProto {  }
             }.toByteArray().toUByteArray()
         )
     }
@@ -62,6 +69,12 @@ class PicoToPiMessageFactory @Inject constructor() {
             destinationDevice = IBusDevice.PI,
             data = picoToPi {
                 messageTypeValue = MessageType.PiSoftPowerRestartPi_VALUE
+
+                //Pico always puts in an empty string for this field, even though
+                //it's optional.
+//                loggerStatement = ""
+
+//                existingConfig = configProto {  }
             }.toByteArray().toUByteArray()
         )
     }

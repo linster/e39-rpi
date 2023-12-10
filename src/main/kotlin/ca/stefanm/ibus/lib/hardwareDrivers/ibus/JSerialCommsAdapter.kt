@@ -92,7 +92,8 @@ class BlockingJSerialCommsReader @Inject constructor(
                 if (bytesAvailable == -1) { logger.w(TAG, "Port not open") ; break }
 
                 val readBytes = ByteArray(bytesAvailable)
-                port.readBytes(readBytes, bytesAvailable.toLong())
+//                port.readBytes(readBytes, bytesAvailable.toLong())
+                port.readBytes(readBytes, bytesAvailable)
 
                 if (bytesAvailable > 0) {
 //                    logger.v("BYTE READER", "Read $bytesAvailable bytes from serial port.")
@@ -237,7 +238,7 @@ class NonBlockingJSerialCommsWriter @Inject constructor(
     private val port = serialPortProvider.serialPort
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
-        var bytesWritten = 0L
+        var bytesWritten = 0
         while (bytesWritten < bytes.size) {
             bytesWritten += port.writeBytes(bytes, 1, bytesWritten)
             yield()
@@ -262,7 +263,7 @@ class BlockingJSerialCommsWriter @Inject constructor(
 //            delay(200)
             delay((bytes.size * 8).toLong()) //Experimentally found to give the BMBT enough time to respond to long packets.
 
-            port.writeBytes(bytes, bytes.size.toLong())
+            port.writeBytes(bytes, bytes.size)
 
             logger.d("TAG", "Awaiting write: ${port.bytesAwaitingWrite()}")
         }
