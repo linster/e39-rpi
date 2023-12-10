@@ -37,9 +37,12 @@ annotation class ScreenDoc(
     @Qualifier
     @Target(AnnotationTarget.CLASS)
     @Retention(AnnotationRetention.RUNTIME)
+    @Repeatable
     annotation class AllowsGoBack(
-        val optionalTag : String = ""
-    )
+        val extraEdgeDescriptions : Array<Description> = [] //Empty list is just a back-stack go back edge, no extra edges with descriptions
+    ) {
+        annotation class Description(val description : String)
+    }
 
     @Qualifier
     @Target(AnnotationTarget.CLASS)

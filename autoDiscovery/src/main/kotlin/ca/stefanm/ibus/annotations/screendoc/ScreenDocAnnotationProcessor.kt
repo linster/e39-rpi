@@ -17,7 +17,7 @@ class ScreenDocAnnotationProcessor : AbstractProcessor() {
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(
-//            ScreenDoc::class.java.canonicalName,
+            ScreenDoc::class.java.canonicalName,
 //            ScreenDoc.GraphPartition::class.java.canonicalName,
             ScreenDoc.NavigateTo::class.java.canonicalName,
 //            ScreenDoc.AllowsGoBack::class.java.canonicalName,

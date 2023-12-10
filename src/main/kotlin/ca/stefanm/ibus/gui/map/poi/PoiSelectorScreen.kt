@@ -21,8 +21,10 @@ import javax.inject.Inject
     screenName = "PoiSelectorScreen",
     description = "Allows the user to select a point on a map from the POI addressbook."
 )
-@ScreenDoc.AllowsGoBack(optionalTag = "Location Selected")
-@ScreenDoc.AllowsGoBack(optionalTag = "No selection")
+@ScreenDoc.AllowsGoBack([
+    ScreenDoc.AllowsGoBack.Description("Location Selected"),
+    ScreenDoc.AllowsGoBack.Description("No location selected")
+])
 @GuidanceScreenDocPartition
 @AutoDiscover
 class PoiSelectorScreen @Inject constructor(

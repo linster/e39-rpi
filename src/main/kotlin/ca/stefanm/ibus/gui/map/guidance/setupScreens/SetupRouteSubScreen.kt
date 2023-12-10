@@ -45,10 +45,8 @@ import javax.inject.Inject
     ]
 )
 @ScreenDoc.OpensSubScreen("openLocatonChooser")
-
 @GuidanceScreenDocPartition
-@ScreenDoc.AllowsGoBack(optionalTag = "Go Back")
-@ScreenDoc.AllowsGoBack(optionalTag = "Start Guidance")
+@ScreenDoc.AllowsGoBack
 @AutoDiscover
 class SetupRouteSubScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
@@ -207,7 +205,7 @@ class SetupRouteSubScreen @Inject constructor(
 
     @ScreenDoc.SubScreen(
         " v",
-        paneDescription = "Shows a `SelectOnMap` link to let the use rpick a point."
+        paneDescription = "Shows a `SelectOnMap` link to let the user pick a point."
     )
     fun openLocatonChooser(
         title : String,
