@@ -20,8 +20,8 @@ class ScreenDocAnnotationProcessor : AbstractProcessor() {
             ScreenDoc::class.java.canonicalName,
 //            ScreenDoc.GraphPartition::class.java.canonicalName,
             ScreenDoc.NavigateTo::class.java.canonicalName,
-//            ScreenDoc.AllowsGoBack::class.java.canonicalName,
-//            ScreenDoc.AllowsGoRoot::class.java.canonicalName,
+            ScreenDoc.AllowsGoBack::class.java.canonicalName,
+            ScreenDoc.AllowsGoRoot::class.java.canonicalName,
 //            ScreenDoc.OpensSubScreen::class.java.canonicalName,
 
 //            ScreenDoc.SubScreen::class.java.canonicalName,
@@ -41,8 +41,21 @@ class ScreenDocAnnotationProcessor : AbstractProcessor() {
         get() = processingEnv.options["kapt.kotlin.generated"]
 
 
+
+    val elementsByAnnotation = mutableMapOf<Annotation, Set<Element>>()
+    val annotationsByElement = mutableMapOf<Element, Annotation>()
+
+    fun convertAnnotationMaps(
+        input : Map<Annotation, Set<Element>>
+    ) : Map<Element, Annotation> {
+        
+
+        return mapOf()
+    }
+
     override fun process(annotations: MutableSet<out TypeElement>,
                          env: RoundEnvironment): Boolean {
+
 
         if (annotations.isNotEmpty()) {
             val screenDocs = env.getElementsAnnotatedWith(ScreenDoc::class.java)
