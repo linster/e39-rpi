@@ -94,6 +94,8 @@ dependencies {
     implementation( "org.jetbrains.kotlin:kotlin-stdlib")
     implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 
+    implementation("com.github.ajalt.clikt:clikt:4.2.2")
+
     implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
     implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
 
