@@ -19,6 +19,7 @@ interface CarPlatformConfiguration {
         return "DeviceConfiguration(" +
                 "isPi: $isPi," +
                 "iBusInterfaceUri: $iBusInterfaceUri," +
+                "baudRate: $serialPortBaudRate" +
                 "displayDriver: $displayDriver," +
                 "pairedPhone : $pairedPhone"
     }
@@ -30,6 +31,12 @@ interface CarPlatformConfiguration {
     val serialPortWriteMode : SerialPortWriteMode
 
     //TODO expose 8N1, 8E1, and baudrate here.
+
+    enum class PicoSerialBaudRate{
+        SERIAL_115200_8N1,
+        SERIAL_9600_8E1
+    }
+    val serialPortBaudRate : PicoSerialBaudRate
 
     enum class TrackInfoPrinterType { BMBT, CLI } //Do we stub out track info printing to the cli?
 
@@ -54,6 +61,8 @@ class Pi3BPlusDeviceConfiguration() : CarPlatformConfiguration {
     override val serialPortReadMode = CarPlatformConfiguration.SerialPortReadMode.BLOCKING
     override val serialPortWriteMode = CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING
 
+    override val serialPortBaudRate = CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_115200_8N1
+
     override val trackInfoPrinter = CarPlatformConfiguration.TrackInfoPrinterType.BMBT
 
     override val listOfServiceGroupsOnStartup: List<String> = emptyList()
@@ -75,6 +84,8 @@ class LaptopDeviceConfiguration : CarPlatformConfiguration {
 
     override val serialPortReadMode = CarPlatformConfiguration.SerialPortReadMode.BLOCKING
     override val serialPortWriteMode = CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING
+
+    override val serialPortBaudRate = CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_115200_8N1
 
     override val trackInfoPrinter = CarPlatformConfiguration.TrackInfoPrinterType.CLI
 

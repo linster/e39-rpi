@@ -194,9 +194,18 @@ class JSerialCommsSerialPortProvider @Inject constructor(
             logger.d(TAG, "Opened serial port ${port.systemPortName}")
         }
 
-        port.setComPortParameters(
-            9600, 8, 1, SerialPort.EVEN_PARITY
-        )
+        when (deviceConfiguration.serialPortBaudRate) {
+            CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_115200_8N1 -> {
+                port.setComPortParameters(
+                    115200, 8, 1, SerialPort.NO_PARITY
+                )
+            }
+            CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_9600_8E1 -> {
+                port.setComPortParameters(
+                    9600, 8, 1, SerialPort.EVEN_PARITY
+                )
+            }
+        }
 
         if (deviceConfiguration.serialPortReadMode == CarPlatformConfiguration.SerialPortReadMode.BLOCKING
             && deviceConfiguration.serialPortWriteMode == CarPlatformConfiguration.SerialPortWriteMode.BLOCKING) {
