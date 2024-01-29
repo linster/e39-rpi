@@ -6,8 +6,8 @@
 package ca.stefanm.e39.proto;
 
 @kotlin.jvm.JvmName("-initializeconfigProto")
-public inline fun configProto(block: ca.stefanm.e39.proto.ConfigProtoKt.Dsl.() -> kotlin.Unit): ConfigProtoOuterClass.ConfigProto =
-  ca.stefanm.e39.proto.ConfigProtoKt.Dsl._create(ConfigProtoOuterClass.ConfigProto.newBuilder()).apply { block() }._build()
+public inline fun configProto(block: ca.stefanm.e39.proto.ConfigProtoKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto =
+  ca.stefanm.e39.proto.ConfigProtoKt.Dsl._create(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.newBuilder()).apply { block() }._build()
 /**
  * Protobuf type `ca.stefanm.e39.proto.ConfigProto`
  */
@@ -15,33 +15,33 @@ public object ConfigProtoKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: ConfigProtoOuterClass.ConfigProto.Builder
+    private val _builder: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: ConfigProtoOuterClass.ConfigProto.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): ConfigProtoOuterClass.ConfigProto = _builder.build()
+    internal fun _build(): ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto = _builder.build()
 
     /**
-     * `string str = 1;`
+     * `string rpiFwGitCommitHash = 1;`
      */
-    public var str: kotlin.String
-      @JvmName("getStr")
-      get() = _builder.getStr()
-      @JvmName("setStr")
+    public var rpiFwGitCommitHash: kotlin.String
+      @JvmName("getRpiFwGitCommitHash")
+      get() = _builder.getRpiFwGitCommitHash()
+      @JvmName("setRpiFwGitCommitHash")
       set(value) {
-        _builder.setStr(value)
+        _builder.setRpiFwGitCommitHash(value)
       }
     /**
-     * `string str = 1;`
+     * `string rpiFwGitCommitHash = 1;`
      */
-    public fun clearStr() {
-      _builder.clearStr()
+    public fun clearRpiFwGitCommitHash() {
+      _builder.clearRpiFwGitCommitHash()
     }
 
     /**
@@ -64,7 +64,7 @@ public object ConfigProtoKt {
     /**
      * `.ca.stefanm.e39.proto.ConfigProto.LoggingLevels enabledMaxLogLevelForIbusLog = 3;`
      */
-    public var enabledMaxLogLevelForIbusLog: ConfigProtoOuterClass.ConfigProto.LoggingLevels
+    public var enabledMaxLogLevelForIbusLog: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels
       @JvmName("getEnabledMaxLogLevelForIbusLog")
       get() = _builder.getEnabledMaxLogLevelForIbusLog()
       @JvmName("setEnabledMaxLogLevelForIbusLog")
@@ -88,7 +88,7 @@ public object ConfigProtoKt {
     /**
      * `.ca.stefanm.e39.proto.ConfigProto.LoggingLevels enabledMaxLogLevelForPrintfLog = 4;`
      */
-    public var enabledMaxLogLevelForPrintfLog: ConfigProtoOuterClass.ConfigProto.LoggingLevels
+    public var enabledMaxLogLevelForPrintfLog: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels
       @JvmName("getEnabledMaxLogLevelForPrintfLog")
       get() = _builder.getEnabledMaxLogLevelForPrintfLog()
       @JvmName("setEnabledMaxLogLevelForPrintfLog")
@@ -162,7 +162,7 @@ public object ConfigProtoKt {
     /**
      * `.ca.stefanm.e39.proto.ConfigProto.ScanProgram scanProgramOnBoot = 7;`
      */
-    public var scanProgramOnBoot: ConfigProtoOuterClass.ConfigProto.ScanProgram
+    public var scanProgramOnBoot: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.ScanProgram
       @JvmName("getScanProgramOnBoot")
       get() = _builder.getScanProgramOnBoot()
       @JvmName("setScanProgramOnBoot")
@@ -186,7 +186,7 @@ public object ConfigProtoKt {
     /**
      * `.ca.stefanm.e39.proto.ConfigProto.VideoSource videoSourceOnBoot = 8;`
      */
-    public var videoSourceOnBoot: ConfigProtoOuterClass.ConfigProto.VideoSource
+    public var videoSourceOnBoot: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.VideoSource
       @JvmName("getVideoSourceOnBoot")
       get() = _builder.getVideoSourceOnBoot()
       @JvmName("setVideoSourceOnBoot")
@@ -235,7 +235,7 @@ public object ConfigProtoKt {
     /**
      * `.ca.stefanm.e39.proto.ConfigProto.VideoEncoding videoEncoding = 10;`
      */
-    public var videoEncoding: ConfigProtoOuterClass.ConfigProto.VideoEncoding
+    public var videoEncoding: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.VideoEncoding
       @JvmName("getVideoEncoding")
       get() = _builder.getVideoEncoding()
       @JvmName("setVideoEncoding")
@@ -259,7 +259,7 @@ public object ConfigProtoKt {
     /**
      * `.ca.stefanm.e39.proto.ConfigProto.AspectRatio aspectRatio = 11;`
      */
-    public var aspectRatio: ConfigProtoOuterClass.ConfigProto.AspectRatio
+    public var aspectRatio: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.AspectRatio
       @JvmName("getAspectRatio")
       get() = _builder.getAspectRatio()
       @JvmName("setAspectRatio")
@@ -282,6 +282,6 @@ public object ConfigProtoKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun ConfigProtoOuterClass.ConfigProto.copy(block: ca.stefanm.e39.proto.ConfigProtoKt.Dsl.() -> kotlin.Unit): ConfigProtoOuterClass.ConfigProto =
+public inline fun ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.copy(block: ca.stefanm.e39.proto.ConfigProtoKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto =
   ca.stefanm.e39.proto.ConfigProtoKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

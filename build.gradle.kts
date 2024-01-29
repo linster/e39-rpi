@@ -28,6 +28,8 @@ plugins {
     id("java")
 
     id("com.squareup.sqldelight") version "1.5.5"
+
+    id("com.google.protobuf") version "0.9.4"
 }
 
 

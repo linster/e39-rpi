@@ -6,22 +6,29 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
+import ca.stefanm.ibus.lib.messages.IBusMessage
 
-enum class PiToPicoNoArgCannedMessageType {
-    HeartbeatRequest,
-    HeartbeatResponse,
+enum class PiToPicoNoArgCannedMessageType(val message: PiToPicoMessageFactory.() -> IBusMessage) {
+    HeartbeatRequest({heartbeatRequest()}),
+    HeartbeatResponse({heartbeatResponse()}),
 
-    ConfigStatusRequest, //Instruct the pico to tell us what it's config object is
+    ConfigStatusRequest({configStatusRequest()}), ///Instruct the pico to tell us what it's config object is
 
 
-    PicoVideoRequestUpstream, //Ask the pico to show upstream (for Back to BMW function)
-    PicoVideoRequestPico, //Ask the pico to show the debug menu
-    PicoVideoRequestRpi, //Ask the pico to show the RPi.
-    PicoVideoRequestRVC,
+    PicoVideoRequestUpstream({ videoSourceRequest(PiToPicoMessageFactory.PicoVideoRequestSource.Upstream)}),
+    PicoVideoRequestPico({ videoSourceRequest(PiToPicoMessageFactory.PicoVideoRequestSource.Pico) }),
+    PicoVideoRequestRpi({ videoSourceRequest(PiToPicoMessageFactory.PicoVideoRequestSource.Rpi)}),
+    PicoVideoRequestRVC({ videoSourceRequest(PiToPicoMessageFactory.PicoVideoRequestSource.RVC)}),
 
     //For test purposes to toggle the power switch for the RPI power supply.
-    PicoPowerRequestOn,
-    PicoPowerRequestOff,
+    PicoPowerRequestOn({ piHardPowerSwitch(true) }),
+    PicoPowerRequestOff({ piHardPowerSwitch(false) }),
+
+    SimulatedIgnitionKey0({ simulateIgnition(PiToPicoMessageFactory.IgnitionPosition.POSITION_0)}),
+    SimulatedIgnitionKey1({ simulateIgnition(PiToPicoMessageFactory.IgnitionPosition.POSITION_1)}),
+    SimulatedIgnitionKey2({ simulateIgnition(PiToPicoMessageFactory.IgnitionPosition.POSITION_2)}),
+    SimulatedIgnitionKey3({ simulateIgnition(PiToPicoMessageFactory.IgnitionPosition.POSITION_3)}),
 }
 
 @Composable

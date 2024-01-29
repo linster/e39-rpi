@@ -3,7 +3,7 @@ syntax = "proto3";
 package ca.stefanm.e39.proto;
 
 message ConfigProto {
-  string str = 1;
+  string rpiFwGitCommitHash = 1;
 
   bool isIbusLogOutputEnabled = 2;
 

@@ -6,8 +6,8 @@
 package ca.stefanm.e39.proto;
 
 @kotlin.jvm.JvmName("-initializepiToPico")
-public inline fun piToPico(block: ca.stefanm.e39.proto.PiToPicoKt.Dsl.() -> kotlin.Unit): PiToPicoOuterClass.PiToPico =
-  ca.stefanm.e39.proto.PiToPicoKt.Dsl._create(PiToPicoOuterClass.PiToPico.newBuilder()).apply { block() }._build()
+public inline fun piToPico(block: ca.stefanm.e39.proto.PiToPicoKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico =
+  ca.stefanm.e39.proto.PiToPicoKt.Dsl._create(ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.newBuilder()).apply { block() }._build()
 /**
  * Protobuf type `ca.stefanm.e39.proto.PiToPico`
  */
@@ -15,22 +15,22 @@ public object PiToPicoKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: PiToPicoOuterClass.PiToPico.Builder
+    private val _builder: ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: PiToPicoOuterClass.PiToPico.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): PiToPicoOuterClass.PiToPico = _builder.build()
+    internal fun _build(): ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico = _builder.build()
 
     /**
      * `.ca.stefanm.e39.proto.PiToPico.MessageType messageType = 1;`
      */
-    public var messageType: PiToPicoOuterClass.PiToPico.MessageType
+    public var messageType: ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.MessageType
       @JvmName("getMessageType")
       get() = _builder.getMessageType()
       @JvmName("setMessageType")
@@ -52,9 +52,9 @@ public object PiToPicoKt {
     }
 
     /**
-     * `optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;`
+     * `.ca.stefanm.e39.proto.ConfigProto newConfig = 2;`
      */
-    public var newConfig: ConfigProtoOuterClass.ConfigProto
+    public var newConfig: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
       @JvmName("getNewConfig")
       get() = _builder.getNewConfig()
       @JvmName("setNewConfig")
@@ -62,26 +62,24 @@ public object PiToPicoKt {
         _builder.setNewConfig(value)
       }
     /**
-     * `optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;`
+     * `.ca.stefanm.e39.proto.ConfigProto newConfig = 2;`
      */
     public fun clearNewConfig() {
       _builder.clearNewConfig()
     }
     /**
-     * `optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;`
+     * `.ca.stefanm.e39.proto.ConfigProto newConfig = 2;`
      * @return Whether the newConfig field is set.
      */
     public fun hasNewConfig(): kotlin.Boolean {
       return _builder.hasNewConfig()
     }
-    public val PiToPicoKt.Dsl.newConfigOrNull: ConfigProtoOuterClass.ConfigProto?
-      get() = _builder.newConfigOrNull
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun PiToPicoOuterClass.PiToPico.copy(block: ca.stefanm.e39.proto.PiToPicoKt.Dsl.() -> kotlin.Unit): PiToPicoOuterClass.PiToPico =
+public inline fun ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.copy(block: ca.stefanm.e39.proto.PiToPicoKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico =
   ca.stefanm.e39.proto.PiToPicoKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
-public val PiToPicoOuterClass.PiToPicoOrBuilder.newConfigOrNull: ConfigProtoOuterClass.ConfigProto?
+public val ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPicoOrBuilder.newConfigOrNull: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto?
   get() = if (hasNewConfig()) getNewConfig() else null
 

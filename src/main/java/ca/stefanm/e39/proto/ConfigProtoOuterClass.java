@@ -19,16 +19,16 @@ public final class ConfigProtoOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string str = 1;</code>
-     * @return The str.
+     * <code>string rpiFwGitCommitHash = 1;</code>
+     * @return The rpiFwGitCommitHash.
      */
-    java.lang.String getStr();
+    java.lang.String getRpiFwGitCommitHash();
     /**
-     * <code>string str = 1;</code>
-     * @return The bytes for str.
+     * <code>string rpiFwGitCommitHash = 1;</code>
+     * @return The bytes for rpiFwGitCommitHash.
      */
     com.google.protobuf.ByteString
-        getStrBytes();
+        getRpiFwGitCommitHashBytes();
 
     /**
      * <code>bool isIbusLogOutputEnabled = 2;</code>
@@ -145,7 +145,7 @@ public final class ConfigProtoOuterClass {
       super(builder);
     }
     private ConfigProto() {
-      str_ = "";
+      rpiFwGitCommitHash_ = "";
       enabledMaxLogLevelForIbusLog_ = 0;
       enabledMaxLogLevelForPrintfLog_ = 0;
       scanProgramOnBoot_ = 0;
@@ -804,39 +804,39 @@ public final class ConfigProtoOuterClass {
       // @@protoc_insertion_point(enum_scope:ca.stefanm.e39.proto.ConfigProto.AspectRatio)
     }
 
-    public static final int STR_FIELD_NUMBER = 1;
+    public static final int RPIFWGITCOMMITHASH_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object str_ = "";
+    private volatile java.lang.Object rpiFwGitCommitHash_ = "";
     /**
-     * <code>string str = 1;</code>
-     * @return The str.
+     * <code>string rpiFwGitCommitHash = 1;</code>
+     * @return The rpiFwGitCommitHash.
      */
     @java.lang.Override
-    public java.lang.String getStr() {
-      java.lang.Object ref = str_;
+    public java.lang.String getRpiFwGitCommitHash() {
+      java.lang.Object ref = rpiFwGitCommitHash_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        str_ = s;
+        rpiFwGitCommitHash_ = s;
         return s;
       }
     }
     /**
-     * <code>string str = 1;</code>
-     * @return The bytes for str.
+     * <code>string rpiFwGitCommitHash = 1;</code>
+     * @return The bytes for rpiFwGitCommitHash.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getStrBytes() {
-      java.lang.Object ref = str_;
+        getRpiFwGitCommitHashBytes() {
+      java.lang.Object ref = rpiFwGitCommitHash_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        str_ = b;
+        rpiFwGitCommitHash_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -1021,8 +1021,8 @@ public final class ConfigProtoOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(str_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, str_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rpiFwGitCommitHash_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, rpiFwGitCommitHash_);
       }
       if (isIbusLogOutputEnabled_ != false) {
         output.writeBool(2, isIbusLogOutputEnabled_);
@@ -1063,8 +1063,8 @@ public final class ConfigProtoOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(str_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, str_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rpiFwGitCommitHash_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, rpiFwGitCommitHash_);
       }
       if (isIbusLogOutputEnabled_ != false) {
         size += com.google.protobuf.CodedOutputStream
@@ -1121,8 +1121,8 @@ public final class ConfigProtoOuterClass {
       }
       ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto other = (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) obj;
 
-      if (!getStr()
-          .equals(other.getStr())) return false;
+      if (!getRpiFwGitCommitHash()
+          .equals(other.getRpiFwGitCommitHash())) return false;
       if (getIsIbusLogOutputEnabled()
           != other.getIsIbusLogOutputEnabled()) return false;
       if (enabledMaxLogLevelForIbusLog_ != other.enabledMaxLogLevelForIbusLog_) return false;
@@ -1148,8 +1148,8 @@ public final class ConfigProtoOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + STR_FIELD_NUMBER;
-      hash = (53 * hash) + getStr().hashCode();
+      hash = (37 * hash) + RPIFWGITCOMMITHASH_FIELD_NUMBER;
+      hash = (53 * hash) + getRpiFwGitCommitHash().hashCode();
       hash = (37 * hash) + ISIBUSLOGOUTPUTENABLED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getIsIbusLogOutputEnabled());
@@ -1303,7 +1303,7 @@ public final class ConfigProtoOuterClass {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        str_ = "";
+        rpiFwGitCommitHash_ = "";
         isIbusLogOutputEnabled_ = false;
         enabledMaxLogLevelForIbusLog_ = 0;
         enabledMaxLogLevelForPrintfLog_ = 0;
@@ -1348,7 +1348,7 @@ public final class ConfigProtoOuterClass {
       private void buildPartial0(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.str_ = str_;
+          result.rpiFwGitCommitHash_ = rpiFwGitCommitHash_;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.isIbusLogOutputEnabled_ = isIbusLogOutputEnabled_;
@@ -1394,8 +1394,8 @@ public final class ConfigProtoOuterClass {
 
       public Builder mergeFrom(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto other) {
         if (other == ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance()) return this;
-        if (!other.getStr().isEmpty()) {
-          str_ = other.str_;
+        if (!other.getRpiFwGitCommitHash().isEmpty()) {
+          rpiFwGitCommitHash_ = other.rpiFwGitCommitHash_;
           bitField0_ |= 0x00000001;
           onChanged();
         }
@@ -1456,7 +1456,7 @@ public final class ConfigProtoOuterClass {
                 done = true;
                 break;
               case 10: {
-                str_ = input.readStringRequireUtf8();
+                rpiFwGitCommitHash_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
@@ -1527,73 +1527,73 @@ public final class ConfigProtoOuterClass {
       }
       private int bitField0_;
 
-      private java.lang.Object str_ = "";
+      private java.lang.Object rpiFwGitCommitHash_ = "";
       /**
-       * <code>string str = 1;</code>
-       * @return The str.
+       * <code>string rpiFwGitCommitHash = 1;</code>
+       * @return The rpiFwGitCommitHash.
        */
-      public java.lang.String getStr() {
-        java.lang.Object ref = str_;
+      public java.lang.String getRpiFwGitCommitHash() {
+        java.lang.Object ref = rpiFwGitCommitHash_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          str_ = s;
+          rpiFwGitCommitHash_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>string str = 1;</code>
-       * @return The bytes for str.
+       * <code>string rpiFwGitCommitHash = 1;</code>
+       * @return The bytes for rpiFwGitCommitHash.
        */
       public com.google.protobuf.ByteString
-          getStrBytes() {
-        java.lang.Object ref = str_;
+          getRpiFwGitCommitHashBytes() {
+        java.lang.Object ref = rpiFwGitCommitHash_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          str_ = b;
+          rpiFwGitCommitHash_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
       /**
-       * <code>string str = 1;</code>
-       * @param value The str to set.
+       * <code>string rpiFwGitCommitHash = 1;</code>
+       * @param value The rpiFwGitCommitHash to set.
        * @return This builder for chaining.
        */
-      public Builder setStr(
+      public Builder setRpiFwGitCommitHash(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        str_ = value;
+        rpiFwGitCommitHash_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>string str = 1;</code>
+       * <code>string rpiFwGitCommitHash = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearStr() {
-        str_ = getDefaultInstance().getStr();
+      public Builder clearRpiFwGitCommitHash() {
+        rpiFwGitCommitHash_ = getDefaultInstance().getRpiFwGitCommitHash();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
       /**
-       * <code>string str = 1;</code>
-       * @param value The bytes for str to set.
+       * <code>string rpiFwGitCommitHash = 1;</code>
+       * @param value The bytes for rpiFwGitCommitHash to set.
        * @return This builder for chaining.
        */
-      public Builder setStrBytes(
+      public Builder setRpiFwGitCommitHashBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        str_ = value;
+        rpiFwGitCommitHash_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
@@ -2159,31 +2159,31 @@ public final class ConfigProtoOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\021ConfigProto.proto\022\024ca.stefanm.e39.prot" +
-      "o\"\310\007\n\013ConfigProto\022\013\n\003str\030\001 \001(\t\022\036\n\026isIbus" +
-      "LogOutputEnabled\030\002 \001(\010\022U\n\034enabledMaxLogL" +
-      "evelForIbusLog\030\003 \001(\0162/.ca.stefanm.e39.pr" +
-      "oto.ConfigProto.LoggingLevels\022W\n\036enabled" +
-      "MaxLogLevelForPrintfLog\030\004 \001(\0162/.ca.stefa" +
-      "nm.e39.proto.ConfigProto.LoggingLevels\022\037" +
-      "\n\027alwaysTurnOnRpiOnStatup\030\005 \001(\010\022(\n alway" +
-      "sTurnOnScreenOnIbusActivity\030\006 \001(\010\022H\n\021sca" +
-      "nProgramOnBoot\030\007 \001(\0162-.ca.stefanm.e39.pr" +
-      "oto.ConfigProto.ScanProgram\022H\n\021videoSour" +
-      "ceOnBoot\030\010 \001(\0162-.ca.stefanm.e39.proto.Co" +
-      "nfigProto.VideoSource\022&\n\036sendBMBTEncodin" +
-      "gPacketOnBootup\030\t \001(\010\022F\n\rvideoEncoding\030\n" +
+      "o\"\327\007\n\013ConfigProto\022\032\n\022rpiFwGitCommitHash\030" +
+      "\001 \001(\t\022\036\n\026isIbusLogOutputEnabled\030\002 \001(\010\022U\n" +
+      "\034enabledMaxLogLevelForIbusLog\030\003 \001(\0162/.ca" +
+      ".stefanm.e39.proto.ConfigProto.LoggingLe" +
+      "vels\022W\n\036enabledMaxLogLevelForPrintfLog\030\004" +
       " \001(\0162/.ca.stefanm.e39.proto.ConfigProto." +
-      "VideoEncoding\022B\n\013aspectRatio\030\013 \001(\0162-.ca." +
-      "stefanm.e39.proto.ConfigProto.AspectRati" +
-      "o\"B\n\rLoggingLevels\022\t\n\005DEBUG\020\000\022\010\n\004INFO\020\001\022" +
-      "\010\n\004WARN\020\002\022\t\n\005ERROR\020\003\022\007\n\003WTF\020\004\"p\n\013ScanPro" +
-      "gram\022\010\n\004NONE\020\000\022\t\n\005CLOCK\020\001\022\030\n\024LINSTEROS_B" +
-      "OOTSPLASH\020\002\022\024\n\020GOOSE_BOOTSPLASH\020\003\022\022\n\016BMW" +
-      "_BOOTSPLASH\020\004\022\010\n\004MENU\020\005\"6\n\013VideoSource\022\007" +
-      "\n\003RVC\020\000\022\014\n\010UPSTREAM\020\001\022\010\n\004PICO\020\002\022\006\n\002PI\020\003\"" +
-      "\"\n\rVideoEncoding\022\010\n\004NTSC\020\000\022\007\n\003PAL\020\001\"7\n\013A" +
-      "spectRatio\022\r\n\tFourThree\020\000\022\017\n\013SixteenNine" +
-      "\020\001\022\010\n\004Zoom\020\002b\006proto3"
+      "LoggingLevels\022\037\n\027alwaysTurnOnRpiOnStatup" +
+      "\030\005 \001(\010\022(\n alwaysTurnOnScreenOnIbusActivi" +
+      "ty\030\006 \001(\010\022H\n\021scanProgramOnBoot\030\007 \001(\0162-.ca" +
+      ".stefanm.e39.proto.ConfigProto.ScanProgr" +
+      "am\022H\n\021videoSourceOnBoot\030\010 \001(\0162-.ca.stefa" +
+      "nm.e39.proto.ConfigProto.VideoSource\022&\n\036" +
+      "sendBMBTEncodingPacketOnBootup\030\t \001(\010\022F\n\r" +
+      "videoEncoding\030\n \001(\0162/.ca.stefanm.e39.pro" +
+      "to.ConfigProto.VideoEncoding\022B\n\013aspectRa" +
+      "tio\030\013 \001(\0162-.ca.stefanm.e39.proto.ConfigP" +
+      "roto.AspectRatio\"B\n\rLoggingLevels\022\t\n\005DEB" +
+      "UG\020\000\022\010\n\004INFO\020\001\022\010\n\004WARN\020\002\022\t\n\005ERROR\020\003\022\007\n\003W" +
+      "TF\020\004\"p\n\013ScanProgram\022\010\n\004NONE\020\000\022\t\n\005CLOCK\020\001" +
+      "\022\030\n\024LINSTEROS_BOOTSPLASH\020\002\022\024\n\020GOOSE_BOOT" +
+      "SPLASH\020\003\022\022\n\016BMW_BOOTSPLASH\020\004\022\010\n\004MENU\020\005\"6" +
+      "\n\013VideoSource\022\007\n\003RVC\020\000\022\014\n\010UPSTREAM\020\001\022\010\n\004" +
+      "PICO\020\002\022\006\n\002PI\020\003\"\"\n\rVideoEncoding\022\010\n\004NTSC\020" +
+      "\000\022\007\n\003PAL\020\001\"7\n\013AspectRatio\022\r\n\tFourThree\020\000" +
+      "\022\017\n\013SixteenNine\020\001\022\010\n\004Zoom\020\002b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2194,7 +2194,7 @@ public final class ConfigProtoOuterClass {
     internal_static_ca_stefanm_e39_proto_ConfigProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ca_stefanm_e39_proto_ConfigProto_descriptor,
-        new java.lang.String[] { "Str", "IsIbusLogOutputEnabled", "EnabledMaxLogLevelForIbusLog", "EnabledMaxLogLevelForPrintfLog", "AlwaysTurnOnRpiOnStatup", "AlwaysTurnOnScreenOnIbusActivity", "ScanProgramOnBoot", "VideoSourceOnBoot", "SendBMBTEncodingPacketOnBootup", "VideoEncoding", "AspectRatio", });
+        new java.lang.String[] { "RpiFwGitCommitHash", "IsIbusLogOutputEnabled", "EnabledMaxLogLevelForIbusLog", "EnabledMaxLogLevelForPrintfLog", "AlwaysTurnOnRpiOnStatup", "AlwaysTurnOnScreenOnIbusActivity", "ScanProgramOnBoot", "VideoSourceOnBoot", "SendBMBTEncodingPacketOnBootup", "VideoEncoding", "AspectRatio", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

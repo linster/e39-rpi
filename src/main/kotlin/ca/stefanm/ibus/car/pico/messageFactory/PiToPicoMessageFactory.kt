@@ -84,4 +84,25 @@ class PiToPicoMessageFactory @Inject constructor() {
         )
     }
 
+    enum class IgnitionPosition {
+        POSITION_0,
+        POSITION_1,
+        POSITION_2,
+        POSITION_3
+    }
+    fun simulateIgnition(position: IgnitionPosition) : IBusMessage {
+        return IBusMessage(
+            sourceDevice = IBusDevice.PI,
+            destinationDevice = IBusDevice.PICO,
+            data = piToPico {
+                messageType = when(position) {
+                    IgnitionPosition.POSITION_0 -> PiToPico.MessageType.SimulatedIgnitionPosition0
+                    IgnitionPosition.POSITION_1 -> PiToPico.MessageType.SimulatedIgnitionPosition1
+                    IgnitionPosition.POSITION_2 -> PiToPico.MessageType.SimulatedIgnitionPosition2
+                    IgnitionPosition.POSITION_3 -> PiToPico.MessageType.SimulatedIgnitionPosition3
+                }
+            }.toByteArray().toUByteArray()
+        )
+    }
+
 }

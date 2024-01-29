@@ -83,76 +83,8 @@ class PicoCommsDebugWindow @Inject constructor(
 
             val scope = rememberCoroutineScope()
             CannedMessageTypes(modifier = Modifier, onMessageTypeSelected = {
-                when (it) {
-                    PiToPicoNoArgCannedMessageType.HeartbeatRequest -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.HeartbeatRequest.name
-                            ) { heartbeatRequest() }
-                        }
-                    }
-                    PiToPicoNoArgCannedMessageType.HeartbeatResponse -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.HeartbeatResponse.name
-                            ) { heartbeatResponse() }
-                        }
-                    }
-                    PiToPicoNoArgCannedMessageType.ConfigStatusRequest -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.ConfigStatusRequest.name
-                            ) { configStatusRequest() }
-                        }
-                    }
-                    PiToPicoNoArgCannedMessageType.PicoVideoRequestUpstream -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.PicoVideoRequestUpstream.name
-                            ) { videoSourceRequest(
-                                PiToPicoMessageFactory.PicoVideoRequestSource.Upstream
-                            ) }
-                        }
-                    }
-                    PiToPicoNoArgCannedMessageType.PicoVideoRequestPico -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.PicoVideoRequestPico.name
-                            ) { videoSourceRequest(
-                                PiToPicoMessageFactory.PicoVideoRequestSource.Pico
-                            ) }
-                        }
-                    }
-                    PiToPicoNoArgCannedMessageType.PicoVideoRequestRpi -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.PicoVideoRequestRpi.name
-                            ) { videoSourceRequest(
-                                PiToPicoMessageFactory.PicoVideoRequestSource.Rpi
-                            ) }
-                        }
-                    }
-                    PiToPicoNoArgCannedMessageType.PicoVideoRequestRVC -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.PicoVideoRequestRVC.name
-                            ) { videoSourceRequest(
-                                PiToPicoMessageFactory.PicoVideoRequestSource.RVC
-                            ) }
-                        }
-                    }
-                    PiToPicoNoArgCannedMessageType.PicoPowerRequestOn -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.PicoPowerRequestOn.name
-                            ) { piHardPowerSwitch(true) } }
-                    }
-                    PiToPicoNoArgCannedMessageType.PicoPowerRequestOff -> {
-                        scope.launch {
-                            sendMessage(
-                                PiToPicoNoArgCannedMessageType.PicoPowerRequestOff.name
-                            ) { piHardPowerSwitch(false) } }
-                    }
+                scope.launch {
+                    sendMessage(it.name) { it.message(this)}
                 }
             })
         }

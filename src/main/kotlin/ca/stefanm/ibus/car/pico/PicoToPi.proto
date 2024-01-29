@@ -25,7 +25,7 @@ message PicoToPi {
 
   MessageType messageType = 1;
 
-  optional ConfigProto existingConfig = 2;
+  ConfigProto existingConfig = 2;
 
-  optional string loggerStatement = 3;
+  string loggerStatement = 3;
 }

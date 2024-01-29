@@ -30,17 +30,17 @@ public final class PiToPicoOuterClass {
     ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.MessageType getMessageType();
 
     /**
-     * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
      * @return Whether the newConfig field is set.
      */
     boolean hasNewConfig();
     /**
-     * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
      * @return The newConfig.
      */
     ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getNewConfig();
     /**
-     * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
      */
     ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getNewConfigOrBuilder();
   }
@@ -153,6 +153,26 @@ public final class PiToPicoOuterClass {
        * <code>PicoPowerRequestOff = 9;</code>
        */
       PicoPowerRequestOff(9),
+      /**
+       * <pre>
+       *Allow us to simulate ignition events without a GM or LCM or ignition switch
+       * </pre>
+       *
+       * <code>SimulatedIgnitionPosition0 = 10;</code>
+       */
+      SimulatedIgnitionPosition0(10),
+      /**
+       * <code>SimulatedIgnitionPosition1 = 11;</code>
+       */
+      SimulatedIgnitionPosition1(11),
+      /**
+       * <code>SimulatedIgnitionPosition2 = 12;</code>
+       */
+      SimulatedIgnitionPosition2(12),
+      /**
+       * <code>SimulatedIgnitionPosition3 = 13;</code>
+       */
+      SimulatedIgnitionPosition3(13),
       UNRECOGNIZED(-1),
       ;
 
@@ -220,6 +240,26 @@ public final class PiToPicoOuterClass {
        * <code>PicoPowerRequestOff = 9;</code>
        */
       public static final int PicoPowerRequestOff_VALUE = 9;
+      /**
+       * <pre>
+       *Allow us to simulate ignition events without a GM or LCM or ignition switch
+       * </pre>
+       *
+       * <code>SimulatedIgnitionPosition0 = 10;</code>
+       */
+      public static final int SimulatedIgnitionPosition0_VALUE = 10;
+      /**
+       * <code>SimulatedIgnitionPosition1 = 11;</code>
+       */
+      public static final int SimulatedIgnitionPosition1_VALUE = 11;
+      /**
+       * <code>SimulatedIgnitionPosition2 = 12;</code>
+       */
+      public static final int SimulatedIgnitionPosition2_VALUE = 12;
+      /**
+       * <code>SimulatedIgnitionPosition3 = 13;</code>
+       */
+      public static final int SimulatedIgnitionPosition3_VALUE = 13;
 
 
       public final int getNumber() {
@@ -256,6 +296,10 @@ public final class PiToPicoOuterClass {
           case 7: return PicoVideoRequestRVC;
           case 8: return PicoPowerRequestOn;
           case 9: return PicoPowerRequestOff;
+          case 10: return SimulatedIgnitionPosition0;
+          case 11: return SimulatedIgnitionPosition1;
+          case 12: return SimulatedIgnitionPosition2;
+          case 13: return SimulatedIgnitionPosition3;
           default: return null;
         }
       }
@@ -312,7 +356,6 @@ public final class PiToPicoOuterClass {
       // @@protoc_insertion_point(enum_scope:ca.stefanm.e39.proto.PiToPico.MessageType)
     }
 
-    private int bitField0_;
     public static final int MESSAGETYPE_FIELD_NUMBER = 1;
     private int messageType_ = 0;
     /**
@@ -334,15 +377,15 @@ public final class PiToPicoOuterClass {
     public static final int NEWCONFIG_FIELD_NUMBER = 2;
     private ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto newConfig_;
     /**
-     * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
      * @return Whether the newConfig field is set.
      */
     @java.lang.Override
     public boolean hasNewConfig() {
-      return ((bitField0_ & 0x00000001) != 0);
+      return newConfig_ != null;
     }
     /**
-     * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
      * @return The newConfig.
      */
     @java.lang.Override
@@ -350,7 +393,7 @@ public final class PiToPicoOuterClass {
       return newConfig_ == null ? ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance() : newConfig_;
     }
     /**
-     * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
      */
     @java.lang.Override
     public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getNewConfigOrBuilder() {
@@ -374,7 +417,7 @@ public final class PiToPicoOuterClass {
       if (messageType_ != ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.MessageType.HeartbeatRequest.getNumber()) {
         output.writeEnum(1, messageType_);
       }
-      if (((bitField0_ & 0x00000001) != 0)) {
+      if (newConfig_ != null) {
         output.writeMessage(2, getNewConfig());
       }
       getUnknownFields().writeTo(output);
@@ -390,7 +433,7 @@ public final class PiToPicoOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, messageType_);
       }
-      if (((bitField0_ & 0x00000001) != 0)) {
+      if (newConfig_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getNewConfig());
       }
@@ -549,19 +592,13 @@ public final class PiToPicoOuterClass {
 
       // Construct using ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getNewConfigFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -609,14 +646,11 @@ public final class PiToPicoOuterClass {
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.messageType_ = messageType_;
         }
-        int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.newConfig_ = newConfigBuilder_ == null
               ? newConfig_
               : newConfigBuilder_.build();
-          to_bitField0_ |= 0x00000001;
         }
-        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -749,14 +783,14 @@ public final class PiToPicoOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder> newConfigBuilder_;
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        * @return Whether the newConfig field is set.
        */
       public boolean hasNewConfig() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        * @return The newConfig.
        */
       public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getNewConfig() {
@@ -767,7 +801,7 @@ public final class PiToPicoOuterClass {
         }
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        */
       public Builder setNewConfig(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto value) {
         if (newConfigBuilder_ == null) {
@@ -783,7 +817,7 @@ public final class PiToPicoOuterClass {
         return this;
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        */
       public Builder setNewConfig(
           ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder builderForValue) {
@@ -797,7 +831,7 @@ public final class PiToPicoOuterClass {
         return this;
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        */
       public Builder mergeNewConfig(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto value) {
         if (newConfigBuilder_ == null) {
@@ -816,7 +850,7 @@ public final class PiToPicoOuterClass {
         return this;
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        */
       public Builder clearNewConfig() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -829,7 +863,7 @@ public final class PiToPicoOuterClass {
         return this;
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        */
       public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder getNewConfigBuilder() {
         bitField0_ |= 0x00000002;
@@ -837,7 +871,7 @@ public final class PiToPicoOuterClass {
         return getNewConfigFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        */
       public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getNewConfigOrBuilder() {
         if (newConfigBuilder_ != null) {
@@ -848,7 +882,7 @@ public final class PiToPicoOuterClass {
         }
       }
       /**
-       * <code>optional .ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto newConfig = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder> 
@@ -942,17 +976,20 @@ public final class PiToPicoOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\016PiToPico.proto\022\024ca.stefanm.e39.proto\032\021" +
-      "ConfigProto.proto\"\225\003\n\010PiToPico\022?\n\013messag" +
+      "ConfigProto.proto\"\202\004\n\010PiToPico\022?\n\013messag" +
       "eType\030\001 \001(\0162*.ca.stefanm.e39.proto.PiToP" +
-      "ico.MessageType\0229\n\tnewConfig\030\002 \001(\0132!.ca." +
-      "stefanm.e39.proto.ConfigProtoH\000\210\001\001\"\376\001\n\013M" +
-      "essageType\022\024\n\020HeartbeatRequest\020\000\022\025\n\021Hear" +
-      "tbeatResponse\020\001\022\027\n\023ConfigStatusRequest\020\002" +
-      "\022\016\n\nConfigPush\020\003\022\034\n\030PicoVideoRequestUpst" +
-      "ream\020\004\022\030\n\024PicoVideoRequestPico\020\005\022\027\n\023Pico" +
-      "VideoRequestRpi\020\006\022\027\n\023PicoVideoRequestRVC" +
-      "\020\007\022\026\n\022PicoPowerRequestOn\020\010\022\027\n\023PicoPowerR" +
-      "equestOff\020\tB\014\n\n_newConfigb\006proto3"
+      "ico.MessageType\0224\n\tnewConfig\030\002 \001(\0132!.ca." +
+      "stefanm.e39.proto.ConfigProto\"\376\002\n\013Messag" +
+      "eType\022\024\n\020HeartbeatRequest\020\000\022\025\n\021Heartbeat" +
+      "Response\020\001\022\027\n\023ConfigStatusRequest\020\002\022\016\n\nC" +
+      "onfigPush\020\003\022\034\n\030PicoVideoRequestUpstream\020" +
+      "\004\022\030\n\024PicoVideoRequestPico\020\005\022\027\n\023PicoVideo" +
+      "RequestRpi\020\006\022\027\n\023PicoVideoRequestRVC\020\007\022\026\n" +
+      "\022PicoPowerRequestOn\020\010\022\027\n\023PicoPowerReques" +
+      "tOff\020\t\022\036\n\032SimulatedIgnitionPosition0\020\n\022\036" +
+      "\n\032SimulatedIgnitionPosition1\020\013\022\036\n\032Simula" +
+      "tedIgnitionPosition2\020\014\022\036\n\032SimulatedIgnit" +
+      "ionPosition3\020\rb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -964,7 +1001,7 @@ public final class PiToPicoOuterClass {
     internal_static_ca_stefanm_e39_proto_PiToPico_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ca_stefanm_e39_proto_PiToPico_descriptor,
-        new java.lang.String[] { "MessageType", "NewConfig", "NewConfig", });
+        new java.lang.String[] { "MessageType", "NewConfig", });
     ca.stefanm.e39.proto.ConfigProtoOuterClass.getDescriptor();
   }
 
