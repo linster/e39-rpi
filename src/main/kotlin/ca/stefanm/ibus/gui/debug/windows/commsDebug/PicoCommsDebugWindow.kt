@@ -79,7 +79,7 @@ class PicoCommsDebugWindow @Inject constructor(
     @Composable
     fun MessageSendCard() {
         NestingCard {
-            NestingCardHeader("Send Pico Message")
+            NestingCardHeader("Send PiToPico Message")
 
             val scope = rememberCoroutineScope()
             CannedMessageTypes(modifier = Modifier, onMessageTypeSelected = {
@@ -103,7 +103,7 @@ class PicoCommsDebugWindow @Inject constructor(
         }
 
         if (piToPicoMessage != null) {
-            logger.d("PicoCommsWindow", "Sending message: $name " +
+            logger.d("PicoCommsWindow", "Sending PiToPico message: $name " +
                     "bytes: ${rawMessage.toWireBytes().toUByteArray().map {
                         it.toUInt().toString(radix = 16)
                     }}")

@@ -40,7 +40,7 @@ class StdOutLogger @Inject constructor() : Logger {
     }
 
     override fun e(tag: String, msg: String, e: Throwable) {
-        e(tag, "$msg exception: ${e.printStackTrace()}")
+        e(tag, "$msg exception: {${e.toString()}} ${e.message} ${e.printStackTrace()}")
     }
 }
 

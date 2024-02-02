@@ -130,8 +130,23 @@ class BlockingJSerialCommsReader @Inject constructor(
             val data = if (packetLength <= 2) {
                 ubyteArrayOf()
             } else {
-                // subtract 2 because length includes checksum and dest address
-                buffer.readByteArray(packetLength.toLong() - 2).toUByteArray()
+                try {
+                    // subtract 2 because length includes checksum and dest address
+                    buffer.readByteArray(packetLength.toLong() - 2).toUByteArray()
+                } catch (e : Exception) {
+                    logger.e("BYTE READER", "Malformed packet", e)
+                    logger.e(
+                        "BYTE READER",
+                        "Data from malformed packet read so far: " +
+                                "[src = ${sourceDevice.toDeviceIdString()}] " +
+                                "[src_16 = ${sourceDevice.toString(16)}] " +
+                                "[len_10 = ${packetLength.toString(10)}] " +
+                                "[len_16 = ${packetLength.toString(16)}] " +
+                                "[dest = ${destDevice.toDeviceIdString()}] "
+                    )
+                    ubyteArrayOf()
+                    return@flow
+                }
             }
             val givenCrc = buffer.readByte().toUByte()
 
@@ -144,11 +159,21 @@ class BlockingJSerialCommsReader @Inject constructor(
                 logger.v(
                     "BYTE READER",
                     "Read raw packet : " +
-                            "[${sourceDevice.toDeviceIdString()}] " +
-                            "[${packetLength.toString(10)}] " +
-                            "[${destDevice.toDeviceIdString()}] " +
+                            "[src = ${sourceDevice.toDeviceIdString()}] " +
+                            "[src_16 = ${sourceDevice.toString(16)}] " +
+                            "[len_10 = ${packetLength.toString(10)}] " +
+                            "[len_16 = ${packetLength.toString(16)}] " +
+                            "[dest = ${destDevice.toDeviceIdString()}] " +
                             "<${data.size} bytes data> " +
-                            "[CRC g/a : $givenCrc / $actualCrc ]"
+                            "[data_10 = ${data}] " +
+                            "[CRC_10 g/a : $givenCrc / $actualCrc ]" +
+                            "[CRC_16 g/a : ${givenCrc.toString(16)} / ${actualCrc.toString(radix = 16)} ]"
+                )
+                logger.v(
+                    "BYTE READER",
+                    "Total Packet: " +
+                    "reassembled_packet : ${reAssembledPacket}" +
+                    "reassembled_packet_size : ${reAssembledPacket.size}"
                 )
             }
 

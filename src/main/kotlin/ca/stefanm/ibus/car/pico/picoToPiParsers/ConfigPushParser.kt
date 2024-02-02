@@ -2,6 +2,7 @@ package ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers
 
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.e39.proto.PicoToPiOuterClass
+import ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.platform.LongRunningService
@@ -17,13 +18,12 @@ import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
 
-
 @PlatformServiceInfo(
-    name = "RestartXParser",
-    description = "Soft power request from Pico to restart the X server."
+    name = "ConfigPushParser",
+    description = "Handles config push messages from the pico"
 )
 @PicoToPiParserGroup
-class RestartXParser @Inject constructor(
+class ConfigPushParser @Inject constructor(
     @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,
     @Named(ApplicationModule.IBUS_COMMS_DEBUG_CHANNEL) private val commsDebugChannel : MutableSharedFlow<IbusCommsDebugMessage>,
     private val logger: Logger,
@@ -43,19 +43,33 @@ class RestartXParser @Inject constructor(
                 return@collect
             }
 
-            if (message.messageType == PicoToPiOuterClass.PicoToPi.MessageType.PiSoftPowerRestartX) {
-                commsDebugChannel.emit(IbusCommsDebugMessage.IncomingMessage.PicoToPiMessage(
-                    Instant.now(),
-                    it,
-                    message
-                ))
-                restartX()
+            if (message.messageType == PicoToPi.MessageType.ConfigStatusResponse) {
+                onConfigRecieved(it, message)
             }
         }
     }
 
-    private fun restartX() {
-        logger.w("RestartXParser", "TODO restart X")
+    private suspend fun onConfigRecieved(raw : IBusMessage, parsed: PicoToPi) {
+        logger.i("ConfigPushParser", "Got new config")
+
+        val TAG = "ConfigPushParser"
+        logger.i(TAG, "rpiFwGitCommitHash: ${parsed.existingConfig.rpiFwGitCommitHash}")
+        logger.i(TAG, "isInitialized: ${parsed.existingConfig.isInitialized}")
+        logger.i(TAG, "aspectRatio: ${parsed.existingConfig.aspectRatio}")
+        logger.i(TAG, "alwaysTurnOnRpiOnStatup: ${parsed.existingConfig.alwaysTurnOnRpiOnStatup}")
+        logger.i(TAG, "enabledMaxLogLevelForIbusLog: ${parsed.existingConfig.enabledMaxLogLevelForIbusLog}")
+        logger.i(TAG, "enabledMaxLogLevelForPrintfLog: ${parsed.existingConfig.enabledMaxLogLevelForPrintfLog}")
+        logger.i(TAG, "rpiFwGitCommitHash: ${parsed.existingConfig.rpiFwGitCommitHash}")
+        logger.i(TAG, "scanProgramOnBoot: ${parsed.existingConfig.scanProgramOnBoot}")
+        logger.i(TAG, "sendBMBTEncodingPacketOnBootup: ${parsed.existingConfig.sendBMBTEncodingPacketOnBootup}")
+        logger.i(TAG, "videoSourceOnBoot: ${parsed.existingConfig.videoSourceOnBoot}")
+
+        logger.i("ConfigPushParser", parsed.existingConfig.toString())
+        commsDebugChannel.emit(IbusCommsDebugMessage.IncomingMessage.PicoToPiMessage(
+            Instant.now(),
+            raw,
+            parsed
+        ))
     }
 
 }

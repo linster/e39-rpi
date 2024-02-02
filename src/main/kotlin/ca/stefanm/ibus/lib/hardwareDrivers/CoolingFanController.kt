@@ -29,7 +29,7 @@ class CoolingFanController @Inject constructor(
     private fun getCpuTemp() : Float {
         return try {
             SystemInfo.getCpuTemperature()
-        } catch (e : IOException) {
+        } catch (e : Exception) {
             //We're not on a pi
             60.0f //TODO
         }

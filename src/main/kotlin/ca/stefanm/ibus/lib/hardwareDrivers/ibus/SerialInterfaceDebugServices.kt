@@ -46,6 +46,7 @@ sealed class IbusCommsDebugMessage(val createdAt : Instant) {
         data class PicoToPiMessage(
             override val recievedAt: Instant,
             val rawMessage: IBusMessage,
+            val picoToPiMessage: PicoToPi
         ) : IncomingMessage(recievedAt, rawMessage)
 
         data class SyntheticPicoToPiMessage(
