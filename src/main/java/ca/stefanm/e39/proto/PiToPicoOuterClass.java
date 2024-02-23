@@ -90,176 +90,184 @@ public final class PiToPicoOuterClass {
     public enum MessageType
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>HeartbeatRequest = 0;</code>
+       * <code>EmptyMessage = 0;</code>
        */
-      HeartbeatRequest(0),
+      EmptyMessage(0),
       /**
-       * <code>HeartbeatResponse = 1;</code>
+       * <code>HeartbeatRequest = 1;</code>
        */
-      HeartbeatResponse(1),
+      HeartbeatRequest(1),
+      /**
+       * <code>HeartbeatResponse = 2;</code>
+       */
+      HeartbeatResponse(2),
       /**
        * <pre>
        *Instruct the pico to tell us what it's config object is
        * </pre>
        *
-       * <code>ConfigStatusRequest = 2;</code>
+       * <code>ConfigStatusRequest = 3;</code>
        */
-      ConfigStatusRequest(2),
+      ConfigStatusRequest(3),
       /**
        * <pre>
        *Tell the pico what it's new config object should be
        * </pre>
        *
-       * <code>ConfigPush = 3;</code>
+       * <code>ConfigPush = 4;</code>
        */
-      ConfigPush(3),
+      ConfigPush(4),
       /**
        * <pre>
        *Ask the pico to show upstream (for Back to BMW function)
        * </pre>
        *
-       * <code>PicoVideoRequestUpstream = 4;</code>
+       * <code>PicoVideoRequestUpstream = 5;</code>
        */
-      PicoVideoRequestUpstream(4),
+      PicoVideoRequestUpstream(5),
       /**
        * <pre>
        *Ask the pico to show the debug menu
        * </pre>
        *
-       * <code>PicoVideoRequestPico = 5;</code>
+       * <code>PicoVideoRequestPico = 6;</code>
        */
-      PicoVideoRequestPico(5),
+      PicoVideoRequestPico(6),
       /**
        * <pre>
        *Ask the pico to show the RPi.
        * </pre>
        *
-       * <code>PicoVideoRequestRpi = 6;</code>
+       * <code>PicoVideoRequestRpi = 7;</code>
        */
-      PicoVideoRequestRpi(6),
+      PicoVideoRequestRpi(7),
       /**
-       * <code>PicoVideoRequestRVC = 7;</code>
+       * <code>PicoVideoRequestRVC = 8;</code>
        */
-      PicoVideoRequestRVC(7),
+      PicoVideoRequestRVC(8),
       /**
        * <pre>
        *For test purposes to toggle the power switch for the RPI power supply.
        * </pre>
        *
-       * <code>PicoPowerRequestOn = 8;</code>
+       * <code>PicoPowerRequestOn = 9;</code>
        */
-      PicoPowerRequestOn(8),
+      PicoPowerRequestOn(9),
       /**
-       * <code>PicoPowerRequestOff = 9;</code>
+       * <code>PicoPowerRequestOff = 10;</code>
        */
-      PicoPowerRequestOff(9),
+      PicoPowerRequestOff(10),
       /**
        * <pre>
        *Allow us to simulate ignition events without a GM or LCM or ignition switch
        * </pre>
        *
-       * <code>SimulatedIgnitionPosition0 = 10;</code>
+       * <code>SimulatedIgnitionPosition0 = 11;</code>
        */
-      SimulatedIgnitionPosition0(10),
+      SimulatedIgnitionPosition0(11),
       /**
-       * <code>SimulatedIgnitionPosition1 = 11;</code>
+       * <code>SimulatedIgnitionPosition1 = 12;</code>
        */
-      SimulatedIgnitionPosition1(11),
+      SimulatedIgnitionPosition1(12),
       /**
-       * <code>SimulatedIgnitionPosition2 = 12;</code>
+       * <code>SimulatedIgnitionPosition2 = 13;</code>
        */
-      SimulatedIgnitionPosition2(12),
+      SimulatedIgnitionPosition2(13),
       /**
-       * <code>SimulatedIgnitionPosition3 = 13;</code>
+       * <code>SimulatedIgnitionPosition3 = 14;</code>
        */
-      SimulatedIgnitionPosition3(13),
+      SimulatedIgnitionPosition3(14),
       UNRECOGNIZED(-1),
       ;
 
       /**
-       * <code>HeartbeatRequest = 0;</code>
+       * <code>EmptyMessage = 0;</code>
        */
-      public static final int HeartbeatRequest_VALUE = 0;
+      public static final int EmptyMessage_VALUE = 0;
       /**
-       * <code>HeartbeatResponse = 1;</code>
+       * <code>HeartbeatRequest = 1;</code>
        */
-      public static final int HeartbeatResponse_VALUE = 1;
+      public static final int HeartbeatRequest_VALUE = 1;
+      /**
+       * <code>HeartbeatResponse = 2;</code>
+       */
+      public static final int HeartbeatResponse_VALUE = 2;
       /**
        * <pre>
        *Instruct the pico to tell us what it's config object is
        * </pre>
        *
-       * <code>ConfigStatusRequest = 2;</code>
+       * <code>ConfigStatusRequest = 3;</code>
        */
-      public static final int ConfigStatusRequest_VALUE = 2;
+      public static final int ConfigStatusRequest_VALUE = 3;
       /**
        * <pre>
        *Tell the pico what it's new config object should be
        * </pre>
        *
-       * <code>ConfigPush = 3;</code>
+       * <code>ConfigPush = 4;</code>
        */
-      public static final int ConfigPush_VALUE = 3;
+      public static final int ConfigPush_VALUE = 4;
       /**
        * <pre>
        *Ask the pico to show upstream (for Back to BMW function)
        * </pre>
        *
-       * <code>PicoVideoRequestUpstream = 4;</code>
+       * <code>PicoVideoRequestUpstream = 5;</code>
        */
-      public static final int PicoVideoRequestUpstream_VALUE = 4;
+      public static final int PicoVideoRequestUpstream_VALUE = 5;
       /**
        * <pre>
        *Ask the pico to show the debug menu
        * </pre>
        *
-       * <code>PicoVideoRequestPico = 5;</code>
+       * <code>PicoVideoRequestPico = 6;</code>
        */
-      public static final int PicoVideoRequestPico_VALUE = 5;
+      public static final int PicoVideoRequestPico_VALUE = 6;
       /**
        * <pre>
        *Ask the pico to show the RPi.
        * </pre>
        *
-       * <code>PicoVideoRequestRpi = 6;</code>
+       * <code>PicoVideoRequestRpi = 7;</code>
        */
-      public static final int PicoVideoRequestRpi_VALUE = 6;
+      public static final int PicoVideoRequestRpi_VALUE = 7;
       /**
-       * <code>PicoVideoRequestRVC = 7;</code>
+       * <code>PicoVideoRequestRVC = 8;</code>
        */
-      public static final int PicoVideoRequestRVC_VALUE = 7;
+      public static final int PicoVideoRequestRVC_VALUE = 8;
       /**
        * <pre>
        *For test purposes to toggle the power switch for the RPI power supply.
        * </pre>
        *
-       * <code>PicoPowerRequestOn = 8;</code>
+       * <code>PicoPowerRequestOn = 9;</code>
        */
-      public static final int PicoPowerRequestOn_VALUE = 8;
+      public static final int PicoPowerRequestOn_VALUE = 9;
       /**
-       * <code>PicoPowerRequestOff = 9;</code>
+       * <code>PicoPowerRequestOff = 10;</code>
        */
-      public static final int PicoPowerRequestOff_VALUE = 9;
+      public static final int PicoPowerRequestOff_VALUE = 10;
       /**
        * <pre>
        *Allow us to simulate ignition events without a GM or LCM or ignition switch
        * </pre>
        *
-       * <code>SimulatedIgnitionPosition0 = 10;</code>
+       * <code>SimulatedIgnitionPosition0 = 11;</code>
        */
-      public static final int SimulatedIgnitionPosition0_VALUE = 10;
+      public static final int SimulatedIgnitionPosition0_VALUE = 11;
       /**
-       * <code>SimulatedIgnitionPosition1 = 11;</code>
+       * <code>SimulatedIgnitionPosition1 = 12;</code>
        */
-      public static final int SimulatedIgnitionPosition1_VALUE = 11;
+      public static final int SimulatedIgnitionPosition1_VALUE = 12;
       /**
-       * <code>SimulatedIgnitionPosition2 = 12;</code>
+       * <code>SimulatedIgnitionPosition2 = 13;</code>
        */
-      public static final int SimulatedIgnitionPosition2_VALUE = 12;
+      public static final int SimulatedIgnitionPosition2_VALUE = 13;
       /**
-       * <code>SimulatedIgnitionPosition3 = 13;</code>
+       * <code>SimulatedIgnitionPosition3 = 14;</code>
        */
-      public static final int SimulatedIgnitionPosition3_VALUE = 13;
+      public static final int SimulatedIgnitionPosition3_VALUE = 14;
 
 
       public final int getNumber() {
@@ -286,20 +294,21 @@ public final class PiToPicoOuterClass {
        */
       public static MessageType forNumber(int value) {
         switch (value) {
-          case 0: return HeartbeatRequest;
-          case 1: return HeartbeatResponse;
-          case 2: return ConfigStatusRequest;
-          case 3: return ConfigPush;
-          case 4: return PicoVideoRequestUpstream;
-          case 5: return PicoVideoRequestPico;
-          case 6: return PicoVideoRequestRpi;
-          case 7: return PicoVideoRequestRVC;
-          case 8: return PicoPowerRequestOn;
-          case 9: return PicoPowerRequestOff;
-          case 10: return SimulatedIgnitionPosition0;
-          case 11: return SimulatedIgnitionPosition1;
-          case 12: return SimulatedIgnitionPosition2;
-          case 13: return SimulatedIgnitionPosition3;
+          case 0: return EmptyMessage;
+          case 1: return HeartbeatRequest;
+          case 2: return HeartbeatResponse;
+          case 3: return ConfigStatusRequest;
+          case 4: return ConfigPush;
+          case 5: return PicoVideoRequestUpstream;
+          case 6: return PicoVideoRequestPico;
+          case 7: return PicoVideoRequestRpi;
+          case 8: return PicoVideoRequestRVC;
+          case 9: return PicoPowerRequestOn;
+          case 10: return PicoPowerRequestOff;
+          case 11: return SimulatedIgnitionPosition0;
+          case 12: return SimulatedIgnitionPosition1;
+          case 13: return SimulatedIgnitionPosition2;
+          case 14: return SimulatedIgnitionPosition3;
           default: return null;
         }
       }
@@ -414,7 +423,7 @@ public final class PiToPicoOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (messageType_ != ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.MessageType.HeartbeatRequest.getNumber()) {
+      if (messageType_ != ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.MessageType.EmptyMessage.getNumber()) {
         output.writeEnum(1, messageType_);
       }
       if (newConfig_ != null) {
@@ -429,7 +438,7 @@ public final class PiToPicoOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (messageType_ != ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.MessageType.HeartbeatRequest.getNumber()) {
+      if (messageType_ != ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico.MessageType.EmptyMessage.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, messageType_);
       }
@@ -976,20 +985,20 @@ public final class PiToPicoOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\016PiToPico.proto\022\024ca.stefanm.e39.proto\032\021" +
-      "ConfigProto.proto\"\202\004\n\010PiToPico\022?\n\013messag" +
+      "ConfigProto.proto\"\224\004\n\010PiToPico\022?\n\013messag" +
       "eType\030\001 \001(\0162*.ca.stefanm.e39.proto.PiToP" +
       "ico.MessageType\0224\n\tnewConfig\030\002 \001(\0132!.ca." +
-      "stefanm.e39.proto.ConfigProto\"\376\002\n\013Messag" +
-      "eType\022\024\n\020HeartbeatRequest\020\000\022\025\n\021Heartbeat" +
-      "Response\020\001\022\027\n\023ConfigStatusRequest\020\002\022\016\n\nC" +
-      "onfigPush\020\003\022\034\n\030PicoVideoRequestUpstream\020" +
-      "\004\022\030\n\024PicoVideoRequestPico\020\005\022\027\n\023PicoVideo" +
-      "RequestRpi\020\006\022\027\n\023PicoVideoRequestRVC\020\007\022\026\n" +
-      "\022PicoPowerRequestOn\020\010\022\027\n\023PicoPowerReques" +
-      "tOff\020\t\022\036\n\032SimulatedIgnitionPosition0\020\n\022\036" +
-      "\n\032SimulatedIgnitionPosition1\020\013\022\036\n\032Simula" +
-      "tedIgnitionPosition2\020\014\022\036\n\032SimulatedIgnit" +
-      "ionPosition3\020\rb\006proto3"
+      "stefanm.e39.proto.ConfigProto\"\220\003\n\013Messag" +
+      "eType\022\020\n\014EmptyMessage\020\000\022\024\n\020HeartbeatRequ" +
+      "est\020\001\022\025\n\021HeartbeatResponse\020\002\022\027\n\023ConfigSt" +
+      "atusRequest\020\003\022\016\n\nConfigPush\020\004\022\034\n\030PicoVid" +
+      "eoRequestUpstream\020\005\022\030\n\024PicoVideoRequestP" +
+      "ico\020\006\022\027\n\023PicoVideoRequestRpi\020\007\022\027\n\023PicoVi" +
+      "deoRequestRVC\020\010\022\026\n\022PicoPowerRequestOn\020\t\022" +
+      "\027\n\023PicoPowerRequestOff\020\n\022\036\n\032SimulatedIgn" +
+      "itionPosition0\020\013\022\036\n\032SimulatedIgnitionPos" +
+      "ition1\020\014\022\036\n\032SimulatedIgnitionPosition2\020\r" +
+      "\022\036\n\032SimulatedIgnitionPosition3\020\016b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

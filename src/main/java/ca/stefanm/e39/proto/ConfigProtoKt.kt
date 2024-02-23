@@ -28,6 +28,10 @@ public object ConfigProtoKt {
     internal fun _build(): ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto = _builder.build()
 
     /**
+     * ```
+     ** Because this makes the message variable length we need options to say this is a callback message 
+     * ```
+     *
      * `string rpiFwGitCommitHash = 1;`
      */
     public var rpiFwGitCommitHash: kotlin.String
@@ -38,6 +42,10 @@ public object ConfigProtoKt {
         _builder.setRpiFwGitCommitHash(value)
       }
     /**
+     * ```
+     ** Because this makes the message variable length we need options to say this is a callback message 
+     * ```
+     *
      * `string rpiFwGitCommitHash = 1;`
      */
     public fun clearRpiFwGitCommitHash() {

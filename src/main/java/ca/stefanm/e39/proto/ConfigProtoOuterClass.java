@@ -19,11 +19,19 @@ public final class ConfigProtoOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     ** Because this makes the message variable length we need options to say this is a callback message 
+     * </pre>
+     *
      * <code>string rpiFwGitCommitHash = 1;</code>
      * @return The rpiFwGitCommitHash.
      */
     java.lang.String getRpiFwGitCommitHash();
     /**
+     * <pre>
+     ** Because this makes the message variable length we need options to say this is a callback message 
+     * </pre>
+     *
      * <code>string rpiFwGitCommitHash = 1;</code>
      * @return The bytes for rpiFwGitCommitHash.
      */
@@ -180,48 +188,56 @@ public final class ConfigProtoOuterClass {
     public enum LoggingLevels
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>DEBUG = 0;</code>
+       * <code>Logging_NotSet = 0;</code>
        */
-      DEBUG(0),
+      Logging_NotSet(0),
       /**
-       * <code>INFO = 1;</code>
+       * <code>DEBUG = 1;</code>
        */
-      INFO(1),
+      DEBUG(1),
       /**
-       * <code>WARN = 2;</code>
+       * <code>INFO = 2;</code>
        */
-      WARN(2),
+      INFO(2),
       /**
-       * <code>ERROR = 3;</code>
+       * <code>WARN = 3;</code>
        */
-      ERROR(3),
+      WARN(3),
       /**
-       * <code>WTF = 4;</code>
+       * <code>ERROR = 4;</code>
        */
-      WTF(4),
+      ERROR(4),
+      /**
+       * <code>WTF = 5;</code>
+       */
+      WTF(5),
       UNRECOGNIZED(-1),
       ;
 
       /**
-       * <code>DEBUG = 0;</code>
+       * <code>Logging_NotSet = 0;</code>
        */
-      public static final int DEBUG_VALUE = 0;
+      public static final int Logging_NotSet_VALUE = 0;
       /**
-       * <code>INFO = 1;</code>
+       * <code>DEBUG = 1;</code>
        */
-      public static final int INFO_VALUE = 1;
+      public static final int DEBUG_VALUE = 1;
       /**
-       * <code>WARN = 2;</code>
+       * <code>INFO = 2;</code>
        */
-      public static final int WARN_VALUE = 2;
+      public static final int INFO_VALUE = 2;
       /**
-       * <code>ERROR = 3;</code>
+       * <code>WARN = 3;</code>
        */
-      public static final int ERROR_VALUE = 3;
+      public static final int WARN_VALUE = 3;
       /**
-       * <code>WTF = 4;</code>
+       * <code>ERROR = 4;</code>
        */
-      public static final int WTF_VALUE = 4;
+      public static final int ERROR_VALUE = 4;
+      /**
+       * <code>WTF = 5;</code>
+       */
+      public static final int WTF_VALUE = 5;
 
 
       public final int getNumber() {
@@ -248,11 +264,12 @@ public final class ConfigProtoOuterClass {
        */
       public static LoggingLevels forNumber(int value) {
         switch (value) {
-          case 0: return DEBUG;
-          case 1: return INFO;
-          case 2: return WARN;
-          case 3: return ERROR;
-          case 4: return WTF;
+          case 0: return Logging_NotSet;
+          case 1: return DEBUG;
+          case 2: return INFO;
+          case 3: return WARN;
+          case 4: return ERROR;
+          case 5: return WTF;
           default: return null;
         }
       }
@@ -315,56 +332,64 @@ public final class ConfigProtoOuterClass {
     public enum ScanProgram
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>NONE = 0;</code>
+       * <code>Scan_Program_NotSet = 0;</code>
        */
-      NONE(0),
+      Scan_Program_NotSet(0),
       /**
-       * <code>CLOCK = 1;</code>
+       * <code>NONE = 1;</code>
        */
-      CLOCK(1),
+      NONE(1),
       /**
-       * <code>LINSTEROS_BOOTSPLASH = 2;</code>
+       * <code>CLOCK = 2;</code>
        */
-      LINSTEROS_BOOTSPLASH(2),
+      CLOCK(2),
       /**
-       * <code>GOOSE_BOOTSPLASH = 3;</code>
+       * <code>LINSTEROS_BOOTSPLASH = 3;</code>
        */
-      GOOSE_BOOTSPLASH(3),
+      LINSTEROS_BOOTSPLASH(3),
       /**
-       * <code>BMW_BOOTSPLASH = 4;</code>
+       * <code>GOOSE_BOOTSPLASH = 4;</code>
        */
-      BMW_BOOTSPLASH(4),
+      GOOSE_BOOTSPLASH(4),
       /**
-       * <code>MENU = 5;</code>
+       * <code>BMW_BOOTSPLASH = 5;</code>
        */
-      MENU(5),
+      BMW_BOOTSPLASH(5),
+      /**
+       * <code>MENU = 6;</code>
+       */
+      MENU(6),
       UNRECOGNIZED(-1),
       ;
 
       /**
-       * <code>NONE = 0;</code>
+       * <code>Scan_Program_NotSet = 0;</code>
        */
-      public static final int NONE_VALUE = 0;
+      public static final int Scan_Program_NotSet_VALUE = 0;
       /**
-       * <code>CLOCK = 1;</code>
+       * <code>NONE = 1;</code>
        */
-      public static final int CLOCK_VALUE = 1;
+      public static final int NONE_VALUE = 1;
       /**
-       * <code>LINSTEROS_BOOTSPLASH = 2;</code>
+       * <code>CLOCK = 2;</code>
        */
-      public static final int LINSTEROS_BOOTSPLASH_VALUE = 2;
+      public static final int CLOCK_VALUE = 2;
       /**
-       * <code>GOOSE_BOOTSPLASH = 3;</code>
+       * <code>LINSTEROS_BOOTSPLASH = 3;</code>
        */
-      public static final int GOOSE_BOOTSPLASH_VALUE = 3;
+      public static final int LINSTEROS_BOOTSPLASH_VALUE = 3;
       /**
-       * <code>BMW_BOOTSPLASH = 4;</code>
+       * <code>GOOSE_BOOTSPLASH = 4;</code>
        */
-      public static final int BMW_BOOTSPLASH_VALUE = 4;
+      public static final int GOOSE_BOOTSPLASH_VALUE = 4;
       /**
-       * <code>MENU = 5;</code>
+       * <code>BMW_BOOTSPLASH = 5;</code>
        */
-      public static final int MENU_VALUE = 5;
+      public static final int BMW_BOOTSPLASH_VALUE = 5;
+      /**
+       * <code>MENU = 6;</code>
+       */
+      public static final int MENU_VALUE = 6;
 
 
       public final int getNumber() {
@@ -391,12 +416,13 @@ public final class ConfigProtoOuterClass {
        */
       public static ScanProgram forNumber(int value) {
         switch (value) {
-          case 0: return NONE;
-          case 1: return CLOCK;
-          case 2: return LINSTEROS_BOOTSPLASH;
-          case 3: return GOOSE_BOOTSPLASH;
-          case 4: return BMW_BOOTSPLASH;
-          case 5: return MENU;
+          case 0: return Scan_Program_NotSet;
+          case 1: return NONE;
+          case 2: return CLOCK;
+          case 3: return LINSTEROS_BOOTSPLASH;
+          case 4: return GOOSE_BOOTSPLASH;
+          case 5: return BMW_BOOTSPLASH;
+          case 6: return MENU;
           default: return null;
         }
       }
@@ -808,6 +834,10 @@ public final class ConfigProtoOuterClass {
     @SuppressWarnings("serial")
     private volatile java.lang.Object rpiFwGitCommitHash_ = "";
     /**
+     * <pre>
+     ** Because this makes the message variable length we need options to say this is a callback message 
+     * </pre>
+     *
      * <code>string rpiFwGitCommitHash = 1;</code>
      * @return The rpiFwGitCommitHash.
      */
@@ -825,6 +855,10 @@ public final class ConfigProtoOuterClass {
       }
     }
     /**
+     * <pre>
+     ** Because this makes the message variable length we need options to say this is a callback message 
+     * </pre>
+     *
      * <code>string rpiFwGitCommitHash = 1;</code>
      * @return The bytes for rpiFwGitCommitHash.
      */
@@ -1027,10 +1061,10 @@ public final class ConfigProtoOuterClass {
       if (isIbusLogOutputEnabled_ != false) {
         output.writeBool(2, isIbusLogOutputEnabled_);
       }
-      if (enabledMaxLogLevelForIbusLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.DEBUG.getNumber()) {
+      if (enabledMaxLogLevelForIbusLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.Logging_NotSet.getNumber()) {
         output.writeEnum(3, enabledMaxLogLevelForIbusLog_);
       }
-      if (enabledMaxLogLevelForPrintfLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.DEBUG.getNumber()) {
+      if (enabledMaxLogLevelForPrintfLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.Logging_NotSet.getNumber()) {
         output.writeEnum(4, enabledMaxLogLevelForPrintfLog_);
       }
       if (alwaysTurnOnRpiOnStatup_ != false) {
@@ -1039,7 +1073,7 @@ public final class ConfigProtoOuterClass {
       if (alwaysTurnOnScreenOnIbusActivity_ != false) {
         output.writeBool(6, alwaysTurnOnScreenOnIbusActivity_);
       }
-      if (scanProgramOnBoot_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.ScanProgram.NONE.getNumber()) {
+      if (scanProgramOnBoot_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.ScanProgram.Scan_Program_NotSet.getNumber()) {
         output.writeEnum(7, scanProgramOnBoot_);
       }
       if (videoSourceOnBoot_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.VideoSource.RVC.getNumber()) {
@@ -1070,11 +1104,11 @@ public final class ConfigProtoOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, isIbusLogOutputEnabled_);
       }
-      if (enabledMaxLogLevelForIbusLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.DEBUG.getNumber()) {
+      if (enabledMaxLogLevelForIbusLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.Logging_NotSet.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, enabledMaxLogLevelForIbusLog_);
       }
-      if (enabledMaxLogLevelForPrintfLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.DEBUG.getNumber()) {
+      if (enabledMaxLogLevelForPrintfLog_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.LoggingLevels.Logging_NotSet.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, enabledMaxLogLevelForPrintfLog_);
       }
@@ -1086,7 +1120,7 @@ public final class ConfigProtoOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, alwaysTurnOnScreenOnIbusActivity_);
       }
-      if (scanProgramOnBoot_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.ScanProgram.NONE.getNumber()) {
+      if (scanProgramOnBoot_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.ScanProgram.Scan_Program_NotSet.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(7, scanProgramOnBoot_);
       }
@@ -1529,6 +1563,10 @@ public final class ConfigProtoOuterClass {
 
       private java.lang.Object rpiFwGitCommitHash_ = "";
       /**
+       * <pre>
+       ** Because this makes the message variable length we need options to say this is a callback message 
+       * </pre>
+       *
        * <code>string rpiFwGitCommitHash = 1;</code>
        * @return The rpiFwGitCommitHash.
        */
@@ -1545,6 +1583,10 @@ public final class ConfigProtoOuterClass {
         }
       }
       /**
+       * <pre>
+       ** Because this makes the message variable length we need options to say this is a callback message 
+       * </pre>
+       *
        * <code>string rpiFwGitCommitHash = 1;</code>
        * @return The bytes for rpiFwGitCommitHash.
        */
@@ -1562,6 +1604,10 @@ public final class ConfigProtoOuterClass {
         }
       }
       /**
+       * <pre>
+       ** Because this makes the message variable length we need options to say this is a callback message 
+       * </pre>
+       *
        * <code>string rpiFwGitCommitHash = 1;</code>
        * @param value The rpiFwGitCommitHash to set.
        * @return This builder for chaining.
@@ -1575,6 +1621,10 @@ public final class ConfigProtoOuterClass {
         return this;
       }
       /**
+       * <pre>
+       ** Because this makes the message variable length we need options to say this is a callback message 
+       * </pre>
+       *
        * <code>string rpiFwGitCommitHash = 1;</code>
        * @return This builder for chaining.
        */
@@ -1585,6 +1635,10 @@ public final class ConfigProtoOuterClass {
         return this;
       }
       /**
+       * <pre>
+       ** Because this makes the message variable length we need options to say this is a callback message 
+       * </pre>
+       *
        * <code>string rpiFwGitCommitHash = 1;</code>
        * @param value The bytes for rpiFwGitCommitHash to set.
        * @return This builder for chaining.
@@ -2159,7 +2213,7 @@ public final class ConfigProtoOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\021ConfigProto.proto\022\024ca.stefanm.e39.prot" +
-      "o\"\327\007\n\013ConfigProto\022\032\n\022rpiFwGitCommitHash\030" +
+      "o\"\205\010\n\013ConfigProto\022\032\n\022rpiFwGitCommitHash\030" +
       "\001 \001(\t\022\036\n\026isIbusLogOutputEnabled\030\002 \001(\010\022U\n" +
       "\034enabledMaxLogLevelForIbusLog\030\003 \001(\0162/.ca" +
       ".stefanm.e39.proto.ConfigProto.LoggingLe" +
@@ -2175,15 +2229,17 @@ public final class ConfigProtoOuterClass {
       "videoEncoding\030\n \001(\0162/.ca.stefanm.e39.pro" +
       "to.ConfigProto.VideoEncoding\022B\n\013aspectRa" +
       "tio\030\013 \001(\0162-.ca.stefanm.e39.proto.ConfigP" +
-      "roto.AspectRatio\"B\n\rLoggingLevels\022\t\n\005DEB" +
-      "UG\020\000\022\010\n\004INFO\020\001\022\010\n\004WARN\020\002\022\t\n\005ERROR\020\003\022\007\n\003W" +
-      "TF\020\004\"p\n\013ScanProgram\022\010\n\004NONE\020\000\022\t\n\005CLOCK\020\001" +
-      "\022\030\n\024LINSTEROS_BOOTSPLASH\020\002\022\024\n\020GOOSE_BOOT" +
-      "SPLASH\020\003\022\022\n\016BMW_BOOTSPLASH\020\004\022\010\n\004MENU\020\005\"6" +
-      "\n\013VideoSource\022\007\n\003RVC\020\000\022\014\n\010UPSTREAM\020\001\022\010\n\004" +
-      "PICO\020\002\022\006\n\002PI\020\003\"\"\n\rVideoEncoding\022\010\n\004NTSC\020" +
-      "\000\022\007\n\003PAL\020\001\"7\n\013AspectRatio\022\r\n\tFourThree\020\000" +
-      "\022\017\n\013SixteenNine\020\001\022\010\n\004Zoom\020\002b\006proto3"
+      "roto.AspectRatio\"V\n\rLoggingLevels\022\022\n\016Log" +
+      "ging_NotSet\020\000\022\t\n\005DEBUG\020\001\022\010\n\004INFO\020\002\022\010\n\004WA" +
+      "RN\020\003\022\t\n\005ERROR\020\004\022\007\n\003WTF\020\005\"\211\001\n\013ScanProgram" +
+      "\022\027\n\023Scan_Program_NotSet\020\000\022\010\n\004NONE\020\001\022\t\n\005C" +
+      "LOCK\020\002\022\030\n\024LINSTEROS_BOOTSPLASH\020\003\022\024\n\020GOOS" +
+      "E_BOOTSPLASH\020\004\022\022\n\016BMW_BOOTSPLASH\020\005\022\010\n\004ME" +
+      "NU\020\006\"6\n\013VideoSource\022\007\n\003RVC\020\000\022\014\n\010UPSTREAM" +
+      "\020\001\022\010\n\004PICO\020\002\022\006\n\002PI\020\003\"\"\n\rVideoEncoding\022\010\n" +
+      "\004NTSC\020\000\022\007\n\003PAL\020\001\"7\n\013AspectRatio\022\r\n\tFourT" +
+      "hree\020\000\022\017\n\013SixteenNine\020\001\022\010\n\004Zoom\020\002b\006proto" +
+      "3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

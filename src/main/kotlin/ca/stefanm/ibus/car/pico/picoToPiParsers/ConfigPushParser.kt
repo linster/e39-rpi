@@ -3,6 +3,7 @@ package ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.e39.proto.PicoToPiOuterClass
 import ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi
+import ca.stefanm.e39.proto.configMessageOrNull
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.platform.LongRunningService
@@ -53,18 +54,18 @@ class ConfigPushParser @Inject constructor(
         logger.i("ConfigPushParser", "Got new config")
 
         val TAG = "ConfigPushParser"
-        logger.i(TAG, "rpiFwGitCommitHash: ${parsed.existingConfig.rpiFwGitCommitHash}")
-        logger.i(TAG, "isInitialized: ${parsed.existingConfig.isInitialized}")
-        logger.i(TAG, "aspectRatio: ${parsed.existingConfig.aspectRatio}")
-        logger.i(TAG, "alwaysTurnOnRpiOnStatup: ${parsed.existingConfig.alwaysTurnOnRpiOnStatup}")
-        logger.i(TAG, "enabledMaxLogLevelForIbusLog: ${parsed.existingConfig.enabledMaxLogLevelForIbusLog}")
-        logger.i(TAG, "enabledMaxLogLevelForPrintfLog: ${parsed.existingConfig.enabledMaxLogLevelForPrintfLog}")
-        logger.i(TAG, "rpiFwGitCommitHash: ${parsed.existingConfig.rpiFwGitCommitHash}")
-        logger.i(TAG, "scanProgramOnBoot: ${parsed.existingConfig.scanProgramOnBoot}")
-        logger.i(TAG, "sendBMBTEncodingPacketOnBootup: ${parsed.existingConfig.sendBMBTEncodingPacketOnBootup}")
-        logger.i(TAG, "videoSourceOnBoot: ${parsed.existingConfig.videoSourceOnBoot}")
+        logger.i(TAG, "rpiFwGitCommitHash: ${parsed.configMessageOrNull?.rpiFwGitCommitHash}")
+        logger.i(TAG, "isInitialized: ${parsed.configMessageOrNull?.isInitialized}")
+        logger.i(TAG, "aspectRatio: ${parsed.configMessageOrNull?.aspectRatio}")
+        logger.i(TAG, "alwaysTurnOnRpiOnStatup: ${parsed.configMessageOrNull?.alwaysTurnOnRpiOnStatup}")
+        logger.i(TAG, "enabledMaxLogLevelForIbusLog: ${parsed.configMessageOrNull?.enabledMaxLogLevelForIbusLog}")
+        logger.i(TAG, "enabledMaxLogLevelForPrintfLog: ${parsed.configMessageOrNull?.enabledMaxLogLevelForPrintfLog}")
+        logger.i(TAG, "rpiFwGitCommitHash: ${parsed.configMessageOrNull?.rpiFwGitCommitHash}")
+        logger.i(TAG, "scanProgramOnBoot: ${parsed.configMessageOrNull?.scanProgramOnBoot}")
+        logger.i(TAG, "sendBMBTEncodingPacketOnBootup: ${parsed.configMessageOrNull?.sendBMBTEncodingPacketOnBootup}")
+        logger.i(TAG, "videoSourceOnBoot: ${parsed.configMessageOrNull?.videoSourceOnBoot}")
 
-        logger.i("ConfigPushParser", parsed.existingConfig.toString())
+//        logger.i("ConfigPushParser", parsed.configMessageOrNull)
         commsDebugChannel.emit(IbusCommsDebugMessage.IncomingMessage.PicoToPiMessage(
             Instant.now(),
             raw,

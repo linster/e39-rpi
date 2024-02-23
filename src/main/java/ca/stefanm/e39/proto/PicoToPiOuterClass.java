@@ -30,20 +30,25 @@ public final class PicoToPiOuterClass {
     ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType getMessageType();
 
     /**
-     * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
-     * @return Whether the existingConfig field is set.
+     * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
+     * @return Whether the configMessage field is set.
      */
-    boolean hasExistingConfig();
+    boolean hasConfigMessage();
     /**
-     * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
-     * @return The existingConfig.
+     * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
+     * @return The configMessage.
      */
-    ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getExistingConfig();
+    ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getConfigMessage();
     /**
-     * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
      */
-    ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getExistingConfigOrBuilder();
+    ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getConfigMessageOrBuilder();
 
+    /**
+     * <code>string loggerStatement = 3;</code>
+     * @return Whether the loggerStatement field is set.
+     */
+    boolean hasLoggerStatement();
     /**
      * <code>string loggerStatement = 3;</code>
      * @return The loggerStatement.
@@ -55,6 +60,8 @@ public final class PicoToPiOuterClass {
      */
     com.google.protobuf.ByteString
         getLoggerStatementBytes();
+
+    ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.BodyCase getBodyCase();
   }
   /**
    * Protobuf type {@code ca.stefanm.e39.proto.PicoToPi}
@@ -70,7 +77,6 @@ public final class PicoToPiOuterClass {
     }
     private PicoToPi() {
       messageType_ = 0;
-      loggerStatement_ = "";
     }
 
     @java.lang.Override
@@ -99,29 +105,33 @@ public final class PicoToPiOuterClass {
     public enum MessageType
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>HeartbeatRequest = 0;</code>
+       * <code>EmptyMessage = 0;</code>
        */
-      HeartbeatRequest(0),
+      EmptyMessage(0),
       /**
-       * <code>HeartbeatResponse = 1;</code>
+       * <code>HeartbeatRequest = 1;</code>
        */
-      HeartbeatResponse(1),
+      HeartbeatRequest(1),
+      /**
+       * <code>HeartbeatResponse = 2;</code>
+       */
+      HeartbeatResponse(2),
       /**
        * <pre>
        *For the logger on the pico to shuttle to Rpi.
        * </pre>
        *
-       * <code>LogStatement = 2;</code>
+       * <code>LogStatement = 3;</code>
        */
-      LogStatement(2),
+      LogStatement(3),
       /**
        * <pre>
        *Dump the config object
        * </pre>
        *
-       * <code>ConfigStatusResponse = 3;</code>
+       * <code>ConfigStatusResponse = 4;</code>
        */
-      ConfigStatusResponse(3),
+      ConfigStatusResponse(4),
       /**
        * <pre>
        *TODO we could have a mechanism where the pi sends to the pico
@@ -130,44 +140,48 @@ public final class PicoToPiOuterClass {
        *TODO it could auto-restart the PI.
        * </pre>
        *
-       * <code>PiSoftPowerRestartX = 4;</code>
+       * <code>PiSoftPowerRestartX = 5;</code>
        */
-      PiSoftPowerRestartX(4),
+      PiSoftPowerRestartX(5),
       /**
        * <pre>
        *Ask the RPI to legit restart
        * </pre>
        *
-       * <code>PiSoftPowerRestartPi = 5;</code>
+       * <code>PiSoftPowerRestartPi = 6;</code>
        */
-      PiSoftPowerRestartPi(5),
+      PiSoftPowerRestartPi(6),
       UNRECOGNIZED(-1),
       ;
 
       /**
-       * <code>HeartbeatRequest = 0;</code>
+       * <code>EmptyMessage = 0;</code>
        */
-      public static final int HeartbeatRequest_VALUE = 0;
+      public static final int EmptyMessage_VALUE = 0;
       /**
-       * <code>HeartbeatResponse = 1;</code>
+       * <code>HeartbeatRequest = 1;</code>
        */
-      public static final int HeartbeatResponse_VALUE = 1;
+      public static final int HeartbeatRequest_VALUE = 1;
+      /**
+       * <code>HeartbeatResponse = 2;</code>
+       */
+      public static final int HeartbeatResponse_VALUE = 2;
       /**
        * <pre>
        *For the logger on the pico to shuttle to Rpi.
        * </pre>
        *
-       * <code>LogStatement = 2;</code>
+       * <code>LogStatement = 3;</code>
        */
-      public static final int LogStatement_VALUE = 2;
+      public static final int LogStatement_VALUE = 3;
       /**
        * <pre>
        *Dump the config object
        * </pre>
        *
-       * <code>ConfigStatusResponse = 3;</code>
+       * <code>ConfigStatusResponse = 4;</code>
        */
-      public static final int ConfigStatusResponse_VALUE = 3;
+      public static final int ConfigStatusResponse_VALUE = 4;
       /**
        * <pre>
        *TODO we could have a mechanism where the pi sends to the pico
@@ -176,17 +190,17 @@ public final class PicoToPiOuterClass {
        *TODO it could auto-restart the PI.
        * </pre>
        *
-       * <code>PiSoftPowerRestartX = 4;</code>
+       * <code>PiSoftPowerRestartX = 5;</code>
        */
-      public static final int PiSoftPowerRestartX_VALUE = 4;
+      public static final int PiSoftPowerRestartX_VALUE = 5;
       /**
        * <pre>
        *Ask the RPI to legit restart
        * </pre>
        *
-       * <code>PiSoftPowerRestartPi = 5;</code>
+       * <code>PiSoftPowerRestartPi = 6;</code>
        */
-      public static final int PiSoftPowerRestartPi_VALUE = 5;
+      public static final int PiSoftPowerRestartPi_VALUE = 6;
 
 
       public final int getNumber() {
@@ -213,12 +227,13 @@ public final class PicoToPiOuterClass {
        */
       public static MessageType forNumber(int value) {
         switch (value) {
-          case 0: return HeartbeatRequest;
-          case 1: return HeartbeatResponse;
-          case 2: return LogStatement;
-          case 3: return ConfigStatusResponse;
-          case 4: return PiSoftPowerRestartX;
-          case 5: return PiSoftPowerRestartPi;
+          case 0: return EmptyMessage;
+          case 1: return HeartbeatRequest;
+          case 2: return HeartbeatResponse;
+          case 3: return LogStatement;
+          case 4: return ConfigStatusResponse;
+          case 5: return PiSoftPowerRestartX;
+          case 6: return PiSoftPowerRestartPi;
           default: return null;
         }
       }
@@ -275,6 +290,48 @@ public final class PicoToPiOuterClass {
       // @@protoc_insertion_point(enum_scope:ca.stefanm.e39.proto.PicoToPi.MessageType)
     }
 
+    private int bodyCase_ = 0;
+    @SuppressWarnings("serial")
+    private java.lang.Object body_;
+    public enum BodyCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      CONFIGMESSAGE(2),
+      LOGGERSTATEMENT(3),
+      BODY_NOT_SET(0);
+      private final int value;
+      private BodyCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static BodyCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static BodyCase forNumber(int value) {
+        switch (value) {
+          case 2: return CONFIGMESSAGE;
+          case 3: return LOGGERSTATEMENT;
+          case 0: return BODY_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public BodyCase
+    getBodyCase() {
+      return BodyCase.forNumber(
+          bodyCase_);
+    }
+
     public static final int MESSAGETYPE_FIELD_NUMBER = 1;
     private int messageType_ = 0;
     /**
@@ -293,49 +350,63 @@ public final class PicoToPiOuterClass {
       return result == null ? ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType.UNRECOGNIZED : result;
     }
 
-    public static final int EXISTINGCONFIG_FIELD_NUMBER = 2;
-    private ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto existingConfig_;
+    public static final int CONFIGMESSAGE_FIELD_NUMBER = 2;
     /**
-     * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
-     * @return Whether the existingConfig field is set.
+     * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
+     * @return Whether the configMessage field is set.
      */
     @java.lang.Override
-    public boolean hasExistingConfig() {
-      return existingConfig_ != null;
+    public boolean hasConfigMessage() {
+      return bodyCase_ == 2;
     }
     /**
-     * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
-     * @return The existingConfig.
+     * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
+     * @return The configMessage.
      */
     @java.lang.Override
-    public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getExistingConfig() {
-      return existingConfig_ == null ? ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance() : existingConfig_;
+    public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getConfigMessage() {
+      if (bodyCase_ == 2) {
+         return (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_;
+      }
+      return ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance();
     }
     /**
-     * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+     * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
      */
     @java.lang.Override
-    public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getExistingConfigOrBuilder() {
-      return existingConfig_ == null ? ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance() : existingConfig_;
+    public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getConfigMessageOrBuilder() {
+      if (bodyCase_ == 2) {
+         return (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_;
+      }
+      return ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance();
     }
 
     public static final int LOGGERSTATEMENT_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object loggerStatement_ = "";
+    /**
+     * <code>string loggerStatement = 3;</code>
+     * @return Whether the loggerStatement field is set.
+     */
+    public boolean hasLoggerStatement() {
+      return bodyCase_ == 3;
+    }
     /**
      * <code>string loggerStatement = 3;</code>
      * @return The loggerStatement.
      */
-    @java.lang.Override
     public java.lang.String getLoggerStatement() {
-      java.lang.Object ref = loggerStatement_;
+      java.lang.Object ref = "";
+      if (bodyCase_ == 3) {
+        ref = body_;
+      }
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        loggerStatement_ = s;
+        if (bodyCase_ == 3) {
+          body_ = s;
+        }
         return s;
       }
     }
@@ -343,15 +414,19 @@ public final class PicoToPiOuterClass {
      * <code>string loggerStatement = 3;</code>
      * @return The bytes for loggerStatement.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getLoggerStatementBytes() {
-      java.lang.Object ref = loggerStatement_;
+      java.lang.Object ref = "";
+      if (bodyCase_ == 3) {
+        ref = body_;
+      }
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        loggerStatement_ = b;
+        if (bodyCase_ == 3) {
+          body_ = b;
+        }
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -372,14 +447,14 @@ public final class PicoToPiOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (messageType_ != ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType.HeartbeatRequest.getNumber()) {
+      if (messageType_ != ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType.EmptyMessage.getNumber()) {
         output.writeEnum(1, messageType_);
       }
-      if (existingConfig_ != null) {
-        output.writeMessage(2, getExistingConfig());
+      if (bodyCase_ == 2) {
+        output.writeMessage(2, (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(loggerStatement_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, loggerStatement_);
+      if (bodyCase_ == 3) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, body_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -390,16 +465,16 @@ public final class PicoToPiOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (messageType_ != ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType.HeartbeatRequest.getNumber()) {
+      if (messageType_ != ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType.EmptyMessage.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, messageType_);
       }
-      if (existingConfig_ != null) {
+      if (bodyCase_ == 2) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, getExistingConfig());
+          .computeMessageSize(2, (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(loggerStatement_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, loggerStatement_);
+      if (bodyCase_ == 3) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, body_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -417,13 +492,19 @@ public final class PicoToPiOuterClass {
       ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi other = (ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi) obj;
 
       if (messageType_ != other.messageType_) return false;
-      if (hasExistingConfig() != other.hasExistingConfig()) return false;
-      if (hasExistingConfig()) {
-        if (!getExistingConfig()
-            .equals(other.getExistingConfig())) return false;
+      if (!getBodyCase().equals(other.getBodyCase())) return false;
+      switch (bodyCase_) {
+        case 2:
+          if (!getConfigMessage()
+              .equals(other.getConfigMessage())) return false;
+          break;
+        case 3:
+          if (!getLoggerStatement()
+              .equals(other.getLoggerStatement())) return false;
+          break;
+        case 0:
+        default:
       }
-      if (!getLoggerStatement()
-          .equals(other.getLoggerStatement())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -437,12 +518,18 @@ public final class PicoToPiOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + MESSAGETYPE_FIELD_NUMBER;
       hash = (53 * hash) + messageType_;
-      if (hasExistingConfig()) {
-        hash = (37 * hash) + EXISTINGCONFIG_FIELD_NUMBER;
-        hash = (53 * hash) + getExistingConfig().hashCode();
+      switch (bodyCase_) {
+        case 2:
+          hash = (37 * hash) + CONFIGMESSAGE_FIELD_NUMBER;
+          hash = (53 * hash) + getConfigMessage().hashCode();
+          break;
+        case 3:
+          hash = (37 * hash) + LOGGERSTATEMENT_FIELD_NUMBER;
+          hash = (53 * hash) + getLoggerStatement().hashCode();
+          break;
+        case 0:
+        default:
       }
-      hash = (37 * hash) + LOGGERSTATEMENT_FIELD_NUMBER;
-      hash = (53 * hash) + getLoggerStatement().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -573,12 +660,11 @@ public final class PicoToPiOuterClass {
         super.clear();
         bitField0_ = 0;
         messageType_ = 0;
-        existingConfig_ = null;
-        if (existingConfigBuilder_ != null) {
-          existingConfigBuilder_.dispose();
-          existingConfigBuilder_ = null;
+        if (configMessageBuilder_ != null) {
+          configMessageBuilder_.clear();
         }
-        loggerStatement_ = "";
+        bodyCase_ = 0;
+        body_ = null;
         return this;
       }
 
@@ -606,6 +692,7 @@ public final class PicoToPiOuterClass {
       public ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi buildPartial() {
         ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi result = new ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi(this);
         if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
       }
@@ -615,13 +702,14 @@ public final class PicoToPiOuterClass {
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.messageType_ = messageType_;
         }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.existingConfig_ = existingConfigBuilder_ == null
-              ? existingConfig_
-              : existingConfigBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.loggerStatement_ = loggerStatement_;
+      }
+
+      private void buildPartialOneofs(ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi result) {
+        result.bodyCase_ = bodyCase_;
+        result.body_ = this.body_;
+        if (bodyCase_ == 2 &&
+            configMessageBuilder_ != null) {
+          result.body_ = configMessageBuilder_.build();
         }
       }
 
@@ -640,13 +728,20 @@ public final class PicoToPiOuterClass {
         if (other.messageType_ != 0) {
           setMessageTypeValue(other.getMessageTypeValue());
         }
-        if (other.hasExistingConfig()) {
-          mergeExistingConfig(other.getExistingConfig());
-        }
-        if (!other.getLoggerStatement().isEmpty()) {
-          loggerStatement_ = other.loggerStatement_;
-          bitField0_ |= 0x00000004;
-          onChanged();
+        switch (other.getBodyCase()) {
+          case CONFIGMESSAGE: {
+            mergeConfigMessage(other.getConfigMessage());
+            break;
+          }
+          case LOGGERSTATEMENT: {
+            bodyCase_ = 3;
+            body_ = other.body_;
+            onChanged();
+            break;
+          }
+          case BODY_NOT_SET: {
+            break;
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -681,14 +776,15 @@ public final class PicoToPiOuterClass {
               } // case 8
               case 18: {
                 input.readMessage(
-                    getExistingConfigFieldBuilder().getBuilder(),
+                    getConfigMessageFieldBuilder().getBuilder(),
                     extensionRegistry);
-                bitField0_ |= 0x00000002;
+                bodyCase_ = 2;
                 break;
               } // case 18
               case 26: {
-                loggerStatement_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000004;
+                java.lang.String s = input.readStringRequireUtf8();
+                bodyCase_ = 3;
+                body_ = s;
                 break;
               } // case 26
               default: {
@@ -706,6 +802,21 @@ public final class PicoToPiOuterClass {
         } // finally
         return this;
       }
+      private int bodyCase_ = 0;
+      private java.lang.Object body_;
+      public BodyCase
+          getBodyCase() {
+        return BodyCase.forNumber(
+            bodyCase_);
+      }
+
+      public Builder clearBody() {
+        bodyCase_ = 0;
+        body_ = null;
+        onChanged();
+        return this;
+      }
+
       private int bitField0_;
 
       private int messageType_ = 0;
@@ -761,137 +872,173 @@ public final class PicoToPiOuterClass {
         return this;
       }
 
-      private ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto existingConfig_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder> existingConfigBuilder_;
+          ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder> configMessageBuilder_;
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
-       * @return Whether the existingConfig field is set.
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
+       * @return Whether the configMessage field is set.
        */
-      public boolean hasExistingConfig() {
-        return ((bitField0_ & 0x00000002) != 0);
+      @java.lang.Override
+      public boolean hasConfigMessage() {
+        return bodyCase_ == 2;
       }
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
-       * @return The existingConfig.
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
+       * @return The configMessage.
        */
-      public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getExistingConfig() {
-        if (existingConfigBuilder_ == null) {
-          return existingConfig_ == null ? ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance() : existingConfig_;
+      @java.lang.Override
+      public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto getConfigMessage() {
+        if (configMessageBuilder_ == null) {
+          if (bodyCase_ == 2) {
+            return (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_;
+          }
+          return ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance();
         } else {
-          return existingConfigBuilder_.getMessage();
+          if (bodyCase_ == 2) {
+            return configMessageBuilder_.getMessage();
+          }
+          return ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance();
         }
       }
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
        */
-      public Builder setExistingConfig(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto value) {
-        if (existingConfigBuilder_ == null) {
+      public Builder setConfigMessage(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto value) {
+        if (configMessageBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          existingConfig_ = value;
+          body_ = value;
+          onChanged();
         } else {
-          existingConfigBuilder_.setMessage(value);
+          configMessageBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000002;
-        onChanged();
+        bodyCase_ = 2;
         return this;
       }
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
        */
-      public Builder setExistingConfig(
+      public Builder setConfigMessage(
           ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder builderForValue) {
-        if (existingConfigBuilder_ == null) {
-          existingConfig_ = builderForValue.build();
+        if (configMessageBuilder_ == null) {
+          body_ = builderForValue.build();
+          onChanged();
         } else {
-          existingConfigBuilder_.setMessage(builderForValue.build());
+          configMessageBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000002;
-        onChanged();
+        bodyCase_ = 2;
         return this;
       }
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
        */
-      public Builder mergeExistingConfig(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto value) {
-        if (existingConfigBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) != 0) &&
-            existingConfig_ != null &&
-            existingConfig_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance()) {
-            getExistingConfigBuilder().mergeFrom(value);
+      public Builder mergeConfigMessage(ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto value) {
+        if (configMessageBuilder_ == null) {
+          if (bodyCase_ == 2 &&
+              body_ != ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance()) {
+            body_ = ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.newBuilder((ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_)
+                .mergeFrom(value).buildPartial();
           } else {
-            existingConfig_ = value;
+            body_ = value;
+          }
+          onChanged();
+        } else {
+          if (bodyCase_ == 2) {
+            configMessageBuilder_.mergeFrom(value);
+          } else {
+            configMessageBuilder_.setMessage(value);
+          }
+        }
+        bodyCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
+       */
+      public Builder clearConfigMessage() {
+        if (configMessageBuilder_ == null) {
+          if (bodyCase_ == 2) {
+            bodyCase_ = 0;
+            body_ = null;
+            onChanged();
           }
         } else {
-          existingConfigBuilder_.mergeFrom(value);
+          if (bodyCase_ == 2) {
+            bodyCase_ = 0;
+            body_ = null;
+          }
+          configMessageBuilder_.clear();
         }
-        bitField0_ |= 0x00000002;
-        onChanged();
         return this;
       }
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
        */
-      public Builder clearExistingConfig() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        existingConfig_ = null;
-        if (existingConfigBuilder_ != null) {
-          existingConfigBuilder_.dispose();
-          existingConfigBuilder_ = null;
-        }
-        onChanged();
-        return this;
+      public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder getConfigMessageBuilder() {
+        return getConfigMessageFieldBuilder().getBuilder();
       }
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
        */
-      public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder getExistingConfigBuilder() {
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return getExistingConfigFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
-       */
-      public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getExistingConfigOrBuilder() {
-        if (existingConfigBuilder_ != null) {
-          return existingConfigBuilder_.getMessageOrBuilder();
+      @java.lang.Override
+      public ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder getConfigMessageOrBuilder() {
+        if ((bodyCase_ == 2) && (configMessageBuilder_ != null)) {
+          return configMessageBuilder_.getMessageOrBuilder();
         } else {
-          return existingConfig_ == null ?
-              ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance() : existingConfig_;
+          if (bodyCase_ == 2) {
+            return (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_;
+          }
+          return ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance();
         }
       }
       /**
-       * <code>.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;</code>
+       * <code>.ca.stefanm.e39.proto.ConfigProto configMessage = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder> 
-          getExistingConfigFieldBuilder() {
-        if (existingConfigBuilder_ == null) {
-          existingConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+          getConfigMessageFieldBuilder() {
+        if (configMessageBuilder_ == null) {
+          if (!(bodyCase_ == 2)) {
+            body_ = ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.getDefaultInstance();
+          }
+          configMessageBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
               ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto.Builder, ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProtoOrBuilder>(
-                  getExistingConfig(),
+                  (ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto) body_,
                   getParentForChildren(),
                   isClean());
-          existingConfig_ = null;
+          body_ = null;
         }
-        return existingConfigBuilder_;
+        bodyCase_ = 2;
+        onChanged();
+        return configMessageBuilder_;
       }
 
-      private java.lang.Object loggerStatement_ = "";
+      /**
+       * <code>string loggerStatement = 3;</code>
+       * @return Whether the loggerStatement field is set.
+       */
+      @java.lang.Override
+      public boolean hasLoggerStatement() {
+        return bodyCase_ == 3;
+      }
       /**
        * <code>string loggerStatement = 3;</code>
        * @return The loggerStatement.
        */
+      @java.lang.Override
       public java.lang.String getLoggerStatement() {
-        java.lang.Object ref = loggerStatement_;
+        java.lang.Object ref = "";
+        if (bodyCase_ == 3) {
+          ref = body_;
+        }
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          loggerStatement_ = s;
+          if (bodyCase_ == 3) {
+            body_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
@@ -901,14 +1048,20 @@ public final class PicoToPiOuterClass {
        * <code>string loggerStatement = 3;</code>
        * @return The bytes for loggerStatement.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getLoggerStatementBytes() {
-        java.lang.Object ref = loggerStatement_;
+        java.lang.Object ref = "";
+        if (bodyCase_ == 3) {
+          ref = body_;
+        }
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          loggerStatement_ = b;
+          if (bodyCase_ == 3) {
+            body_ = b;
+          }
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -922,8 +1075,8 @@ public final class PicoToPiOuterClass {
       public Builder setLoggerStatement(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        loggerStatement_ = value;
-        bitField0_ |= 0x00000004;
+        bodyCase_ = 3;
+        body_ = value;
         onChanged();
         return this;
       }
@@ -932,9 +1085,11 @@ public final class PicoToPiOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLoggerStatement() {
-        loggerStatement_ = getDefaultInstance().getLoggerStatement();
-        bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
+        if (bodyCase_ == 3) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
         return this;
       }
       /**
@@ -946,8 +1101,8 @@ public final class PicoToPiOuterClass {
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        loggerStatement_ = value;
-        bitField0_ |= 0x00000004;
+        bodyCase_ = 3;
+        body_ = value;
         onChanged();
         return this;
       }
@@ -1030,15 +1185,16 @@ public final class PicoToPiOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\016PicoToPi.proto\022\024ca.stefanm.e39.proto\032\021" +
-      "ConfigProto.proto\"\273\002\n\010PicoToPi\022?\n\013messag" +
+      "ConfigProto.proto\"\330\002\n\010PicoToPi\022?\n\013messag" +
       "eType\030\001 \001(\0162*.ca.stefanm.e39.proto.PicoT" +
-      "oPi.MessageType\0229\n\016existingConfig\030\002 \001(\0132" +
-      "!.ca.stefanm.e39.proto.ConfigProto\022\027\n\017lo" +
-      "ggerStatement\030\003 \001(\t\"\231\001\n\013MessageType\022\024\n\020H" +
-      "eartbeatRequest\020\000\022\025\n\021HeartbeatResponse\020\001" +
-      "\022\020\n\014LogStatement\020\002\022\030\n\024ConfigStatusRespon" +
-      "se\020\003\022\027\n\023PiSoftPowerRestartX\020\004\022\030\n\024PiSoftP" +
-      "owerRestartPi\020\005b\006proto3"
+      "oPi.MessageType\022:\n\rconfigMessage\030\002 \001(\0132!" +
+      ".ca.stefanm.e39.proto.ConfigProtoH\000\022\031\n\017l" +
+      "oggerStatement\030\003 \001(\tH\000\"\253\001\n\013MessageType\022\020" +
+      "\n\014EmptyMessage\020\000\022\024\n\020HeartbeatRequest\020\001\022\025" +
+      "\n\021HeartbeatResponse\020\002\022\020\n\014LogStatement\020\003\022" +
+      "\030\n\024ConfigStatusResponse\020\004\022\027\n\023PiSoftPower" +
+      "RestartX\020\005\022\030\n\024PiSoftPowerRestartPi\020\006B\006\n\004" +
+      "bodyb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1050,7 +1206,7 @@ public final class PicoToPiOuterClass {
     internal_static_ca_stefanm_e39_proto_PicoToPi_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ca_stefanm_e39_proto_PicoToPi_descriptor,
-        new java.lang.String[] { "MessageType", "ExistingConfig", "LoggerStatement", });
+        new java.lang.String[] { "MessageType", "ConfigMessage", "LoggerStatement", "Body", });
     ca.stefanm.e39.proto.ConfigProtoOuterClass.getDescriptor();
   }
 

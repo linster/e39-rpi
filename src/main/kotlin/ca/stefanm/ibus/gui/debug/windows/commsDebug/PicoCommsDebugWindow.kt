@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
@@ -18,8 +15,12 @@ import androidx.compose.ui.window.WindowScope
 import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
 import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PicoToPiMessageFactory
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
+import ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
 import ca.stefanm.e39.proto.PiToPicoOuterClass
 import ca.stefanm.e39.proto.PicoToPiOuterClass
+import ca.stefanm.e39.proto.configProto
+import ca.stefanm.e39.proto.piToPico
+import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.debug.windows.CheckBoxWithLabel
@@ -58,9 +59,14 @@ class PicoCommsDebugWindow @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = DpSize(1680.dp, 1024.dp)
+    override val size = DpSize(2280.dp, 1024.dp)
 
     override fun content(): @Composable WindowScope.() -> Unit = {
+
+        val configBuilderSeed = remember {
+            mutableStateOf<ConfigProto?>(null)
+        }
+
         Row(modifier = Modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Column(modifier = Modifier.weight(0.6f)) {
                 PicoLogViewerWindow()
@@ -69,9 +75,39 @@ class PicoCommsDebugWindow @Inject constructor(
                 PlatformControls(configurablePlatform)
                 Row {
                     MessageSendCard()
-                    SimulatePicoMessagesCard()
+                    Column {
+                        SimulatePicoMessagesCard()
+                        SeedConfigBuilderCard() {
+                            configBuilderSeed.value = it
+                        }
+                    }
                 }
                 SendTestMessages()
+            }
+
+            val scope = rememberCoroutineScope()
+
+            LaunchedEffect(configBuilderSeed.value) {
+                println("configbuilderseed ${configBuilderSeed.value}")
+            }
+
+            key(configBuilderSeed.value) {
+                ConfigMessageBuilderPane(configBuilderSeed.value) { config ->
+                    scope.launch {
+                        sendMessage(
+                            name = "ConfigMessage",
+                        ) {
+                            IBusMessage(
+                                sourceDevice = IBusDevice.PI,
+                                destinationDevice = IBusDevice.PICO,
+                                data = piToPico {
+                                    messageType = PiToPicoOuterClass.PiToPico.MessageType.ConfigPush
+                                    newConfig = config
+                                }.toByteArray().toUByteArray()
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -114,6 +150,58 @@ class PicoCommsDebugWindow @Inject constructor(
                     piToPicoMessage = piToPicoMessage
                 )
             )
+        }
+    }
+
+    @Composable
+    fun SeedConfigBuilderCard(
+        onSeedComplete : (ConfigProto?) -> Unit
+    ) {
+        //TODO a box with "Seed Canned config", "Seed Last Received"
+        NestingCard {
+            NestingCardHeader("Seed Config")
+            Button(onClick = {
+                onSeedComplete(null)
+            }) { Text("Null") }
+            Button(onClick = {
+                onSeedComplete(
+                    configProto {
+                        rpiFwGitCommitHash = "Canned"
+                        isIbusLogOutputEnabled = true
+                        enabledMaxLogLevelForIbusLog = ConfigProto.LoggingLevels.DEBUG
+                        enabledMaxLogLevelForPrintfLog = ConfigProto.LoggingLevels.WTF
+                        alwaysTurnOnRpiOnStatup = true
+                        alwaysTurnOnScreenOnIbusActivity = true
+                        scanProgramOnBoot = ConfigProto.ScanProgram.LINSTEROS_BOOTSPLASH
+                        videoSourceOnBoot = ConfigProto.VideoSource.UPSTREAM
+                        sendBMBTEncodingPacketOnBootup = false
+                        videoEncoding = ConfigProto.VideoEncoding.NTSC
+                        aspectRatio = ConfigProto.AspectRatio.SixteenNine
+                    }
+                )
+            }) { Text("Canned (on Boot, Upstream) Config") }
+            Button(onClick = {
+                onSeedComplete(
+                    configProto {
+                        rpiFwGitCommitHash = "Canned"
+                        isIbusLogOutputEnabled = true
+                        enabledMaxLogLevelForIbusLog = ConfigProto.LoggingLevels.DEBUG
+                        enabledMaxLogLevelForPrintfLog = ConfigProto.LoggingLevels.WTF
+                        alwaysTurnOnRpiOnStatup = true
+                        alwaysTurnOnScreenOnIbusActivity = true
+                        scanProgramOnBoot = ConfigProto.ScanProgram.LINSTEROS_BOOTSPLASH
+                        videoSourceOnBoot = ConfigProto.VideoSource.PI
+                        sendBMBTEncodingPacketOnBootup = false
+                        videoEncoding = ConfigProto.VideoEncoding.NTSC
+                        aspectRatio = ConfigProto.AspectRatio.SixteenNine
+                    }
+                )
+            }) { Text("Canned (on Boot, Pi) Config") }
+
+
+            Button(onClick = {
+
+            }) { Text("Copy last-received") }
         }
     }
 

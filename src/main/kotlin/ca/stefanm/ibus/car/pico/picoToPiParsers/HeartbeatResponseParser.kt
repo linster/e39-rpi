@@ -5,6 +5,7 @@ import ca.stefanm.e39.proto.PicoToPiOuterClass
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.platform.LongRunningService
+import ca.stefanm.ibus.car.platform.PicoToPiParserGroup
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
@@ -20,6 +21,7 @@ import javax.inject.Named
     name = "PicoHeartbeatResponseParser",
     description = "Listens from heartbeat responses from the pico and prints to a debug log"
 )
+@PicoToPiParserGroup
 class HeartbeatResponseParser  @Inject constructor(
     @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,
     @Named(ApplicationModule.IBUS_COMMS_DEBUG_CHANNEL) private val commsDebugChannel : MutableSharedFlow<IbusCommsDebugMessage>,

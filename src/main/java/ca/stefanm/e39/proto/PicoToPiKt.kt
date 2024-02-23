@@ -52,27 +52,27 @@ public object PicoToPiKt {
     }
 
     /**
-     * `.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;`
+     * `.ca.stefanm.e39.proto.ConfigProto configMessage = 2;`
      */
-    public var existingConfig: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
-      @JvmName("getExistingConfig")
-      get() = _builder.getExistingConfig()
-      @JvmName("setExistingConfig")
+    public var configMessage: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
+      @JvmName("getConfigMessage")
+      get() = _builder.getConfigMessage()
+      @JvmName("setConfigMessage")
       set(value) {
-        _builder.setExistingConfig(value)
+        _builder.setConfigMessage(value)
       }
     /**
-     * `.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;`
+     * `.ca.stefanm.e39.proto.ConfigProto configMessage = 2;`
      */
-    public fun clearExistingConfig() {
-      _builder.clearExistingConfig()
+    public fun clearConfigMessage() {
+      _builder.clearConfigMessage()
     }
     /**
-     * `.ca.stefanm.e39.proto.ConfigProto existingConfig = 2;`
-     * @return Whether the existingConfig field is set.
+     * `.ca.stefanm.e39.proto.ConfigProto configMessage = 2;`
+     * @return Whether the configMessage field is set.
      */
-    public fun hasExistingConfig(): kotlin.Boolean {
-      return _builder.hasExistingConfig()
+    public fun hasConfigMessage(): kotlin.Boolean {
+      return _builder.hasConfigMessage()
     }
 
     /**
@@ -91,12 +91,26 @@ public object PicoToPiKt {
     public fun clearLoggerStatement() {
       _builder.clearLoggerStatement()
     }
+    /**
+     * `string loggerStatement = 3;`
+     * @return Whether the loggerStatement field is set.
+     */
+    public fun hasLoggerStatement(): kotlin.Boolean {
+      return _builder.hasLoggerStatement()
+    }
+    public val bodyCase: ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.BodyCase
+      @JvmName("getBodyCase")
+      get() = _builder.getBodyCase()
+
+    public fun clearBody() {
+      _builder.clearBody()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.copy(block: ca.stefanm.e39.proto.PicoToPiKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi =
   ca.stefanm.e39.proto.PicoToPiKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
-public val ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPiOrBuilder.existingConfigOrNull: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto?
-  get() = if (hasExistingConfig()) getExistingConfig() else null
+public val ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPiOrBuilder.configMessageOrNull: ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto?
+  get() = if (hasConfigMessage()) getConfigMessage() else null
 

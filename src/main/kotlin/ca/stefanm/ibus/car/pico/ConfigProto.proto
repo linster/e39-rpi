@@ -3,12 +3,13 @@ syntax = "proto3";
 package ca.stefanm.e39.proto;
 
 message ConfigProto {
+  /** Because this makes the message variable length we need options to say this is a callback message */
   string rpiFwGitCommitHash = 1;
 
   bool isIbusLogOutputEnabled = 2;
 
   enum LoggingLevels {
-    DEBUG = 0; INFO = 1; WARN = 2; ERROR = 3; WTF = 4;
+    Logging_NotSet = 0; DEBUG = 1; INFO = 2; WARN = 3; ERROR = 4; WTF = 5;
   }
 
   LoggingLevels enabledMaxLogLevelForIbusLog = 3;
@@ -21,12 +22,13 @@ message ConfigProto {
   bool alwaysTurnOnScreenOnIbusActivity = 6;
 
   enum ScanProgram {
-    NONE = 0;
-    CLOCK = 1;
-    LINSTEROS_BOOTSPLASH = 2;
-    GOOSE_BOOTSPLASH = 3;
-    BMW_BOOTSPLASH = 4;
-    MENU = 5;
+    Scan_Program_NotSet = 0;
+    NONE = 1;
+    CLOCK = 2;
+    LINSTEROS_BOOTSPLASH = 3;
+    GOOSE_BOOTSPLASH = 4;
+    BMW_BOOTSPLASH = 5;
+    MENU = 6;
   }
   ScanProgram scanProgramOnBoot = 7;
 

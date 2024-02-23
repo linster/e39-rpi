@@ -83,20 +83,20 @@ class PicoToPiMessageFactory @Inject constructor() {
         val rawMessage : IBusMessage,
         val configProto: ConfigProto
     )
-
-    fun syntheticConfigStatusResponse(
-        givenConfigProto: ConfigProto
-    ) : ConfigStatusResponse {
-        return ConfigStatusResponse(
-            rawMessage = IBusMessage(
-                sourceDevice = IBusDevice.PICO,
-                destinationDevice = IBusDevice.PI,
-                data = picoToPi {
-                    messageTypeValue = MessageType.ConfigStatusResponse_VALUE
-                    existingConfig = givenConfigProto
-                }.toByteArray().toUByteArray()
-            ),
-            configProto = givenConfigProto
-        )
-    }
+//
+//    fun syntheticConfigStatusResponse(
+//        givenConfigProto: ConfigProto
+//    ) : ConfigStatusResponse {
+//        return ConfigStatusResponse(
+//            rawMessage = IBusMessage(
+//                sourceDevice = IBusDevice.PICO,
+//                destinationDevice = IBusDevice.PI,
+//                data = picoToPi {
+//                    messageTypeValue = MessageType.ConfigStatusResponse_VALUE
+//                    existingConfig = givenConfigProto
+//                }.toByteArray().toUByteArray()
+//            ),
+//            configProto = givenConfigProto
+//        )
+//    }
 }
