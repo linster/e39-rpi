@@ -12,6 +12,8 @@ object HmiVersion : ConfigSpec() {
         "sdHash", description = "Git Hash of the e39-rpi OS image")
     val hmiHash by optional("<no version set>",
         "hmiHash", description = "Git Hash of the e39-rpi HMI")
+    val fwHash by optional("<no version set>",
+        "fwHash", description = "Git Hash of the e39-rpi firmware on pico")
 }
 
 object E39Config : ConfigSpec() {
