@@ -22,14 +22,6 @@ sudo raspi-config nonint do_blanking 1
 #Enable i2c for relays
 sudo raspi-config nonint do_i2c 0
 
-cat << EOT >> /boot/config.txt
-overscan_left=48
-overscan_right=-48
-overscan_top=16
-overscan_bottom=-64
-sdtv_aspect=3
-test_mode=0
-EOT
 
 
 #cd /var/lib/e39
