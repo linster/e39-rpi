@@ -23,15 +23,3 @@ sudo raspi-config nonint do_blanking 1
 sudo raspi-config nonint do_i2c 0
 
 
-
-#cd /var/lib/e39
-#git clone https://github.com/linster/e39-rpi.git
-#cd /var/lib/e39/e39-rpi
-
-#git checkout -t origin/deploy/stefan
-
-# Build e39 project
-#./gradlew
-#./gradlew packageUberJarForCurrentOs
-
-

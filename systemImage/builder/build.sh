@@ -8,7 +8,7 @@ cd ../../
 ./gradlew clean
 ./gradlew packageUberJarForCurrentOs
 #Make the JAR Runnable from the cli.
-zip -d `ls build/compose/jars/*.jar` 'META-INF/*.SF' 'META-INF/*.RSA' 'META-INF/*SF'
+#zip -d `ls ../../build/compose/jars/*.jar` 'META-INF/*.SF' 'META-INF/*.RSA' 'META-INF/*SF'
 
 cd -
 unset BUILD_PI

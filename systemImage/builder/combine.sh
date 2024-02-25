@@ -17,11 +17,11 @@ mount -o loop,offset=$((512*532480)) 2021-10-30-raspios-bullseye-arm64-lite.img 
 mkdir mnt/var/lib/e39
 mkdir mnt/etc/e39
 
-cp config_txt/config.400x234.menu.ntsc.txt mnt/boot/config.txt
-
 cp -a packages mnt/var/lib/e39
 cp install-e39.sh mnt/var/lib/e39
 cp *.jar mnt/var/lib/e39
+cp config.400x234.menu.ntsc.txt mnt/var/lib/e39/config.txt
+cp wpa_supplicant.conf mnt/var/lib/e39/wpa_supplicant.conf
 cp jwmrc mnt/home/pi/.jwmrc
 cp config.conf mnt/var/lib/e39
 cp version.conf mnt/var/lib/e39

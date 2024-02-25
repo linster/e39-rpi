@@ -16,5 +16,7 @@ ADD combine.sh \
 	*.jar \
 	*.conf \
 	jwmrc \
+	config_txt/config.400x234.menu.ntsc.txt \
+	wpa_supplicant.conf \
 	./
 CMD [ "./combine.sh" ]
