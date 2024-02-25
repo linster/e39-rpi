@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 echo "Installer stub script"
-# Download e39 project
+
 
 cd /var/lib/e39
 sudo chmod -R 0777 /var/lib/e39/

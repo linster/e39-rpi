@@ -1,13 +1,5 @@
 #!/bin/sh -ex
 
-# We have to update the wpa_supplicant.conf here before we can do software updates
-
-if [ -e /var/lib/e39/wpa_supplicant.conf]; then
-    cp /var/lib/e39/wpa_supplicant.conf /boot/wpa_supplicant.conf
-else
-
-fi
-
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
