@@ -27,22 +27,22 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.0"
     id("java")
 
-    id("com.squareup.sqldelight") version "1.5.5"
+//    id("com.squareup.sqldelight") version "1.5.5"
 
     id("com.google.protobuf") version "0.9.4"
 }
 
 
-sqldelight {
-    database("NavigationDb") {
-        packageName = "ca.stefanm.e39.navigation.db"
-        //sourceFolders = listOf("db")
-        schemaOutputDirectory = file("build/dbs")
-        //dependency(project(":OtherProject"))
-        dialect = "sqlite:3.24"
-        verifyMigrations = true
-    }
-}
+//sqldelight {
+//    database("NavigationDb") {
+//        packageName = "ca.stefanm.e39.navigation.db"
+//        //sourceFolders = listOf("db")
+//        schemaOutputDirectory = file("build/dbs")
+//        //dependency(project(":OtherProject"))
+//        dialect = "sqlite:3.24"
+//        verifyMigrations = true
+//    }
+//}
 
 kapt {
     correctErrorTypes = true
@@ -126,8 +126,8 @@ dependencies {
     testImplementation("junit:junit:4.12")
 
 
-    implementation("com.squareup.sqldelight:sqlite-driver:1.5.5")
-    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.5")
+//    implementation("com.squareup.sqldelight:sqlite-driver:1.5.5")
+//    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.5")
 
     //Web
     val ktor_version = "1.6.4"

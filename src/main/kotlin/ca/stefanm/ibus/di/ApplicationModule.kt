@@ -47,7 +47,7 @@ annotation class ApplicationScope
     ApplicationModule::class,
     GuiModule::class,
     NavigationModule::class,
-    MapDatabaseModule::class,
+//    MapDatabaseModule::class,
 //    NavigationBindsModule::class,
     MapModule::class
 ])

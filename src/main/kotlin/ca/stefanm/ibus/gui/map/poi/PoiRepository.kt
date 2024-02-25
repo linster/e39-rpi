@@ -5,15 +5,15 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import ca.stefanm.e39.navigation.db.NavigationDb
+//import ca.stefanm.e39.navigation.db.NavigationDb
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
-import com.squareup.sqldelight.db.SqlDriver
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+//import com.squareup.sqldelight.db.SqlDriver
+//import com.squareup.sqldelight.runtime.coroutines.asFlow
+//import com.squareup.sqldelight.runtime.coroutines.mapToList
+//import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.hocon
@@ -28,8 +28,7 @@ import javax.inject.Singleton
 
 @ApplicationScope
 class PoiRepository @Inject constructor(
-    private val logger : Logger,
-    private val poiQueries: PoiQueries
+    private val logger : Logger
 ){
 
     data class Poi(
@@ -85,69 +84,72 @@ class PoiRepository @Inject constructor(
             )
         }
     }
-    fun PoiTable.toSerializablePoi() : SerializablePoi {
-        return SerializablePoi(
-            name = this.name_string ?: "",
-            location = Pair(latitude_long ?: 0.0,  longitude_long ?: 0.0),
-            iconType = iconType_string ?: "NoIcon",
-            iconColor = iconColor_int,
-            iconFileName = iconFileName_string,
-            isVisible = isVisible ?: false
-        )
-    }
-
-    fun SerializablePoi.toPoiTable() : PoiTable {
-        return PoiTable(
-            name_string = name,
-            latitude_long = location.first,
-            longitude_long = location.second,
-            iconType_string = iconType,
-            iconColor_int = iconColor,
-            iconFileName_string = iconFileName,
-            isVisible = isVisible
-        )
-    }
+//    fun PoiTable.toSerializablePoi() : SerializablePoi {
+//        return SerializablePoi(
+//            name = this.name_string ?: "",
+//            location = Pair(latitude_long ?: 0.0,  longitude_long ?: 0.0),
+//            iconType = iconType_string ?: "NoIcon",
+//            iconColor = iconColor_int,
+//            iconFileName = iconFileName_string,
+//            isVisible = isVisible ?: false
+//        )
+//    }
+//
+//    fun SerializablePoi.toPoiTable() : PoiTable {
+//        return PoiTable(
+//            name_string = name,
+//            latitude_long = location.first,
+//            longitude_long = location.second,
+//            iconType_string = iconType,
+//            iconColor_int = iconColor,
+//            iconFileName_string = iconFileName,
+//            isVisible = isVisible
+//        )
+//    }
 
 
     fun saveOrUpdatePoi(
         new : Poi
     ) {
-        poiQueries.transaction {
-            val matching = poiQueries.poiExists(name_string = new.name, latitude = new.location.latitude, longitude = new.location.longitude).executeAsOne()
-            logger.d("PoiRepository", "SaveOrUpdatePoi. Matching is $matching")
-            if (matching == 0L) {
-                poiQueries.insertPoi(new.toSerializablePoi().toPoiTable())
-            } else {
-                poiQueries.deletePoi(name_string = new.name, latitude = new.location.latitude, longitude = new.location.longitude)
-                poiQueries.insertPoi(new.toSerializablePoi().toPoiTable())
-            }
-        }
+//        poiQueries.transaction {
+//            val matching = poiQueries.poiExists(name_string = new.name, latitude = new.location.latitude, longitude = new.location.longitude).executeAsOne()
+//            logger.d("PoiRepository", "SaveOrUpdatePoi. Matching is $matching")
+//            if (matching == 0L) {
+//                poiQueries.insertPoi(new.toSerializablePoi().toPoiTable())
+//            } else {
+//                poiQueries.deletePoi(name_string = new.name, latitude = new.location.latitude, longitude = new.location.longitude)
+//                poiQueries.insertPoi(new.toSerializablePoi().toPoiTable())
+//            }
+//        }
     }
 
     fun getAllPois() : List<Poi> {
-        return poiQueries.selectAll().executeAsList().map { it.toSerializablePoi().toPoi() }
+        return emptyList()
+//        return poiQueries.selectAll().executeAsList().map { it.toSerializablePoi().toPoi() }
     }
 
     fun getAllPoisFlow() : Flow<List<Poi>> {
-        return poiQueries.selectAll()
-            .asFlow().mapToList().map { it.map { it.toSerializablePoi().toPoi() } }.flowOn(Dispatchers.IO)
+        return flowOf(emptyList())
+//        return poiQueries.selectAll()
+//            .asFlow().mapToList().map { it.map { it.toSerializablePoi().toPoi() } }.flowOn(Dispatchers.IO)
     }
 
     fun getAllVisiblePoisFlow() : Flow<List<Poi>> {
-        return poiQueries.selectAllVisible()
-            .asFlow().mapToList().map { it.map { it.toSerializablePoi().toPoi() } }.flowOn(Dispatchers.IO)
+        return flowOf(emptyList())
+//        return poiQueries.selectAllVisible()
+//            .asFlow().mapToList().map { it.map { it.toSerializablePoi().toPoi() } }.flowOn(Dispatchers.IO)
     }
 
     fun deletePoi(poi: Poi) {
-        poiQueries.deleteByName(name_string = poi.name)
+//        poiQueries.deleteByName(name_string = poi.name)
     }
 
     fun hideAllPois() {
-        poiQueries.hideAllPois()
+//        poiQueries.hideAllPois()
     }
 
     fun showAllPois() {
-        poiQueries.showAllPois()
+//        poiQueries.showAllPois()
     }
 
 }
