@@ -13,6 +13,13 @@ cd ../../
 cd -
 unset BUILD_PI
 
+
+# Build up an intermediate/userconf.txt (to copy into /boot)
+# that is username:password(hashed)
+#echo raspberry | openssl passwd -6 -stdin
+
+
+
 cp ../../build/compose/jars/e39Rpi-linux-x64-1.0.0.jar .
 docker build . -t e39 && \
     docker run --rm --privileged --volume /dev:/dev --volume $PWD:/output e39

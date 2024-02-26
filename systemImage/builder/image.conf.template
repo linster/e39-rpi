@@ -1,0 +1,9 @@
+imageConf {
+    hostname="e39rpi"
+    username="e39"
+    password="e39_password"
+    
+    wifinetwork="ssid"
+    wifipass="pass"
+
+}

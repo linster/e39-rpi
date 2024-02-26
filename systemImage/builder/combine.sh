@@ -37,7 +37,7 @@ umount mnt
 #Start = 8192, end = 532479, sectors = 524288
 mount -o loop,offset=$((512*8192)) 2021-10-30-raspios-bullseye-arm64-lite.img mntboot/
 
-cp config.400x234.menu.ntsc.txt mntboot/config.txt
+cp config.400x234.menu.ntsc.shorter.txt mntboot/config.txt
 cp wpa_supplicant.conf mntboot/wpa_supplicant.conf
 cp vga565.dtbo mntboot/overlays/vga565.dtbo
 

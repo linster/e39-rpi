@@ -16,7 +16,7 @@ ADD combine.sh \
 	*.jar \
 	*.conf \
 	jwmrc \
-	config_txt/config.400x234.menu.ntsc.txt \
+	config_txt/config.400x234.menu.ntsc.shorter.txt \
 	wpa_supplicant.conf \
 	video_overlay/vga565.dtbo \
 	./
