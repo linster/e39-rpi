@@ -18,5 +18,6 @@ ADD combine.sh \
 	jwmrc \
 	config_txt/config.400x234.menu.ntsc.txt \
 	wpa_supplicant.conf \
+	video_overlay/vga565.dtbo \
 	./
 CMD [ "./combine.sh" ]
