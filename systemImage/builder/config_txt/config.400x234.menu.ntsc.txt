@@ -95,12 +95,6 @@ dtoverlay=pwm-2chan,pin=18,func=2,pin2=19,func2=2
 dtparam=audio=on
 
 [all]
-#overscan_left=48
-#overscan_right=-48
-#overscan_top=16
-#overscan_bottom=-64
-#sdtv_aspect=3
-#test_mode=0
 
 dtparam=i2c_arm=off
 #gpio=2-8,12-17,20-24=a2
@@ -110,10 +104,7 @@ display_default_lcd=1
 
 dtoverlay=vga565
 dpi_output_format=0x13
-#enable_dpi_lcd=1
-#display_default_lcd=1
-#dpi_group=2
-#dpi_mode=9
+
 
 dpi_group=2
 dpi_mode=87
