@@ -2,4 +2,7 @@
 mnt/
 *zip
 wpa_supplicant.conf
-intemediate/
+intemediate/*
+intemediate/boot/
+intemediate/e39/
+image.conf

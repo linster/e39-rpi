@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<!-- saved from url=(0083)https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/ -->
+<html lang="en" style="color-scheme: light;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>
+  Headless WiFi setup on Raspberry Pi OS "Bookworm" without the Raspberry Pi Imager · Sara Zan
+</title>
+  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Sara Zan">
+<meta name="description" content="Setting up a Raspberry Pi headless without the Raspberry Pi Imager used to be a fairly simple process for the average Linux user, to the point where a how-to and a few searches on the Raspberry Pi forums would sort the process out. After flashing the image with dd, creating ssh in the boot partition and populating wpa_supplicant.conf was normally enough to get started.
+However with the recently released Raspberry Pi OS 12 “Bookworm” this second step doesn’t work anymore and the only recommendation that users receive is to “just use the Raspberry Pi Imager” (like here).">
+<meta name="keywords" content="blog,developer,personal,python,llm,nlp,swe,software-engineering,open-source">
+
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Headless WiFi setup on Raspberry Pi OS &quot;Bookworm&quot; without the Raspberry Pi Imager">
+<meta name="twitter:description" content="Setting up a Raspberry Pi headless without the Raspberry Pi Imager used to be a fairly simple process for the average Linux user, to the point where a how-to and a few searches on the Raspberry Pi forums would sort the process out. After flashing the image with dd, creating ssh in the boot partition and populating wpa_supplicant.conf was normally enough to get started.
+However with the recently released Raspberry Pi OS 12 “Bookworm” this second step doesn’t work anymore and the only recommendation that users receive is to “just use the Raspberry Pi Imager” (like here).">
+
+<meta property="og:title" content="Headless WiFi setup on Raspberry Pi OS &quot;Bookworm&quot; without the Raspberry Pi Imager">
+<meta property="og:description" content="Setting up a Raspberry Pi headless without the Raspberry Pi Imager used to be a fairly simple process for the average Linux user, to the point where a how-to and a few searches on the Raspberry Pi forums would sort the process out. After flashing the image with dd, creating ssh in the boot partition and populating wpa_supplicant.conf was normally enough to get started.
+However with the recently released Raspberry Pi OS 12 “Bookworm” this second step doesn’t work anymore and the only recommendation that users receive is to “just use the Raspberry Pi Imager” (like here).">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2024-01-06T00:00:00+00:00">
+<meta property="article:modified_time" content="2024-01-06T00:00:00+00:00">
+
+
+
+
+
+<meta name="msvalidate.01" content="CD2BB9B57B16AF914327870432D856C1">
+<meta name="yandex-verification" content="a886d3d5d2b57cb5">
+
+
+<link rel="canonical" href="https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/">
+
+
+<link rel="preload" href="https://www.zansara.dev/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin="">
+
+
+  
+  
+  <link rel="stylesheet" href="./Headless WiFi setup on Raspberry Pi OS _Bookworm_ without the Raspberry Pi Imager · Sara Zan_files/coder.min.dd36d58866601da945649d13fee476efead0f6a28812487d80df0d774ed551e0.css" integrity="sha256-3TbViGZgHalFZJ0T/uR27+rQ9qKIEkh9gN8Nd07VUeA=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="./Headless WiFi setup on Raspberry Pi OS _Bookworm_ without the Raspberry Pi Imager · Sara Zan_files/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen">
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://www.zansara.dev/favicon.png" sizes="any">
+<link rel="icon" type="image/png" href="https://www.zansara.dev/favicon.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://www.zansara.dev/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://www.zansara.dev/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.zansara.dev/favicon.png">
+
+<link rel="manifest" href="https://www.zansara.dev/site.webmanifest">
+<link rel="mask-icon" href="https://www.zansara.dev/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+
+  
+  <meta name="image" content="/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/cover.png">
+  <meta name="og:image" content="/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/cover.png">
+  <meta name="twitter:image" content="/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/cover.png">
+  
+
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link href="./Headless WiFi setup on Raspberry Pi OS _Bookworm_ without the Raspberry Pi Imager · Sara Zan_files/css2" rel="stylesheet"> 
+
+  <script data-goatcounter="https://zansaradev.goatcounter.com/count" async="" src="./Headless WiFi setup on Raspberry Pi OS _Bookworm_ without the Raspberry Pi Imager · Sara Zan_files/count.js"></script>
+</head>
+
+
+
+
+
+
+<body class="colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://www.zansara.dev/">
+      Home
+    </a>
+    
+      <input type="checkbox" id="menu-toggle">
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://www.zansara.dev/about">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://www.zansara.dev/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://www.zansara.dev/projects/">Projects</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://www.zansara.dev/publications/">Publications</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://www.zansara.dev/talks/">Talks</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://www.zansara.dev/tags/">Tags</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://zansaradev.goatcounter.com/">Stats</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/">
+              Headless WiFi setup on Raspberry Pi OS "Bookworm" without the Raspberry Pi Imager
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-01-06T00:00:00Z">
+                January 6, 2024
+              </time>
+            </span>
+            
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://www.zansara.dev/tags/raspberry-pi/">Raspberry Pi</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://www.zansara.dev/tags/bookworm/">Bookworm</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://www.zansara.dev/tags/wifi/">WiFi</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://www.zansara.dev/tags/network-manager/">Network Manager</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://www.zansara.dev/tags/raspberry-pi-os/">Raspberry Pi OS</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://www.zansara.dev/tags/bash/">Bash</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://www.zansara.dev/tags/raspberry-pi-imager/">Raspberry Pi Imager</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+          <img style="width:100%;" src="./Headless WiFi setup on Raspberry Pi OS _Bookworm_ without the Raspberry Pi Imager · Sara Zan_files/cover.png" alt="Featured image">
+        
+        <p>Setting up a Raspberry Pi headless without the Raspberry Pi Imager used to be a fairly simple process for the average Linux user, to the point where a how-to and a few searches on the Raspberry Pi forums would sort the process out. After flashing the image with <code>dd</code>, creating <code>ssh</code> in the boot partition and populating <code>wpa_supplicant.conf</code> was normally enough to get started.</p>
+<p>However with the <a href="https://www.raspberrypi.com/news/bookworm-the-new-version-of-raspberry-pi-os/" class="external-link" target="_blank" rel="noopener">recently released Raspberry Pi OS 12 “Bookworm”</a> this second step <a href="https://www.raspberrypi.com/documentation/computers/configuration.html#connect-to-a-wireless-network" class="external-link" target="_blank" rel="noopener">doesn’t work anymore</a> and the only recommendation that users receive is to “just use the Raspberry Pi Imager” (like <a href="https://github.com/raspberrypi/bookworm-feedback/issues/72" class="external-link" target="_blank" rel="noopener">here</a>).</p>
+<p>But what does the Imager really do to configure the OS? Is it really that complex that it requires downloading a dedicated installer?</p>
+<p>In this post I’m going to find out first how to get the OS connect to the WiFi without Imager, and then I’m going to dig a bit deeper to find out why such advice is given and how the Imager performs this configuration step.</p>
+<h1 id="network-manager">
+  Network Manager
+  <a class="heading-link" href="https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/#network-manager">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>In the <a href="https://www.raspberrypi.com/news/bookworm-the-new-version-of-raspberry-pi-os/" class="external-link" target="_blank" rel="noopener">announcement</a> of the new OS release, one of the highlights is the move to <a href="https://networkmanager.dev/" class="external-link" target="_blank" rel="noopener">NetworkManager</a> as the default mechanism to deal with networking. While this move undoubtely brings many advantages, it is the reason why the classic technique of dropping a <code>wpa_supplicant.conf</code> file under <code>/etc/wpa_supplicant/</code> no longer works.</p>
+<p>The good news is that also NetworkManager can be manually configured with a text file. The file needs to be called <code>SSID.nmconnection</code> (replace <code>SSID</code> with your network’s SSID) and placed under <code>/etc/NetworkManager/system-connections/</code> in the Pi’s <code>rootfs</code> partition.</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-toml" data-lang="toml"><span style="display:flex;"><span>[connection]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>id=SSID
+</span></span><span style="display:flex;"><span>uuid= <span style="color:#8b949e;font-style:italic"># random UUID in the format 11111111-1111-1111-1111-111111111111</span>
+</span></span><span style="display:flex;"><span>type=wifi
+</span></span><span style="display:flex;"><span>autoconnect=<span style="color:#79c0ff">true</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[wifi]
+</span></span><span style="display:flex;"><span>mode=infrastructure
+</span></span><span style="display:flex;"><span>ssid=SSID
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[wifi-security]
+</span></span><span style="display:flex;"><span>auth-alg=open
+</span></span><span style="display:flex;"><span>key-mgmt=wpa-psk
+</span></span><span style="display:flex;"><span>psk=PASSWORD
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[ipv4]
+</span></span><span style="display:flex;"><span>method=auto
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[ipv6]
+</span></span><span style="display:flex;"><span>method=auto
+</span></span></code></pre></div><p>(replace <code>SSID</code> and <code>PASSWORD</code> with your wifi network’s SSID and password). <a href="https://developer-old.gnome.org/NetworkManager/stable/nm-settings-keyfile.html" class="external-link" target="_blank" rel="noopener">Here</a> you can find the full syntax for this file.</p>
+<p>You’ll need also to configure its access rights as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo chmod -R <span style="color:#a5d6ff">600</span> &lt;path-to-rootfs&gt;/etc/NetworkManager/system-connections/SSID.nmconnection
+</span></span><span style="display:flex;"><span>sudo chown -R root:root &lt;path-to-rootfs&gt;/etc/NetworkManager/system-connections/SSID.nmconnection
+</span></span></code></pre></div><p>Once this is done, let’s not forget to create an empty <code>ssh</code> file in the <code>bootfs</code> partition to enable the SSH server:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>touch &lt;path-to-bootfs&gt;/ssh
+</span></span></code></pre></div><p>and, as it was already the case in Bullseye to <a href="https://www.raspberrypi.com/news/raspberry-pi-bullseye-update-april-2022/" class="external-link" target="_blank" rel="noopener">configure the default user</a> with <code>userconfig.txt</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>echo <span style="color:#a5d6ff">'mypassword'</span> | openssl passwd -6 -stdin | awk <span style="color:#a5d6ff">'{print "myuser:"$1}'</span> &gt; &lt;path-to-bootfs&gt;/userconfig.txt
+</span></span></code></pre></div><p>So far it doesn’t seem too complicated. However, interestingly, this is <strong>not</strong> what the Raspberry Pi Imager does, because if you use it to flash the image and check the result, these files are nowhere to be found. Is there a better way to go about this?</p>
+<h1 id="raspberry-pi-imager">
+  Raspberry Pi Imager
+  <a class="heading-link" href="https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/#raspberry-pi-imager">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>To find out what the Imager does, my first idea was to have a peek at its <a href="https://github.com/raspberrypi/rpi-imager" class="external-link" target="_blank" rel="noopener">source code</a>. Being a Qt application the source might be quite intimidating, but with a some searching it’s possible to locate this interesting <a href="https://github.com/raspberrypi/rpi-imager/blob/6f6a90adbb88c135534d5f20cc2a10f167ea43a3/src/imagewriter.cpp#L1214" class="external-link" target="_blank" rel="noopener">snippet</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff7b72">void</span> ImageWriter<span style="color:#ff7b72;font-weight:bold">::</span>setImageCustomization(<span style="color:#ff7b72">const</span> QByteArray <span style="color:#ff7b72;font-weight:bold">&amp;</span>config, <span style="color:#ff7b72">const</span> QByteArray <span style="color:#ff7b72;font-weight:bold">&amp;</span>cmdline, <span style="color:#ff7b72">const</span> QByteArray <span style="color:#ff7b72;font-weight:bold">&amp;</span>firstrun, <span style="color:#ff7b72">const</span> QByteArray <span style="color:#ff7b72;font-weight:bold">&amp;</span>cloudinit, <span style="color:#ff7b72">const</span> QByteArray <span style="color:#ff7b72;font-weight:bold">&amp;</span>cloudinitNetwork)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    _config <span style="color:#ff7b72;font-weight:bold">=</span> config;
+</span></span><span style="display:flex;"><span>    _cmdline <span style="color:#ff7b72;font-weight:bold">=</span> cmdline;
+</span></span><span style="display:flex;"><span>    _firstrun <span style="color:#ff7b72;font-weight:bold">=</span> firstrun;
+</span></span><span style="display:flex;"><span>    _cloudinit <span style="color:#ff7b72;font-weight:bold">=</span> cloudinit;
+</span></span><span style="display:flex;"><span>    _cloudinitNetwork <span style="color:#ff7b72;font-weight:bold">=</span> cloudinitNetwork;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    qDebug() <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> <span style="color:#a5d6ff">"Custom config.txt entries:"</span> <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> config;
+</span></span><span style="display:flex;"><span>    qDebug() <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> <span style="color:#a5d6ff">"Custom cmdline.txt entries:"</span> <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> cmdline;
+</span></span><span style="display:flex;"><span>    qDebug() <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> <span style="color:#a5d6ff">"Custom firstuse.sh:"</span> <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> firstrun;
+</span></span><span style="display:flex;"><span>    qDebug() <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> <span style="color:#a5d6ff">"Cloudinit:"</span> <span style="color:#ff7b72;font-weight:bold">&lt;&lt;</span> cloudinit;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>I’m no C++ expert, but this function tells me a few things:</p>
+<ol>
+<li>The Imager writes the configuration in these files: <code>config.txt</code>, <code>cmdline.txt</code>, <code>firstuse.sh</code> (we’ll soon figure out this is a typo: the file is actually called <code>firstrun.sh</code>).</li>
+<li>It also prepares a “Cloudinit” configuration file, but it’s unclear if it writes it and where</li>
+<li>The content of these files is printed to the console as debug output.</li>
+</ol>
+<p>So let’s enable the debug logs and see what they produce:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>rpi-imager --debug
+</span></span></code></pre></div><p>The console stays quiet until I configure the user, password, WiFi and so on in the Imager, at which point it starts printing all the expected configuration files to the console.</p>
+<details>
+<summary><i>Click here to see the full output</i></summary>
+<pre tabindex="0"><code>Custom config.txt entries: ""
+Custom cmdline.txt entries: " cfg80211.ieee80211_regdom=PT"
+Custom firstuse.sh: "#!/bin/bash
+
+set +e
+
+CURRENT_HOSTNAME=`cat /etc/hostname | tr -d " \    \
+\\r"`
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname raspberrypi
+else
+   echo raspberrypi &gt;/etc/hostname
+   sed -i "s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\    raspberrypi/g" /etc/hosts
+fi
+FIRSTUSER=`getent passwd 1000 | cut -d: -f1`
+FIRSTUSERHOME=`getent passwd 1000 | cut -d: -f6`
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh
+else
+   systemctl enable ssh
+fi
+if [ -f /usr/lib/userconf-pi/userconf ]; then
+   /usr/lib/userconf-pi/userconf 'myuser' '&lt;hash-of-the-user-password&gt;'
+else
+   echo "$FIRSTUSER:"'&lt;hash-of-the-user-password&gt;' | chpasswd -e
+   if [ "$FIRSTUSER" != "myuser" ]; then
+      usermod -l "myuser" "$FIRSTUSER"
+      usermod -m -d "/home/myuser" "myuser"
+      groupmod -n "myuser" "$FIRSTUSER"
+      if grep -q "^autologin-user=" /etc/lightdm/lightdm.conf ; then
+         sed /etc/lightdm/lightdm.conf -i -e "s/^autologin-user=.*/autologin-user=myuser/"
+      fi
+      if [ -f /etc/systemd/system/getty@tty1.service.d/autologin.conf ]; then
+         sed /etc/systemd/system/getty@tty1.service.d/autologin.conf -i -e "s/$FIRSTUSER/myuser/"
+      fi
+      if [ -f /etc/sudoers.d/010_pi-nopasswd ]; then
+         sed -i "s/^$FIRSTUSER /myuser /" /etc/sudoers.d/010_pi-nopasswd
+      fi
+   fi
+fi
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan 'MY-SSID' 'MY-PASSWORD' 'PT'
+else
+cat &gt;/etc/wpa_supplicant/wpa_supplicant.conf &lt;&lt;'WPAEOF'
+country=PT
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+ap_scan=1
+
+update_config=1
+network={
+    ssid="MY-SSID"
+    psk=MY-PASSWORD
+}
+
+WPAEOF
+   chmod 600 /etc/wpa_supplicant/wpa_supplicant.conf
+   rfkill unblock wifi
+   for filename in /var/lib/systemd/rfkill/*:wlan ; do
+       echo 0 &gt; $filename
+   done
+fi
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_keymap 'us'
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_timezone 'Europe/Lisbon'
+else
+   rm -f /etc/localtime
+   echo "Europe/Lisbon" &gt;/etc/timezone
+   dpkg-reconfigure -f noninteractive tzdata
+cat &gt;/etc/default/keyboard &lt;&lt;'KBEOF'
+XKBMODEL="pc105"
+XKBLAYOUT="us"
+XKBVARIANT=""
+XKBOPTIONS=""
+
+KBEOF
+   dpkg-reconfigure -f noninteractive keyboard-configuration
+fi
+rm -f /boot/firstrun.sh
+sed -i 's| systemd.run.*||g' /boot/cmdline.txt
+exit 0
+"
+
+Cloudinit: "hostname: raspberrypi
+manage_etc_hosts: true
+packages:
+- avahi-daemon
+apt:
+  conf: |
+    Acquire {
+      Check-Date "false";
+    };
+
+users:
+- name: myuser
+  groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
+  shell: /bin/bash
+  lock_passwd: false
+  passwd: &lt;hash-of-the-user-password&gt;
+
+ssh_pwauth: true
+
+timezone: Europe/Lisbon
+runcmd:
+- localectl set-x11-keymap "us" pc105
+- setupcon -k --force || true
+
+
+"
+</code></pre></details>
+<p>Among these the most interesting file is <code>firstrun.sh</code>, which we can quickly locate in the <code>bootfs</code> partition. Here is its content:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8b949e;font-weight:bold;font-style:italic">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#8b949e;font-weight:bold;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>set +e
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">CURRENT_HOSTNAME</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">`</span>cat /etc/hostname | tr -d <span style="color:#a5d6ff">" \    \
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">\\r"</span><span style="color:#a5d6ff">`</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /usr/lib/raspberrypi-sys-mods/imager_custom <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>   /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname raspberrypi
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">else</span>
+</span></span><span style="display:flex;"><span>   echo raspberrypi &gt;/etc/hostname
+</span></span><span style="display:flex;"><span>   sed -i <span style="color:#a5d6ff">"s/127.0.1.1.*</span><span style="color:#79c0ff">$CURRENT_HOSTNAME</span><span style="color:#a5d6ff">/127.0.1.1\    raspberrypi/g"</span> /etc/hosts
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">FIRSTUSER</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">`</span>getent passwd <span style="color:#a5d6ff">1000</span> | cut -d: -f1<span style="color:#a5d6ff">`</span>
+</span></span><span style="display:flex;"><span><span style="color:#79c0ff">FIRSTUSERHOME</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">`</span>getent passwd <span style="color:#a5d6ff">1000</span> | cut -d: -f6<span style="color:#a5d6ff">`</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /usr/lib/raspberrypi-sys-mods/imager_custom <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>   /usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">else</span>
+</span></span><span style="display:flex;"><span>   systemctl enable ssh
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /usr/lib/userconf-pi/userconf <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>   /usr/lib/userconf-pi/userconf <span style="color:#a5d6ff">'myuser'</span> <span style="color:#a5d6ff">'&lt;hash-of-the-user-password&gt;'</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">else</span>
+</span></span><span style="display:flex;"><span>   echo <span style="color:#a5d6ff">"</span><span style="color:#79c0ff">$FIRSTUSER</span><span style="color:#a5d6ff">:"</span><span style="color:#a5d6ff">'&lt;hash-of-the-user-password&gt;'</span> | chpasswd -e
+</span></span><span style="display:flex;"><span>   <span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> <span style="color:#a5d6ff">"</span><span style="color:#79c0ff">$FIRSTUSER</span><span style="color:#a5d6ff">"</span> !<span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">"myuser"</span> <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>      usermod -l <span style="color:#a5d6ff">"myuser"</span> <span style="color:#a5d6ff">"</span><span style="color:#79c0ff">$FIRSTUSER</span><span style="color:#a5d6ff">"</span>
+</span></span><span style="display:flex;"><span>      usermod -m -d <span style="color:#a5d6ff">"/home/myuser"</span> <span style="color:#a5d6ff">"myuser"</span>
+</span></span><span style="display:flex;"><span>      groupmod -n <span style="color:#a5d6ff">"myuser"</span> <span style="color:#a5d6ff">"</span><span style="color:#79c0ff">$FIRSTUSER</span><span style="color:#a5d6ff">"</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff7b72">if</span> grep -q <span style="color:#a5d6ff">"^autologin-user="</span> /etc/lightdm/lightdm.conf ; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>         sed /etc/lightdm/lightdm.conf -i -e <span style="color:#a5d6ff">"s/^autologin-user=.*/autologin-user=myuser/"</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /etc/systemd/system/getty@tty1.service.d/autologin.conf <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>         sed /etc/systemd/system/getty@tty1.service.d/autologin.conf -i -e <span style="color:#a5d6ff">"s/</span><span style="color:#79c0ff">$FIRSTUSER</span><span style="color:#a5d6ff">/myuser/"</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /etc/sudoers.d/010_pi-nopasswd <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>         sed -i <span style="color:#a5d6ff">"s/^</span><span style="color:#79c0ff">$FIRSTUSER</span><span style="color:#a5d6ff"> /myuser /"</span> /etc/sudoers.d/010_pi-nopasswd
+</span></span><span style="display:flex;"><span>      <span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /usr/lib/raspberrypi-sys-mods/imager_custom <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>   /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan <span style="color:#a5d6ff">'MY-SSID'</span> <span style="color:#a5d6ff">'MY-PASSWORD'</span> <span style="color:#a5d6ff">'PT'</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">else</span>
+</span></span><span style="display:flex;"><span>cat &gt;/etc/wpa_supplicant/wpa_supplicant.conf <span style="color:#a5d6ff">&lt;&lt;'WPAEOF'
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">country=PT
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">ap_scan=1
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">update_config=1
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">network={
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    ssid="MY-SSID"
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    psk=MY-PASSWORD
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">}
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">WPAEOF</span>
+</span></span><span style="display:flex;"><span>   chmod <span style="color:#a5d6ff">600</span> /etc/wpa_supplicant/wpa_supplicant.conf
+</span></span><span style="display:flex;"><span>   rfkill unblock wifi
+</span></span><span style="display:flex;"><span>   <span style="color:#ff7b72">for</span> filename in /var/lib/systemd/rfkill/*:wlan ; <span style="color:#ff7b72">do</span>
+</span></span><span style="display:flex;"><span>       echo <span style="color:#a5d6ff">0</span> &gt; <span style="color:#79c0ff">$filename</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff7b72">done</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /usr/lib/raspberrypi-sys-mods/imager_custom <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>   /usr/lib/raspberrypi-sys-mods/imager_custom set_keymap <span style="color:#a5d6ff">'us'</span>
+</span></span><span style="display:flex;"><span>   /usr/lib/raspberrypi-sys-mods/imager_custom set_timezone <span style="color:#a5d6ff">'Europe/Lisbon'</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">else</span>
+</span></span><span style="display:flex;"><span>   rm -f /etc/localtime
+</span></span><span style="display:flex;"><span>   echo <span style="color:#a5d6ff">"Europe/Lisbon"</span> &gt;/etc/timezone
+</span></span><span style="display:flex;"><span>   dpkg-reconfigure -f noninteractive tzdata
+</span></span><span style="display:flex;"><span>cat &gt;/etc/default/keyboard <span style="color:#a5d6ff">&lt;&lt;'KBEOF'
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">XKBMODEL="pc105"
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">XKBLAYOUT="us"
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">XKBVARIANT=""
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">XKBOPTIONS=""
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">KBEOF</span>
+</span></span><span style="display:flex;"><span>   dpkg-reconfigure -f noninteractive keyboard-configuration
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span>rm -f /boot/firstrun.sh
+</span></span><span style="display:flex;"><span>sed -i <span style="color:#a5d6ff">'s| systemd.run.*||g'</span> /boot/cmdline.txt
+</span></span><span style="display:flex;"><span>exit <span style="color:#a5d6ff">0</span>
+</span></span></code></pre></div><details>
+<summary> <i>Side note: how does the OS know that it should run this file on  its first boot? </i></summary>
+<p>Imager also writes a file called <code>cmdline.txt</code> in the boot partition, which contains the following:</p>
+<pre tabindex="0"><code>console=serial0,115200 console=tty1 root=PARTUUID=57c84f67-02 rootfstype=ext4 fsck.repair=yes rootwait quiet init=/usr/lib/raspberrypi-sys-mods/firstboot cfg80211.ieee80211_regdom=PT systemd.run=/boot/firstrun.sh systemd.run_success_action=reboot systemd.unit=kernel-command-line.target
+</code></pre><p>Note the reference to <code>/boot/firstrun.sh</code>. If you plan to implement your own <code>firstrun.sh</code> file and want to change its name, don’t forget to modify this line as well.</p>
+</details>
+<p>That’s a lot of Bash in one go, but upon inspection one can spot a recurring pattern. For example, when setting the hostname, it does this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> -f /usr/lib/raspberrypi-sys-mods/imager_custom <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>   /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname raspberrypi
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">else</span>
+</span></span><span style="display:flex;"><span>   echo raspberrypi &gt;/etc/hostname
+</span></span><span style="display:flex;"><span>   sed -i <span style="color:#a5d6ff">"s/127.0.1.1.*</span><span style="color:#79c0ff">$CURRENT_HOSTNAME</span><span style="color:#a5d6ff">/127.0.1.1\    raspberrypi/g"</span> /etc/hosts
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">fi</span>
+</span></span></code></pre></div><p>The script clearly messages that there is a “preferred” way to set the hostname: to use <code>/usr/lib/raspberrypi-sys-mods/imager_custom set_hostname [NAME]</code>. Only if this executable is not available, then it falls back to the “traditional” way of setting the hostname by editing <code>/etc/hosts</code>.</p>
+<p>The same patterns repeat a few times to perform the following operations:</p>
+<ul>
+<li>set the hostname (<code>/usr/lib/raspberrypi-sys-mods/imager_custom set_hostname [NAME]</code>)</li>
+<li>enable ssh (<code>/usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh</code>)</li>
+<li>configure the user (<code>/usr/lib/userconf-pi/userconf [USERNAME] [HASHED-PASSWORD]</code>)</li>
+<li>configure the WiFi (<code>/usr/lib/raspberrypi-sys-mods/imager_custom set_wlan [MY-SSID [MY-PASSWORD] [2-LETTER-COUNTRY-CODE]</code>)</li>
+<li>set the keyboard layout (<code>/usr/lib/raspberrypi-sys-mods/imager_custom set_keymap [CODE]</code>)</li>
+<li>set the timezone (<code>/usr/lib/raspberrypi-sys-mods/imager_custom set_timezone [TIMEZONE-NAME]</code>)</li>
+</ul>
+<p>It seems like using <code>raspberrypi-sys-mods</code> to configure the OS at the first boot is the way to go in this RPi OS version, and it might be true in future versions as well. There are <a href="https://github.com/RPi-Distro/raspberrypi-sys-mods/issues/82#issuecomment-1779109991" class="external-link" target="_blank" rel="noopener">hints</a> that the Raspberry PI OS team is going to move to <a href="https://cloudinit.readthedocs.io/en/latest/index.html" class="external-link" target="_blank" rel="noopener"><code>cloud-init</code></a> in the near future, but for now this seems to be the way that the initial setup is done.</p>
+<h1 id="raspberrypi-sys-mods">
+  raspberrypi-sys-mods
+  <a class="heading-link" href="https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/#raspberrypi-sys-mods">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>So let’s check out what <code>raspberrypi-sys-mods</code> do! The source code can be found here: <a href="https://github.com/RPi-Distro/raspberrypi-sys-mods" class="external-link" target="_blank" rel="noopener">raspberrypi-sys-mods</a>.</p>
+<p>Given that we’re interested in the WiFi configuration, let’s head straight to the <code>imager_custom</code> script (<a href="https://github.com/RPi-Distro/raspberrypi-sys-mods/blob/2e256445b65995f62db80e6a267313275cad51e4/usr/lib/raspberrypi-sys-mods/imager_custom#L97" class="external-link" target="_blank" rel="noopener">here</a>), where we discover that it’s a Bash script which does this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#79c0ff">CONNFILE</span><span style="color:#ff7b72;font-weight:bold">=</span>/etc/NetworkManager/system-connections/preconfigured.nmconnection
+</span></span><span style="display:flex;"><span>  <span style="color:#79c0ff">UUID</span><span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#ff7b72">$(</span>uuid -v4<span style="color:#ff7b72">)</span>
+</span></span><span style="display:flex;"><span>  cat <span style="color:#a5d6ff">&lt;&lt;- EOF &gt;${CONNFILE}
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	[connection]
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	id=preconfigured
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	uuid=${UUID}
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	type=wifi
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	[wifi]
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	mode=infrastructure
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	ssid=${SSID}
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	hidden=${HIDDEN}
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	[ipv4]
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	method=auto
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	[ipv6]
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	addr-gen-mode=default
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	method=auto
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	[proxy]
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">if</span> <span style="color:#ff7b72;font-weight:bold">[</span> ! -z <span style="color:#a5d6ff">"</span><span style="color:#a5d6ff">${</span><span style="color:#79c0ff">PASS</span><span style="color:#a5d6ff">}</span><span style="color:#a5d6ff">"</span> <span style="color:#ff7b72;font-weight:bold">]</span>; <span style="color:#ff7b72">then</span>
+</span></span><span style="display:flex;"><span>    cat <span style="color:#a5d6ff">&lt;&lt;- EOF &gt;&gt;${CONNFILE}
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	[wifi-security]
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	key-mgmt=wpa-psk
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	psk=${PASS}
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">	EOF</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8b949e;font-style:italic"># NetworkManager will ignore nmconnection files with incorrect permissions,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8b949e;font-style:italic"># to prevent Wi-Fi credentials accidentally being world-readable.</span>
+</span></span><span style="display:flex;"><span>  chmod <span style="color:#a5d6ff">600</span> <span style="color:#a5d6ff">${</span><span style="color:#79c0ff">CONNFILE</span><span style="color:#a5d6ff">}</span>
+</span></span></code></pre></div><p>So after all this searching, we’re back to square one. This utility is doing exactly what we’ve done at the start: it writes a NetworkManager configuration file called <code>preconfigured.nmconnection</code> and it fills it in with the information that we’ve provided to the Imager, then changes the permissions to make sure NetworkManager can use it.</p>
+<h1 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="https://www.zansara.dev/posts/2024-01-06-raspberrypi-headless-bookworm-wifi-config/#conclusion">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>It would be great if the Raspberry Pi OS team would expand their documentation to include this information, so that users aren’t left wondering what makes the RPi Imager so special and whether their manual setup is the right way to go or rather a hack that is likely to break. For now it seems like there is one solid good approach to this problem, and we are going to see what is going to change in the next version of the Raspberry Pi OS.</p>
+<p>On this note you should remember that doing a manual configuration of NetworkManager, using the Imager, or using <code>raspberrypi-sys-mods</code> may be nearly identical right now, but when choosing which approach to use for your project you should also keep in mind the maintenance burden that this decision brings.</p>
+<p>Doing a manual configuration is easier on many levels, but only if you don’t intend to support other versions of RPi OS. If you do, or if you expect to migrate when a new version comes out, you should consider doing something similar to what the Imager does: use a <code>firstrun.sh</code> file that tries to use <code>raspberrypi-sys-mods</code> and falls back to a manual configuration only if that executable is missing. That is likely to make migrations easier if the Raspberry Pi OS team should choose once again to modify the way that headless setups work.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+<section class="see-also">
+  
+    
+    
+    
+  
+</section>
+
+
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+      2023 -
+    
+    2024
+     Sara Zan 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &amp; <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="./Headless WiFi setup on Raspberry Pi OS _Bookworm_ without the Raspberry Pi Imager · Sara Zan_files/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+
+</body></html>

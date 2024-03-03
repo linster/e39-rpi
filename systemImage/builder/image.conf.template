@@ -5,5 +5,5 @@ imageConf {
     
     wifinetwork="ssid"
     wifipass="pass"
-
+    wificountry="CA"
 }
