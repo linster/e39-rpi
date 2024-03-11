@@ -2,18 +2,24 @@
 Description=Configure e39 platform on first boot
 DefaultDependencies=no
 Conflicts=shutdown.target
-After=systemd-remount-fs.service network-online.target
-Wants=network-online.target
+After=systemd-remount-fs.service 
+#network-online.target
+#Wants=first-boot-complete.target network-online.target
+Wants=bluetooth.target
+#Wants=multi-user.target
 Before=shutdown.target
 ConditionPathIsReadWrite=/etc
 ConditionPathExists=!/etc/e39/configured
+User=root
+
 
 [Service]
 ExecStart=/var/lib/e39/configure.sh
 ExecStartPost=/usr/bin/touch /etc/e39/configured
-ExecStop=/usr/sbin/reboot
+ExecStopPost=/usr/sbin/reboot
 Type=oneshot
 RemainAfterExit=no
-
+StandardOutput=file:/var/lib/e39/configure.log
+StandardError=file:/var/lib/e39/configure.log.err
 [Install]
 WantedBy=default.target

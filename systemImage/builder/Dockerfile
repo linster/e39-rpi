@@ -11,7 +11,7 @@ WORKDIR /e39
 RUN wget -q https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2023-12-11/2023-12-11-raspios-bookworm-arm64-lite.img.xz
 ADD combine.sh \
 	e39-deps.control \
-	firstboot.service \
+	e39firstboot.service \
 	configure.sh \
 	install-e39.sh \
 	*.deb \

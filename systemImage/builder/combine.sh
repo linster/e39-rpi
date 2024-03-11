@@ -41,7 +41,7 @@ cp version.conf mnt/var/lib/e39
 cp configure.sh mnt/var/lib/e39
 
 
-cp firstboot.service mnt/lib/systemd/system/firstboot.service
+cp e39firstboot.service mnt/lib/systemd/system/e39firstboot.service
 ln -s /lib/systemd/system/firstboot.service mnt/etc/systemd/system/default.target.wants
 
 umount mnt
@@ -53,6 +53,7 @@ cp config.400x234.menu.ntsc.shorter.txt mntboot/config.txt
 
 cp vga565.dtbo mntboot/overlays/vga565.dtbo
 cp ssh mntboot/ssh
+cp userconf.txt mntboot/userconf.txt
 
 
 umount mntboot
