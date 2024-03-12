@@ -151,7 +151,7 @@ class PairingManager @Inject constructor(
             val device = dBusConnectionOwningComponent.getSystemBusConnection().getRemoteObject("org.bluez", _device.path) as Device1
             val btDevice = BluetoothDevice(device, dBusConnectionOwningComponent.getDeviceManager().adapter, _device.path, dBusConnectionOwningComponent.getSystemBusConnection())
 
-            runBlocking {
+            GlobalScope.launch {
                 var result : Boolean? = null
 
                 pinKeyApprove = { result = true }
@@ -173,10 +173,12 @@ class PairingManager @Inject constructor(
                 if (result != true) {
                     throw BluezRejectedException("Rejected $_device with code ${p1?.toString()}")
                 }
+                result = null
             }
             btDevice.isTrusted = true
             //btDevice.connect()
             logger.d("Agent1", "RequestConfirmation Connected.")
+
         }
 
         override fun RequestAuthorization(p0: DBusPath?) {

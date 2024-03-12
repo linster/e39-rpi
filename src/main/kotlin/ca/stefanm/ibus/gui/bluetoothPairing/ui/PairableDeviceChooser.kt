@@ -84,6 +84,8 @@ class PairableDeviceChooser @Inject constructor(
                     TextMenuItem(
                         title = "${device.alias} ; isConnected ${device.isConnected.toCheckBox()} ; isPaired ${device.isPaired.toCheckBox()}",
                         onClicked = {
+                            //TODO We probably end up cancelling the pairing because we complete the flow here.
+                            //TODO because the screen goes away. We actually need to
                             navigationNodeTraverser.setResultAndGoBack(
                                 this@PairableDeviceChooser,
                                 PairableDeviceChooserResult.RequestPairToDevice(device)

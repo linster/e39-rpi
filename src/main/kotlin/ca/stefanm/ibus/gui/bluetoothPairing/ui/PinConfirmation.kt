@@ -14,6 +14,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
 import javax.inject.Inject
 
@@ -60,11 +61,11 @@ class BluetoothPinConfirmationScreen @Inject constructor(
             Column(
                 Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             ) {
-                Text("Do you want to pair with this device?", color = Color.White, fontSize = 28.sp)
-                Text("", color = Color.White, fontSize = 28.sp)
-                Text("Name: ${parameters.phoneName}", color = Color.White, fontSize = 28.sp)
+                Text("Do you want to pair with this device?", color = Color.White, fontSize = 28.sp.halveIfNotPixelDoubled())
+                Text("", color = Color.White, fontSize = 28.sp.halveIfNotPixelDoubled())
+                Text("Name: ${parameters.phoneName}", color = Color.White, fontSize = 28.sp.halveIfNotPixelDoubled())
 
-                Text(parameters.pin, color = Color.White, fontSize = 64.sp, textAlign = TextAlign.Center)
+                Text(parameters.pin, color = Color.White, fontSize = 64.sp.halveIfNotPixelDoubled(), textAlign = TextAlign.Center)
             }
         }
     }

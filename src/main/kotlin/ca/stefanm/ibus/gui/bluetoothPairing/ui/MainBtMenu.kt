@@ -11,6 +11,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -20,7 +21,8 @@ import javax.inject.Inject
 @AutoDiscover
 class MainBtMenu @Inject constructor(
     private val pairingManager: PairingManager,
-    private val configurablePlatform: ConfigurablePlatform
+    private val configurablePlatform: ConfigurablePlatform,
+    private val logger: Logger
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -29,6 +31,7 @@ class MainBtMenu @Inject constructor(
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { incomingResult ->
 
         if (incomingResult != null && incomingResult.result is UiResult) {
+            logger.i("MainBtMenu", "incomingResult is ${incomingResult}")
             pairingManager.onUiResult(incomingResult.result)
         }
 

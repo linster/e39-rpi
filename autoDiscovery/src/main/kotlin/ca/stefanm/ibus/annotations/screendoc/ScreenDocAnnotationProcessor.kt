@@ -112,6 +112,21 @@ class ScreenDocAnnotationProcessor : AbstractProcessor() {
 
 
         val upstreamCopy = upstream.toMutableMap()
+
+        val rawLinksWithDuplicates = mutableListOf<RawLink>()
+
+        val navToLinks = env.getElementsAnnotatedWith(ScreenDoc.NavigateTo::class.java)
+
+        //env.getElementsAnnotatedWith(ScreenDoc::class.java).map { it.getAnnotation(ScreenDoc::class.java) }.filter { it.navigatesTo.isNotEmpty() }
+
+        val screensNamesWithNavigateTo = env.getElementsAnnotatedWith(ScreenDoc::class.java)
+            .map { it.getAnnotation(ScreenDoc::class.java) }
+            .filter { it.navigatesTo.isNotEmpty() }
+            .associateWith { it.navigatesTo }
+            .mapKeys { it.key.screenName }
+
+        //We just need to build up a list of rawLinks
+
         val links = upstream.keys
             .map { it to it.getAnnotationsByType(ScreenDoc.NavigateTo::class.java) }
             .filter { it.second.isNotEmpty() }
@@ -120,10 +135,15 @@ class ScreenDocAnnotationProcessor : AbstractProcessor() {
 
 
 
-        val navToLinks = env.getElementsAnnotatedWith(ScreenDoc.NavigateTo::class.java)
+
 
         print(navToLinks)
 
         return upstreamCopy
+    }
+
+    fun addGoBackLinks() {
+        //We will take the direct links, see if the target has AllowsGoBack, and if so,
+        //Add a reverse link
     }
 }

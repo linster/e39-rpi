@@ -2,13 +2,14 @@
 <JWM>
 
 <StartupCommand>
-java -jar /var/lib/e39/e39Rpi-linux-x64-1.0.0.jar > /home/pi/hmi.log
+~/e39.sh
 </StartupCommand>
 
 
     <!-- The root menu. -->
     <RootMenu onroot="12">
         <Include>/etc/jwm/debian-menu</Include>
+        <Program icon="terminal.png" label="e39-rpi">~/e39.sh</Program>
         <Program icon="terminal.png" label="Terminal">xterm</Program>
         <Separator/>
         <Program icon="lock.png" label="Lock">
