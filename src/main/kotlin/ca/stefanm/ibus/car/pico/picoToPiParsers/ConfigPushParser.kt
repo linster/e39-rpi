@@ -8,6 +8,8 @@ import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.PicoToPiParserGroup
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.HmiVersion
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
@@ -27,6 +29,7 @@ import javax.inject.Named
 class ConfigPushParser @Inject constructor(
     @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,
     @Named(ApplicationModule.IBUS_COMMS_DEBUG_CHANNEL) private val commsDebugChannel : MutableSharedFlow<IbusCommsDebugMessage>,
+    private val configurationStorage: ConfigurationStorage,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
@@ -71,6 +74,11 @@ class ConfigPushParser @Inject constructor(
             raw,
             parsed
         ))
+
+        parsed.configMessageOrNull?.rpiFwGitCommitHash?.let {
+            configurationStorage.versionConfig[HmiVersion.fwHash] = it
+        }
+
     }
 
 }

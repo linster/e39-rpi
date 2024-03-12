@@ -9,6 +9,9 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.hocon
 import com.uchuhimo.konf.source.hocon.toHocon
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -93,5 +96,20 @@ class ConfigurationStorage @Inject constructor(
 
     fun setBrightnessCompensation(tint : Float) {
         config[E39Config.WindowManagerConfig.brightnessCompensation] = tint
+    }
+
+    fun fwVersionAsFlow() : Flow<String> {
+
+        val sharedFlow = MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 20, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+        val handler = versionConfig.afterSet { item, value ->
+            if (item.name == HmiVersion.fwHash.name) {
+                sharedFlow.tryEmit(versionConfig[HmiVersion.fwHash])
+            }
+        }
+
+        return sharedFlow.onStart {
+            sharedFlow.tryEmit(versionConfig[HmiVersion.fwHash])
+        }.onCompletion { handler.cancel() }
     }
 }

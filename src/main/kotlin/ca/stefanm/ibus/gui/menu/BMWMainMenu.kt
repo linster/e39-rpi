@@ -31,7 +31,6 @@ import javax.inject.Inject
         ScreenDoc.NavigateTo(SettingsRootMenu::class)
     ]
 )
-
 @ScreenDoc.AllowsGoRoot
 @AutoDiscover
 class BMWMainMenu @Inject constructor(

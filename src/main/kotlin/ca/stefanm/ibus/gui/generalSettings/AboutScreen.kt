@@ -4,7 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,20 +15,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.HmiVersion
+import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.lib.messages.IBusMessage
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @ScreenDoc(
     screenName = "AboutScreen",
@@ -38,8 +46,12 @@ import javax.inject.Inject
 @AutoDiscover
 class AboutScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val configurationStorage: ConfigurationStorage
-) : NavigationNode<Nothing> {
+    private val configurationStorage: ConfigurationStorage,
+    @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) val outgoingMessages : Channel<IBusMessage>,
+    private val piToPicoMessageFactory: PiToPicoMessageFactory,
+    private val notificationHub: NotificationHub
+
+    ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = AboutScreen::class.java
@@ -87,6 +99,17 @@ class AboutScreen @Inject constructor(
 
     @Composable
     private fun aboutInfo() {
+
+        LaunchedEffect(Unit) {
+            notificationHub.postNotification(Notification(
+                Notification.NotificationImage.ALERT_OCTAGON,
+                "Requesting firmware version from Pico"
+            ))
+            outgoingMessages.send(piToPicoMessageFactory.configStatusRequest())
+
+        }
+
+
         Box(Modifier.padding(top = 30.dp.halveIfNotPixelDoubled())) {
 
             Column(Modifier
@@ -113,8 +136,12 @@ class AboutScreen @Inject constructor(
                 AboutLabel("https://stefanm.ca")
                 AboutLabel("")
                 AboutLabel("Version 1.0.0")
-                AboutLabel("     HMI: ${configurationStorage.versionConfig[HmiVersion.hmiHash]}")
-                AboutLabel("     OS : ${configurationStorage.versionConfig[HmiVersion.sdHash]}")
+                AboutLabel("      HMI: ${configurationStorage.versionConfig[HmiVersion.hmiHash]}")
+                AboutLabel("      OS : ${configurationStorage.versionConfig[HmiVersion.sdHash]}")
+                AboutLabel("Firmware : ${
+                    configurationStorage.fwVersionAsFlow()
+                        .collectAsState(initial = configurationStorage.versionConfig[HmiVersion.fwHash]).value
+                }")
             }
         }
     }
