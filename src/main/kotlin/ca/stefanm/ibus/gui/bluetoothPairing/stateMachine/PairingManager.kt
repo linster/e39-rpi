@@ -5,7 +5,9 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DBusConnectionOwner
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DeviceListProvider
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
+import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.lib.logging.Logger
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.*
@@ -34,7 +36,8 @@ class PairingManager @Inject constructor(
     private val dBusConnectionOwningComponent: DBusConnectionOwner,
     private val deviceListProvider: DeviceListProvider,
     private val logger: Logger,
-    private val configurationStorage: ConfigurationStorage
+    private val configurationStorage: ConfigurationStorage,
+    private val notificationHub: NotificationHub
 ) {
 
     private companion object {
@@ -151,33 +154,39 @@ class PairingManager @Inject constructor(
             val device = dBusConnectionOwningComponent.getSystemBusConnection().getRemoteObject("org.bluez", _device.path) as Device1
             val btDevice = BluetoothDevice(device, dBusConnectionOwningComponent.getDeviceManager().adapter, _device.path, dBusConnectionOwningComponent.getSystemBusConnection())
 
-            GlobalScope.launch {
-                var result : Boolean? = null
-
-                pinKeyApprove = { result = true }
-                pinKeyDeny = { result = false }
-
-                navigationNodeTraverser.navigateToNodeWithParameters(
-                    BluetoothPinConfirmationScreen::class.java,
-                    BluetoothPinConfirmationScreen.PinConfirmationParameters(
-                        phoneName = btDevice.alias,
-                        pin = p1?.toInt()?.toString(10)?.padStart(6, '0') ?: "null"
-                    )
-                )
-
-                while (result == null) {
-                    yield()
-                }
-
-                logger.d(TAG, "Pin Confirmation result: $result")
-                if (result != true) {
-                    throw BluezRejectedException("Rejected $_device with code ${p1?.toString()}")
-                }
-                result = null
+            pinKeyApprove = {
+                logger.i("Agent1", "pinKeyApprove")
+                btDevice.isTrusted = true
             }
-            btDevice.isTrusted = true
-            //btDevice.connect()
-            logger.d("Agent1", "RequestConfirmation Connected.")
+
+            pinKeyDeny = {
+                val exception = BluezRejectedException("Rejected $_device with code ${p1?.toString()}")
+                logger.e("Pairing Manager", "Rejected pairing", exception)
+                notificationHub.postNotificationBackground(
+                    Notification(
+                        image = Notification.NotificationImage.BLUETOOTH,
+                        topText = "Error, Pairing Rejected",
+                        contentText = "Phone: ${btDevice.alias}",
+                        duration = Notification.NotificationDuration.SHORT
+                    ))
+            }
+
+            val pin = p1?.toInt()?.toString(10)?.padStart(6, '0') ?: "null"
+
+            notificationHub.postNotificationBackground(Notification(
+                image = Notification.NotificationImage.BLUETOOTH,
+                topText = "Pairing Request",
+                contentText = "Pin: ${pin}, Phone: ${btDevice.alias}",
+                duration = Notification.NotificationDuration.LONG
+            ))
+
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                BluetoothPinConfirmationScreen::class.java,
+                BluetoothPinConfirmationScreen.PinConfirmationParameters(
+                    phoneName = btDevice.alias,
+                    pin = pin
+                )
+            )
 
         }
 
