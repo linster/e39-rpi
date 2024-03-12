@@ -55,6 +55,8 @@ whiptail --infobox "Installed X server" 20 40
 # Multimedia
 apt-get install -y install pipewire libspa-0.2-bluetooth pulseaudio-utils
 
+
+
 # Old
 #apt-get install -y --no-install-recommends xserver-xorg xinit git \
 #  gstreamer1.0-x gstreamer1.0-omx gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
