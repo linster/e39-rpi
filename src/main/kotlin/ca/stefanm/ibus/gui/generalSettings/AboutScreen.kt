@@ -124,7 +124,8 @@ class AboutScreen @Inject constructor(
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth(0.8f)
                 )
-                Text("Powered by Linux", Modifier.padding(top = 10.dp.halveIfNotPixelDoubled()), textAlign = TextAlign.Center, color = Color.White)
+                Text("Powered by Linux", Modifier.padding(top = 10.dp.halveIfNotPixelDoubled()),
+                    textAlign = TextAlign.Center, color = Color.White, fontSize = 16.sp.halveIfNotPixelDoubled())
             }
 
 

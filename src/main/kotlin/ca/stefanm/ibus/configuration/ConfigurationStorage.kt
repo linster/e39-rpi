@@ -81,6 +81,8 @@ class ConfigurationStorage @Inject constructor(
                 config
             )
         )
+
+        configurablePlatform.run()
     }
 
     fun clearBMBTPairedPhone() {
@@ -108,9 +110,7 @@ class ConfigurationStorage @Inject constructor(
         val sharedFlow = MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 20, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
         val handler = versionConfig.afterSet { item, value ->
-            if (item.name == HmiVersion.fwHash.name) {
                 sharedFlow.tryEmit(versionConfig[HmiVersion.fwHash])
-            }
         }
 
         return sharedFlow.onStart {

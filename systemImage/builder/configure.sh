@@ -54,7 +54,7 @@ whiptail --infobox "Installed X server" 20 40
 #  bluez libbluetooth3 gstreamer1.0-pulseaudio
 
 # Multimedia
-apt-get install -y --no-install-recommends pipewire libspa-0.2-bluetooth pulseaudio-utils
+apt-get install -y pipewire libspa-0.2-bluetooth pulseaudio-utils wireplumber
 
 
 

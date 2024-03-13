@@ -13,18 +13,15 @@ import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.DBusMap
 import org.freedesktop.dbus.connections.impl.DBusConnection
-import org.freedesktop.dbus.errors.UnknownObject
 import org.freedesktop.dbus.interfaces.Properties
 import java.lang.NullPointerException
 import java.rmi.activation.UnknownObjectException
@@ -60,7 +57,7 @@ class BluetoothService @Inject constructor(
         trackInfoPrinter.onCreate()
         dBusTrackInfoFetcher.onCreate()
         dbusTrackListenerService.onCreate()
-        bluetoothEventDispatcherService.onCreate()
+
         super.onCreate()
     }
 
@@ -69,7 +66,7 @@ class BluetoothService @Inject constructor(
         dbusTrackListenerService.onShutdown()
         dBusTrackInfoFetcher.onShutdown()
         trackInfoPrinter.onShutdown()
-        bluetoothEventDispatcherService.onShutdown()
+
         super.onShutdown()
     }
 
@@ -189,38 +186,3 @@ class DBusTrackInfoFetcher @Inject constructor(
     }
 }
 
-@ConfiguredCarScope
-class BluetoothEventDispatcherService @Inject constructor(
-    @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
-
-    private val dbusReconnector: DbusReconnector,
-    private val logger: Logger,
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
-) : LongRunningService(coroutineScope, parsingDispatcher) {
-
-    var mediaPlayer1: MediaPlayer1? = null
-
-    override suspend fun doWork() {
-        inputEvents.collect {
-            dispatchInputEvent(it)
-        }
-    }
-
-    private fun dispatchInputEvent(event: InputEvent) {
-        if (mediaPlayer1 == null) {
-            logger.w("BT Dispatcher", "Attempting to dispatch to MediaPlayer where it doesn't exist.")
-            mediaPlayer1 = dbusReconnector.reconnect().second
-        }
-        try {
-            when (event) {
-                InputEvent.PrevTrack -> mediaPlayer1?.Previous()
-                InputEvent.NextTrack -> mediaPlayer1?.Next()
-                else -> {}
-            }
-        } catch (e : UnknownObject) {
-            logger.e("BT Dispatcher", "Unknown object?", e)
-        }
-
-    }
-}

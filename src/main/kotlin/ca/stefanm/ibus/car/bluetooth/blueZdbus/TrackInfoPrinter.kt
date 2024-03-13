@@ -1,11 +1,13 @@
 package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
+import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.getAllowedLength
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
+import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
@@ -39,6 +41,11 @@ class CliTrackInfoPrinter @Inject constructor(
     }
 }
 
+@PlatformServiceInfo(
+    name = "ScreenTrackInfoPrinter",
+    description = "Print out the track info to the BMBT"
+)
+@BluetoothServiceGroup
 @ConfiguredCarScope
 class ScreenTrackInfoPrinter @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) private val inputEvents : SharedFlow<InputEvent>,
