@@ -11,6 +11,7 @@ import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
+import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.Notification
@@ -41,7 +42,7 @@ import javax.inject.Named
 @BluetoothServiceGroup
 class BluetoothService @Inject constructor(
     private val configurablePlatform: ConfigurablePlatform,
-    private val onScreenSetupManager: BluetoothOnScreenSetupManager,
+    private val pairedPhone: CarPlatformConfiguration.PairedPhone?,
     private val bluetoothEventDispatcherService: BluetoothEventDispatcherService,
     private val trackInfoPrinter: TrackInfoPrinter,
     private val dBusTrackInfoFetcher: DBusTrackInfoFetcher,
@@ -49,6 +50,7 @@ class BluetoothService @Inject constructor(
     private val dbusConnector: DbusConnector,
     private val dbusReconnector: DbusReconnector,
     private val logger: Logger,
+    private val notificationHub: NotificationHub,
     coroutineScope: CoroutineScope,
     parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
@@ -73,20 +75,14 @@ class BluetoothService @Inject constructor(
 
     override suspend fun doWork() {
 
-        val pairedPhone = with(onScreenSetupManager) {
-            if (!isPhonePaired()) {
-                requestBluetoothSetup()
-            }
-            getPairedPhone()
-        }
-
         if (pairedPhone == null) {
             logger.d("BT", "Don't have a phone, shutting down service")
-            DaggerApplicationComponent.create().notificationHub().postNotification(
+            notificationHub.postNotification(
                 Notification(
                     Notification.NotificationImage.BLUETOOTH,
                     "Stopping Bluetooth Service",
-                    "No phone paired"
+                    "No phone paired",
+                    Notification.NotificationDuration.LONG
                 )
             )
             configurablePlatform.configurablePlatformServiceRunner?.stopByName("BluetoothService")
@@ -94,7 +90,14 @@ class BluetoothService @Inject constructor(
         }
 
         val btPhone = dbusConnector.getDevice(pairedPhone.macAddress)
-        logger.d("BT", "have phone.")
+        logger.d("BT", "have phone. $btPhone")
+        notificationHub.postNotification(
+            Notification(
+                Notification.NotificationImage.BLUETOOTH,
+                "[Startup] Have Phone",
+                "Phone: ${btPhone?.name}"
+            )
+        )
 
         val player = dbusConnector.getPlayer(btPhone)
         bluetoothEventDispatcherService.mediaPlayer1 = player

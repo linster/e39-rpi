@@ -6,6 +6,9 @@ import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.car.platform.Service
 import com.github.hypfvieh.bluetooth.DeviceManager
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import javax.inject.Inject
@@ -16,31 +19,41 @@ class DbusConnector @Inject constructor(
 ) : Service {
 
     lateinit var connection : DBusConnection
-    lateinit var deviceManager: DeviceManager
+    lateinit var deviceManager: DeviceManager //TODO we sometimes get "lateinit property device manager has noot been initalized"
 
     override fun onCreate() {
-        connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM)
-        logger.d("DBUS CONN", "Connected to DBus.")
-        DeviceManager.createInstance(connection.address.rawAddress)
-        deviceManager = DeviceManager.getInstance()
+        runBlocking {
+            connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM)
 
-        logger.d("DBUS CONN", "Created device manager.")
+            logger.d("DBUS CONN", "Connected to DBus.")
+            DeviceManager.createInstance(connection.address.rawAddress)
+            deviceManager = DeviceManager.getInstance()
 
-        //We need to have already paired to the device and connected to it
-        //before we can call getDevice.
-        deviceManager.findBtDevicesByIntrospection(deviceManager.adapter)
+            logger.d("DBUS CONN", "Created device manager.")
+
+            //We need to have already paired to the device and connected to it
+            //before we can call getDevice.
+            //deviceManager.findBtDevicesByIntrospection(deviceManager.adapter)
+        }
     }
 
     override fun onShutdown() {
-        deviceManager.closeConnection()
+        if (::deviceManager.isInitialized) {
+            deviceManager.closeConnection()
+        } else {
+            logger.w("DbusConnector", "onShutdown() ,no deviceManager??")
+        }
         connection.disconnect()
     }
 
-    fun reScanBluetoothDevices() {
-        deviceManager.findBtDevicesByIntrospection(deviceManager.adapter)
-    }
 
     fun getDevice(macAddress: List<Int>) : BluetoothDevice? {
+
+        if (!::deviceManager.isInitialized) {
+            logger.w("DbusConnector", "getDevice() has no deviceManager")
+            return null
+        }
+
         return deviceManager.getDevices(true)
             .filter { it.isConnected }
             .firstOrNull { it.address == macAddress

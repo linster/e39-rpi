@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export PI_IP="192.168.0.22"
-export PI_USER="pi"
+export PI_IP="192.168.0.81"
+export PI_USER="e39"
 export BUILD_PI="true"
 
 ./gradlew clean
@@ -25,7 +25,7 @@ sshpass -f ~/.ssh/pi_pass ssh `echo $PI_USER`@`echo $PI_IP` hocon -f /home/pi/.e
 
 sshpass -f ~/.ssh/pi_pass ssh -t `echo $PI_USER`@`echo $PI_IP` sudo systemctl restart display-manager
 
-sshpass -f ~/.ssh/pi_pass ssh -tt `echo $PI_USER`@`echo $PI_IP` stdbuf -oL tail -f /home/pi/hmi.log
+sshpass -f ~/.ssh/pi_pass ssh -tt `echo $PI_USER`@`echo $PI_IP` stdbuf -oL tail -f /home/e39/hmi.log
 
 
 #sudo systemctl restart display-manager

@@ -103,8 +103,6 @@ class ConfigurablePlatform @Inject constructor(
         serviceListJob = GlobalScope.launch {
             runStatusViewer!!.records.collect { _servicesRunning.value = it }
         }
-
-        run()
     }
 }
 

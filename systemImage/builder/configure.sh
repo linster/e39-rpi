@@ -44,7 +44,8 @@ whiptail --infobox "Installed config reader deps" 20 40
 #X server
 apt-get install -y --no-install-recommends xserver-xorg xinit \
   lightdm realvnc-vnc-server \
-  x11-xserver-utils jwm xterm 
+  x11-xserver-utils jwm xterm fonts-noto fonts-opensymbol \
+  fonts-noto-color-emoji
   
 whiptail --infobox "Installed X server" 20 40
   
@@ -53,7 +54,7 @@ whiptail --infobox "Installed X server" 20 40
 #  bluez libbluetooth3 gstreamer1.0-pulseaudio
 
 # Multimedia
-apt-get install -y install pipewire libspa-0.2-bluetooth pulseaudio-utils
+apt-get install -y --no-install-recommends pipewire libspa-0.2-bluetooth pulseaudio-utils
 
 
 

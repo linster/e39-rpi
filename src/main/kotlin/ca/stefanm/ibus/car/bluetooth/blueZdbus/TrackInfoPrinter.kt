@@ -6,6 +6,7 @@ import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.getAllowedLength
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
+import ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
@@ -24,6 +25,8 @@ interface TrackInfoPrinter : Service {
     suspend fun onNewTrackInfo(track : String, artist : String, album : String)
 }
 
+
+//@CliPrinterServiceGroup
 @ConfiguredCarScope
 class CliTrackInfoPrinter @Inject constructor(
     private val logger: Logger

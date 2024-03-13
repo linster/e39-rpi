@@ -15,11 +15,13 @@ After=systemd-remount-fs.service
 #network-online.target
 #Wants=first-boot-complete.target network-online.target
 Wants=bluetooth.target
+Wants=first-boot-complete.target
+
 #Wants=multi-user.target
 Before=shutdown.target
 ConditionPathIsReadWrite=/etc
 ConditionPathExists=!/etc/e39/configured
-User=root
+
 
 
 [Service]
@@ -28,13 +30,16 @@ ExecStartPost=/usr/bin/touch /etc/e39/configured
 ExecStopPost=/usr/sbin/reboot
 Type=oneshot
 RemainAfterExit=no
+
 TTYReset=yes
-TTYPath=/dev/tty2
+TTYPath=/dev/console
 StandardOutput=tty
 TTYVHangup=yes
 TTYVTDisallocate=yes
+
 StandardError=file:/var/lib/e39/configure.log.err
+User=root
 [Install]
-WantedBy=bluetooth.target
+#WantedBy=bluetooth.target
 #from rhel7
 WantedBy=multi-user.target

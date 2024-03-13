@@ -53,6 +53,11 @@ class ConfigurationStorage @Inject constructor(
         if (!versionFile.exists()) {
             versionConfig.toHocon.toFile(versionFile)
         }
+
+        versionConfig.afterSet { item, value ->
+            logger.d(TAG, "Setting ${item.name} to $value")
+            versionConfig.toHocon.toFile(versionFile)
+        }
     }
 
     fun saveConfigAsFile(filename : String) {

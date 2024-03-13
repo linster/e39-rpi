@@ -176,7 +176,7 @@ class PairingManager @Inject constructor(
             notificationHub.postNotificationBackground(Notification(
                 image = Notification.NotificationImage.BLUETOOTH,
                 topText = "Pairing Request",
-                contentText = "Pin: ${pin}, Phone: ${btDevice.alias}",
+                contentText = "Pin: ${pin}, Phone: ${btDevice.alias} \n Select yes on phone, then on upcoming screen.",
                 duration = Notification.NotificationDuration.LONG
             ))
 
@@ -285,6 +285,10 @@ class PairingManager @Inject constructor(
                         device.pair()
                     } catch (e: DBusExecutionException) {
                         logger.e(TAG, "RequestPairToDevice exception: $e", e)
+//                        if (e.message?.contains("Already Exists", ignoreCase = true) == true) {
+                            device.disconnect()
+
+//                        }
                     }
                 } else {
                     if (!device.isConnected) {

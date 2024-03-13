@@ -109,6 +109,8 @@ class ApplicationModule {
 
 
         private val ibusIngress = MutableSharedFlow<IBusMessage>()
+
+        private val notificationHub : NotificationHub = NotificationHub()
     }
 
     @Provides
@@ -168,4 +170,8 @@ class ApplicationModule {
             logDistributionHub
         )
     }
+
+    @Provides
+    @ApplicationScope
+    fun provideNotificationHub() : NotificationHub = notificationHub
 }
