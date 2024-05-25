@@ -62,20 +62,10 @@ interface MenuItem {
     }
 }
 
-fun String.toMultiTextMenuItems(labelColor: Color? = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE) : List<TextMenuItem> {
-    return this.split('\n').map {
-        TextMenuItem(
-            title = it,
-            labelColor = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
-            isSelectable = false,
-            onClicked = {}
-        )
-    }
-}
 
 data class TextMenuItem(
     val title : String,
-    val labelColor : Color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+    val labelColor : Color? = null,
     override val isSelectable : Boolean = true,
     override val isSelected : Boolean = false,
     override val onClicked : () -> Unit
@@ -93,7 +83,7 @@ data class TextMenuItem(
             boxModifier = boxModifier,
             label = title,
             chipOrientation = chipOrientation,
-            labelColor = labelColor,
+            labelColor = labelColor ?: ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             isSelected = isSelected,
             onClicked = onClicked
         )
@@ -103,7 +93,7 @@ data class TextMenuItem(
 data class CheckBoxMenuItem(
     val title: String,
     val isChecked : Boolean,
-    val labelColor: Color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+    val labelColor: Color? = null,
     override val isSelectable : Boolean = true,
     override val isSelected : Boolean = false,
     override val onClicked : () -> Unit
@@ -113,7 +103,7 @@ data class CheckBoxMenuItem(
             boxModifier = boxModifier,
             label = " ${if (isChecked) "[X]" else "[ ]"} $title",
             chipOrientation = chipOrientation,
-            labelColor = labelColor,
+            labelColor = labelColor ?: ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             isSelected = isSelected,
             onClicked = onClicked
         )

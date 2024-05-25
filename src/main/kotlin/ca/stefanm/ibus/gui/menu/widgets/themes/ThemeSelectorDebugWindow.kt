@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.widgets.themes
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -24,42 +25,54 @@ class ThemeSelectorDebugWindow @Inject constructor(
 ): WindowManager.E39Window {
 
     override val title: String = "Theme Selector"
-    override val size = DpSize(800.dp, 600.dp)
+    override val size = DpSize(800.dp, 800.dp)
     override val tag = this
     override val defaultPosition = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
     override fun content(): @Composable WindowScope.() -> Unit = {
-        NestingCard() {
+        Row {
             NestingCard {
-                NestingCardHeader("HMI Window")
-                Button(onClick = {
-                    windowManager.get().closeHmiMainWindow()
-                }) { Text("Close HMI") }
-                Button(onClick = {
-                    windowManager.get().openHmiMainWindow()
-                }) { Text("Open HMI") }
-            }
-
-
-            NestingCard {
-                NestingCardHeader("Select Theme Preset")
-                Themes.availableThemes.forEach {
+                NestingCard {
+                    NestingCardHeader("HMI Window")
                     Button(onClick = {
-                        themeConfigurationStorage.setTheme(it)
-                    }) { Text(it.friendlyName) }
+                        windowManager.get().closeHmiMainWindow()
+                    }) { Text("Close HMI") }
+                    Button(onClick = {
+                        windowManager.get().openHmiMainWindow()
+                    }) { Text("Open HMI") }
+                }
+
+
+                NestingCard {
+                    NestingCardHeader("Select Theme Preset")
+                    Themes.availableThemes.forEach {
+                        Button(onClick = {
+                            themeConfigurationStorage.setTheme(it)
+                        }) { Text(it.friendlyName) }
+                    }
+                }
+
+                NestingCard {
+                    Button(onClick = {
+                        notificationHub.postNotificationBackground(
+                            Notification(
+                                Notification.NotificationImage.ALERT_CIRCLE,
+                                topText = "Test Notification",
+                                contentText = "This is a notification test thing."
+                            )
+                        )
+                    }) { Text("Post Notification")}
                 }
             }
 
             NestingCard {
                 Button(onClick = {
-                    notificationHub.postNotificationBackground(
-                        Notification(
-                            Notification.NotificationImage.ALERT_CIRCLE,
-                            topText = "Test Notification",
-                            contentText = "This is a notification test thing."
-                        )
-                    )
-                }) { Text("Post Notification")}
+                    themeConfigurationStorage.setPixelDoubleThemesSelectable(false)
+                }) { Text("Hide 2x themes")}
+                Button(onClick = {
+                    themeConfigurationStorage.setPixelDoubleThemesSelectable(true)
+                }) { Text("Show 2x themes")}
+
             }
         }
     }

@@ -2,7 +2,6 @@ package ca.stefanm.ibus.gui.menu.widgets.themes
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
-import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -34,7 +33,7 @@ class ThemeSelectorScreen @Inject constructor(
                     }
                 )
             ) + Themes.availableThemes.filter {
-                if (themeConfigurationStorage.allowSelectPixelDoubledThemes()) {
+                if (themeConfigurationStorage.isPixelDoubleThemesSelectable()) {
                     true
                 } else {
                     !it.isPixelDoubled

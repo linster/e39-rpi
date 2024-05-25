@@ -67,7 +67,7 @@ object SidePanelMenu {
             Modifier
                 .fillMaxSize()
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                .border(width = 4.dp.halveIfNotPixelDoubled(), color = Color(61, 112, 176, 255))
+                .border(width = 4.dp.halveIfNotPixelDoubled(), color = ThemeWrapper.ThemeHandle.current.colors.sideMenuBorder)
                 .shadow(4.dp.halveIfNotPixelDoubled(), RectangleShape)
         ) {
             if (title != null) {

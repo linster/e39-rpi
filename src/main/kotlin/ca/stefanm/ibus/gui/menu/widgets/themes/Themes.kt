@@ -217,6 +217,9 @@ data class Theme(
         val chipColor : Color,
         val chipHighlights : Color,
 
+        // Usually the center of the edge highlight
+        val sideMenuBorder : Color
+
     ) {
         companion object {
             val BmwBlue = Colors(
@@ -224,7 +227,8 @@ data class Theme(
                 textMenuColorAccent = Color(229, 255, 255, 255),
                 selectedColor = Color(240, 189, 176, 255),
                 chipColor = Color(121, 181, 220, 255),
-                chipHighlights = Color.White
+                chipHighlights = Color.White,
+                sideMenuBorder = CenterGradientWithEdgeHighlight.BmwBlueColorList[1]
             )
 
             val BmwBlack = Colors(
@@ -232,15 +236,17 @@ data class Theme(
                 textMenuColorAccent = Color(229, 55, 255, 255),
                 selectedColor = Color(240, 189, 176, 255),
                 chipColor = Color(121, 181, 220, 255),
-                chipHighlights = Color.White
+                chipHighlights = Color.White,
+                sideMenuBorder = CenterGradientWithEdgeHighlight.BmwBlackColorList[1]
             )
 
             val RevolutionOrange = Colors(
                 menuBackground = Color(173, 101, 0, 255),
                 textMenuColorAccent = Color(255, 255, 229, 255),
                 selectedColor = Color(240, 189, 176, 255),
-                chipColor = Color(121, 181, 220, 255),
-                chipHighlights = Color.White
+                chipColor = Color(218, 154, 81, 255),
+                chipHighlights = Color.White,
+                sideMenuBorder = CenterGradientWithEdgeHighlight.RevolutionOrangeColorList[1]
             )
 
             val GooseGreen = Colors(
@@ -248,7 +254,8 @@ data class Theme(
                 textMenuColorAccent = Color(229, 255, 255, 255),
                 selectedColor = Color(240, 189, 176, 255),
                 chipColor = Color(121, 181, 220, 255),
-                chipHighlights = Color.White
+                chipHighlights = Color.White,
+                sideMenuBorder = CenterGradientWithEdgeHighlight.GooseGreenColorList[1]
             )
         }
     }

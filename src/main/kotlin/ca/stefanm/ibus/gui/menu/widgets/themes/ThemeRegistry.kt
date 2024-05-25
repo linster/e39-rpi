@@ -1,7 +1,5 @@
 package ca.stefanm.ibus.gui.menu.widgets.themes
 
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -90,7 +88,11 @@ class ThemeConfigurationStorage @Inject constructor(
         }
     }
 
-    fun allowSelectPixelDoubledThemes() = themeConfig[ThemeConfigSpec.allowSelectPixelDoubledThemes]
+    fun isPixelDoubleThemesSelectable() = themeConfig[ThemeConfigSpec.allowSelectPixelDoubledThemes]
+
+    fun setPixelDoubleThemesSelectable(new : Boolean)  {
+        themeConfig[ThemeConfigSpec.allowSelectPixelDoubledThemes] = new
+    }
 
     fun setTheme(theme: Theme) {
         themeConfig[ThemeConfigSpec.themeName] = theme.configFileName
