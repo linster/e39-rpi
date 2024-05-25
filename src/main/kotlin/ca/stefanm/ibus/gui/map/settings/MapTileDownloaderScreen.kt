@@ -77,7 +77,7 @@ class MapTileDownloaderScreen @Inject constructor(
             fun InfoLabel(text : String, weight : FontWeight = FontWeight.Normal) {
                 Text(
                     text = text,
-                    color = ChipItemColors.TEXT_WHITE,
+                    color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                     fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 20.sp else 11.sp,
                     fontWeight = weight
                 )

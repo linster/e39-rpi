@@ -66,7 +66,7 @@ object SidePanelMenu {
         Column(
             Modifier
                 .fillMaxSize()
-                .background(ChipItemColors.MenuBackground)
+                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                 .border(width = 4.dp.halveIfNotPixelDoubled(), color = Color(61, 112, 176, 255))
                 .shadow(4.dp.halveIfNotPixelDoubled(), RectangleShape)
         ) {
@@ -81,7 +81,7 @@ object SidePanelMenu {
     fun InfoLabel(text : String, weight : FontWeight = FontWeight.Normal) {
         Text(
             text = text,
-            color = ChipItemColors.TEXT_WHITE,
+            color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 18.sp else 9.sp,
             fontWeight = weight
         )

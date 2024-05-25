@@ -6,9 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
-import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toName
 import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
@@ -45,13 +42,6 @@ object ThemeWrapper {
                 themeStorage.setTheme(themeStorage.getStoredTheme())
             }
 
-            val isPixelDoubled = ThemeHandle.current.isPixelDoubled
-//            ProvideTextStyle(
-//                    TextStyle(fontSize = if (isPixelDoubled) 16.sp else 8.sp)
-//            ) {
-//                content()
-//            }
-
             content()
         }
     }
@@ -66,7 +56,9 @@ class ThemeConfigurationStorage @Inject constructor(
 
     private object ThemeConfigSpec : ConfigSpec() {
         val themeOverridesWindowSize by optional(true, "Theme setting for windowsize takes precedence over main conf file")
-        val themeName by optional("BmwBlueDoubledPixels")
+        val themeName by optional(Themes.DEFAULT_THEME_NAME)
+
+        val allowSelectPixelDoubledThemes by optional(true, "Whether the pixel doubled themes are available to select in the UI?")
     }
 
     private val themeConfigFile = File(ConfigurationStorage.e39BaseFolder, "theme.conf")
@@ -98,15 +90,22 @@ class ThemeConfigurationStorage @Inject constructor(
         }
     }
 
+    fun allowSelectPixelDoubledThemes() = themeConfig[ThemeConfigSpec.allowSelectPixelDoubledThemes]
+
     fun setTheme(theme: Theme) {
-        themeConfig[ThemeConfigSpec.themeName] = theme.toName()
+        themeConfig[ThemeConfigSpec.themeName] = theme.configFileName
     }
 
     fun getTheme() : Flow<Theme> {
         return currentTheme
     }
 
-    fun getStoredTheme() : Theme{
-        return themeConfig[ThemeConfigSpec.themeName].toTheme()
+    fun getStoredTheme() : Theme {
+        return try {
+            themeConfig[ThemeConfigSpec.themeName].toTheme()
+        } catch (e : Throwable) {
+            setTheme(Themes.BmwBlueDoubledPixels)
+            getStoredTheme()
+        }
     }
 }

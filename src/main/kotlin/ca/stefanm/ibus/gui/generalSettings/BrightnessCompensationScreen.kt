@@ -74,7 +74,7 @@ class BrightnessCompensationScreen @Inject constructor(
     private fun InfoLabel(text : String, weight : FontWeight = FontWeight.Normal) {
         Text(
             text = text,
-            color = ChipItemColors.TEXT_WHITE,
+            color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             fontSize = 22.sp.halveIfNotPixelDoubled(),
             fontWeight = weight,
             modifier = Modifier.padding(start = 10.dp.halveIfNotPixelDoubled())

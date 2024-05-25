@@ -33,13 +33,17 @@ class ThemeSelectorScreen @Inject constructor(
                         navigationNodeTraverser.goBack()
                     }
                 )
-            ) + Themes.availableThemes.map {
+            ) + Themes.availableThemes.filter {
+                if (themeConfigurationStorage.allowSelectPixelDoubledThemes()) {
+                    true
+                } else {
+                    !it.isPixelDoubled
+                }
+            }.map {
                 TextMenuItem(
-                    title = it,
+                    title = it.friendlyName,
                     onClicked = {
-                        themeConfigurationStorage.setTheme(
-                            it.toTheme()
-                        )
+                        themeConfigurationStorage.setTheme(it)
                     }
                 )
             }

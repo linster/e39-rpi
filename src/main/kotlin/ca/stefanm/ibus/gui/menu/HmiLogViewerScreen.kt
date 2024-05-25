@@ -96,7 +96,7 @@ class HmiLogViewerScreen @Inject constructor(
                             Column {
                                 Text(
                                     text = message.toMessage(),
-                                    color = ChipItemColors.TEXT_WHITE,
+                                    color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                                     fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 18.sp else 9.sp,
                                     fontWeight = FontWeight.Light
                                 )

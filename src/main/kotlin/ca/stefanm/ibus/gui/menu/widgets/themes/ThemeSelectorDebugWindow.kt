@@ -41,12 +41,12 @@ class ThemeSelectorDebugWindow @Inject constructor(
             }
 
 
-            NestingCard() {
+            NestingCard {
                 NestingCardHeader("Select Theme Preset")
-                Themes.availableThemes.forEach { name ->
+                Themes.availableThemes.forEach {
                     Button(onClick = {
-                        themeConfigurationStorage.setTheme(name.toTheme())
-                    }) { Text(name) }
+                        themeConfigurationStorage.setTheme(it)
+                    }) { Text(it.friendlyName) }
                 }
             }
 

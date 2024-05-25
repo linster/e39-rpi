@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.IntOffset
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
 
 data class ModalMenu(
@@ -49,7 +50,7 @@ fun ModalChipMenu(
 ) {
     Box(
         modifier = modifier.then(
-            Modifier.background(ChipItemColors.MenuBackground)
+            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
         )
     ) {
         Column {

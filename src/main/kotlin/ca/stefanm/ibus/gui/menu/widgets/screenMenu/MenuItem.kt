@@ -19,6 +19,7 @@ import ca.stefanm.ibus.gui.menu.widgets.ImageMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
 interface MenuItem {
     val isSelectable : Boolean
@@ -61,11 +62,11 @@ interface MenuItem {
     }
 }
 
-fun String.toMultiTextMenuItems(labelColor: Color? = ChipItemColors.TEXT_WHITE) : List<TextMenuItem> {
+fun String.toMultiTextMenuItems(labelColor: Color? = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE) : List<TextMenuItem> {
     return this.split('\n').map {
         TextMenuItem(
             title = it,
-            labelColor = ChipItemColors.TEXT_WHITE,
+            labelColor = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             isSelectable = false,
             onClicked = {}
         )
@@ -74,7 +75,7 @@ fun String.toMultiTextMenuItems(labelColor: Color? = ChipItemColors.TEXT_WHITE) 
 
 data class TextMenuItem(
     val title : String,
-    val labelColor : Color = ChipItemColors.TEXT_WHITE,
+    val labelColor : Color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
     override val isSelectable : Boolean = true,
     override val isSelected : Boolean = false,
     override val onClicked : () -> Unit
@@ -102,7 +103,7 @@ data class TextMenuItem(
 data class CheckBoxMenuItem(
     val title: String,
     val isChecked : Boolean,
-    val labelColor: Color = ChipItemColors.TEXT_WHITE,
+    val labelColor: Color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
     override val isSelectable : Boolean = true,
     override val isSelected : Boolean = false,
     override val onClicked : () -> Unit

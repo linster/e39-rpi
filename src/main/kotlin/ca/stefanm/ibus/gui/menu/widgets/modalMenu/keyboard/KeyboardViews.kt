@@ -64,7 +64,7 @@ object KeyboardViews {
                 fun displayChar(char: Char) {
                     Text(
                         text = " $char ",
-                        color = ChipItemColors.TEXT_WHITE,
+                        color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                         fontSize = if (isPixelDoubled) 24.sp else 12.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -76,7 +76,7 @@ object KeyboardViews {
                 fun displayCursor() {
                     Text(
                         text = " ",
-                        color = ChipItemColors.TEXT_WHITE,
+                        color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                         fontSize = if (isPixelDoubled) 24.sp else 12.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,

@@ -54,10 +54,6 @@ object ChipItemColors {
     val TEXT_BLUE_LIGHT = Color.Blue
     val TEXT_BLUE_DARK = Color.Blue
     val TEXT_RED = Color.Red
-
-    val MenuBackground = Color(48, 72, 107, 255)
-
-//    val SelectedColor = Color(240, 189, 176, 255)
 }
 
 @Composable
@@ -90,7 +86,7 @@ private data class MenuItemMeasurements(
 fun MenuItem(
     boxModifier : Modifier = Modifier.fillMaxWidth(),
     label : String = " ",
-    labelColor : Color = ChipItemColors.TEXT_WHITE,
+    labelColor : Color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
     chipOrientation: ItemChipOrientation = ItemChipOrientation.NONE,
     isSelected: Boolean = false,
     isSmallSize : Boolean = false,
@@ -107,8 +103,8 @@ fun MenuItem(
 
 
     val chipWidth = measurements.chipWidth
-    val chipColor = Color(121, 181, 220, 255)
-    val chipHighlights = Color.White
+    val chipColor = ThemeWrapper.ThemeHandle.current.colors.chipColor
+    val chipHighlights = ThemeWrapper.ThemeHandle.current.colors.chipHighlights
     val highlightWidth = measurements.highlightWidth
 
     Box(modifier = boxModifier) {
@@ -339,8 +335,8 @@ fun ImageMenuItem(
 
 
     val chipWidth = measurements.chipWidth
-    val chipColor = Color(121, 181, 220, 255)
-    val chipHighlights = Color.White
+    val chipColor = ThemeWrapper.ThemeHandle.current.colors.chipColor
+    val chipHighlights = ThemeWrapper.ThemeHandle.current.colors.chipHighlights
     val highlightWidth = measurements.highlightWidth
 
     Box(modifier = boxModifier) {

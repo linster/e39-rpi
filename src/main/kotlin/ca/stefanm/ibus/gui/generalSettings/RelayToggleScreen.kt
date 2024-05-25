@@ -107,7 +107,7 @@ class RelayToggleScreen @Inject constructor(
     private fun InfoLabel(text : String, weight : FontWeight = FontWeight.Normal) {
         Text(
             text = text,
-            color = ChipItemColors.TEXT_WHITE,
+            color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 30.sp else 9.sp,
             fontWeight = weight
         )
