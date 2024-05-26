@@ -171,7 +171,7 @@ object Themes {
             ),
             centerGradientWithEdgeHighlight = Theme.CenterGradientWithEdgeHighlight(
                 backgroundGradientColorList = Theme.CenterGradientWithEdgeHighlight.GooseGreenColorList,
-                edgeHighlightColor = Theme.CenterGradientWithEdgeHighlight.edgeHighlightColorBmwBlack,
+                edgeHighlightColor = Theme.CenterGradientWithEdgeHighlight.edgeHighlightColorGooseGreen,
                 edgeHighlightHeight = Theme.CenterGradientWithEdgeHighlight.edgeHighlightHeightPixelDoubled
             ),
             windowSize = PixelDoubledWindowSize
@@ -250,13 +250,15 @@ data class Theme(
             )
 
             val GooseGreen = Colors(
-                menuBackground = Color(48, 72, 107, 255),
-                textMenuColorAccent = Color(229, 255, 255, 255),
+                menuBackground = Color(0, 82, 41, 255),
+                textMenuColorAccent = Color(229, 255, 229, 255),
                 selectedColor = Color(240, 189, 176, 255),
-                chipColor = Color(121, 181, 220, 255),
+                chipColor = Color(0, 154, 81, 255),
                 chipHighlights = Color.White,
-                sideMenuBorder = CenterGradientWithEdgeHighlight.GooseGreenColorList[1]
+                sideMenuBorder = Color(0, 102, 53, 255)
             )
+
+            //Color(82, 41, 100, 255) this is a really nice purple background.
         }
     }
 
@@ -277,7 +279,7 @@ data class Theme(
             val bmwBlueColor = Color(229, 255, 255, 255)
             val bmwBlackColor = Color(229, 255, 255, 255)
             val revolutionOrangeColor = Color(229, 255, 255, 255)
-            val gooseGreenColor = Color(229, 255, 255, 255)
+            val gooseGreenColor = Color(229, 255, 229, 255)
 
 
             val PixelDoubledSize = 18.sp
@@ -358,15 +360,15 @@ data class Theme(
                 Color(249, 148, 11, 255)
             )
             val GooseGreenColorList = listOf(
-                Color(68, 128, 192, 255),
-                Color(61, 112, 176, 255),
-                Color(68, 128, 192, 255)
+                Color(0, 123, 65, 255),
+                Color(0, 112, 59, 255),
+                Color(0, 123, 65, 255)
             )
 
             val edgeHighlightColorBmwBlue = Color(86, 139, 191, 255)
             val edgeHighlightColorBmwBlack = Color(86, 139, 191, 255)
             val edgeHighlightColorRevolutionOrange = Color(177, 126, 67, 255)
-            val edgeHighlightColorGooseGreen = Color(162, 126, 64, 255)
+            val edgeHighlightColorGooseGreen = Color(0, 84, 44, 255)
 
             val edgeHighlightHeightPixelDoubled = 4.dp
             val edgeHighlightHeightNormalSize = 2.dp

@@ -26,14 +26,14 @@
      showgrid="false"
      showguides="true"
      inkscape:guide-bbox="true"
-     inkscape:zoom="2.9190506"
-     inkscape:cx="535.27677"
-     inkscape:cy="558.22944"
-     inkscape:window-width="1273"
-     inkscape:window-height="1082"
-     inkscape:window-x="1231"
-     inkscape:window-y="162"
-     inkscape:window-maximized="0"
+     inkscape:zoom="1.6497799"
+     inkscape:cx="824.95851"
+     inkscape:cy="576.44051"
+     inkscape:window-width="2500"
+     inkscape:window-height="1371"
+     inkscape:window-x="60"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
      inkscape:current-layer="layer1">
     <sodipodi:guide
        position="419.0548,513.00691"
@@ -80,7 +80,7 @@
        y2="551.92334"
        gradientUnits="userSpaceOnUse"
        spreadMethod="reflect"
-       gradientTransform="matrix(1,0,0,1.8853149,0,-491.21567)" />
+       gradientTransform="matrix(1,0,0,1.8853149,-9.5703103e-6,-603.97907)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3130"
@@ -91,13 +91,13 @@
        x2="747.38879"
        y2="551.92334"
        spreadMethod="reflect"
-       gradientTransform="matrix(1,0,0,1.8962199,1.3294924e-5,-392.46181)" />
+       gradientTransform="matrix(1,0,0,1.8962199,3.7246137e-6,-505.22521)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#orange_center-8"
-       id="linearGradient3038"
+       id="linearGradient3061"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-2.6742166e-6,157.60357)"
+       gradientTransform="translate(9.6289466e-7,-64.725694)"
        x1="419.05478"
        y1="550.93695"
        x2="747.38879"
@@ -105,10 +105,21 @@
        spreadMethod="reflect" />
     <linearGradient
        inkscape:collect="always"
-       xlink:href="#orange_center-8"
-       id="linearGradient3061"
+       xlink:href="#linearGradient3130"
+       id="linearGradient15497"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(1.0533205e-5,48.037709)"
+       gradientTransform="matrix(1,0,0,1.8962199,5.5078146e-6,-409.64087)"
+       x1="419.05478"
+       y1="550.93695"
+       x2="747.38879"
+       y2="551.92334"
+       spreadMethod="reflect" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3130"
+       id="linearGradient15540"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.8962199,-1.3816404e-5,-327.01828)"
        x1="419.05478"
        y1="550.93695"
        x2="747.38879"
@@ -123,12 +134,12 @@
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:24px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
        x="419.55096"
-       y="516.89978"
+       y="404.13638"
        id="text1706"><tspan
          sodipodi:role="line"
          id="tspan1704"
          x="419.55096"
-         y="516.89978"
+         y="404.13638"
          style="font-size:24px">Center with Edge Highlight</tspan></text>
     <rect
        style="fill:url(#linearGradient2682);fill-opacity:1;stroke-width:5.21766"
@@ -136,49 +147,42 @@
        width="628.15283"
        height="35.406055"
        x="419.05478"
-       y="529.77094" />
+       y="417.00754" />
     <rect
        style="fill:url(#linearGradient2993);fill-opacity:1;stroke-width:5.23273"
        id="rect2606-4"
        width="628.15283"
        height="35.610851"
        x="419.05481"
-       y="634.43036" />
-    <rect
-       style="fill:url(#linearGradient3038);fill-opacity:1;stroke-width:3.8"
-       id="rect2606-4-2"
-       width="628.15283"
-       height="18.779917"
-       x="419.05481"
-       y="699.15057" />
+       y="521.66693" />
     <rect
        style="fill:url(#linearGradient3061);fill-opacity:1;stroke-width:3.8"
        id="rect2606-4-3"
        width="628.15283"
        height="18.779917"
        x="419.05481"
-       y="589.58472" />
+       y="476.82132" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:17.3333px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
        x="431.52475"
-       y="555.1554"
+       y="442.392"
        id="text3824"><tspan
          sodipodi:role="line"
          id="tspan3822"
          x="431.52475"
-         y="555.1554"
+         y="442.392"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#e5ffff;fill-opacity:1">MAIN MENU</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:17.3333px;line-height:1.25;font-family:sans-serif;fill:#ffffe5;fill-opacity:1;stroke:none"
        x="433.13107"
-       y="659.10913"
+       y="546.3457"
        id="text3824-2"><tspan
          sodipodi:role="line"
          id="tspan3822-1"
          x="433.13107"
-         y="659.10913"
+         y="546.3457"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#ffffe5;fill-opacity:1">MAIN MENU</tspan></text>
     <rect
        style="fill:#568bbf;fill-opacity:1;stroke-width:3.79985"
@@ -186,34 +190,112 @@
        width="73.618912"
        height="20.874331"
        x="471.14557"
-       y="562.02759" />
+       y="449.26419" />
     <rect
        style="fill:#b17e43;fill-opacity:1;stroke-width:3.79985"
        id="rect11491-0"
        width="73.618912"
        height="20.874331"
        x="479.2522"
-       y="665.81909" />
+       y="553.05566" />
     <rect
        style="fill:#30486b;fill-opacity:1;stroke-width:6.48994"
        id="rect13016"
        width="107.65977"
        height="15.483947"
        x="467.6185"
-       y="569.52136" />
+       y="456.75797" />
     <rect
        style="fill:#ad6500;fill-opacity:1;stroke-width:6.48994"
        id="rect13016-5"
        width="107.65977"
        height="15.483947"
        x="464.98312"
-       y="673.24969" />
+       y="560.48627" />
     <rect
        style="fill:#da9a51;fill-opacity:1;stroke-width:3.79985"
        id="rect11491-0-1"
        width="73.618912"
        height="20.874331"
        x="517.00122"
-       y="676.19843" />
+       y="563.435" />
+    <rect
+       style="fill:url(#linearGradient15497);fill-opacity:1;stroke-width:5.23273"
+       id="rect2606-4-8"
+       width="628.15283"
+       height="35.610851"
+       x="419.05481"
+       y="617.25122" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:17.3333px;line-height:1.25;font-family:sans-serif;fill:#ffffe5;fill-opacity:1;stroke:none"
+       x="433.1311"
+       y="641.92999"
+       id="text3824-2-5"><tspan
+         sodipodi:role="line"
+         id="tspan3822-1-0"
+         x="433.1311"
+         y="641.92999"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#ffffe5;fill-opacity:1">MAIN MENU</tspan></text>
+    <rect
+       style="fill:#b17e43;fill-opacity:1;stroke-width:3.79985"
+       id="rect11491-0-6"
+       width="73.618912"
+       height="20.874331"
+       x="479.2522"
+       y="648.63995" />
+    <rect
+       style="fill:#ad6500;fill-opacity:1;stroke-width:6.48994"
+       id="rect13016-5-4"
+       width="107.65977"
+       height="15.483947"
+       x="464.98315"
+       y="656.07056" />
+    <rect
+       style="fill:#da9a51;fill-opacity:1;stroke-width:3.79985"
+       id="rect11491-0-1-6"
+       width="73.618912"
+       height="20.874331"
+       x="517.00122"
+       y="659.01929" />
+    <rect
+       style="fill:url(#linearGradient15540);fill-opacity:1;stroke-width:5.23273"
+       id="rect2606-4-86"
+       width="628.15283"
+       height="35.610851"
+       x="419.05481"
+       y="699.87384" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:17.3333px;line-height:1.25;font-family:sans-serif;fill:#e5ffe5;fill-opacity:1;stroke:none"
+       x="433.13107"
+       y="724.55261"
+       id="text3824-2-2"><tspan
+         sodipodi:role="line"
+         id="tspan3822-1-8"
+         x="433.13107"
+         y="724.55261"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#e5ffe5;fill-opacity:1">MAIN MENU</tspan></text>
+    <rect
+       style="fill:#b17e43;fill-opacity:1;stroke-width:3.79985"
+       id="rect11491-0-4"
+       width="73.618912"
+       height="20.874331"
+       x="479.2522"
+       y="731.26257" />
+    <rect
+       style="fill:#ad6500;fill-opacity:1;stroke-width:6.48994"
+       id="rect13016-5-7"
+       width="107.65977"
+       height="15.483947"
+       x="464.98312"
+       y="738.69318" />
+    <rect
+       style="fill:#da9a51;fill-opacity:1;stroke-width:3.79985"
+       id="rect11491-0-1-2"
+       width="73.618912"
+       height="20.874331"
+       x="517.00122"
+       y="741.64191" />
   </g>
 </svg>
