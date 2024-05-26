@@ -180,11 +180,11 @@ object Themes {
 
     val availableThemes = listOf(
         BmwBlueDoubledPixels,
-        BmwBlackDoubledPixels,
+//        BmwBlackDoubledPixels,
         RevolutionOrangeDoubledPixels,
         GooseGreenDoubledPixels,
         BmwBlueNormalSize,
-        BmwBlackNormalSize,
+//        BmwBlackNormalSize,
         RevolutionOrangeNormalSize,
         GooseGreenNormalSize
     )
