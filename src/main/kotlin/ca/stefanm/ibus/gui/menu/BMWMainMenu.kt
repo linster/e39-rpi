@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
+import ca.stefanm.ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
 import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
@@ -35,7 +37,8 @@ import javax.inject.Inject
 @AutoDiscover
 class BMWMainMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val picoScreenStatusManager: PicoScreenStatusManager
+    private val picoScreenStatusManager: PicoScreenStatusManager,
+    private val screenPowerWriter: ScreenPowerWriter
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -53,10 +56,14 @@ class BMWMainMenu @Inject constructor(
                 )
             )
             val neItems = listOf<MenuItem>(
-//                TextMenuItem(
-//                    title = "Telephone Dialer",
-//                    onClicked = {}
-//                ),
+                TextMenuItem(
+                    title = "Now Playing",
+                    onClicked = {
+                        navigationNodeTraverser.navigateToNode(
+                            NowPlayingMenu::class.java
+                        )
+                    }
+                ),
 //                TextMenuItem(
 //                    title = "Chat Notifications",
 //                    onClicked = {}
@@ -81,8 +88,15 @@ class BMWMainMenu @Inject constructor(
             val scope = rememberCoroutineScope()
             val seItems = listOf(
                 TextMenuItem(
+                    title = "Screen Off",
+                    onClicked = {
+                        scope.launch {
+                            screenPowerWriter.turnScreenOff()
+                        }
+                    }
+                ),
+                TextMenuItem(
                     title = "Back to BMW",
-                    labelColor = Color.Red,
                     onClicked = {
                         scope.launch {
                             picoScreenStatusManager.goBackToBmw()

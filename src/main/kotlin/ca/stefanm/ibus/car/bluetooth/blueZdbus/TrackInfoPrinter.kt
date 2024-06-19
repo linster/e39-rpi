@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
+import ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader.NowPlayingTextFieldFlows
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
@@ -19,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.yield
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -112,5 +114,50 @@ class ScreenTrackInfoPrinter @Inject constructor(
                 printMessage(currentAlbum, ALBUM_FIELD)
             }
         }
+    }
+}
+
+
+@PlatformServiceInfo(
+    name = "DbusTrackInfoPrinter",
+    description = "Print out the track info to the service that sends it to the NowPlaying screen"
+)
+@BluetoothServiceGroup
+@ConfiguredCarScope
+class DbusTrackInfoPrinter @Inject constructor(
+
+    private val textLengthConstraints: TextLengthConstraints,
+
+) : Service, TrackInfoPrinter {
+
+    private var isRunning = false
+
+    private var currentTrack = ""
+    private var currentArtist = ""
+    private var currentAlbum = ""
+
+    override fun onCreate() {
+        isRunning = true
+    }
+
+    override fun onShutdown() {
+        isRunning = false
+    }
+
+    override suspend fun onNewTrackInfo(track: String, artist: String, album: String) {
+        if (!isRunning) {
+            return
+        }
+
+        currentTrack = track
+        currentArtist = artist
+        currentAlbum = album
+
+        NowPlayingTextFieldFlows.radioTextFieldsFlow.emit(
+            NowPlayingTextFieldFlows.radioTextFieldsFlow.value.copy(
+                t5 = currentTrack,
+                t6 = currentArtist
+            )
+        )
     }
 }

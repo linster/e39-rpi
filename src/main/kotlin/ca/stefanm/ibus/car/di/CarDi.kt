@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.car.di
 
+import ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
 import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.*
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerDebugService
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialWriterDebugService
@@ -9,6 +10,7 @@ import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.BluetoothEventDispatcherService
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.CliTrackInfoPrinter
+import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackInfoPrinter
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.ScreenTrackInfoPrinter
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
@@ -71,6 +73,7 @@ interface ConfiguredCarComponent {
     fun discoveredServiceBluetoothService() : BluetoothService
     fun discoveredServiceBluetoothEventDispatcherService() : BluetoothEventDispatcherService
     fun discoveredServiceScreenTrackInfoPrinter() : ScreenTrackInfoPrinter
+    fun discoveredServiceDbusTrackInfoPrinter() : DbusTrackInfoPrinter
     fun discoveredServiceSerialListenerDebugService() : SerialListenerDebugService
     fun discoveredServiceSerialWriterDebugService() : SerialWriterDebugService
     fun discoveredServiceSyntheticIBusInputEventDebugLoggerService() : SyntheticIBusInputEventDebugLoggerService
@@ -80,6 +83,7 @@ interface ConfiguredCarComponent {
     fun discoveredServiceRestartPiParser() : RestartPiParser
     fun discoveredServiceRestartXParser() : RestartXParser
     fun discoveredServiceConfigPushParser() : ConfigPushParser
+    fun discoveredServiceRadioTextFieldReaderService() : RadioTextFieldReaderService
     fun discoveredServicePicoHeartbeatResponseParser() : HeartbeatResponseParser
 }
 
