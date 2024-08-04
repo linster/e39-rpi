@@ -66,29 +66,3 @@ class DbusConnector @Inject constructor(
     }
 }
 
-//This is a hack because I haven't thought through the design for the multiple-phone pairing yet.
-@ConfiguredCarScope
-class DbusReconnector @Inject constructor(
-    private val deviceConfiguration: CarPlatformConfiguration,
-    private val dbusConnector: DbusConnector,
-    private val logger: Logger
-) {
-
-    var previouslyPairedPhone : CarPlatformConfiguration.PairedPhone? = null
-
-    @Synchronized
-    fun reconnect() : Pair<DBusConnection?, MediaPlayer1?>{
-
-        with (dbusConnector) {
-            val pairedPhone = deviceConfiguration.pairedPhone
-            return if (pairedPhone != null) {
-                logger.d("RECONNECTOR", "Attempting DBus Reconnect.")
-                Pair(connection, getPlayer(getDevice(pairedPhone.macAddress)))
-            } else {
-                logger.d("RECONNECTOR", "No paired phone in config, skipping reconnect attempt.")
-                Pair(null, null)
-            }
-        }
-
-    }
-}

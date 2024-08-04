@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.car.di
 
 import ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
+import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.*
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerDebugService
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialWriterDebugService
@@ -9,10 +10,7 @@ import ca.stefanm.ibus.car.tvmodule.NavigationAnnounceService
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.BluetoothEventDispatcherService
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.CliTrackInfoPrinter
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackInfoPrinter
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.ScreenTrackInfoPrinter
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
+import ca.stefanm.ibus.car.bluetooth.blueZdbus.*
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
@@ -71,8 +69,12 @@ interface ConfiguredCarComponent {
     fun discoveredServiceIncomingIbusMessageCliPrinter() : IncomingIbusMessageCliPrinter
     fun discoveredServiceIbusInputMessageParser() : IBusInputMessageParser
     fun discoveredServiceBluetoothService() : BluetoothService
+    fun discoveredServiceFlowDbusConnector() : FlowDbusConnector
+    fun discoveredServiceDbusTrackListenerService() : DbusTrackListenerService
     fun discoveredServiceBluetoothEventDispatcherService() : BluetoothEventDispatcherService
     fun discoveredServiceScreenTrackInfoPrinter() : ScreenTrackInfoPrinter
+    fun discoveredDbusTrackListenerService() : DbusTrackListenerService
+    fun discoveredServiceCliTrackInfoPrinter() : CliTrackInfoPrinter
     fun discoveredServiceDbusTrackInfoPrinter() : DbusTrackInfoPrinter
     fun discoveredServiceSerialListenerDebugService() : SerialListenerDebugService
     fun discoveredServiceSerialWriterDebugService() : SerialWriterDebugService
@@ -116,13 +118,15 @@ class ConfiguredCarModule(
     @ConfiguredCarScope
     fun provideTrackPrinter(
         deviceConfiguration: CarPlatformConfiguration,
+        dbusTrackInfoPrinter: DbusTrackInfoPrinter,
         screenTrackInfoPrinter: ScreenTrackInfoPrinter,
         cliTrackInfoPrinter: CliTrackInfoPrinter
     ) : TrackInfoPrinter {
-        return when(deviceConfiguration.trackInfoPrinter) {
+        val right = when(deviceConfiguration.trackInfoPrinter) {
             CarPlatformConfiguration.TrackInfoPrinterType.CLI -> cliTrackInfoPrinter
             CarPlatformConfiguration.TrackInfoPrinterType.BMBT -> screenTrackInfoPrinter
         }
+        return CompositeTrackInfoPrinter(listOf(dbusTrackInfoPrinter, right))
     }
 
     @Provides
@@ -148,10 +152,5 @@ class ConfiguredCarModule(
             cliRelayReaderWriter
         }
     }
-
-//    @Provides
-//    fun provideAllServices() : Set<DiscoveredServiceGroups.DiscoveredServiceInfo> {
-//        return DiscoveredServiceGroups().getAllServiceInfos()
-//    }
 
 }

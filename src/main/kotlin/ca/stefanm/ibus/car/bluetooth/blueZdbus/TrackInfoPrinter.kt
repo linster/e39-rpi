@@ -30,16 +30,42 @@ interface TrackInfoPrinter : Service {
 }
 
 
-//@CliPrinterServiceGroup
+class CompositeTrackInfoPrinter(
+    private val printers : List<TrackInfoPrinter>
+) : TrackInfoPrinter {
+
+    override suspend fun onNewTrackInfo(track: String, artist: String, album: String) {
+        printers.forEach { it.onNewTrackInfo(track, artist, album) }
+    }
+
+    override fun onCreate() {
+        printers.forEach { it.onCreate() }
+    }
+
+    override fun onShutdown() {
+        printers.forEach { it.onShutdown() }
+    }
+}
+
+
+@PlatformServiceInfo(
+    name = "CliTrackInfoPrinter",
+    description = "Print out the track info the the logs"
+)
+@BluetoothServiceGroup
 @ConfiguredCarScope
 class CliTrackInfoPrinter @Inject constructor(
     private val logger: Logger
 ) : TrackInfoPrinter {
-    override fun onCreate() {}
-    override fun onShutdown() {}
+
+    private var isRunning = false
+    override fun onCreate() { isRunning = true }
+    override fun onShutdown() { isRunning = false }
 
     override suspend fun onNewTrackInfo(track: String, artist: String, album: String) {
-        logger.i("TrackInfo", "New track: $track, $artist, $album")
+        if (isRunning) {
+            logger.i("TrackInfo", "New track: $track, $artist, $album")
+        }
     }
 }
 
