@@ -84,6 +84,7 @@ interface ConfiguredCarComponent {
     fun discoveredServiceLogMessageParser() : LogMessageParser
     fun discoveredServiceRestartPiParser() : RestartPiParser
     fun discoveredServiceRestartXParser() : RestartXParser
+    fun discoveredServiceShutdownPiParser() : ShutdownPiParser
     fun discoveredServiceConfigPushParser() : ConfigPushParser
     fun discoveredServiceRadioTextFieldReaderService() : RadioTextFieldReaderService
     fun discoveredServicePicoHeartbeatResponseParser() : HeartbeatResponseParser

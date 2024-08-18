@@ -134,10 +134,7 @@ public final class PicoToPiOuterClass {
       ConfigStatusResponse(4),
       /**
        * <pre>
-       *TODO we could have a mechanism where the pi sends to the pico
-       *TODO the number of ibus events it processed (knob turn messages?)
-       *TODO and if the pico isn't receiveng this heartbeat often enough,
-       *TODO it could auto-restart the PI.
+       *Ask the RPI to restart the X server
        * </pre>
        *
        * <code>PiSoftPowerRestartX = 5;</code>
@@ -151,6 +148,10 @@ public final class PicoToPiOuterClass {
        * <code>PiSoftPowerRestartPi = 6;</code>
        */
       PiSoftPowerRestartPi(6),
+      /**
+       * <code>PiSoftPowerShutdown = 7;</code>
+       */
+      PiSoftPowerShutdown(7),
       UNRECOGNIZED(-1),
       ;
 
@@ -184,10 +185,7 @@ public final class PicoToPiOuterClass {
       public static final int ConfigStatusResponse_VALUE = 4;
       /**
        * <pre>
-       *TODO we could have a mechanism where the pi sends to the pico
-       *TODO the number of ibus events it processed (knob turn messages?)
-       *TODO and if the pico isn't receiveng this heartbeat often enough,
-       *TODO it could auto-restart the PI.
+       *Ask the RPI to restart the X server
        * </pre>
        *
        * <code>PiSoftPowerRestartX = 5;</code>
@@ -201,6 +199,10 @@ public final class PicoToPiOuterClass {
        * <code>PiSoftPowerRestartPi = 6;</code>
        */
       public static final int PiSoftPowerRestartPi_VALUE = 6;
+      /**
+       * <code>PiSoftPowerShutdown = 7;</code>
+       */
+      public static final int PiSoftPowerShutdown_VALUE = 7;
 
 
       public final int getNumber() {
@@ -234,6 +236,7 @@ public final class PicoToPiOuterClass {
           case 4: return ConfigStatusResponse;
           case 5: return PiSoftPowerRestartX;
           case 6: return PiSoftPowerRestartPi;
+          case 7: return PiSoftPowerShutdown;
           default: return null;
         }
       }
@@ -1185,16 +1188,16 @@ public final class PicoToPiOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\016PicoToPi.proto\022\024ca.stefanm.e39.proto\032\021" +
-      "ConfigProto.proto\"\330\002\n\010PicoToPi\022?\n\013messag" +
+      "ConfigProto.proto\"\361\002\n\010PicoToPi\022?\n\013messag" +
       "eType\030\001 \001(\0162*.ca.stefanm.e39.proto.PicoT" +
       "oPi.MessageType\022:\n\rconfigMessage\030\002 \001(\0132!" +
       ".ca.stefanm.e39.proto.ConfigProtoH\000\022\031\n\017l" +
-      "oggerStatement\030\003 \001(\tH\000\"\253\001\n\013MessageType\022\020" +
+      "oggerStatement\030\003 \001(\tH\000\"\304\001\n\013MessageType\022\020" +
       "\n\014EmptyMessage\020\000\022\024\n\020HeartbeatRequest\020\001\022\025" +
       "\n\021HeartbeatResponse\020\002\022\020\n\014LogStatement\020\003\022" +
       "\030\n\024ConfigStatusResponse\020\004\022\027\n\023PiSoftPower" +
-      "RestartX\020\005\022\030\n\024PiSoftPowerRestartPi\020\006B\006\n\004" +
-      "bodyb\006proto3"
+      "RestartX\020\005\022\030\n\024PiSoftPowerRestartPi\020\006\022\027\n\023" +
+      "PiSoftPowerShutdown\020\007B\006\n\004bodyb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -286,6 +286,14 @@ class PicoCommsDebugWindow @Inject constructor(
                 Text("Request restart Pi")
             }
 
+            Button(onClick = { scope.launch {
+                simulatePicoToPiMessage(
+                    dryRun = dryRun.value,
+                    name = "PicoToPi shutdown Pi"
+                ) { shutdownPi() } } }) {
+                Text("Request shutdown Pi")
+            }
+
         }
     }
 

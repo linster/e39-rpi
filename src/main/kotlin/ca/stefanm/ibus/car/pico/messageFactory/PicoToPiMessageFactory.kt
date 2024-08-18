@@ -78,6 +78,15 @@ class PicoToPiMessageFactory @Inject constructor() {
             }.toByteArray().toUByteArray()
         )
     }
+    fun shutdownPi() : IBusMessage {
+        return IBusMessage(
+            sourceDevice = IBusDevice.PICO,
+            destinationDevice = IBusDevice.PI,
+            data = picoToPi {
+                messageTypeValue = MessageType.PiSoftPowerShutdown_VALUE
+            }.toByteArray().toUByteArray()
+        )
+    }
 
     data class ConfigStatusResponse(
         val rawMessage : IBusMessage,
