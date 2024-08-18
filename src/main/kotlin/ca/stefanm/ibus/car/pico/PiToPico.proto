@@ -33,6 +33,4 @@ message PiToPico {
   MessageType messageType = 1;
 
   ConfigProto newConfig = 2;
-
-
 }

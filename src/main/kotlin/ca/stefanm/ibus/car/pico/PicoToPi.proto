@@ -16,12 +16,9 @@ message PicoToPi {
     //Dump the config object
     ConfigStatusResponse = 4;
 
-    //TODO we could have a mechanism where the pi sends to the pico
-    //TODO the number of ibus events it processed (knob turn messages?)
-    //TODO and if the pico isn't receiveng this heartbeat often enough,
-    //TODO it could auto-restart the PI.
     PiSoftPowerRestartX = 5; //Ask the RPI to restart the X server
     PiSoftPowerRestartPi = 6; //Ask the RPI to legit restart
+    PiSoftPowerShutdown = 7;
   }
 
   MessageType messageType = 1;
