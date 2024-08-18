@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.snapshots.StateObject
 import androidx.compose.runtime.snapshots.StateRecord
 import androidx.compose.ui.Alignment
@@ -20,6 +21,9 @@ import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 
 interface MenuItem {
     val isSelectable : Boolean
@@ -35,6 +39,7 @@ interface MenuItem {
         return when (this) {
             is TextMenuItem -> this.copy(isSelected = isSelected)
             is CheckBoxMenuItem -> this.copy(isSelected = isSelected)
+            is CheckBoxFlowMenuItem -> this.copy(isSelected = isSelected)
             is ImageMenuItem -> this.copy(isSelected = isSelected)
             else -> error("Unsupported type")
         }
@@ -55,6 +60,7 @@ interface MenuItem {
             when (it) {
                 is TextMenuItem -> it.copy(onClicked = newOnClick)
                 is CheckBoxMenuItem -> it.copy(onClicked = newOnClick)
+                is CheckBoxFlowMenuItem -> it.copy(onClicked = newOnClick)
                 is ImageMenuItem -> it.copy(onClicked = newOnClick)
                 else -> error("Unsupported.")
             }
@@ -102,6 +108,28 @@ data class CheckBoxMenuItem(
         MenuItem(
             boxModifier = boxModifier,
             label = " ${if (isChecked) "[X]" else "[ ]"} $title",
+            chipOrientation = chipOrientation,
+            labelColor = labelColor ?: ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+            isSelected = isSelected,
+            onClicked = onClicked
+        )
+    }
+}
+data class CheckBoxFlowMenuItem(
+    val title: String,
+    val isChecked : SharedFlow<Boolean>,
+    val isCheckedInitial : Boolean = false,
+    val labelColor: Color? = null,
+    override val isSelectable : Boolean = true,
+    override val isSelected : Boolean = false,
+    override val onClicked : () -> Unit
+) : MenuItem {
+    override fun toView(boxModifier: Modifier, chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
+
+        val isCheckedState = isChecked.collectAsState(isCheckedInitial)
+        MenuItem(
+            boxModifier = boxModifier,
+            label = " ${if (isCheckedState.value) "[X]" else "[ ]"} $title",
             chipOrientation = chipOrientation,
             labelColor = labelColor ?: ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             isSelected = isSelected,

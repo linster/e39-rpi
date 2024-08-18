@@ -31,6 +31,7 @@ import javax.inject.Inject
 class NowPlayingMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val audioFocusSidePane: AudioFocusSidePane,
+    private val nowPlayingInfoSourcePane: NowPlayingInfoSourcePane
 //    private val radioTextFieldReaderService: RadioTextFieldReaderService
 ) : NavigationNode<Nothing> {
 
@@ -70,6 +71,10 @@ class NowPlayingMenu @Inject constructor(
                     TextMenuItem(
                         "Set Audio Focus",
                         onClicked = { audioFocusSidePane.show() }
+                    ),
+                    TextMenuItem(
+                        "Info Sources",
+                        onClicked = { nowPlayingInfoSourcePane.show() }
                     )
                 )
             )

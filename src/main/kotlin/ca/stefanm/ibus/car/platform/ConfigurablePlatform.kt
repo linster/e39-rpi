@@ -104,6 +104,18 @@ class ConfigurablePlatform @Inject constructor(
             runStatusViewer!!.records.collect { _servicesRunning.value = it }
         }
     }
+
+    fun stopByName(serviceName : String) {
+        configurablePlatformServiceRunner?.stopByName(serviceName)
+    }
+
+    fun startByName(serviceName: String) {
+        configurablePlatformServiceRunner?.startByName(serviceName)
+    }
+
+    fun findServiceRecordByName(serviceName: String) : Flow<ConfigurablePlatformServiceRunStatusViewer.RunStatusRecordService> {
+        return runStatusViewer!!.findService(serviceName)
+    }
 }
 
 @ConfiguredCarScope
@@ -142,7 +154,7 @@ class ConfigurablePlatformServiceRunner @Inject constructor(
         findService(serviceName).onCreate()
     }
 
-    private fun findService(name: String) : PlatformService {
+    fun findService(name: String) : PlatformService {
         return list.list.map { it.children }.flatten().first { it.name == name }
     }
 }
@@ -187,5 +199,14 @@ class ConfigurablePlatformServiceRunStatusViewer internal constructor(
             )
         }
         _records.value = newList
+    }
+
+    fun findService(name : String) : Flow<RunStatusRecordService> {
+        return _records
+            .map { groupList -> groupList.firstOrNull { service -> service.name == name } }
+            .filterNotNull()
+            .map { it.children }
+            .map { it.firstOrNull() }
+            .filterNotNull()
     }
 }

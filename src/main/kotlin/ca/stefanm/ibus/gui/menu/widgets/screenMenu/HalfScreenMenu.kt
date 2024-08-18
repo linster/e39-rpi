@@ -79,6 +79,7 @@ object HalfScreenMenu {
                             when (item) {
                                 is TextMenuItem -> item.copy(isSelected = isNowSelected)
                                 is CheckBoxMenuItem -> item.copy(isSelected = isNowSelected)
+                                is CheckBoxFlowMenuItem -> item.copy(isSelected = isNowSelected)
                                 is ImageMenuItem -> item.copy(isSelected = isNowSelected)
                                 else -> error("Unsupported type")
                             }
