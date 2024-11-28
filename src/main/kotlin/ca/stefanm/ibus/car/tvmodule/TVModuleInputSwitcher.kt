@@ -1,12 +1,14 @@
 package ca.stefanm.ibus.car.tvmodule
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.TvModuleAnnounceSim
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import javax.inject.Named
 
 class TVModuleInputSwitcher @Inject constructor(
 
@@ -30,8 +32,8 @@ class TVModuleInputSwitcher @Inject constructor(
 )
 @TvModuleAnnounceSim
 class NavigationAnnounceService @Inject constructor(
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
     override suspend fun doWork() {
 //https://github.com/piersholt/wilhelm-docs/blob/master/02.md#gt-0x3b

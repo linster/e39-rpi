@@ -2,6 +2,7 @@ package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
 import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.lib.logging.Logger
@@ -21,6 +22,7 @@ import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.types.Variant
 import javax.inject.Inject
+import javax.inject.Named
 
 @PlatformServiceInfo(
     name = "DbusTrackListenerService",
@@ -33,8 +35,8 @@ class DbusTrackListenerService @Inject constructor(
 
     private val logger : Logger,
     private val trackInfoPrinter: TrackInfoPrinter,
-    private val coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     val TAG = "Track Listener"

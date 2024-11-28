@@ -2,6 +2,7 @@ package ca.stefanm.ibus.car.bordmonitor.menu
 
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.ScreenPainter
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule
@@ -20,8 +21,8 @@ class ScreenManager(
     /* The screen we show when entering our menu system */
     private val entryPointScreen : Screen,
     private val screenPainter: ScreenPainter,
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     override suspend fun doWork() {

@@ -5,6 +5,7 @@ import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.PicoToPiParserGroup
 import ca.stefanm.ibus.di.ApplicationModule
@@ -30,8 +31,8 @@ class HeartbeatRequestParser @Inject constructor(
     @Named(ApplicationModule.IBUS_COMMS_DEBUG_CHANNEL) private val commsDebugChannel : MutableSharedFlow<IbusCommsDebugMessage>,
     private val piToPicoMessageFactory: PiToPicoMessageFactory,
     private val logger: Logger,
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher){
 
 

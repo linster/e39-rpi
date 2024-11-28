@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
 import ca.stefanm.ca.stefanm.ibus.gui.audio.NowPlayingMenu
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
 import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
@@ -53,6 +54,10 @@ class BMWMainMenu @Inject constructor(
                 TextMenuItem(
                     title = "GPS-Navigation",
                     onClicked = { navigationNodeTraverser.navigateToNode(MapScreen::class.java) }
+                ),
+                TextMenuItem(
+                    title = "Matrix Chat",
+                    onClicked = { navigationNodeTraverser.navigateToNode(ChatAppHomeScreen::class.java)}
                 )
             )
             val neItems = listOf<MenuItem>(

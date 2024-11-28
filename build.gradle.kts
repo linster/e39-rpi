@@ -57,8 +57,10 @@ kapt {
 //sourceCompatibility = 1.8
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=androidx.compose.ui.ExperimentalComposeUiApi"
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.time.ExperimentalTime"
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
+    kotlinOptions.freeCompilerArgs += "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi"
 }
 
 repositories {
@@ -140,6 +142,11 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("io.ktor:ktor-client-logging:${ktor_version}")
+
+
+
+    // TODO change this to trixnity (https://trixnity.gitlab.io/trixnity/docs/client/create)
+    implementation("com.cosium.matrix_communication_client:matrix-communication-client:1.9")
 
 
 

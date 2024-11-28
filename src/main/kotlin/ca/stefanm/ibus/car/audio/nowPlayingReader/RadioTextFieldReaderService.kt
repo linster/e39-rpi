@@ -3,15 +3,18 @@ package ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader
 import ca.stefanm.ibus.annotations.services.PlatformServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
+import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
-
+import javax.inject.Named
 
 
 @PlatformServiceGroup(
@@ -48,14 +51,41 @@ object NowPlayingTextFieldFlows {
 @ConfiguredCarScope
 class RadioTextFieldReaderService @Inject constructor(
     private val deviceConfiguration : CarPlatformConfiguration,
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    private val textLengthConstraints: TextLengthConstraints,
+    @Named(ApplicationModule.IBUS_MESSAGE_INGRESS) val incomingMessages : MutableSharedFlow<IBusMessage>,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     override suspend fun doWork() {
-        //TODO need to listen to the serial port and emit to
+        getRadioTextFields()
+            .map { it.trimToLength() }
+            .collect {
+                emitRadioTextFields(it)
+            }
+    }
 
-        //Also, trim the strings according to car config. See TrackInfoPrinter.kt for examples
-        deviceConfiguration.trackInfoPrinter is CarPlatformConfiguration.TrackInfoPrinterType
+    fun getRadioTextFields() : Flow<RadioTextFields> {
+        // TODO need to replicate the behaviour where the sender needs to clear
+        // the existing string... so we need a cachey thing
+        return emptyFlow()
+    }
+
+    suspend fun emitRadioTextFields(fields : RadioTextFields) {
+        NowPlayingTextFieldFlows.radioTextFieldsFlow.emit(
+            fields
+        )
+    }
+
+    fun RadioTextFields.trimToLength() : RadioTextFields {
+        return this.copy(
+            t0 = this.t0.subSequence(0, textLengthConstraints.AREA_0 - 1).toString(),
+            t1 = this.t0.subSequence(0, textLengthConstraints.AREA_0 - 1).toString(),
+            t2 = this.t0.subSequence(0, textLengthConstraints.AREA_0 - 1).toString(),
+            t3 = this.t0.subSequence(0, textLengthConstraints.AREA_0 - 1).toString(),
+            t4 = this.t0.subSequence(0, textLengthConstraints.AREA_0 - 1).toString(),
+            t5 = this.t0.subSequence(0, textLengthConstraints.AREA_0 - 1).toString(),
+            t6 = this.t0.subSequence(0, textLengthConstraints.AREA_0 - 1).toString(),
+        )
     }
 }

@@ -7,6 +7,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TitleNMessage
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.getAllowedLength
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
@@ -81,8 +82,8 @@ class ScreenTrackInfoPrinter @Inject constructor(
     private val deviceConfiguration: CarPlatformConfiguration,
     private val textLengthConstraints: TextLengthConstraints,
     @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) private val messagesOut : Channel<IBusMessage>,
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher), TrackInfoPrinter {
 
     private var currentTrack = ""

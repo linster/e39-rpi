@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.car.di
 
+import ca.stefanm.ca.stefanm.ibus.car.ExceptionHandler
 import ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
 import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.*
@@ -33,7 +34,7 @@ import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import dagger.*
 import dagger.multibindings.ElementsIntoSet
 import dagger.multibindings.IntoSet
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -42,6 +43,7 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Scope
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Scope
 @Retention(AnnotationRetention.RUNTIME)
@@ -95,6 +97,34 @@ class ConfiguredCarModule(
     private val deviceConfiguration: CarPlatformConfiguration
 ) {
 
+    companion object {
+        const val SERVICE_COROUTINE_SCOPE = "ServiceCoroutineScope"
+        const val SERVICE_COROUTINE_CONTEXT = "ServiceCoroutineContext"
+        const val SERVICE_COROUTINE_DISPATCHER = "ServiceCoroutineDispatcher"
+    }
+
+    @Provides
+    @Named(SERVICE_COROUTINE_SCOPE)
+    @ConfiguredCarScope
+    fun provideServiceCoroutineScope(
+        exceptionHandler: ExceptionHandler
+    ) : CoroutineScope {
+        return CoroutineScope(GlobalScope.coroutineContext + exceptionHandler.handler)
+    }
+
+    @Provides
+    @Named(SERVICE_COROUTINE_CONTEXT)
+    @ConfiguredCarScope
+    fun provideServiceCoroutineContext(
+        @Named(SERVICE_COROUTINE_SCOPE) scope: CoroutineScope
+    ) : CoroutineContext = scope.coroutineContext
+
+    @Provides
+    @Named(SERVICE_COROUTINE_DISPATCHER)
+    @ConfiguredCarScope
+    fun provideServiceCoroutineDispatcher(
+        @Named(SERVICE_COROUTINE_SCOPE) scope: CoroutineScope
+    ) : CoroutineDispatcher = Dispatchers.IO
 
     @Provides
     @ConfiguredCarScope

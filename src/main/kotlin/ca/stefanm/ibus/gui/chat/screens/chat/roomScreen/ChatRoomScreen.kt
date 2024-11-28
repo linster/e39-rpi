@@ -1,0 +1,169 @@
+package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatMessage
+import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.MessageAuthor
+import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.MessageMetadata
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
+import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@ScreenDoc(
+    screenName = "ChatRoomScreen",
+    description = "Show the chat log for a room",
+    navigatesTo = []
+)
+@ScreenDoc.AllowsGoBack
+@AutoDiscover
+class ChatRoomScreen @Inject constructor(
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val notificationHub: NotificationHub,
+    private val modalMenuService: ModalMenuService
+) : NavigationNode<Nothing>{
+
+    override val thisClass: Class<out NavigationNode<Nothing>>
+        get() = ChatRoomScreen::class.java
+
+    companion object {
+        const val TAG = "ChatRoomScreen"
+
+        fun openForRoomId(
+            navigationNodeTraverser: NavigationNodeTraverser,
+            roomId : String
+        ) {
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                ChatRoomScreen::class.java,
+                ChatRoomScreenInputParameters(
+                    roomId = roomId
+                )
+            )
+        }
+    }
+
+    data class ChatRoomScreenInputParameters(
+        val roomId : String
+    )
+
+    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { param ->
+
+        val roomId = (param?.requestParameters as? ChatRoomScreenInputParameters)?.roomId
+
+
+        val roomName = remember { mutableStateOf("") }
+
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(Unit) {
+            //Fetch the Room name for the roomId
+            scope.launch {
+                delay(1000)
+                roomName.value = roomId ?: "null"
+            }
+        }
+
+
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            BmwSingleLineHeader("Room: ${roomName.value}")
+
+            FullScreenMenu.OneColumn(listOf(
+                TextMenuItem(
+                    "Open Message Writer",
+                    onClicked = { openMessageWriter() }
+                ),
+                TextMenuItem(
+                    "Open Poll Voter",
+                    onClicked = { openPollVoter(
+                        ChatMessage.PollMessage(
+                            "What day",
+                            listOf(
+                                ChatMessage.PollMessage.PollItem("Tuesday", 0),
+                                ChatMessage.PollMessage.PollItem("Wednesday", 1)),
+                            MessageAuthor(),
+                            MessageMetadata()
+                        )
+                    )}
+                )
+
+            ))
+        }
+    }
+
+
+
+    // Need a side-pane for voting in polls
+    fun openPollVoter(pollMessage: ChatMessage.PollMessage) {
+
+    }
+
+
+    var inProgressMessage = ""
+
+    //Need a side-pane for message building
+    fun openMessageWriter() {
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            val text = remember { mutableStateOf(inProgressMessage) }
+            LaunchedEffect(text) {
+                inProgressMessage = text.value
+            }
+            SidePanelMenu.SidePanelMenu(
+                title = "Write Message",
+                @Composable {
+                    SidePanelMenu.InfoLabel("Contents:")
+                    SidePanelMenu.InfoLabel(text.value)
+                },
+                listOf(
+                    TextMenuItem("Clear", onClicked = {
+                        text.value = ""
+                        inProgressMessage = ""
+                    }),
+                    TextMenuItem("Edit", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(false)
+                        modalMenuService.showKeyboard(
+                            Keyboard.KeyboardType.FULL,
+                            prefilled = text.value,
+                            onTextEntered = { newText ->
+                                text.value = newText
+                                inProgressMessage = newText
+                                openMessageWriter()
+                            }
+                        )
+                    }),
+                    TextMenuItem("Send", onClicked = {
+                        notificationHub.postNotificationBackground(Notification(
+                            Notification.NotificationImage.MESSAGE_SQUARE,
+                            "Sending Message",
+                            text.value
+                        ))
+                        modalMenuService.closeSidePaneOverlay(true)
+                        inProgressMessage = ""
+                    }),
+                    TextMenuItem("Go Back", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                    })
+                )
+            )
+        }
+    }
+
+    //Need a side-pane for Room Outbox (messages not yet sent), so that they can be canceled or retried
+
+    //Need a room settings side-pane
+
+
+}

@@ -1,6 +1,7 @@
 package ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.car.platform.LongRunningService
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.*
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import javax.inject.Inject
+import javax.inject.Named
 
 @PlatformServiceInfo(
     name = "FlowDbusConnector",
@@ -24,8 +26,8 @@ import javax.inject.Inject
 class FlowDbusConnector @Inject constructor(
     private val deviceConfiguration: CarPlatformConfiguration,
     private val logger : Logger,
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     private val _connection = MutableStateFlow<DBusConnection?>(null)

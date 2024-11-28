@@ -6,6 +6,7 @@ import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.yield
+import org.freedesktop.dbus.exceptions.DBusExecutionException
 import javax.inject.Inject
 
 //This doesn't handle the actual pairing, it's just to draw the list of devices that are paired and connected.
@@ -25,7 +26,15 @@ class DeviceListProvider @Inject constructor(
 
     override fun onCleanup() {
         if (adapter.isDiscovering) {
-            adapter.stopDiscovery()
+            try {
+                adapter.stopDiscovery()
+            } catch (e : DBusExecutionException) {
+                if (e.message?.contains("No discovery started") == true) {
+                    logger.e("DeviceListProvider", "No discovery started", e)
+                } else {
+                    throw e
+                }
+            }
         }
     }
 

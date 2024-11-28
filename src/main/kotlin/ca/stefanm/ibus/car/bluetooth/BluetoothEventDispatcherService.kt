@@ -3,6 +3,7 @@ package ca.stefanm.ibus.car.bluetooth
 import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.car.platform.LongRunningService
@@ -29,8 +30,8 @@ class BluetoothEventDispatcherService @Inject constructor(
     private val flowDbusConnector: FlowDbusConnector,
 
     private val logger: Logger,
-    private val coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     override suspend fun doWork() {

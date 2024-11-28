@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.di
 
+import ca.stefanm.ca.stefanm.ibus.gui.di.ChatModule
 import ca.stefanm.ca.stefanm.ibus.gui.map.MapDatabaseModule
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
@@ -49,7 +50,8 @@ annotation class ApplicationScope
     NavigationModule::class,
 //    MapDatabaseModule::class,
 //    NavigationBindsModule::class,
-    MapModule::class
+    MapModule::class,
+    ChatModule::class
 ])
 @ApplicationScope
 interface ApplicationComponent {

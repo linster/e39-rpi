@@ -16,7 +16,7 @@ zip -d `ls build/compose/jars/*.jar` 'META-INF/*.SF' 'META-INF/*.RSA' 'META-INF/
 
 #Kill the HMI
 #ssh `echo $PI_USER`@`echo $PI_IP` kill `ps -e | grep java | awk '{print $1}'`
-sshpass -f ~/.ssh/pi_pass ssh `echo $PI_USER`@`echo $PI_IP` killall java
+#sshpass -f ~/.ssh/pi_pass ssh `echo $PI_USER`@`echo $PI_IP` killall java
 
 sshpass -f ~/.ssh/pi_pass ssh -t `echo $PI_USER`@`echo $PI_IP` sudo cp /var/lib/e39/e39Rpi-linux-x64-1.0.0.jar /var/lib/e39/e39Rpi-linux-x64-1.0.0-`date --iso-8601=seconds`.jar
 sshpass -f ~/.ssh/pi_pass scp `ls build/compose/jars/*.jar` `echo $PI_USER`@`echo $PI_IP`:/var/lib/e39/e39Rpi-linux-x64-1.0.0.jar

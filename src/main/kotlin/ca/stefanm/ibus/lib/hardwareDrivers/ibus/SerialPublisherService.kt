@@ -3,6 +3,7 @@ package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialWriterDebugService
 import ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
@@ -24,8 +25,8 @@ class SerialPublisherService @Inject constructor(
     private val logger: Logger,
     private val serialPortWriter: SerialPortWriter,
     private val serialWriterDebugService: SerialWriterDebugService,
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
     override suspend fun doWork() {
         messagesOut.consumeEach {

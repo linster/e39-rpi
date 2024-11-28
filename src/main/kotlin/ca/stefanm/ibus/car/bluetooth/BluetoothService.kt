@@ -6,6 +6,7 @@ import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusConnector
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.lib.logging.Logger
@@ -17,6 +18,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 
 //https://github.com/aguedes/bluez/blob/master/doc/media-api.txt
@@ -36,8 +38,8 @@ class BluetoothService @Inject constructor(
 
     private val logger: Logger,
     private val notificationHub: NotificationHub,
-    private val coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     override fun onCreate() {

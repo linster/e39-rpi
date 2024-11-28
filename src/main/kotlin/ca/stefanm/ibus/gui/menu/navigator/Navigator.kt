@@ -2,6 +2,10 @@ package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.audio.NowPlayingMenu
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
 import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
@@ -97,6 +101,10 @@ class NavigationModule {
         networkInfoScreen: NetworkInfoScreen,
         brightnessCompensationScreen: BrightnessCompensationScreen,
         nowPlayingMenu: NowPlayingMenu,
+        createRoomScreen: CreateRoomScreen,
+        chatAppHomeScreen: ChatAppHomeScreen,
+        chatSetupMenuRoot: ChatSetupMenuRoot,
+        chatRoomScreen: ChatRoomScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -135,7 +143,11 @@ class NavigationModule {
         routeTerminatedSubScreen,
         networkInfoScreen,
         brightnessCompensationScreen,
-        nowPlayingMenu
+        nowPlayingMenu,
+        createRoomScreen,
+        chatAppHomeScreen,
+        chatSetupMenuRoot,
+        chatRoomScreen
     )
 }
 

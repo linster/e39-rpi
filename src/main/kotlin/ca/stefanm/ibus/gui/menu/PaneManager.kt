@@ -55,6 +55,7 @@ fun PaneManager(
                     banner()
                 }
             }
+
             Box(Modifier.weight(weightContent)) {
                 mainContent()
 
@@ -73,6 +74,7 @@ fun PaneManager(
 
                 mainContentOverlay?.invoke()
             }
+
             if (bottomPanel != null) {
                 Box {
                     bottomPanel()

@@ -3,6 +3,7 @@ package ca.stefanm.ibus.stefane39
 import ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.hardwareDrivers.VideoEnableRelayManager
 import ca.stefanm.ibus.lib.logging.Logger
@@ -26,8 +27,8 @@ class TelephoneButtonVideoSwitcherService @Inject constructor(
     private val videoEnableRelayManager: VideoEnableRelayManager,
     private val logger: Logger,
 
-    coroutineScope: CoroutineScope,
-    parsingDispatcher: CoroutineDispatcher
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
+    @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     override suspend fun doWork() {
