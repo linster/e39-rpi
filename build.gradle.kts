@@ -15,10 +15,12 @@ plugins {
 
     if (true) {
         // __KOTLIN_COMPOSE_VERSION__
-        kotlin("jvm") version "1.8.20" //TODO https://github.com/Kotlin/kotlinx.serialization/issues/1417#issuecomment-1021545236
-        kotlin("kapt") version "1.8.20" //TODO update to 1.6.20+ to get sealed interface seriaization working.
+        //TODO might need to go up to 2.0.10
+        kotlin("jvm") version "2.0.10" //TODO https://github.com/Kotlin/kotlinx.serialization/issues/1417#issuecomment-1021545236
+        kotlin("kapt") version "2.0.10" //TODO update to 1.6.20+ to get sealed interface seriaization working.
 //        id("org.jetbrains.compose") version "0.3.2"
-        id("org.jetbrains.compose") version "1.4.0"
+//        id("org.jetbrains.compose") version "1.4.0"
+        id("org.jetbrains.compose") version "1.7.1"
     } else {
 //        kotlin("jvm") version "1.4.21"
 //        kotlin("kapt") version "1.4.21"
