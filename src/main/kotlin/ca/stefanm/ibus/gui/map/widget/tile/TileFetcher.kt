@@ -11,7 +11,6 @@ import com.javadocmd.simplelatlng.LatLngTool
 import com.javadocmd.simplelatlng.util.LengthUnit
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -53,7 +52,7 @@ class TileFetcher @Inject constructor(
             error("Content type was ${response.contentType()} and not PNG")
         }
 
-        return response.receive()
+        return response.body()
     }
 
     data class DownloadStatus(

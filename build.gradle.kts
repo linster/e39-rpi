@@ -87,7 +87,7 @@ dependencies {
     implementation(project(":autoDiscovery"))
     implementation(project(":autoDiscoveryAnnotations"))
 
-    implementation("com.squareup.okio:okio:2.6.0")
+    implementation("com.squareup.okio:okio:3.4.0")
 
     println(System.getenv("BUILD_PI"))
     if (System.getenv("BUILD_PI") == "true") {
@@ -105,15 +105,15 @@ dependencies {
     implementation("com.fazecast:jSerialComm:2.10.1")
 
 
-    implementation("com.google.protobuf:protobuf-java:3.23.0")
-    implementation("com.google.protobuf:protobuf-kotlin:3.23.0")
+    implementation("com.google.protobuf:protobuf-java:4.28.2")
+    implementation("com.google.protobuf:protobuf-kotlin:4.28.2")
     implementation("com.google.protobuf:protobuf-java-util:3.23.0")
 
     implementation("com.javadocmd:simplelatlng:1.3.1")
     implementation("org.jxmapviewer:jxmapviewer2:2.5")
 
     implementation("com.uchuhimo:konf:1.1.2")
-    implementation("commons-io:commons-io:2.11.0")
+    implementation("commons-io:commons-io:2.14.0")
 
     implementation("com.ginsberg:cirkle:1.0.1")
 
@@ -125,30 +125,34 @@ dependencies {
     implementation("com.jakewharton.timber:timber:4.7.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
-    testImplementation("junit:junit:4.12")
+    testImplementation("junit:junit:4.13.1")
 
 
 //    implementation("com.squareup.sqldelight:sqlite-driver:1.5.5")
 //    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.5")
 
     //Web
-    val ktor_version = "1.6.4"
+    val ktor_version = "2.1.0"
     implementation("io.ktor:ktor:${ktor_version}")
     implementation("io.ktor:ktor-server-netty:${ktor_version}")
-    implementation("io.ktor:ktor-html-builder:${ktor_version}")
 
     implementation("io.ktor:ktor-client-core:${ktor_version}")
     implementation("io.ktor:ktor-client-cio:${ktor_version}")
 
-    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("io.ktor:ktor-client-logging:${ktor_version}")
 
 
 
-    // TODO change this to trixnity (https://trixnity.gitlab.io/trixnity/docs/client/create)
-    implementation("com.cosium.matrix_communication_client:matrix-communication-client:1.9")
+    //Trixnity (https://trixnity.gitlab.io/trixnity/docs/client/create)
+    val trixnityVersion = "4.9.2"
 
+    fun trixnity(module: String, version: String = trixnityVersion) =
+        "net.folivo:trixnity-$module:$version"
 
+    implementation(trixnity("client"))
+    implementation(trixnity("client-repository-exposed"))
+    implementation(trixnity("client-media-okio"))
 
 }
 

@@ -20,9 +20,6 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
-import com.cosium.matrix_communication_client.CreateRoomInput
-import com.cosium.matrix_communication_client.CreateRoomInput.CreationContent
-import com.cosium.matrix_communication_client.MatrixResources
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -38,8 +35,7 @@ class CreateRoomScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val notificationHub: NotificationHub,
     private val modalMenuService: ModalMenuService,
-    private val logger: Logger,
-    private val matrixResources: Provider<MatrixResources>
+    private val logger: Logger
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -112,28 +108,6 @@ class CreateRoomScreen @Inject constructor(
         topic: String?
     ) : Boolean {
 
-        val roomSpec = CreateRoomInput.builder()
-            .name(name)
-            .topic(topic)
-            .build()
-
-        val result = kotlin.runCatching {
-            matrixResources.get().rooms().create(roomSpec)
-        }
-
-        return if (result.isSuccess) {
-            true
-        } else {
-            result.exceptionOrNull()?.let {
-                logger.e(TAG, "Could not create room", it)
-                notificationHub.postNotification(
-                    Notification(Notification.NotificationImage.ALERT_TRIANGLE,
-                        "Could not create room.",
-                        it.message ?: ""
-                    )
-                )
-            }
-            false
-        }
+       return true
     }
 }

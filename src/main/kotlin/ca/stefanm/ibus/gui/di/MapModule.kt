@@ -5,7 +5,7 @@ import ca.stefanm.ibus.gui.map.guidance.RouteCalculator
 import dagger.Module
 import dagger.Provides
 import io.ktor.client.*
-import io.ktor.client.features.logging.*
+
 import javax.inject.Named
 
 
@@ -18,10 +18,11 @@ class MapModule {
 
         val httpClient = HttpClient {
 
-            install(Logging) {
-                logger = Logger.SIMPLE
-                level = LogLevel.HEADERS
-            }
+
+//            install(Logging) {
+//                logger = Logger.SIMPLE
+//                level = LogLevel.HEADERS
+//            }
         }
     }
 

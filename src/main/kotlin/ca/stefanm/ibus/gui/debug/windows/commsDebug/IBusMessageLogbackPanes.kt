@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.lib.logging.StaticLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import io.ktor.http.*
+import io.ktor.server.http.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

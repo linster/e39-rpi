@@ -70,6 +70,7 @@ class RoomMembersListScreen @Inject constructor(
 
             BmwSingleLineHeader("Room Members for: ${roomName.value}")
 
+            // TODO list all the people in the room, click opens info about them
         }
     }
 

@@ -4,10 +4,8 @@ import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.PictureViewerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.RoomMembersListScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.RoomUploadsList
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.PersonPickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.*
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
@@ -110,7 +108,9 @@ class NavigationModule {
         chatRoomScreen: ChatRoomScreen,
         roomMembersListScreen: RoomMembersListScreen,
         roomUploadsList: RoomUploadsList,
-        pictureViewerScreen: PictureViewerScreen
+        pictureViewerScreen: PictureViewerScreen,
+        personPickerScreen: PersonPickerScreen,
+        addRoomMemberScreen: AddRoomMemberScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -156,7 +156,9 @@ class NavigationModule {
         chatRoomScreen,
         roomMembersListScreen,
         roomUploadsList,
-        pictureViewerScreen
+        pictureViewerScreen,
+        personPickerScreen,
+        addRoomMemberScreen
     )
 }
 

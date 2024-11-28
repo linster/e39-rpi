@@ -103,9 +103,7 @@ class ChatRoomScreen @Inject constructor(
                 ),
                 TextMenuItem("Room Settings", onClicked = {
                     openRoomSettingsPanel()
-                }),
-                TextMenuItem("Outbox", onClicked = {})
-
+                })
             ))
         }
     }
@@ -229,6 +227,10 @@ class ChatRoomScreen @Inject constructor(
                         roomId?.let {
                             RoomMembersListScreen.openForRoomId(navigationNodeTraverser, it)
                         }
+                    }),
+                    TextMenuItem("Add person", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                        roomId?.let { AddRoomMemberScreen.openForRoom(navigationNodeTraverser, it) }
                     }),
                     TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true)}),
                 )

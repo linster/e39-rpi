@@ -16,7 +16,7 @@ import javax.inject.Inject
 //List all the uploads for a room (list of small pictures)
 @AutoDiscover
 class RoomUploadsList @Inject constructor(
-
+    private val navigationNodeTraverser: NavigationNodeTraverser
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -43,7 +43,7 @@ class RoomUploadsList @Inject constructor(
         val roomId: String
     )
 
-    var roomId: String? = null
+    private var roomId: String? = null
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { param ->
 
@@ -66,6 +66,7 @@ class RoomUploadsList @Inject constructor(
 
             BmwSingleLineHeader("Room Uploads for: ${roomName.value}")
 
+            //TODO list the room uploads. Click on each, if picture, opens up the picture viewer.
         }
     }
 }
