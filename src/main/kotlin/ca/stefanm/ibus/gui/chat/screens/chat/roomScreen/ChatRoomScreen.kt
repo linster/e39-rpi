@@ -60,9 +60,11 @@ class ChatRoomScreen @Inject constructor(
         val roomId : String
     )
 
+    var roomId : String? = null
+
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { param ->
 
-        val roomId = (param?.requestParameters as? ChatRoomScreenInputParameters)?.roomId
+        roomId = (param?.requestParameters as? ChatRoomScreenInputParameters)?.roomId
 
 
         val roomName = remember { mutableStateOf("") }
@@ -98,18 +100,26 @@ class ChatRoomScreen @Inject constructor(
                             MessageMetadata()
                         )
                     )}
-                )
+                ),
+                TextMenuItem("Room Settings", onClicked = {
+                    openRoomSettingsPanel()
+                }),
+                TextMenuItem("Outbox", onClicked = {})
 
             ))
         }
     }
 
 
+    private suspend fun sendMessageToRoom(textMessage : String) : Boolean {
+        return true
+    }
 
-    // Need a side-pane for voting in polls
-    fun openPollVoter(pollMessage: ChatMessage.PollMessage) {
+    private suspend fun voteInPoll(pollMessage: ChatMessage.PollMessage, itemToVoteFor : ChatMessage.PollMessage.PollItem) {
 
     }
+
+
 
 
     var inProgressMessage = ""
@@ -117,6 +127,7 @@ class ChatRoomScreen @Inject constructor(
     //Need a side-pane for message building
     fun openMessageWriter() {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            val scope = rememberCoroutineScope()
             val text = remember { mutableStateOf(inProgressMessage) }
             LaunchedEffect(text) {
                 inProgressMessage = text.value
@@ -150,8 +161,16 @@ class ChatRoomScreen @Inject constructor(
                             "Sending Message",
                             text.value
                         ))
-                        modalMenuService.closeSidePaneOverlay(true)
-                        inProgressMessage = ""
+
+                        scope.launch {
+                            val sendMessageResult = sendMessageToRoom(text.value)
+                            if (sendMessageResult) {
+                                //Only clear the message if send was success, so that failure isn't
+                                //tedious.
+                                inProgressMessage = ""
+                            }
+                            modalMenuService.closeSidePaneOverlay(true)
+                        }
                     }),
                     TextMenuItem("Go Back", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)
@@ -161,9 +180,63 @@ class ChatRoomScreen @Inject constructor(
         }
     }
 
+
+    // Need a side-pane for voting in polls
+    fun openPollVoter(pollMessage: ChatMessage.PollMessage) {
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            val scope = rememberCoroutineScope()
+            SidePanelMenu.SidePanelMenu(
+                title = "Vote in Poll",
+                @Composable {
+                    SidePanelMenu.InfoLabel("Question:")
+                    SidePanelMenu.InfoLabel(pollMessage.question)
+                },
+                pollMessage.pollItems.map {
+                    TextMenuItem(
+                        "${it.votes}: ${it.title}",
+                        onClicked = {
+                            scope.launch {
+                                voteInPoll(pollMessage, it)
+                                modalMenuService.closeSidePaneOverlay(true)
+                            }
+                        }
+                    )
+                } +
+                TextMenuItem("Go Back", onClicked = {
+                    modalMenuService.closeSidePaneOverlay(true)
+                })
+
+            )
+        }
+
+
+    }
+
+
+    fun openRoomSettingsPanel() {
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "Room Settings",
+                @Composable {
+                    SidePanelMenu.InfoLabel("Room Name: Bob Wat")
+                    SidePanelMenu.InfoLabel("Room Id: foo")
+
+                    //TODO room picture, centered, not too big.
+                },
+                listOf(
+                    TextMenuItem("Room Members List", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                        roomId?.let {
+                            RoomMembersListScreen.openForRoomId(navigationNodeTraverser, it)
+                        }
+                    }),
+                    TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true)}),
+                )
+            )
+        }
+    }
     //Need a side-pane for Room Outbox (messages not yet sent), so that they can be canceled or retried
 
-    //Need a room settings side-pane
 
 
 }

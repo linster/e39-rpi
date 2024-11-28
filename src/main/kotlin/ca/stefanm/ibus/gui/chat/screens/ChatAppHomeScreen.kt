@@ -56,6 +56,10 @@ class ChatAppHomeScreen @Inject constructor(
                     TextMenuItem(
                         "View Rooms",
                         onClicked = {}
+                    ),
+                    TextMenuItem(
+                        "View Contacts",
+                        onClicked = {}
                     )
                 ),
                 sw = listOf(

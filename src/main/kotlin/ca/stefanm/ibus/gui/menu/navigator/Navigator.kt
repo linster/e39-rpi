@@ -5,6 +5,9 @@ import ca.stefanm.ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.PictureViewerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.RoomMembersListScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.RoomUploadsList
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
@@ -104,7 +107,10 @@ class NavigationModule {
         createRoomScreen: CreateRoomScreen,
         chatAppHomeScreen: ChatAppHomeScreen,
         chatSetupMenuRoot: ChatSetupMenuRoot,
-        chatRoomScreen: ChatRoomScreen
+        chatRoomScreen: ChatRoomScreen,
+        roomMembersListScreen: RoomMembersListScreen,
+        roomUploadsList: RoomUploadsList,
+        pictureViewerScreen: PictureViewerScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -147,7 +153,10 @@ class NavigationModule {
         createRoomScreen,
         chatAppHomeScreen,
         chatSetupMenuRoot,
-        chatRoomScreen
+        chatRoomScreen,
+        roomMembersListScreen,
+        roomUploadsList,
+        pictureViewerScreen
     )
 }
 

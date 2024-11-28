@@ -21,7 +21,6 @@ import javax.inject.Inject
     navigatesTo = [
     ]
 )
-@ScreenDoc.AllowsGoRoot
 @ScreenDoc.AllowsGoBack
 @AutoDiscover
 class ChatSetupMenuRoot @Inject constructor(
