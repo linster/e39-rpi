@@ -1,7 +1,0 @@
-(sym_lib_table
-  (lib (name e39-rpi-rescue)(type Legacy)(uri ${KIPRJMOD}/e39-rpi-rescue.lib)(options "")(descr ""))
-  (lib (name 2022-03-19_16-59-52)(type Legacy)(uri ${KIPRJMOD}/ul_1-963539-1/KiCAD/2022-03-19_16-59-52/2022-03-19_16-59-52.lib)(options "")(descr ""))
-  (lib (name 2022-03-20_00-58-44)(type Legacy)(uri ${KIPRJMOD}/ul_MCP2021-500E-P/KiCAD/2022-03-20_00-58-44/2022-03-20_00-58-44.lib)(options "")(descr ""))
-  (lib (name 2022-03-21_21-19-33)(type Legacy)(uri ${KIPRJMOD}/ul_OSTVN04A150/KiCAD/2022-03-21_21-19-33/2022-03-21_21-19-33.lib)(options "")(descr ""))
-  (lib (name 2022-03-21_21-40-43)(type Legacy)(uri ${KIPRJMOD}/ul_MCP2021A-330E-SN/KiCAD/2022-03-21_21-40-43/2022-03-21_21-40-43.lib)(options "")(descr ""))
-)
