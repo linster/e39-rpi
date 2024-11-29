@@ -20,8 +20,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @ScreenDoc(

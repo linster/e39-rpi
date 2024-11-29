@@ -13,21 +13,16 @@ buildscript {
 }
 plugins {
 
-    if (true) {
-        // __KOTLIN_COMPOSE_VERSION__
-        //TODO might need to go up to 2.0.10
-        kotlin("jvm") version "2.0.10" //TODO https://github.com/Kotlin/kotlinx.serialization/issues/1417#issuecomment-1021545236
-        kotlin("kapt") version "2.0.10" //TODO update to 1.6.20+ to get sealed interface seriaization working.
-//        id("org.jetbrains.compose") version "0.3.2"
-//        id("org.jetbrains.compose") version "1.4.0"
-        id("org.jetbrains.compose") version "1.7.1"
-    } else {
-//        kotlin("jvm") version "1.4.21"
-//        kotlin("kapt") version "1.4.21"
-//        id("org.jetbrains.compose") version "0.0.0-unmerged-build21"
-    }
-    id("com.github.johnrengelman.shadow") version "7.1.0"
     id("java")
+//    kotlin("jvm") version "2.0.10"
+    kotlin("kapt") version "2.0.10"
+    id("org.jetbrains.compose") version "1.7.1"
+    id("org.jetbrains.kotlin.multiplatform") version "2.0.10"
+//    id("org.jetbrains.plugin.compose") version "1.7.1"
+
+
+    id("com.github.johnrengelman.shadow") version "7.1.0"
+
 
 //    id("com.squareup.sqldelight") version "1.5.5"
 
@@ -74,18 +69,14 @@ repositories {
 
 
 
-//jar {
-//    manifest {
-//        attributes 'Main-Class': 'ca.stefanm.ibus.MainKt'
-//    }
-//}
-
-
 
 dependencies {
 
 
-    kapt(project(":autoDiscovery"))
+    //https://github.com/gradle/kotlin-dsl-samples/issues/1372#issuecomment-515285784
+    configurations.get("kapt").dependencies.add(project(":autoDiscovery"))
+    //    kapt(project(":autoDiscovery"))
+
     implementation(project(":autoDiscovery"))
     implementation(project(":autoDiscoveryAnnotations"))
 
@@ -119,8 +110,9 @@ dependencies {
 
     implementation("com.ginsberg:cirkle:1.0.1")
 
-    api("com.google.dagger:dagger:2.45")
-    kapt("com.google.dagger:dagger-compiler:2.45")
+    implementation("com.google.dagger:dagger:2.45")
+    configurations.get("kapt").dependencies.add(DefaultExternalModuleDependency("com.google.dagger:dagger-compiler:2.45"))
+//    kapt("com.google.dagger:dagger-compiler:2.45")
 
     implementation("com.pi4j:pi4j-core:1.1")
 
@@ -165,7 +157,6 @@ tasks.withType<Jar> {
 }
 compose.desktop {
     application {
-//        mainClass = "ca.stefanm.ibus.gui.GuiMainKt"
         mainClass = "ca.stefanm.ComposeMain"
 
 
@@ -173,7 +164,7 @@ compose.desktop {
             packageVersion = "1.0.0"
             packageName = "e39Rpi"
             description = "BMW E39 HMI"
-            copyright = "© 2021 Stefan Martynkiw."
+            copyright = "© 2021-2025 Stefan Martynkiw."
             vendor = "stefanm.ca"
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
