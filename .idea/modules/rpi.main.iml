@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$/../../src/desktopMain">
-      <sourceFolder url="file://$MODULE_DIR$/../../src/desktopMain/java" isTestSource="false" />
+    <content url="file://$MODULE_DIR$/../../composeApp/src/desktopMain">
+      <sourceFolder url="file://$MODULE_DIR$/../../composeApp/src/desktopMain/java" isTestSource="false" />
     </content>
   </component>
 </module>

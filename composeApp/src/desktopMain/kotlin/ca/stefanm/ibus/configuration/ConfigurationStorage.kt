@@ -1,0 +1,120 @@
+package ca.stefanm.ca.stefanm.ibus.configuration
+
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.source.hocon
+import com.uchuhimo.konf.source.hocon.toHocon
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
+
+//https://github.com/russhwolf/multiplatform-settings
+
+@ApplicationScope
+class ConfigurationStorage @Inject constructor(
+    private val configurablePlatform: ConfigurablePlatform,
+    private val logger : Logger
+) {
+
+    private val TAG = "ConfigurationStorage"
+
+    companion object {
+//        val homeFolder = System.getProperty("user.home")
+//        val e39BaseFolder = File(homeFolder, ".e39")
+        val e39BaseFolder = File("/var/lib/", "e39")
+    }
+
+    private val configFile = File(e39BaseFolder, "config.conf")
+    private val versionFile = File(e39BaseFolder, "version.conf")
+
+    val config = Config { addSpec(E39Config) }
+        .from.hocon.file(configFile, optional = true)
+
+    val versionConfig = Config { addSpec(HmiVersion) }
+        .from.hocon.file(versionFile, optional = true)
+
+    init {
+        if (!configFile.exists()) {
+            config.toHocon.toFile(configFile)
+        }
+        config.afterSet { item, value ->
+            logger.d(TAG, "Setting ${item.name} to $value")
+            config.toHocon.toFile(configFile)
+        }
+
+        if (!versionFile.exists()) {
+            versionConfig.toHocon.toFile(versionFile)
+        }
+
+        versionConfig.afterSet { item, value ->
+            logger.d(TAG, "Setting ${item.name} to $value")
+            versionConfig.toHocon.toFile(versionFile)
+        }
+    }
+
+    fun saveConfigAsFile(filename : String) {
+        config.toHocon.toFile(File(e39BaseFolder, filename))
+    }
+
+    fun setBMBTPairedPhone(
+        currentDevice: CurrentDeviceViewer.CurrentDevice
+    ) {
+        config[E39Config.CarPlatformConfigSpec._pairedPhone] = currentDevice.let {
+            CarPlatformConfiguration.PairedPhone(
+                friendlyName = it.alias,
+                macAddress = it.address
+                    .split(':')
+                    .map { octet -> octet.toInt(16) }
+            )
+        }
+
+        configurablePlatform.onNewDeviceConfiguration(
+            E39Config.CarPlatformConfigSpec.toCarPlatformConfiguration(
+                config
+            )
+        )
+
+        configurablePlatform.run()
+    }
+
+    fun clearBMBTPairedPhone() {
+        config[E39Config.CarPlatformConfigSpec._pairedPhone] = null
+        configurablePlatform.onNewDeviceConfiguration(
+            E39Config.CarPlatformConfigSpec.toCarPlatformConfiguration(
+                config
+            )
+        )
+    }
+
+    fun setServiceGroupsOnStartup(
+        groupNames : List<String>
+    ) {
+        logger.d("configurationStorage", "Saving groups to run on startup: $groupNames")
+        config[E39Config.CarPlatformConfigSpec._listOfServiceGroupsOnStartup] = groupNames
+    }
+
+    fun setBrightnessCompensation(tint : Float) {
+        config[E39Config.WindowManagerConfig.brightnessCompensation] = tint
+    }
+
+    fun fwVersionAsFlow() : Flow<String> {
+
+        val sharedFlow = MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 20, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+        val handler = versionConfig.afterSet { item, value ->
+                sharedFlow.tryEmit(versionConfig[HmiVersion.fwHash])
+        }
+
+        return sharedFlow.onStart {
+            sharedFlow.tryEmit(versionConfig[HmiVersion.fwHash])
+        }.onCompletion { handler.cancel() }
+    }
+}
