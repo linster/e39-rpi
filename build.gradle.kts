@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+
+    //TODO STEFAN where's this go?
+    kotlin("kapt") version "2.0.10"
+
 }
 
 //buildscript {
@@ -16,10 +20,6 @@ plugins {
 //    }
 //}
 
-plugins {
-    //TODO STEFAN where's this go?
-    kotlin("kapt") version "2.0.10"
-}
 
 kapt {
     correctErrorTypes = true
