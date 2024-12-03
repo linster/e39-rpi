@@ -29,5 +29,6 @@ dependencyResolutionManagement {
     }
 }
 
-include("autoDiscoveryAnnotations")
-include("autoDiscovery")
+include(":composeApp")
+include(":autoDiscoveryAnnotations")
+include(":autoDiscovery")
