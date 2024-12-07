@@ -28,6 +28,17 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
         }
+
+        desktopMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
+            implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.runtime.compose)
+        }
         desktopMain.dependencies {
             //https://github.com/gradle/kotlin-dsl-samples/issues/1372#issuecomment-515285784
 //            configurations.get("kapt").dependencies.add(project(":autoDiscovery"))

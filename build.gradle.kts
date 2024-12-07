@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
 
     //TODO STEFAN where's this go?
-    kotlin("kapt") version "2.0.10"
+//    kotlin("kapt") version "2.0.10"
 
 }
 
@@ -21,18 +21,18 @@ plugins {
 //}
 
 
-kapt {
-    correctErrorTypes = true
-}
-
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.time.ExperimentalTime"
-    kotlinOptions.freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
-    kotlinOptions.freeCompilerArgs += "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi"
-}
-
+//kapt {
+//    correctErrorTypes = true
+//}
+//
+//
+//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+//    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.time.ExperimentalTime"
+//    kotlinOptions.freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+//    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
+//    kotlinOptions.freeCompilerArgs += "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi"
+//}
+//
 
 // TODO STEFAN can we remove this?
 //tasks.withType<Jar> {
