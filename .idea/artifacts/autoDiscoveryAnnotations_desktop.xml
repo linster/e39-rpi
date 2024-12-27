@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="autoDiscoveryAnnotations-desktop">
+    <output-path>$PROJECT_DIR$/autoDiscoveryAnnotations/build/libs</output-path>
+    <root id="archive" name="autoDiscoveryAnnotations-desktop.jar">
+      <element id="module-output" name="e39-RPi.autoDiscoveryAnnotations.desktopMain" />
+    </root>
+  </artifact>
+</component>

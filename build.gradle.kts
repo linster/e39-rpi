@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.kapt) apply false
 
     //TODO STEFAN where's this go?
 //    kotlin("kapt") version "2.0.10"

@@ -1,16 +1,28 @@
 plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-    id("java")
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kapt)
 }
 
-//group 'ca.stefanm'
-//version 'unspecified'
 
-repositories {
-    mavenCentral()
-    google()
-    maven("https://kotlin.bintray.com/kotlinx")
+//plugins {
+//    kotlin("jvm")
+//    kotlin("kapt")
+//    id("java")
+//}
+
+kotlin {
+    jvm("desktop")
+
+    sourceSets {
+        val commonMain by getting
+
+        commonMain.dependencies {
+            //Only to access the annotations
+            implementation("com.google.dagger:dagger:2.45")
+            implementation("com.squareup:kotlinpoet:1.12.0")
+            implementation(project(":autoDiscoveryAnnotations"))
+        }
+    }
 }
 
 //Witchcraft and sorcery to get around
@@ -23,13 +35,13 @@ tasks {
 }
 
 
-dependencies {
-
-
-    //Only to access the annotations
-    implementation("com.google.dagger:dagger:2.45")
-
-    implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.squareup:kotlinpoet:1.12.0")
-    implementation(project(":autoDiscoveryAnnotations"))
-}
+//dependencies {
+//
+//
+//    //Only to access the annotations
+//    implementation("com.google.dagger:dagger:2.45")
+//
+//    implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+//    implementation("com.squareup:kotlinpoet:1.12.0")
+//    implementation(project(":autoDiscoveryAnnotations"))
+//}

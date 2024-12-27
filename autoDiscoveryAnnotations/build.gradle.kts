@@ -1,21 +1,17 @@
 plugins {
-    kotlin("jvm")
-    id("java")
+    alias(libs.plugins.kotlinMultiplatform)
 }
 
-//group 'ca.stefanm'
-//version 'unspecified'
 
-repositories {
-    mavenCentral()
-    google()
-    maven("https://kotlin.bintray.com/kotlinx")
-}
+kotlin {
+    jvm("desktop")
 
-dependencies {
-    implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    sourceSets {
+        val commonMain by getting
 
-    //Only to access the annotations
-    implementation("com.google.dagger:dagger:2.45")
-
+        commonMain.dependencies {
+            //Only to access the annotations
+            implementation("com.google.dagger:dagger:2.45")
+        }
+    }
 }

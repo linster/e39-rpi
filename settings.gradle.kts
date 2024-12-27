@@ -13,6 +13,7 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://kotlin.bintray.com/kotlinx")
     }
 }
 
@@ -26,6 +27,7 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        maven("https://kotlin.bintray.com/kotlinx")
     }
 }
 

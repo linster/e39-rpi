@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-
+    alias(libs.plugins.kapt)
 
     //https://imperceptiblethoughts.com/shadow/getting-started/
     id("com.github.johnrengelman.shadow") version "7.1.0"
@@ -16,6 +16,7 @@ kotlin {
     jvm("desktop")
 
     sourceSets {
+        val commonMain by getting
         val desktopMain by getting
 
         commonMain.dependencies {
@@ -122,7 +123,7 @@ compose.desktop {
             copyright = "© 2021-2025 Stefan Martynkiw."
             vendor = "stefanm.ca"
             targetFormats(
-                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+                TargetFormat.Deb
             )
             includeAllModules = true
             //appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
