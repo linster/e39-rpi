@@ -18,7 +18,7 @@ kotlin {
 
         commonMain.dependencies {
             //Only to access the annotations
-            implementation("com.google.dagger:dagger:2.45")
+            implementation("com.google.dagger:dagger:2.54")
             implementation("com.squareup:kotlinpoet:1.12.0")
             implementation(project(":autoDiscoveryAnnotations"))
         }

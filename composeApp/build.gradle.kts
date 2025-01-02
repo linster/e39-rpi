@@ -57,11 +57,11 @@ kotlin {
             implementation(project(":autoDiscovery"))
             implementation(project(":autoDiscoveryAnnotations"))
 
-            implementation("com.google.dagger:dagger:2.45")
+            implementation("com.google.dagger:dagger:2.54")
 
             //TODO STEFAN we just didn't run KAPT on Dagger here...
             configurations.get("kapt").dependencies.add(
-                DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.45"))
+                DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.54"))
 
 
             //implementation(compose.desktop.currentOs)
