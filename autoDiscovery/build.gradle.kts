@@ -28,11 +28,11 @@ kotlin {
 //Witchcraft and sorcery to get around
 //      Symbol is declared in module 'jdk.compiler' which does not export package 'com.sun.tools.javac.code'
 //https://github.com/gradle/gradle/issues/15538
-tasks {
-    withType<JavaCompile> {
-        options.fork(mapOf(Pair("jvmArgs", listOf("--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"))))
-    }
-}
+//tasks {
+//    withType<JavaCompile> {
+//        options.fork(mapOf(Pair("jvmArgs", listOf("--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"))))
+//    }
+//}
 
 
 //dependencies {
