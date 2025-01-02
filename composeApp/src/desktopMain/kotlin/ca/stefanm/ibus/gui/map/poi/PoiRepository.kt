@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.DrawableResource
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,26 +41,26 @@ class PoiRepository @Inject constructor(
         sealed class PoiIcon(val type : String) {
             object NoIcon : PoiIcon(type = "NoIcon")
             data class ColoredCircle(val color: Color) : PoiIcon("ColoredCircle")
-            data class BundledIcon(val fileName : String, val tint : Color = Color.White) : PoiIcon("BundledIcon")
+            data class BundledIcon(val drawableResource : DrawableResource, val tint : Color = Color.White) : PoiIcon("BundledIcon")
         }
 
-        fun toSerializablePoi() : SerializablePoi {
-            return SerializablePoi(
-                name = name,
-                location = location.latitude to location.longitude,
-                iconType = icon.type,
-                iconColor = when (icon) {
-                    is PoiIcon.ColoredCircle -> icon.color
-                    is PoiIcon.BundledIcon -> icon.tint
-                    else -> null
-                }.let { it?.toArgb() },
-                iconFileName = when (icon) {
-                    is PoiIcon.BundledIcon -> icon.fileName
-                    else -> null
-                },
-                isVisible = isVisible
-            )
-        }
+//        fun toSerializablePoi() : SerializablePoi {
+//            return SerializablePoi(
+//                name = name,
+//                location = location.latitude to location.longitude,
+//                iconType = icon.type,
+//                iconColor = when (icon) {
+//                    is PoiIcon.ColoredCircle -> icon.color
+//                    is PoiIcon.BundledIcon -> icon.tint
+//                    else -> null
+//                }.let { it?.toArgb() },
+//                iconFileName = when (icon) {
+//                    is PoiIcon.BundledIcon -> icon.fileName
+//                    else -> null
+//                },
+//                isVisible = isVisible
+//            )
+//        }
     }
 
     data class SerializablePoi(
@@ -70,19 +71,19 @@ class PoiRepository @Inject constructor(
         val iconFileName : String?,
         val isVisible : Boolean
     ) {
-        fun toPoi() : Poi {
-            return Poi(
-                name = name,
-                location = LatLng(location.first, location.second),
-                icon = when (iconType) {
-                    "NoIcon" -> Poi.PoiIcon.NoIcon
-                    "ColoredCircle" -> Poi.PoiIcon.ColoredCircle(Color(iconColor!!))
-                    "BundledIcon" -> Poi.PoiIcon.BundledIcon(fileName = iconFileName!!, Color(iconColor!!))
-                    else -> Poi.PoiIcon.NoIcon
-                },
-                isVisible = isVisible
-            )
-        }
+//        fun toPoi() : Poi {
+//            return Poi(
+//                name = name,
+//                location = LatLng(location.first, location.second),
+//                icon = when (iconType) {
+//                    "NoIcon" -> Poi.PoiIcon.NoIcon
+//                    "ColoredCircle" -> Poi.PoiIcon.ColoredCircle(Color(iconColor!!))
+//                    "BundledIcon" -> Poi.PoiIcon.BundledIcon(fileName = iconFileName!!, Color(iconColor!!))
+//                    else -> Poi.PoiIcon.NoIcon
+//                },
+//                isVisible = isVisible
+//            )
+//        }
     }
 //    fun PoiTable.toSerializablePoi() : SerializablePoi {
 //        return SerializablePoi(

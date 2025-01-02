@@ -37,6 +37,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
+import ca.stefanm.ibus.resources.Res
+import ca.stefanm.ibus.resources.tux
+import org.jetbrains.compose.resources.painterResource
 
 @ScreenDoc(
     screenName = "AboutScreen",
@@ -119,7 +122,7 @@ class AboutScreen @Inject constructor(
                 horizontalAlignment = Alignment.CenterHorizontally)
             {
                 Image(
-                    painter = painterResource("tux.png"),
+                    painter = painterResource(Res.drawable.tux),
                     contentDescription = "Tux",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth(0.8f)

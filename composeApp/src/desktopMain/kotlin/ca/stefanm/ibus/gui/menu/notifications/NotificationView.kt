@@ -10,12 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.resources.*
+import org.jetbrains.compose.resources.painterResource
 
 @Composable fun Notification.toView() {
     val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
@@ -67,20 +68,20 @@ import ca.stefanm.ibus.gui.menu.Notification
                     val resource = painterResource(
                         when (this@toView.image) {
                             Notification.NotificationImage.NONE -> error("Invalid")
-                            Notification.NotificationImage.ALERT_CIRCLE -> "icons/alert-circle.svg"
-                            Notification.NotificationImage.ALERT_OCTAGON -> "icons/alert-octagon.svg"
-                            Notification.NotificationImage.ALERT_TRIANGLE -> "icons/alert-triangle.svg"
-                            Notification.NotificationImage.BLUETOOTH -> "icons/bluetooth.svg"
-                            Notification.NotificationImage.MESSAGE_CIRCLE -> "icons/message-circle.svg"
-                            Notification.NotificationImage.MESSAGE_SQUARE -> "icons/message-square.svg"
-                            Notification.NotificationImage.MUSIC -> "icons/music.svg"
-                            Notification.NotificationImage.PHONE -> "icons/phone.svg"
-                            Notification.NotificationImage.PHONE_INCOMING -> "icons/phone-incoming.svg"
-                            Notification.NotificationImage.PHONE_MISSED -> "icons/phone-missed.svg"
-                            Notification.NotificationImage.VOICE_MAIL -> "icons/voicemail.svg"
-                            Notification.NotificationImage.MAP_GENERAL -> "icons/map.svg"
-                            Notification.NotificationImage.MAP_INSTRUCTION -> "icons/navigation.svg"
-                            Notification.NotificationImage.MAP_WAYPOINT -> "icons/map-pin.svg"
+                            Notification.NotificationImage.ALERT_CIRCLE -> Res.drawable.notification_alert_circle
+                            Notification.NotificationImage.ALERT_OCTAGON -> Res.drawable.notification_alert_octagon
+                            Notification.NotificationImage.ALERT_TRIANGLE -> Res.drawable.notification_alert_triangle
+                            Notification.NotificationImage.BLUETOOTH -> Res.drawable.notification_bluetooth
+                            Notification.NotificationImage.MESSAGE_CIRCLE -> Res.drawable.notification_message_circle
+                            Notification.NotificationImage.MESSAGE_SQUARE -> Res.drawable.notification_message_square
+                            Notification.NotificationImage.MUSIC -> Res.drawable.notification_music
+                            Notification.NotificationImage.PHONE -> Res.drawable.notification_phone
+                            Notification.NotificationImage.PHONE_INCOMING -> Res.drawable.notification_phone_incoming
+                            Notification.NotificationImage.PHONE_MISSED -> Res.drawable.notification_phone_missed
+                            Notification.NotificationImage.VOICE_MAIL -> Res.drawable.notification_voicemail
+                            Notification.NotificationImage.MAP_GENERAL -> Res.drawable.notification_map
+                            Notification.NotificationImage.MAP_INSTRUCTION -> Res.drawable.notification_navigation
+                            Notification.NotificationImage.MAP_WAYPOINT -> Res.drawable.notification_map_pin
                         }
                     )
                     Image(

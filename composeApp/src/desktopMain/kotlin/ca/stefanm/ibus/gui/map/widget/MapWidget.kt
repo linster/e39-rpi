@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
@@ -26,6 +25,8 @@ import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import com.javadocmd.simplelatlng.util.LengthUnit
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
@@ -115,9 +116,9 @@ data class PoiOverlay(
                 }
             }
 
-            val ICON_FILE : @Composable (iconFile : String, tint : Color?) -> Unit = { fileName, tint ->
+            val ICON_FILE : @Composable (iconFile : DrawableResource, tint : Color?) -> Unit = { iconFile, tint ->
                 Image(
-                    painter = painterResource(fileName),
+                    painter = painterResource(iconFile),
                     contentDescription = null,
                     modifier = Modifier.size(42.dp.halveIfNotPixelDoubled()),
                     colorFilter = tint?.let { ColorFilter.tint(tint, BlendMode.SrcAtop) }

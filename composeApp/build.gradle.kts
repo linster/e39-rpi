@@ -21,7 +21,7 @@ kotlin {
 
     sourceSets {
 
-//        val commonMain by getting
+        val commonMain by getting
         val desktopMain by getting {
             languageSettings {
                 optIn("kotlin.time.ExperimentalTime")
@@ -30,16 +30,9 @@ kotlin {
         }
         //desktopMain.dependsOn(commonMain)
 
-//        commonMain.dependencies {
-//            implementation(compose.runtime)
-//            implementation(compose.foundation)
-//            implementation(compose.material)
-//            implementation(compose.ui)
-//            implementation(compose.components.resources)
-//            implementation(compose.components.uiToolingPreview)
-//            implementation(libs.androidx.lifecycle.viewmodel)
-//            implementation(libs.androidx.lifecycle.runtime.compose)
-//        }
+        commonMain.dependencies {
+            implementation(compose.components.resources)
+        }
 
         desktopMain.dependencies {
             implementation(compose.runtime)
@@ -140,4 +133,10 @@ compose.desktop {
 
         }
     }
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "ca.stefanm.ibus.resources"
+    generateResClass = always
 }

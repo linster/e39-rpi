@@ -28,7 +28,9 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ImageMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.javadocmd.simplelatlng.LatLng
+import org.jetbrains.compose.resources.painterResource
 import javax.inject.Inject
+import ca.stefanm.ibus.resources.*
 
 
 @AutoDiscover
@@ -182,7 +184,7 @@ class CreateOrEditPoiScreen @Inject constructor(
                         }
                         is PoiRepository.Poi.PoiIcon.BundledIcon -> {
                             ImageMenuItem(
-                                image = painterResource(icon.fileName),
+                                image = painterResource(icon.drawableResource),
                                 tintColor = icon.tint,
                                 imageModifier = Modifier.size(48.dp)
                                     .aspectRatio(1.0F),
@@ -249,15 +251,16 @@ class CreateOrEditPoiScreen @Inject constructor(
 
                 val colorList = listOf(Color.White, Color.Red, Color.Green, Color.Cyan, Color.Magenta)
                 val iconList = listOf(
-                    "poiIcons/briefcase.svg",
-                    "poiIcons/home.svg",
-                    "poiIcons/shopping-cart.svg",
-                    "icons/map-pin.svg"
+                    Res.drawable.poi_briefcase,
+                    Res.drawable.poi_home,
+                    Res.drawable.poi_shopping_cart,
+                    Res.drawable.poi_shopping_bag,
+                    Res.drawable.notification_map_pin
                 )
 
                 val windowedList : List<List<PoiRepository.Poi.PoiIcon>> = colorList.map { color ->
-                    listOf(PoiRepository.Poi.PoiIcon.ColoredCircle(color)) + iconList.map { filename ->
-                        PoiRepository.Poi.PoiIcon.BundledIcon(fileName = filename, tint = color)
+                    listOf(PoiRepository.Poi.PoiIcon.ColoredCircle(color)) + iconList.map { icon ->
+                        PoiRepository.Poi.PoiIcon.BundledIcon(drawableResource = icon, tint = color)
                     }
                 }
 
@@ -275,12 +278,12 @@ class CreateOrEditPoiScreen @Inject constructor(
                                     }
                                 )
                                 is PoiRepository.Poi.PoiIcon.BundledIcon -> ImageMenuItem(
-                                    image = painterResource(icon.fileName),
+                                    image = painterResource(icon.drawableResource),
                                     imageModifier = Modifier.size(48.dp.halveIfNotPixelDoubled())
                                         .aspectRatio(1.0F),
                                     tintColor = icon.tint,
                                     onClicked = {
-                                        onIconSelected(PoiRepository.Poi.PoiIcon.BundledIcon(icon.fileName, icon.tint))
+                                        onIconSelected(PoiRepository.Poi.PoiIcon.BundledIcon(icon.drawableResource, icon.tint))
                                         modalMenuService.closeSidePaneOverlay(true)
                                     }
                                 )

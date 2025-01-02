@@ -27,9 +27,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.Resource
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.time.ExperimentalTime
+import ca.stefanm.ibus.resources.Res
+import ca.stefanm.ibus.resources.bmw_navigation
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalTime
@@ -160,7 +164,7 @@ class LoadingWindow @Inject constructor(
         }
 
         Image(
-            painter = painterResource("bmw_navigation.png"),
+            painter = painterResource(Res.drawable.bmw_navigation),
             contentDescription = null,
             modifier = Modifier.fillMaxSize()
                 .background(Color.Black)
