@@ -1,3 +1,4 @@
+import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -58,14 +59,9 @@ kotlin {
 
             implementation("com.google.dagger:dagger:2.45")
 
-//            configurations.get("kapt").dependencies.add(
-
-//            configurations.get("kapt").dependencies.add(DefaultExternalModuleDependency("com.google.dagger:dagger-compiler:2.45"))
-//            configurations.get("kapt").dependencies.add(
-//                DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.45"))
-//            kapt("com.google.dagger:dagger-compiler:2.45")
-
-
+            //TODO STEFAN we just didn't run KAPT on Dagger here...
+            configurations.get("kapt").dependencies.add(
+                DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.45"))
 
 
             //implementation(compose.desktop.currentOs)
