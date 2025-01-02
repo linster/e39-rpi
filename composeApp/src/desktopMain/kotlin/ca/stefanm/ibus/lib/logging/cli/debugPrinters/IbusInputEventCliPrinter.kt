@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 import javax.inject.Named
 

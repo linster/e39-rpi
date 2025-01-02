@@ -4,7 +4,7 @@ plugins {
 
 
 kotlin {
-    jvm("desktop")
+    jvm("desktop") { withJava() }
 
     sourceSets {
         val commonMain by getting

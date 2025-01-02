@@ -1,6 +1,5 @@
 package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerDebugService
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
@@ -11,7 +10,6 @@ import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 import javax.inject.Named
 

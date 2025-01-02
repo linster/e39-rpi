@@ -6,12 +6,10 @@ import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerServi
 import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers.*
 import ca.stefanm.ca.stefanm.ibus.car.tvmodule.NavigationAnnounceService
-import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bluetooth.BluetoothEventDispatcherService
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.*
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
 import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu.painter.TvModuleTextLengthConstraints
@@ -19,9 +17,6 @@ import ca.stefanm.ca.stefanm.ibus.car.platform.PlatformServiceList
 import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.*
 import ca.stefanm.ibus.car.platform.*
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
-import ca.stefanm.ibus.di.ApplicationComponent
-import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
@@ -32,17 +27,9 @@ import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IncomingIbusMessageCliPrint
 import ca.stefanm.ca.stefanm.ibus.lib.logging.cli.debugPrinters.PlatformMetronomeLogger
 import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import dagger.*
-import dagger.multibindings.ElementsIntoSet
-import dagger.multibindings.IntoSet
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import java.lang.annotation.RetentionPolicy
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Scope
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Scope

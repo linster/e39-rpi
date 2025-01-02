@@ -10,7 +10,6 @@ import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu.painter.getAllowedLength
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
-import ca.stefanm.ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
 import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
@@ -20,8 +19,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.yield
 import javax.inject.Inject
 import javax.inject.Named
 

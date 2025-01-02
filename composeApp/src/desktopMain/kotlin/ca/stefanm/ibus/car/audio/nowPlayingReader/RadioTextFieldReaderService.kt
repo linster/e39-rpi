@@ -2,7 +2,6 @@ package ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope

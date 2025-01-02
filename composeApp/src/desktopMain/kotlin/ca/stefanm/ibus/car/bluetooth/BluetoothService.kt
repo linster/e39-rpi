@@ -3,9 +3,6 @@ package ca.stefanm.ca.stefanm.ibus.car.bluetooth
 import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusConnector
-import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService
-import ca.stefanm.ibus.car.bluetooth.blueZdbus.TrackInfoPrinter
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform

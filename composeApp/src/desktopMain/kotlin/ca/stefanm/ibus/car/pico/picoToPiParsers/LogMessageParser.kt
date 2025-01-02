@@ -10,12 +10,10 @@ import ca.stefanm.ca.stefanm.ibus.car.platform.PicoToPiParserGroup
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import com.google.common.annotations.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named

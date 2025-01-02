@@ -9,7 +9,6 @@ import com.pi4j.system.SystemInfo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import java.io.IOException
 import javax.inject.Inject
 import kotlin.math.abs
 

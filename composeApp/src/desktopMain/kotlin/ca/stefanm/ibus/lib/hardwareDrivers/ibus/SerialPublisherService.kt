@@ -1,6 +1,5 @@
 package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialWriterDebugService
 import ca.stefanm.ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule

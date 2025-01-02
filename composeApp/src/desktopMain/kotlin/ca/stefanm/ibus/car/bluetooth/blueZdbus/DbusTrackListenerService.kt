@@ -1,17 +1,14 @@
 package ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus
 
-import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
-import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.*
 import org.bluez.MediaPlayer1
