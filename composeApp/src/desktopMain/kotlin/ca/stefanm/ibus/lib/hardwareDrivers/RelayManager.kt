@@ -1,7 +1,7 @@
-package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers
+package ca.stefanm.ibus.lib.hardwareDrivers
 
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import com.pi4j.io.i2c.I2CBus
 import com.pi4j.io.i2c.I2CDevice
 import com.pi4j.io.i2c.I2CFactory

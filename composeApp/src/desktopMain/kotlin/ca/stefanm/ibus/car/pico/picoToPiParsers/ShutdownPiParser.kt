@@ -1,16 +1,16 @@
-package ca.stefanm.ca.stefanm.ibus.car.pico.picoToPiParsers
+package ca.stefanm.ibus.car.pico.picoToPiParsers
 
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.e39.proto.PicoToPiOuterClass
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.platform.LongRunningService
-import ca.stefanm.ca.stefanm.ibus.car.platform.PicoToPiParserGroup
+import ca.stefanm.ibus.car.platform.PicoToPiParserGroup
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

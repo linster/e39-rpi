@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map
+package ca.stefanm.ibus.gui.map
 
 
 import androidx.compose.foundation.Canvas
@@ -14,14 +14,14 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCard
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
-import ca.stefanm.ca.stefanm.ibus.gui.map.widget.ExtentCalculator
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool

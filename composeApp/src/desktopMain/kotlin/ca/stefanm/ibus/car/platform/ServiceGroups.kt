@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.platform
+package ca.stefanm.ibus.car.platform
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceGroup
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent

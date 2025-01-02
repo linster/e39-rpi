@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu.painter
+package ca.stefanm.ibus.car.bordmonitor.menu.painter
 
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.lib.messages.IBusMessage

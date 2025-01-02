@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.platformConfig
+package ca.stefanm.ibus.gui.platformConfig
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -14,18 +14,18 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowScope
-import ca.stefanm.ca.stefanm.ibus.car.platform.DiscoveredPlatformServiceGroup
+import ca.stefanm.ibus.car.platform.DiscoveredPlatformServiceGroup
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.CheckBoxWithLabel
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCard
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.debug.windows.CheckBoxWithLabel
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
 import ca.stefanm.ibus.car.platform.DiscoveredServiceGroups
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.ServiceStatusViewer
+import ca.stefanm.ibus.gui.debug.windows.ServiceStatusViewer
 import kotlinx.coroutines.GlobalScope
 
 

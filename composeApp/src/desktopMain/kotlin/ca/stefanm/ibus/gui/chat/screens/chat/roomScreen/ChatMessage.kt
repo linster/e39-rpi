@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
+package ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
 
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
+import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
 import com.javadocmd.simplelatlng.LatLng
 import java.io.File
 

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu
+package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,21 +8,21 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.notifications.toView
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarClock
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarClock
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch

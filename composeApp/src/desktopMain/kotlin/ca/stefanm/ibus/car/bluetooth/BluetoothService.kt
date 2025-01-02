@@ -1,16 +1,16 @@
-package ca.stefanm.ca.stefanm.ibus.car.bluetooth
+package ca.stefanm.ibus.car.bluetooth
 
-import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
-import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
+import ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
+import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

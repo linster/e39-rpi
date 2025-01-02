@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.platform
+package ca.stefanm.ibus.car.platform
 
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
@@ -10,9 +10,9 @@ import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialListenerService
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.SerialPublisherService
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors

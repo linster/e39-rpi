@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug
+package ca.stefanm.ibus.gui.debug.windows.commsDebug
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
@@ -6,7 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
+import ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
 import ca.stefanm.ibus.lib.messages.IBusMessage
 
 enum class PiToPicoNoArgCannedMessageType(val message: PiToPicoMessageFactory.() -> IBusMessage) {

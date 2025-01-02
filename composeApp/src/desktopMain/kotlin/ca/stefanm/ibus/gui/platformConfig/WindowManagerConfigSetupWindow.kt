@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.platformConfig
+package ca.stefanm.ibus.gui.platformConfig
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable

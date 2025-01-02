@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.configuration
+package ca.stefanm.ibus.configuration
 
 import ca.stefanm.ibus.gui.map.guidance.PersistedGuidanceSession
 import com.javadocmd.simplelatlng.LatLng

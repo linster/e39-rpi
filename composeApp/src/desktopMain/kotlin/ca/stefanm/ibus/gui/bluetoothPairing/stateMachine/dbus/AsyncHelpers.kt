@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield

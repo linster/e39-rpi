@@ -1,15 +1,15 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
+package ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.PersonPickerScreen
+import ca.stefanm.ibus.gui.chat.screens.chat.PersonPickerScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

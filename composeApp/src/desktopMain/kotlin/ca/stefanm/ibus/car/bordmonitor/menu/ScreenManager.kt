@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu
+package ca.stefanm.ibus.car.bordmonitor.menu
 
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.ScreenPainter
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope

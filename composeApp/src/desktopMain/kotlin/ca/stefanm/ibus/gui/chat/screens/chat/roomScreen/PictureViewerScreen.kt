@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
+package ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
@@ -7,9 +7,9 @@ import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import java.io.File
 import javax.inject.Inject
 

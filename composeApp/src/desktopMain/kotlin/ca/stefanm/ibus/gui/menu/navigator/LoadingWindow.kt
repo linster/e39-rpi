@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.navigator
+package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,17 +10,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.DebugLaunchpad
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.DeviceConfigurationViewerWindow
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.HmiNavigatorDebugWindow
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.KeyEventSimulator
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug.PicoCommsDebugWindow
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorDebugWindow
-import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
-import ca.stefanm.ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
+import ca.stefanm.ibus.gui.debug.windows.DebugLaunchpad
+import ca.stefanm.ibus.gui.debug.windows.DeviceConfigurationViewerWindow
+import ca.stefanm.ibus.gui.debug.windows.HmiNavigatorDebugWindow
+import ca.stefanm.ibus.gui.debug.windows.KeyEventSimulator
+import ca.stefanm.ibus.gui.debug.windows.commsDebug.PicoCommsDebugWindow
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorDebugWindow
+import ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
+import ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.debug.windows.*
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import kotlinx.coroutines.delay

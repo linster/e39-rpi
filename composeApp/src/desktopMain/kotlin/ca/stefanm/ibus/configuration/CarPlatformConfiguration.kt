@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.configuration
+package ca.stefanm.ibus.configuration
 
 
 interface CarPlatformConfiguration {

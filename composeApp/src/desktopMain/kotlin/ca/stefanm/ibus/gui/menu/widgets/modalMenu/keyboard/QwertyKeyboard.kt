@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
+package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

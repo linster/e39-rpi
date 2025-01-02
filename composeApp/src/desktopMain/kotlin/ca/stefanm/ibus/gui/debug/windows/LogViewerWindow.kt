@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize

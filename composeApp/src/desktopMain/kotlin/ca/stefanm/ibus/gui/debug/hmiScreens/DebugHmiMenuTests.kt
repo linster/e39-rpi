@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens
+package ca.stefanm.ibus.gui.debug.hmiScreens
 
 import androidx.compose.foundation.background
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -16,18 +16,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.*
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.*
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.*
 import javax.inject.Inject

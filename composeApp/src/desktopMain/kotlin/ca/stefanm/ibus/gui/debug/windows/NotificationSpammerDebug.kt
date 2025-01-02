@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,8 +14,8 @@ import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
 class NotificationSpammerDebug @Inject constructor(

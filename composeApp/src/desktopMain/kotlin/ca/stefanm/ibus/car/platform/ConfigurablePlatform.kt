@@ -1,12 +1,12 @@
-package ca.stefanm.ca.stefanm.ibus.car.platform
+package ca.stefanm.ibus.car.platform
 
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope

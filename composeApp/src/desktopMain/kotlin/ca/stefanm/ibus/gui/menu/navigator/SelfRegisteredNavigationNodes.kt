@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.navigator
+package ca.stefanm.ibus.gui.menu.navigator
 
 import ca.stefanm.ibus.di.ApplicationScope
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing
+package ca.stefanm.ibus.gui.bluetoothPairing
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button

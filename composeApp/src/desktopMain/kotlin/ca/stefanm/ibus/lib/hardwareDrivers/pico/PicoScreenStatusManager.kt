@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.pico
+package ca.stefanm.ibus.lib.hardwareDrivers.pico
 
-import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
+import ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.channels.Channel

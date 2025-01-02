@@ -1,10 +1,10 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.WindowScope
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
 class MenuDebug @Inject constructor(

@@ -1,17 +1,17 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens
+package ca.stefanm.ibus.gui.map.guidance.setupScreens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import ca.stefanm.ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
+import ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 
@@ -67,10 +67,10 @@ class GuidanceSetupScreen @Inject constructor(
         GuidanceSession.SessionState.SETTING_UP,
         GuidanceSession.SessionState.READY_TO_CALCULATE,
         GuidanceSession.SessionState.ROUTE_CALCULATED -> {
-            ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.SetupRouteSubScreen::class.java
+            ca.stefanm.ibus.gui.map.guidance.setupScreens.SetupRouteSubScreen::class.java
         }
         GuidanceSession.SessionState.IN_GUIDANCE -> {
-            ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.InGuidanceSubScreen::class.java
+            ca.stefanm.ibus.gui.map.guidance.setupScreens.InGuidanceSubScreen::class.java
         }
         GuidanceSession.SessionState.TERMINATED -> {
             RouteTerminatedSubScreen::class.java

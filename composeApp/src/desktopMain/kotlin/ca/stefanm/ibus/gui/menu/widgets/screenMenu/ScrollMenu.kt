@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu
+package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.gestures.FlingBehavior
@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.reduceUpdateOnClick
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.reduceUpdateOnClick
 import com.ginsberg.cirkle.circular
 import java.awt.Menu
 import kotlin.math.ceil

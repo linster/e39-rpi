@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,7 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
 import ca.stefanm.ibus.car.platform.PlatformService
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.GlobalScope
 import javax.inject.Inject
 

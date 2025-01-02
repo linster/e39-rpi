@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkInfo
+package ca.stefanm.ibus.gui.networkInfo
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,13 +10,13 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.pi4j.system.NetworkInfo
 import com.pi4j.system.NetworkInterface
 import com.pi4j.system.SystemInfo

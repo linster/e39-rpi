@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.lib.messages
+package ca.stefanm.ibus.lib.messages
 
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import okio.Buffer

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu
+package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
@@ -13,11 +13,11 @@ import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
 @ApplicationScope

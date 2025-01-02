@@ -1,8 +1,8 @@
-package ca.stefanm.ca.stefanm.ibus.car
+package ca.stefanm.ibus.car
 
 import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import javax.inject.Inject

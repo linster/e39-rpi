@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.settings
+package ca.stefanm.ibus.gui.map.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -6,18 +6,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
-import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.javadocmd.simplelatlng.LatLng
 import javax.inject.Inject
 

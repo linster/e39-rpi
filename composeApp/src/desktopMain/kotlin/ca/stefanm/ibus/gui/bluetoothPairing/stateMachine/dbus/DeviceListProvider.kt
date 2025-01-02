@@ -1,7 +1,7 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
 
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusConnectionDependingComponent
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.flow.*

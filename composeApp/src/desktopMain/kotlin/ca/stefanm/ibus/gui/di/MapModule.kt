@@ -1,7 +1,7 @@
-package ca.stefanm.ca.stefanm.ibus.gui.di
+package ca.stefanm.ibus.gui.di
 
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.DummyRouteCalculator
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.RouteCalculator
+import ca.stefanm.ibus.gui.map.guidance.DummyRouteCalculator
+import ca.stefanm.ibus.gui.map.guidance.RouteCalculator
 import dagger.Module
 import dagger.Provides
 import io.ktor.client.*

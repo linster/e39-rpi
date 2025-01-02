@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,12 +18,12 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
+import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
-import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
-import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn
+import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
+import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.ComposeDebugMenu
+import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.navigator.*
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import kotlinx.coroutines.flow.asFlow

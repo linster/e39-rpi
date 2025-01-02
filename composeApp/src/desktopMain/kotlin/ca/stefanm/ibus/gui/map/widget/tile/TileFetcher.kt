@@ -1,11 +1,11 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.widget.tile
+package ca.stefanm.ibus.gui.map.widget.tile
 
-import ca.stefanm.ca.stefanm.ibus.gui.di.MapModule
-import ca.stefanm.ca.stefanm.ibus.gui.map.widget.ExtentCalculator
+import ca.stefanm.ibus.gui.di.MapModule
+import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import com.javadocmd.simplelatlng.util.LengthUnit

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.notifications.ui
+package ca.stefanm.ibus.gui.map.guidance.notifications.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas

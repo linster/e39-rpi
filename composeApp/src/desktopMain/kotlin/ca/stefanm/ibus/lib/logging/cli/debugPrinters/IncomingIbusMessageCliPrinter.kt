@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.lib.logging.cli.debugPrinters
+package ca.stefanm.ibus.lib.logging.cli.debugPrinters
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
+import ca.stefanm.ibus.car.platform.CliPrinterServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule

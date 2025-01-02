@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.lib.logging
+package ca.stefanm.ibus.lib.logging
 
 import javax.inject.Inject
 

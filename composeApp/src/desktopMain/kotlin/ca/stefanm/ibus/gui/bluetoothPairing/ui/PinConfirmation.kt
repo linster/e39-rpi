@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui
+package ca.stefanm.ibus.gui.bluetoothPairing.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -8,14 +8,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
 import javax.inject.Inject
 
 fun NavigationNodeTraverser.requestPinConfirmation(params : BluetoothPinConfirmationScreen.PinConfirmationParameters) {

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug
+package ca.stefanm.ibus.gui.debug.windows.commsDebug
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,10 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCard
-import ca.stefanm.ca.stefanm.ibus.lib.logging.StaticLogger
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.lib.logging.StaticLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import io.ktor.http.*
 import io.ktor.server.http.*

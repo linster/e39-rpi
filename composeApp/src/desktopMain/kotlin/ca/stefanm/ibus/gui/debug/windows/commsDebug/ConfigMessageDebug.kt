@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug
+package ca.stefanm.ibus.gui.debug.windows.commsDebug
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,8 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
 import ca.stefanm.e39.proto.configProto
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCard
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 
 
 @Composable

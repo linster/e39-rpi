@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu
+package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,21 +8,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
-import ca.stefanm.ca.stefanm.ibus.gui.audio.NowPlayingMenu
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
+import ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
+import ca.stefanm.ibus.gui.audio.NowPlayingMenu
+import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
-import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.pico.PicoScreenStatusManager
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.lib.hardwareDrivers.pico.PicoScreenStatusManager
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

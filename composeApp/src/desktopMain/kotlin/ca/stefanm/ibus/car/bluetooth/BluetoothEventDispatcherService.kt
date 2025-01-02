@@ -1,14 +1,14 @@
-package ca.stefanm.ca.stefanm.ibus.car.bluetooth
+package ca.stefanm.ibus.car.bluetooth
 
-import ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
+import ca.stefanm.ibus.car.bluetooth.blueZdbus.FlowDbusConnector
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
+import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

@@ -1,11 +1,11 @@
-package ca.stefanm.ca.stefanm.ibus.gui.audio
+package ca.stefanm.ibus.gui.audio
 
 import androidx.compose.runtime.Composable
-import ca.stefanm.ca.stefanm.ibus.car.audio.focusWriter.AudioFocusWriter
+import ca.stefanm.ibus.car.audio.focusWriter.AudioFocusWriter
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject

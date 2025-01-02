@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.bordmonitor.clock
+package ca.stefanm.ibus.car.bordmonitor.clock
 
 
 //class ClockUpdateManager @Inject constructor(

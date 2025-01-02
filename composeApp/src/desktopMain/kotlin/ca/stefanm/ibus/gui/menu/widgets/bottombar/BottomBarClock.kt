@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.bottombar
+package ca.stefanm.ibus.gui.menu.widgets.bottombar
 
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay

@@ -1,12 +1,12 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes
+package ca.stefanm.ibus.gui.menu.widgets.themes
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
+import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import com.uchuhimo.konf.Config

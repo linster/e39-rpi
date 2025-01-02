@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug
+package ca.stefanm.ibus.gui.debug.windows.commsDebug
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
 import ca.stefanm.ibus.car.platform.PlatformService
-import ca.stefanm.ca.stefanm.ibus.car.platform.SerialInterfaceServiceDebugGroup
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.car.platform.SerialInterfaceServiceDebugGroup
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import kotlinx.coroutines.GlobalScope
 
 

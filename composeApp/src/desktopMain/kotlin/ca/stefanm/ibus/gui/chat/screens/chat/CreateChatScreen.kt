@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat
+package ca.stefanm.ibus.gui.chat.screens.chat
 
 class CreateChatScreen {
 

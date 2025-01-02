@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.notifications
+package ca.stefanm.ibus.gui.menu.notifications
 
 import androidx.compose.runtime.MutableState
 import ca.stefanm.ibus.di.ApplicationScope

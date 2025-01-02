@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.bottombar
+package ca.stefanm.ibus.gui.menu.widgets.bottombar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.MenuWindow
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
+import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 
 @Composable
 fun BmwFullScreenBottomBar(

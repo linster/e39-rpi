@@ -2,12 +2,12 @@ package ca.stefanm.gui.map.guidance
 
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.Route
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.guidance.PersistedGuidanceSession
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

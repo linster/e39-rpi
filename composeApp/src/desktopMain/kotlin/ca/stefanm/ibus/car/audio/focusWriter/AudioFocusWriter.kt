@@ -1,8 +1,8 @@
-package ca.stefanm.ca.stefanm.ibus.car.audio.focusWriter
+package ca.stefanm.ibus.car.audio.focusWriter
 
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.channels.Channel
 import javax.inject.Inject

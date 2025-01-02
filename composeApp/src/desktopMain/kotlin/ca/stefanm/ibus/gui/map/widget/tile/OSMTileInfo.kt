@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.widget.tile
+package ca.stefanm.ibus.gui.map.widget.tile
 
 import androidx.compose.ui.unit.dp
 import javax.inject.Inject

@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.di
+package ca.stefanm.ibus.gui.di
 
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.Notification

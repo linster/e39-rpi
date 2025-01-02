@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui
+package ca.stefanm.ibus.gui.bluetoothPairing.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,19 +9,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
+import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -29,8 +29,8 @@ fun NavigationNodeTraverser.showCurrentDevice(
     currentDevice: Flow<CurrentDeviceViewer.CurrentDevice>
 ) {
     this.navigateToNodeWithParameters(
-        ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer::class.java,
-        ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer.CurrentDeviceViewerParameters(
+        ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer::class.java,
+        ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer.CurrentDeviceViewerParameters(
             currentDevice
         )
     )

@@ -1,10 +1,10 @@
-package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus
+package ca.stefanm.ibus.lib.hardwareDrivers.ibus
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
+import ca.stefanm.ibus.car.platform.SerialInterfaceServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.car.platform.LongRunningService
 import kotlinx.coroutines.CoroutineDispatcher

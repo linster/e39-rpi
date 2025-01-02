@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory
+package ca.stefanm.ibus.car.pico.messageFactory
 
 import ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
 import ca.stefanm.e39.proto.PicoToPiOuterClass.PicoToPi.MessageType

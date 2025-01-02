@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.poi
+package ca.stefanm.ibus.gui.map.poi
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -11,22 +11,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.SidePanelMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.ImageMenuItem
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ImageMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import com.javadocmd.simplelatlng.LatLng
 import javax.inject.Inject
 

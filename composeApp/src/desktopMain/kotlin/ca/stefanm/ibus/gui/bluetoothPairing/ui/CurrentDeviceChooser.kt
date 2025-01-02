@@ -1,17 +1,17 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui
+package ca.stefanm.ibus.gui.bluetoothPairing.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
+import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
 import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
 

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.docs
+package ca.stefanm.ibus.gui.docs
 
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 

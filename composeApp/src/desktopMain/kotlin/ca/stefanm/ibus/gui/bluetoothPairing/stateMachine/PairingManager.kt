@@ -1,18 +1,18 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine
 
-import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
-import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui.showCurrentDevice
+import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
+import ca.stefanm.ibus.gui.bluetoothPairing.ui.showCurrentDevice
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DBusConnectionOwner
-import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui.MainBtMenu
-import ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.ui.UiResult
+import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DBusConnectionOwner
+import ca.stefanm.ibus.gui.bluetoothPairing.ui.MainBtMenu
+import ca.stefanm.ibus.gui.bluetoothPairing.ui.UiResult
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus.DeviceListProvider
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.lib.logging.Logger
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*

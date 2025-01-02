@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance
+package ca.stefanm.ibus.gui.map.guidance
 
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.Kanata_path

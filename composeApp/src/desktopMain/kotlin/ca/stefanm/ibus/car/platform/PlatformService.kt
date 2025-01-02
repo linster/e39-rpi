@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.car.platform
+package ca.stefanm.ibus.car.platform
 
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

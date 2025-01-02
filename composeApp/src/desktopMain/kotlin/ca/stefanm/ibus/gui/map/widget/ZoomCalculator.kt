@@ -1,2 +1,2 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.widget
+package ca.stefanm.ibus.gui.map.widget
 

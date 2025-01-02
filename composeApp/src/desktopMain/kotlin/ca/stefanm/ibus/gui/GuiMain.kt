@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui
+package ca.stefanm.ibus.gui
 
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager

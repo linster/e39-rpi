@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.widget
+package ca.stefanm.ibus.gui.map.widget
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

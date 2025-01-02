@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance
+package ca.stefanm.ibus.gui.map.guidance
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,10 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import ca.stefanm.gui.map.guidance.GuidanceSessionStorage
 import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCard
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.map.Kanata_path
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
 

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens
+package ca.stefanm.ibus.gui.map.guidance.setupScreens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -7,7 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import ca.stefanm.ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
+import ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
 import ca.stefanm.gui.map.guidance.BrowsableRouteStorage
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
@@ -16,17 +16,17 @@ import ca.stefanm.ibus.gui.map.Extents
 import ca.stefanm.ibus.gui.map.MapViewer
 import ca.stefanm.ibus.gui.map.OverlayProperties
 import ca.stefanm.ibus.gui.map.Route
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.flow.map
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows
+package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -15,12 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
 import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ca.stefanm.ibus.gui.menu.PaneManager
+import ca.stefanm.ibus.gui.menu.PaneManager
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.toView
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalChipMenuWindowOverlay
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalChipMenuWindowOverlay
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 

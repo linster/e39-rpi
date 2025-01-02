@@ -1,11 +1,11 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance
+package ca.stefanm.ibus.gui.map.guidance
 
 import ca.stefanm.gui.map.guidance.GuidanceSessionStorage
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.map

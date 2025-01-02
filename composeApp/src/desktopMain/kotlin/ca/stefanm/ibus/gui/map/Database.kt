@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map
+package ca.stefanm.ibus.gui.map
 
 //import ca.stefanm.e39.navigation.db.NavigationDb
 import ca.stefanm.ibus.configuration.ConfigurationStorage

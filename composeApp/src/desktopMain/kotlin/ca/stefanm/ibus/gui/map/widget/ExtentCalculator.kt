@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.widget
+package ca.stefanm.ibus.gui.map.widget
 
 import androidx.compose.ui.unit.IntOffset
 import com.javadocmd.simplelatlng.LatLng

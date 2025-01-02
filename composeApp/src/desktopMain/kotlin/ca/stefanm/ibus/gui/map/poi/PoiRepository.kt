@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.poi
+package ca.stefanm.ibus.gui.map.poi
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 //import ca.stefanm.e39.navigation.db.NavigationDb
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 //import com.squareup.sqldelight.db.SqlDriver
 //import com.squareup.sqldelight.runtime.coroutines.asFlow

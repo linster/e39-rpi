@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen
+package ca.stefanm.ibus.gui.map.mapScreen
 
 sealed interface MapOverlayState {
     object NoOverlay : MapOverlayState

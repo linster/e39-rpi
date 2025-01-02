@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.stefane39
+package ca.stefanm.ibus.stefane39
 
 //
 //class StefanE39Screens @Inject constructor(

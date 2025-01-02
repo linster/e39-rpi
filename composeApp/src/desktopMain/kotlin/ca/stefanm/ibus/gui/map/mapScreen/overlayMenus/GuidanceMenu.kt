@@ -1,12 +1,12 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.overlayMenus
+package ca.stefanm.ibus.gui.map.mapScreen.overlayMenus
 
 import androidx.compose.ui.unit.IntOffset
-import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
 import ca.stefanm.ibus.gui.map.mapScreen.MapOverlayState
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import javax.inject.Inject
 

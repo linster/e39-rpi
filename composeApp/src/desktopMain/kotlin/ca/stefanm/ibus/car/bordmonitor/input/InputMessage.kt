@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input
+package ca.stefanm.ibus.car.bordmonitor.input
 
 
 sealed class KeyInputMessage(

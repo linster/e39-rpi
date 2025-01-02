@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.stefane39
+package ca.stefanm.ibus.stefane39
 
 import ca.stefanm.ibus.car.bluetooth.BluetoothService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.ScreenTrackInfoPrinter

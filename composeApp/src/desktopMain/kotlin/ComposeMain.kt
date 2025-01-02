@@ -1,5 +1,5 @@
 package ca.stefanm
-import ca.stefanm.ca.stefanm.ibus.gui.GuiMain
+import ca.stefanm.ibus.gui.GuiMain
 
 class ComposeMain {
     companion object {

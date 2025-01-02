@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance
+package ca.stefanm.ibus.gui.map.guidance
 
-import ca.stefanm.ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.flow.MutableSharedFlow

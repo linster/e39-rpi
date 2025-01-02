@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.car.tvmodule
+package ca.stefanm.ibus.car.tvmodule
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.platform.LongRunningService
-import ca.stefanm.ca.stefanm.ibus.car.platform.TvModuleAnnounceSim
+import ca.stefanm.ibus.car.platform.TvModuleAnnounceSim
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject

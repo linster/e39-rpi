@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen
+package ca.stefanm.ibus.gui.map.mapScreen
 
-import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.overlayMenus.*
+import ca.stefanm.ibus.gui.map.mapScreen.overlayMenus.*
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.mapScreen.MapOverlayState
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters

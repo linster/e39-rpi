@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.debug.windows.commsDebug
+package ca.stefanm.ibus.gui.debug.windows.commsDebug
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
-import ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory.PicoToPiMessageFactory
-import ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
+import ca.stefanm.ibus.car.pico.messageFactory.PiToPicoMessageFactory
+import ca.stefanm.ibus.car.pico.messageFactory.PicoToPiMessageFactory
+import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
 import ca.stefanm.e39.proto.PiToPicoOuterClass
 import ca.stefanm.e39.proto.PicoToPiOuterClass
@@ -23,12 +23,12 @@ import ca.stefanm.e39.proto.piToPico
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.CheckBoxWithLabel
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCard
-import ca.stefanm.ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.debug.windows.CheckBoxWithLabel
+import ca.stefanm.ibus.gui.debug.windows.NestingCard
+import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.lib.hardwareDrivers.SunroofOpener
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow

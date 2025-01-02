@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers
+package ca.stefanm.ibus.lib.hardwareDrivers
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.Peripherals2ServiceGroup
-import ca.stefanm.ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
+import ca.stefanm.ibus.car.platform.Peripherals2ServiceGroup
+import ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningLoopingService
 import com.pi4j.system.SystemInfo
 import kotlinx.coroutines.CoroutineDispatcher

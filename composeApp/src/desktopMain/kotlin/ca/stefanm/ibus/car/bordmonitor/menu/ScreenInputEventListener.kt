@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu
+package ca.stefanm.ibus.car.bordmonitor.menu
 
 interface ScreenInputEventListener {
     fun onKnobLeft(clicks : Int)

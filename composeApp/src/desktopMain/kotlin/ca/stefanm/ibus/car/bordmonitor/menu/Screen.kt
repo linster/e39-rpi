@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.bordmonitor.menu
+package ca.stefanm.ibus.car.bordmonitor.menu
 
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.ScreenPainter
 

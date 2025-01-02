@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.lib.hardwareDrivers
+package ca.stefanm.ibus.lib.hardwareDrivers
 
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import javax.inject.Inject

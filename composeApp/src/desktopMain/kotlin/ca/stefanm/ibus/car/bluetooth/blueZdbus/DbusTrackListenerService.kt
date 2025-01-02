@@ -1,10 +1,10 @@
-package ca.stefanm.ca.stefanm.ibus.car.bluetooth.blueZdbus
+package ca.stefanm.ibus.car.bluetooth.blueZdbus
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ca.stefanm.ibus.car.platform.BluetoothServiceGroup
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.car.platform.BluetoothServiceGroup
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel

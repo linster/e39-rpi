@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.widget.tile
+package ca.stefanm.ibus.gui.map.widget.tile
 
 
 import androidx.compose.foundation.Image
@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 
 @Composable

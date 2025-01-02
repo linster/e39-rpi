@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine
 
 import com.github.hypfvieh.bluetooth.DeviceManager
 import org.freedesktop.dbus.connections.impl.DBusConnection

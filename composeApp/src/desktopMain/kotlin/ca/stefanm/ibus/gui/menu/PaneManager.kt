@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu
+package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring

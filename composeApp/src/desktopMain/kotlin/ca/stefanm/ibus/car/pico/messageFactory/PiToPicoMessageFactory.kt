@@ -1,13 +1,10 @@
-package ca.stefanm.ca.stefanm.ibus.car.pico.messageFactory
+package ca.stefanm.ibus.car.pico.messageFactory
 
 import ca.stefanm.e39.proto.ConfigProtoOuterClass.ConfigProto
 import ca.stefanm.e39.proto.PiToPicoOuterClass.PiToPico
 import ca.stefanm.e39.proto.piToPico
 import ca.stefanm.ibus.car.bordmonitor.input.IBusDevice
 import ca.stefanm.ibus.lib.messages.IBusMessage
-import com.google.protobuf.ByteString
-import com.google.protobuf.CodedOutputStream
-import java.nio.ByteBuffer
 import javax.inject.Inject
 
 class PiToPicoMessageFactory @Inject constructor() {

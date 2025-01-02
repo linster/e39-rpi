@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen
+package ca.stefanm.ibus.gui.map.mapScreen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

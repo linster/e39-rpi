@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.web
+package ca.stefanm.ibus.web
 
 //import io.ktor.application.*
 //import io.ktor.response.*

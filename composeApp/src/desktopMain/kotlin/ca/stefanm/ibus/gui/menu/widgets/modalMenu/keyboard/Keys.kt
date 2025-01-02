@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
+package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,10 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
-import ca.stefanm.ca.stefanm.ibus.lib.logging.StaticLogger
-import ca.stefanm.ca.stefanm.ibus.lib.logging.StdOutLogger
+import ca.stefanm.ibus.lib.logging.StaticLogger
+import ca.stefanm.ibus.lib.logging.StdOutLogger
 
 enum class SpecialTags {
     Tab,

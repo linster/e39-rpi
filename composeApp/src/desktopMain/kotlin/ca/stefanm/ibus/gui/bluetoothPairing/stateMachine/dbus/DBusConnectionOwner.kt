@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
+package ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.dbus
 
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusConnectionOwningComponent

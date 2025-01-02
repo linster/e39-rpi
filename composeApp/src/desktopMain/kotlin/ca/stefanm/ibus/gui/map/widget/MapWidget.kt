@@ -16,12 +16,12 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
-import ca.stefanm.ca.stefanm.ibus.gui.map.widget.ExtentCalculator
+import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
-import ca.stefanm.ca.stefanm.ibus.gui.map.widget.tile.TileView
+import ca.stefanm.ibus.gui.map.widget.tile.TileView
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
-import ca.stefanm.ca.stefanm.ibus.lib.logging.StdOutLogger
+import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool

@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.guidance
+package ca.stefanm.ibus.gui.map.guidance
 
-import ca.stefanm.ca.stefanm.ibus.lib.logging.StdOutLogger
+import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.javadocmd.simplelatlng.LatLng
 
 

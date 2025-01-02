@@ -1,12 +1,12 @@
-package ca.stefanm.ca.stefanm.ibus.stefane39
+package ca.stefanm.ibus.stefane39
 
-import ca.stefanm.ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
+import ca.stefanm.ibus.car.platform.PeripheralsServiceGroup
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
-import ca.stefanm.ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.hardwareDrivers.VideoEnableRelayManager
-import ca.stefanm.ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.di.ApplicationModule
 import kotlinx.coroutines.CoroutineDispatcher

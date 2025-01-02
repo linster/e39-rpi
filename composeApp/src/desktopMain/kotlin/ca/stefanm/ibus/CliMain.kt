@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus
+package ca.stefanm.ibus
 
 //import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 //import ca.stefanm.ibus.di.DaggerApplicationComponent

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.audio
+package ca.stefanm.ibus.gui.audio
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -6,20 +6,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader.NowPlayingTextFieldFlows
-import ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
-import ca.stefanm.ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFields
+import ca.stefanm.ibus.car.audio.nowPlayingReader.NowPlayingTextFieldFlows
+import ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
+import ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFields
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwFullScreenTrackInfoHeader
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.menu.widgets.BmwFullScreenTrackInfoHeader
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import javax.inject.Inject
 
 @ScreenDoc(
