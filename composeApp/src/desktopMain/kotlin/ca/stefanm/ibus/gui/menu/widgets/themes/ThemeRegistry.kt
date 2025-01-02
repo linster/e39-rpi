@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 object ThemeWrapper {
 
-    val defaultTheme = DaggerApplicationComponent.create()
+    val defaultTheme : Theme = DaggerApplicationComponent.create()
         .themeConfigurationStorage()
         .getStoredTheme()
 
@@ -64,7 +64,7 @@ class ThemeConfigurationStorage @Inject constructor(
     private val themeConfig = Config { addSpec(ThemeConfigSpec) }
         .from.hocon.file(themeConfigFile, optional = true)
 
-    private val currentTheme = MutableStateFlow(ThemeWrapper.defaultTheme)
+    private val currentTheme = MutableStateFlow<Theme>(ThemeWrapper.defaultTheme)
 
     init {
         if (!themeConfigFile.exists()) {
