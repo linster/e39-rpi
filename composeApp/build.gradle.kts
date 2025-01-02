@@ -19,8 +19,14 @@ kotlin {
     }
 
     sourceSets {
+
 //        val commonMain by getting
-        val desktopMain by getting
+        val desktopMain by getting {
+            languageSettings {
+                optIn("kotlin.time.ExperimentalTime")
+                optIn("kotlin.ExperimentalUnsignedTypes")
+            }
+        }
         //desktopMain.dependsOn(commonMain)
 
 //        commonMain.dependencies {
