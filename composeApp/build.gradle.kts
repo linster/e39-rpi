@@ -9,7 +9,7 @@ plugins {
     //https://imperceptiblethoughts.com/shadow/getting-started/
 //    id("com.github.johnrengelman.shadow") version "7.1.0"
 
-    id("com.google.protobuf") version "0.9.4"
+//    id("com.google.protobuf") version "0.9.4"
 }
 
 kotlin {
@@ -19,9 +19,9 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting
+//        val commonMain by getting
         val desktopMain by getting
-        desktopMain.dependsOn(commonMain)
+        //desktopMain.dependsOn(commonMain)
 
 //        commonMain.dependencies {
 //            implementation(compose.runtime)
@@ -45,14 +45,19 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
 
             //https://github.com/gradle/kotlin-dsl-samples/issues/1372#issuecomment-515285784
-//            configurations.get("kapt").dependencies.add(project(":autoDiscovery"))
-            kapt(project(":autoDiscovery"))
+            configurations.get("kapt").dependencies.add(project(":autoDiscovery"))
+//            kapt(project(":autoDiscovery"))
             implementation(project(":autoDiscovery"))
             implementation(project(":autoDiscoveryAnnotations"))
 
             implementation("com.google.dagger:dagger:2.45")
+
+//            configurations.get("kapt").dependencies.add(
+
 //            configurations.get("kapt").dependencies.add(DefaultExternalModuleDependency("com.google.dagger:dagger-compiler:2.45"))
-            kapt("com.google.dagger:dagger-compiler:2.45")
+//            configurations.get("kapt").dependencies.add(
+//                DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.45"))
+//            kapt("com.google.dagger:dagger-compiler:2.45")
 
 
 
@@ -111,7 +116,7 @@ kotlin {
             implementation(trixnity("client-media-okio"))
 
 
-            testImplementation("junit:junit:4.13.1")
+//            desktopTestImplementation("junit:junit:4.13.1")
         }
     }
 }
