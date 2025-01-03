@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.MainBtMenu
@@ -115,7 +116,8 @@ class NavigationModule {
         roomUploadsList: RoomUploadsList,
         pictureViewerScreen: PictureViewerScreen,
         personPickerScreen: PersonPickerScreen,
-        addRoomMemberScreen: AddRoomMemberScreen
+        addRoomMemberScreen: AddRoomMemberScreen,
+        loginScreen: LoginScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -163,7 +165,8 @@ class NavigationModule {
         roomUploadsList,
         pictureViewerScreen,
         personPickerScreen,
-        addRoomMemberScreen
+        addRoomMemberScreen,
+        loginScreen
     )
 }
 

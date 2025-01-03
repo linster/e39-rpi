@@ -52,7 +52,7 @@ kotlin {
 
             implementation("com.google.dagger:dagger:2.54")
 
-            //TODO STEFAN we just didn't run KAPT on Dagger here...
+
             configurations.get("kapt").dependencies.add(
                 DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.54"))
 
@@ -109,6 +109,9 @@ kotlin {
             implementation(trixnity("client"))
             implementation(trixnity("client-repository-exposed"))
             implementation(trixnity("client-media-okio"))
+
+            // So that the Exposed DB for Trixnity writes to a sqlite file
+            implementation("org.xerial:sqlite-jdbc:3.44.1.0")
 
 
 //            desktopTestImplementation("junit:junit:4.13.1")
