@@ -3,7 +3,10 @@ package ca.stefanm.ibus.gui.chat.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
@@ -17,6 +20,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import net.folivo.trixnity.client.MatrixClient
 import javax.inject.Inject
 
 @ScreenDoc(
@@ -30,7 +34,8 @@ import javax.inject.Inject
 @ScreenDoc.AllowsGoBack
 @AutoDiscover
 class ChatAppHomeScreen @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val matrixService: MatrixService
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = ChatAppHomeScreen::class.java
@@ -39,6 +44,12 @@ class ChatAppHomeScreen @Inject constructor(
 
         //TODO login if the client is null, or if it's not null but also not logged in.
 
+        LaunchedEffect(Unit) {
+            if (matrixService.getMatrixClient() == null
+                || matrixService.getMatrixClient()?.loginState?.value != MatrixClient.LoginState.LOGGED_IN) {
+                navigationNodeTraverser.navigateToNode(LoginScreen::class.java)
+            }
+        }
         //If there is an incoming result for a room selection, open the room. (and save the result)
 
         Column(modifier = Modifier.fillMaxSize()) {

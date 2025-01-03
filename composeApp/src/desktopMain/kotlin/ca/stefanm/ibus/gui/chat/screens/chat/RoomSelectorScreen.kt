@@ -131,11 +131,11 @@ class RoomSelectorScreen @Inject constructor(
                         navigationNodeTraverser.setResultAndGoBack(this,
                             RoomSelectorResult.RoomSelected(displayedRoom.roomId)
                         )
-                        modalMenuService.closeSidePaneOverlay(true)}
+                        modalMenuService.closeSidePaneOverlay(true)
                     }),
                     TextMenuItem("More info...", onClicked = {
-
-                        //TODO open the RoomInfoScreen
+                        RoomInfoScreen.openForRoomId(navigationNodeTraverser, displayedRoom.roomId)
+                        modalMenuService.closeSidePaneOverlay(true)
                     }),
                     TextMenuItem("Go Back", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)})
