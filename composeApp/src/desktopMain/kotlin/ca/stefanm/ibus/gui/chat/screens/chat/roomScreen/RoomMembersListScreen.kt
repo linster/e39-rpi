@@ -12,6 +12,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.folivo.trixnity.core.model.RoomId
 import javax.inject.Inject
 
 @ScreenDoc(
@@ -31,7 +32,7 @@ class RoomMembersListScreen @Inject constructor(
 
         fun openForRoomId(
             navigationNodeTraverser: NavigationNodeTraverser,
-            roomId : String
+            roomId : RoomId
         ) {
             navigationNodeTraverser.navigateToNodeWithParameters(
                 RoomMembersListScreen::class.java,
@@ -44,10 +45,10 @@ class RoomMembersListScreen @Inject constructor(
 
 
     data class RoomMembersListScreenParameters(
-        val roomId : String
+        val roomId : RoomId
     )
 
-    var roomId : String? = null
+    var roomId : RoomId? = null
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { param ->
 
@@ -61,7 +62,7 @@ class RoomMembersListScreen @Inject constructor(
             //Fetch the Room name for the roomId
             scope.launch {
                 delay(1000)
-                roomName.value = roomId ?: "null"
+                roomName.value = roomId?.full ?: "null"
             }
         }
 
