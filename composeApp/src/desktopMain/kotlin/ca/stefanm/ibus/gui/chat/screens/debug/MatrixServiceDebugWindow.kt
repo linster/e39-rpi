@@ -22,9 +22,14 @@ class MatrixServiceDebugWindow @Inject constructor(
     override val defaultPosition = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
     override val size = DpSize(600.dp, 400.dp)
-    override val title = "Key Event Simulator"
+    override val title = "Matrix Service Debug Window"
 
     override fun content(): @Composable WindowScope.() -> Unit = {
 
+        //Login pane
+
+        // start/stop service
+
+        // the logout/clear buttons.
     }
 }

@@ -1,11 +1,13 @@
 package ca.stefanm.ca.stefanm.ibus.gui.chat.service
 
 import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.logging.Logger
 import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import net.folivo.trixnity.client.MatrixClient
 import net.folivo.trixnity.client.fromStore
@@ -20,7 +22,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+@ApplicationScope
 class MatrixService @Inject constructor(
     private val logger : Logger
 ) {
@@ -124,10 +126,13 @@ class MatrixService @Inject constructor(
     }
 
     fun getServiceState() : Flow<Boolean> {
-
+        return flowOf(false)
     }
 
 
+    fun getMatrixClient() : MatrixClient? {
+        return matrixClient
+    }
 
     //Exposed for the settings page
     suspend fun logout() {
