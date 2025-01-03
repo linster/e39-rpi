@@ -21,6 +21,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.*
+import net.folivo.trixnity.core.model.RoomId
 import javax.inject.Inject
 
 @ScreenDoc(
@@ -44,7 +45,7 @@ class ChatRoomScreen @Inject constructor(
 
         fun openForRoomId(
             navigationNodeTraverser: NavigationNodeTraverser,
-            roomId : String
+            roomId : RoomId
         ) {
             navigationNodeTraverser.navigateToNodeWithParameters(
                 ChatRoomScreen::class.java,
@@ -56,10 +57,10 @@ class ChatRoomScreen @Inject constructor(
     }
 
     data class ChatRoomScreenInputParameters(
-        val roomId : String
+        val roomId : RoomId
     )
 
-    var roomId : String? = null
+    var roomId : RoomId? = null
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { param ->
 
@@ -73,7 +74,7 @@ class ChatRoomScreen @Inject constructor(
             //Fetch the Room name for the roomId
             scope.launch {
                 delay(1000)
-                roomName.value = roomId ?: "null"
+                roomName.value = roomId?.full ?: "null"
             }
         }
 

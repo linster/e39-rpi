@@ -47,6 +47,7 @@ class RoomSelectorScreen @Inject constructor(
     sealed class RoomSelectorResult {
         object NoSelection : RoomSelectorResult()
         data class RoomSelected(val roomId: RoomId) : RoomSelectorResult()
+        data class DmSelected(val roomId: RoomId) : RoomSelectorResult()
     }
 
     override val thisClass: Class<out NavigationNode<RoomSelectorResult>>
@@ -129,7 +130,11 @@ class RoomSelectorScreen @Inject constructor(
                 listOf(
                     TextMenuItem("Select Room", onClicked = {
                         navigationNodeTraverser.setResultAndGoBack(this,
-                            RoomSelectorResult.RoomSelected(displayedRoom.roomId)
+                            if (displayedRoom.underlyingRoom.isDirect) {
+                                RoomSelectorResult.DmSelected(displayedRoom.roomId)
+                            } else {
+                                RoomSelectorResult.RoomSelected(displayedRoom.roomId)
+                            }
                         )
                         modalMenuService.closeSidePaneOverlay(true)
                     }),
