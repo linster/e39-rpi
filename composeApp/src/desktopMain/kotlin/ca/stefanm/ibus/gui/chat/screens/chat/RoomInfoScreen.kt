@@ -97,6 +97,8 @@ class RoomInfoScreen @Inject constructor(
                             onClicked = { navigationNodeTraverser.goBack() }
                         ),
                         TextMenuItem(
+                            "Is DM? : ${room.isDirect}", isSelectable = false, onClicked = {}),
+                        TextMenuItem(
                             "Membership Count: ${userList.value.count()}",
                             isSelectable = false,
                             onClicked = {}

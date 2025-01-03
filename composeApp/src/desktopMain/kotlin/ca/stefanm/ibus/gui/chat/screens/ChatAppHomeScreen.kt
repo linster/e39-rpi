@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.chat.MostRecentStorage
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
@@ -12,11 +13,14 @@ import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.gui.chat.screens.chat.RoomInfoScreen
 import ca.stefanm.ibus.gui.chat.screens.chat.RoomSelectorScreen
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
+import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
@@ -35,14 +39,14 @@ import javax.inject.Inject
 @AutoDiscover
 class ChatAppHomeScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val matrixService: MatrixService
+    private val matrixService: MatrixService,
+    private val mostRecentStorage: MostRecentStorage,
+    private val notificationHub: NotificationHub
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = ChatAppHomeScreen::class.java
 
-    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-
-        //TODO login if the client is null, or if it's not null but also not logged in.
+    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { params ->
 
         LaunchedEffect(Unit) {
             if (matrixService.getMatrixClient() == null
@@ -50,7 +54,20 @@ class ChatAppHomeScreen @Inject constructor(
                 navigationNodeTraverser.navigateToNode(LoginScreen::class.java)
             }
         }
+
         //If there is an incoming result for a room selection, open the room. (and save the result)
+        if (params != null && params.resultFrom == RoomSelectorScreen::class.java) {
+            when (val selectionResult = params.result as? RoomSelectorScreen.RoomSelectorResult) {
+                is RoomSelectorScreen.RoomSelectorResult.DmSelected -> {
+                    mostRecentStorage.saveMostRecentDmId(selectionResult.roomId)
+                }
+                is RoomSelectorScreen.RoomSelectorResult.RoomSelected -> {
+                    mostRecentStorage.saveMostRecentRoomId(selectionResult.roomId)
+                }
+                else -> {}
+            }
+        }
+
 
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -61,12 +78,33 @@ class ChatAppHomeScreen @Inject constructor(
                     TextMenuItem(
                         "Enter most recent room",
                         onClicked = {
-                            ChatRoomScreen.openForRoomId(navigationNodeTraverser, "sop")
+                            val mostRecentRoom = mostRecentStorage.loadMostRecentRoomId()
+                            if (mostRecentRoom != null) {
+                                ChatRoomScreen.openForRoomId(navigationNodeTraverser, mostRecentRoom)
+                            } else {
+                                notificationHub.postNotificationBackground(Notification(
+                                    Notification.NotificationImage.MESSAGE_CIRCLE,
+                                    "Matrix Chat",
+                                    "Cannot load room, please select one"
+                                ))
+
+                            }
                         }
                     ),
                     TextMenuItem(
                         "Enter most recent DM",
-                        onClicked = {}
+                        onClicked = {
+                            val mostRecentDm = mostRecentStorage.loadMostRecentDmId()
+                            if (mostRecentDm != null) {
+                                ChatRoomScreen.openForRoomId(navigationNodeTraverser, mostRecentDm)
+                            } else {
+                                notificationHub.postNotificationBackground(Notification(
+                                    Notification.NotificationImage.MESSAGE_CIRCLE,
+                                    "Matrix Chat",
+                                    "Cannot load DM, please select one"
+                                ))
+                            }
+                        }
                     )
                 ),
                 ne = listOf(

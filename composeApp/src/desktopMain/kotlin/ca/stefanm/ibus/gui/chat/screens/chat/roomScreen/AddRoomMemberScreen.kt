@@ -11,6 +11,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import kotlinx.coroutines.launch
+import net.folivo.trixnity.core.model.RoomId
 import javax.inject.Inject
 
 @ScreenDoc(
@@ -29,7 +30,7 @@ class AddRoomMemberScreen @Inject constructor(
     companion object {
         const val TAG = "AddRoomMemberScreen"
 
-        fun openForRoom(navigationNodeTraverser: NavigationNodeTraverser, roomId: String) {
+        fun openForRoom(navigationNodeTraverser: NavigationNodeTraverser, roomId: RoomId) {
             navigationNodeTraverser.navigateToNodeWithParameters(AddRoomMemberScreen::class.java,
                 AddRoomMemberScreenInitialParameters(roomId)
             )
@@ -37,10 +38,10 @@ class AddRoomMemberScreen @Inject constructor(
     }
 
     data class AddRoomMemberScreenInitialParameters(
-        val roomId : String
+        val roomId : RoomId
     )
 
-    private var storedRoomId : String? = null
+    private var storedRoomId : RoomId? = null
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
         val scope = rememberCoroutineScope()
@@ -68,7 +69,7 @@ class AddRoomMemberScreen @Inject constructor(
     }
 
 
-    private suspend fun addPersonToRoom(roomId: String, personId : String) {
+    private suspend fun addPersonToRoom(roomId: RoomId, personId : String) {
         //TODO add the person
 
         notificationHub.postNotification(

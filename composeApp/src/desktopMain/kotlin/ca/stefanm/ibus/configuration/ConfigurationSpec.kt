@@ -206,4 +206,9 @@ object E39Config : ConfigSpec() {
             "sidePanelScreenInstructionConsumerIsEnabled"
         )
     }
+
+    object MatrixMostRecentlyUsedConfig : ConfigSpec() {
+        val mostRecentRoomId by optional<String?>(null, "mostRecentRoomId")
+        val mostRecentDmId by optional<String?>(null, "mostRecentDmId")
+    }
 }
