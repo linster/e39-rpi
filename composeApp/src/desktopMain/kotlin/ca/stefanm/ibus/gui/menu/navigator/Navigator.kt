@@ -28,6 +28,7 @@ import ca.stefanm.ibus.di.*
 import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
+import ca.stefanm.ibus.gui.chat.screens.chat.RoomInfoScreen
 import ca.stefanm.ibus.gui.chat.screens.chat.RoomSelectorScreen
 import ca.stefanm.ibus.gui.generalSettings.*
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
@@ -119,7 +120,8 @@ class NavigationModule {
         personPickerScreen: PersonPickerScreen,
         addRoomMemberScreen: AddRoomMemberScreen,
         loginScreen: LoginScreen,
-        roomSelectorScreen: RoomSelectorScreen
+        roomSelectorScreen: RoomSelectorScreen,
+        roomInfoScreen: RoomInfoScreen,
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -169,7 +171,8 @@ class NavigationModule {
         personPickerScreen,
         addRoomMemberScreen,
         loginScreen,
-        roomSelectorScreen
+        roomSelectorScreen,
+        roomInfoScreen
     )
 }
 
