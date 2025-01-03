@@ -9,6 +9,7 @@ import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.gui.chat.screens.chat.RoomSelectorScreen
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -35,6 +36,11 @@ class ChatAppHomeScreen @Inject constructor(
         get() = ChatAppHomeScreen::class.java
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
+
+        //TODO login if the client is null, or if it's not null but also not logged in.
+
+        //If there is an incoming result for a room selection, open the room. (and save the result)
+
         Column(modifier = Modifier.fillMaxSize()) {
 
             BmwSingleLineHeader("Matrix Chat")
@@ -55,7 +61,9 @@ class ChatAppHomeScreen @Inject constructor(
                 ne = listOf(
                     TextMenuItem(
                         "View Rooms",
-                        onClicked = {}
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(RoomSelectorScreen::class.java)
+                        }
                     ),
                     TextMenuItem(
                         "View Contacts",
