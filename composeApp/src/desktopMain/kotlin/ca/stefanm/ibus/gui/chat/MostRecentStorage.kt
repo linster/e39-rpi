@@ -40,7 +40,7 @@ class MostRecentStorage @Inject constructor(
 
     fun loadMostRecentDmId(): RoomId? {
         //Not ideal that this re-implements the roomId serializer
-        val full = configurationStorage.config[E39Config.MatrixMostRecentlyUsedConfig.mostRecentRoomId]
+        val full = configurationStorage.config[E39Config.MatrixMostRecentlyUsedConfig.mostRecentDmId]
         return if (full != null) {
             RoomId(full)
         } else {
