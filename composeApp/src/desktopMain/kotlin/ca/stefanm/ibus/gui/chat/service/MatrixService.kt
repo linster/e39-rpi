@@ -55,6 +55,9 @@ class MatrixService @Inject constructor(
             // The database is unencrypted with no password. Matrix server secrets
             // are stored in the db. Good luck, have fun!
             val matrixFolder = File(ConfigurationStorage.e39BaseFolder, "matrix")
+            if (!matrixFolder.exists()) {
+                matrixFolder.mkdirs()
+            }
             val matrixDbFile = File(matrixFolder, "db.db")
             return Database.connect("jdbc:sqlite:${matrixDbFile.absolutePath}", "org.sqlite.JDBC")
         }
@@ -119,6 +122,10 @@ class MatrixService @Inject constructor(
                 repositoriesModule = provideMatrixDataStore(provideMatrixDatabase()),
                 mediaStore = mediaStore
             ).getOrNull()
+
+            if (matrixClient == null) {
+                logger.w(TAG, "login() just set the client to null")
+            }
 
             start()
         }
