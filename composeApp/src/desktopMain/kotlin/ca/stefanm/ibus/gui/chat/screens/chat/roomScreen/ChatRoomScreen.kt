@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatMessage
@@ -21,20 +22,26 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.*
+import net.folivo.trixnity.client.room
+import net.folivo.trixnity.client.room.message.text
 import net.folivo.trixnity.core.model.RoomId
 import javax.inject.Inject
 
 @ScreenDoc(
     screenName = "ChatRoomScreen",
     description = "Show the chat log for a room",
-    navigatesTo = []
+    navigatesTo = [
+        ScreenDoc.NavigateTo(RoomUploadsList::class),
+        ScreenDoc.NavigateTo(RoomMembersListScreen::class),
+    ]
 )
 @ScreenDoc.AllowsGoBack
 @AutoDiscover
 class ChatRoomScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val notificationHub: NotificationHub,
-    private val modalMenuService: ModalMenuService
+    private val modalMenuService: ModalMenuService,
+    private val matrixService: MatrixService
 ) : NavigationNode<Nothing>{
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -111,8 +118,12 @@ class ChatRoomScreen @Inject constructor(
     }
 
 
-    private suspend fun sendMessageToRoom(textMessage : String) : Boolean {
-        return true
+    private suspend fun sendMessageToRoom(textMessage : String) {
+        roomId?.let {
+            matrixService.getMatrixClient()?.room?.sendMessage(it) {
+                text(textMessage)
+            }
+        }
     }
 
     private suspend fun voteInPoll(pollMessage: ChatMessage.PollMessage, itemToVoteFor : ChatMessage.PollMessage.PollItem) {
@@ -163,12 +174,7 @@ class ChatRoomScreen @Inject constructor(
                         ))
 
                         scope.launch {
-                            val sendMessageResult = sendMessageToRoom(text.value)
-                            if (sendMessageResult) {
-                                //Only clear the message if send was success, so that failure isn't
-                                //tedious.
-                                inProgressMessage = ""
-                            }
+                            sendMessageToRoom(text.value)
                             modalMenuService.closeSidePaneOverlay(true)
                         }
                     }),
