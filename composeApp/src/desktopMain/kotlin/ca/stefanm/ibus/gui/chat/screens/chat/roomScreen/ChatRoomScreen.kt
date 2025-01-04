@@ -78,6 +78,8 @@ class ChatRoomScreen @Inject constructor(
             }
         }
 
+        // Load all the members
+
 
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -216,9 +218,8 @@ class ChatRoomScreen @Inject constructor(
             SidePanelMenu.SidePanelMenu(
                 title = "Room Settings",
                 @Composable {
-                    SidePanelMenu.InfoLabel("Room Name: Bob Wat")
-                    SidePanelMenu.InfoLabel("Room Id: foo")
-
+//                    SidePanelMenu.InfoLabel("Room Name: Bob Wat")
+//                    SidePanelMenu.InfoLabel("Room Id: foo")
                     //TODO room picture, centered, not too big.
                 },
                 listOf(
@@ -228,9 +229,11 @@ class ChatRoomScreen @Inject constructor(
                             RoomMembersListScreen.openForRoomId(navigationNodeTraverser, it)
                         }
                     }),
-                    TextMenuItem("Add person", onClicked = {
+                    TextMenuItem("Room Uploads List", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)
-                        roomId?.let { AddRoomMemberScreen.openForRoom(navigationNodeTraverser, it) }
+                        roomId?.let {
+                            RoomMembersListScreen.openForRoomId(navigationNodeTraverser, it)
+                        }
                     }),
                     TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true)}),
                 )

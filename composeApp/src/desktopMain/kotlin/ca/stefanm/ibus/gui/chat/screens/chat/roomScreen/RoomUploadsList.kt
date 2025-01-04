@@ -11,6 +11,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.folivo.trixnity.core.model.RoomId
 import javax.inject.Inject
 
 //List all the uploads for a room (list of small pictures)
@@ -27,7 +28,7 @@ class RoomUploadsList @Inject constructor(
 
         fun openForRoomId(
             navigationNodeTraverser: NavigationNodeTraverser,
-            roomId: String
+            roomId: RoomId
         ) {
             navigationNodeTraverser.navigateToNodeWithParameters(
                 RoomUploadsList::class.java,
@@ -40,14 +41,12 @@ class RoomUploadsList @Inject constructor(
 
 
     data class RoomUploadsListScreenParameters(
-        val roomId: String
+        val roomId: RoomId
     )
-
-    private var roomId: String? = null
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { param ->
 
-        roomId = (param?.requestParameters as? RoomUploadsListScreenParameters)?.roomId
+        val roomId = (param?.requestParameters as? RoomUploadsListScreenParameters)?.roomId
 
 
         val roomName = remember { mutableStateOf("") }
@@ -57,7 +56,7 @@ class RoomUploadsList @Inject constructor(
             //Fetch the Room name for the roomId
             scope.launch {
                 delay(1000)
-                roomName.value = roomId ?: "null"
+                roomName.value = roomId?.full ?: "null"
             }
         }
 

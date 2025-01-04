@@ -127,14 +127,14 @@ class ChatAppHomeScreen @Inject constructor(
                     TextMenuItem("Go Back", onClicked = { navigationNodeTraverser.navigateToRoot() })
                 ),
                 se = listOf(
-                    TextMenuItem(
-                        "New Chat",
-                        onClicked = {}
-                    ),
-                    TextMenuItem(
-                        "New Room",
-                        onClicked = { navigationNodeTraverser.navigateToNode(CreateRoomScreen::class.java)}
-                    )
+//                    TextMenuItem(
+//                        "New Chat",
+//                        onClicked = {}
+//                    ),
+//                    TextMenuItem(
+//                        "New Room",
+//                        onClicked = { navigationNodeTraverser.navigateToNode(CreateRoomScreen::class.java)}
+//                    )
                 )
             )
         }

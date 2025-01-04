@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -16,6 +17,8 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import net.folivo.trixnity.client.user
+import net.folivo.trixnity.core.model.UserId
 import javax.inject.Inject
 
 @ScreenDoc(
@@ -25,7 +28,8 @@ import javax.inject.Inject
 @ScreenDoc.AllowsGoBack
 @AutoDiscover
 class PersonPickerScreen @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val matrixService: MatrixService
 ) : NavigationNode<PersonPickerScreen.PersonPickerResult>{
 
     companion object {
@@ -38,15 +42,16 @@ class PersonPickerScreen @Inject constructor(
     sealed class PersonPickerResult {
         object NoChoiceMade : PersonPickerResult()
         data class ChosenPerson(
-            val personId: String
+            val personId: UserId
         ) : PersonPickerResult()
     }
     data class PickablePerson(
         val name : String,
-        val personId : String
+        val personId : UserId
     )
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
+
         Column(modifier = Modifier.fillMaxSize()) {
             BmwSingleLineHeader("Pick Person")
 

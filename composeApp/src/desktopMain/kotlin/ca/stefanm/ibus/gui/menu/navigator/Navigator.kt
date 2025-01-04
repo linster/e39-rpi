@@ -6,8 +6,6 @@ import ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.MainBtMenu
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
-import ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
-import ca.stefanm.ibus.gui.chat.screens.chat.PersonPickerScreen
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.*
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.gui.debug.hmiScreens.*
@@ -28,8 +26,7 @@ import ca.stefanm.ibus.di.*
 import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
-import ca.stefanm.ibus.gui.chat.screens.chat.RoomInfoScreen
-import ca.stefanm.ibus.gui.chat.screens.chat.RoomSelectorScreen
+import ca.stefanm.ibus.gui.chat.screens.chat.*
 import ca.stefanm.ibus.gui.generalSettings.*
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
@@ -118,10 +115,10 @@ class NavigationModule {
         roomUploadsList: RoomUploadsList,
         pictureViewerScreen: PictureViewerScreen,
         personPickerScreen: PersonPickerScreen,
-        addRoomMemberScreen: AddRoomMemberScreen,
         loginScreen: LoginScreen,
         roomSelectorScreen: RoomSelectorScreen,
         roomInfoScreen: RoomInfoScreen,
+        contactInfoScreen: ContactInfoScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -169,10 +166,10 @@ class NavigationModule {
         roomUploadsList,
         pictureViewerScreen,
         personPickerScreen,
-        addRoomMemberScreen,
         loginScreen,
         roomSelectorScreen,
-        roomInfoScreen
+        roomInfoScreen,
+        contactInfoScreen
     )
 }
 
