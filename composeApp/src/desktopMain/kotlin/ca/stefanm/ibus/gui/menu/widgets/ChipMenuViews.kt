@@ -547,3 +547,230 @@ fun ImageMenuItem(
 
     }
 }
+
+@Composable
+fun ArbitraryContentsMenuItem(
+    boxModifier : Modifier = Modifier.fillMaxWidth(),
+    labelColor : Color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+    chipOrientation: ItemChipOrientation = ItemChipOrientation.NONE,
+    isSelected: Boolean = false,
+    isSmallSize : Boolean = false,
+    onClicked : () -> Unit,
+    contents : @Composable () -> Unit
+) {
+
+    @Composable
+    fun Dp.halveIfNotPixelDoubled() : Dp = if (!ThemeWrapper.ThemeHandle.current.isPixelDoubled) (this.value / 2F).dp else this
+
+    val measurements = if (isSmallSize)
+        ThemeWrapper.ThemeHandle.current.smallItem
+    else
+        ThemeWrapper.ThemeHandle.current.bigItem
+
+
+    val chipWidth = measurements.chipWidth
+    val chipColor = ThemeWrapper.ThemeHandle.current.colors.chipColor
+    val chipHighlights = ThemeWrapper.ThemeHandle.current.colors.chipHighlights
+    val highlightWidth = measurements.highlightWidth
+
+    Box(modifier = boxModifier) {
+        Box(
+            modifier = Modifier
+                .clickable { onClicked() }
+                .then(
+                    when (chipOrientation) { //TODO N, S
+                        ItemChipOrientation.N,
+                        ItemChipOrientation.NW,
+                        ItemChipOrientation.NE -> {
+                            Modifier.padding(top = (chipWidth).dp.halveIfNotPixelDoubled(), bottom = highlightWidth.dp.halveIfNotPixelDoubled(), start = (chipWidth * 1.5).dp)
+                        }
+                        ItemChipOrientation.S,
+                        ItemChipOrientation.SW,
+                        ItemChipOrientation.SE -> {
+                            Modifier.padding(bottom = (chipWidth * 1.5).dp, top = 5.dp.halveIfNotPixelDoubled(), end = highlightWidth.dp, start = (chipWidth * 1.5).dp)
+                        }
+                        ItemChipOrientation.W -> {
+                            Modifier.padding(start = (chipWidth * 1.5).dp, top = 5.dp.halveIfNotPixelDoubled(), bottom = 5.dp.halveIfNotPixelDoubled())
+                        }
+                        else -> {
+                            Modifier.padding(
+                                top = 5.dp.halveIfNotPixelDoubled(),
+                                bottom = 5.dp.halveIfNotPixelDoubled(),
+                                start = 25.dp.halveIfNotPixelDoubled()
+                            )
+                        }
+                    }
+                )
+        ) {
+            contents()
+        }
+
+        Canvas(modifier = Modifier.matchParentSize(), onDraw = {
+            when (chipOrientation) { //TODO N, S
+                ItemChipOrientation.NW -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(0.0f, (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.height, (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset((chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset((chipWidth * 0.5).dp.toPx(), this.size.height - highlightWidth),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
+                }
+                ItemChipOrientation.NE -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(this.size.width - this.size.height, (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.width, (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset(
+                                this.size.width - (chipWidth * 0.5).dp.toPx(),
+                                this.size.height - highlightWidth
+                            ),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
+                }
+                ItemChipOrientation.E -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), 0.0f),
+                        end = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), this.size.height - highlightWidth),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                    this.drawLine(
+                        brush = SolidColor(chipHighlights),
+                        start = Offset(this.size.width - (chipWidth.dp.toPx()), 0.0f),
+                        end = Offset(this.size.width, 0.0f),
+                        strokeWidth = highlightWidth
+                    )
+                }
+                ItemChipOrientation.SE -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(this.size.width - this.size.height, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.width, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset(this.size.width - (chipWidth * 0.5).dp.toPx(), this.size.height),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
+                    this.drawLine(
+                        brush = SolidColor(chipHighlights),
+                        start = Offset(this.size.width - (chipWidth.dp.toPx()), 0.0f),
+                        end = Offset(this.size.width, 0.0f),
+                        strokeWidth = highlightWidth
+                    )
+                }
+                ItemChipOrientation.SW -> {
+                    if (!isSelected) {
+                        this.drawLine(
+                            brush = SolidColor(chipColor),
+                            start = Offset((chipWidth * 0.5).dp.toPx(), 0.0f),
+                            end = Offset((chipWidth * 0.5).dp.toPx(), this.size.height),
+                            strokeWidth = chipWidth.dp.toPx()
+                        )
+                    }
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(0.0f, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.height, this.size.height - (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                    this.drawLine(
+                        brush = SolidColor(chipHighlights),
+                        start = Offset(0.0f, highlightWidth),
+                        end = Offset(chipWidth.dp.toPx(), highlightWidth),
+                        strokeWidth = highlightWidth
+                    )
+                }
+                ItemChipOrientation.W -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset((chipWidth * 0.5).dp.toPx(), 0.0f),
+                        end = Offset((chipWidth * 0.5).dp.toPx(), this.size.height - highlightWidth),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                    this.drawLine(
+                        brush = SolidColor(chipHighlights),
+                        start = Offset(0.0f, highlightWidth),
+                        end = Offset(chipWidth.dp.toPx(), highlightWidth),
+                        strokeWidth = highlightWidth
+                    )
+                }
+                else -> {}
+            }
+
+            if (isSelected) {
+                //Selected
+
+                val rectY =
+                    if (chipOrientation == ItemChipOrientation.NW || chipOrientation == ItemChipOrientation.NE) {
+                        (highlightWidth) + chipWidth.dp.toPx()
+                    } else {
+                        highlightWidth * 0.5
+                    }.toFloat()
+
+                val rectHeight =
+                    if (chipOrientation == ItemChipOrientation.SW || chipOrientation == ItemChipOrientation.SE) {
+                        this.size.height - rectY - (chipWidth.dp.toPx()) - (highlightWidth)
+                    } else {
+                        this.size.height - rectY
+                    }.toFloat()
+
+                this.drawRect(
+                    color = Color.Green,
+                    topLeft = Offset(
+                        x = 0F,
+                        y = rectY
+                    ),
+                    style = Stroke(width = highlightWidth),
+                    size = Size((this.size.width - (highlightWidth * 0.5)).toFloat(), rectHeight)
+                )
+
+                this.drawRect(
+                    color = Color.Red,
+                    topLeft = Offset(
+                        x =
+                            if (chipOrientation == ItemChipOrientation.E ||
+                                chipOrientation == ItemChipOrientation.SE ||
+                                chipOrientation == ItemChipOrientation.NE
+                            ) {
+                                this.size.width - (chipWidth.dp.toPx())
+                            } else {
+                                0.0F
+                            }, y = rectY
+                    ),
+                    style = Fill,
+                    size = Size(
+                        chipWidth.dp.toPx(),
+                        when (chipOrientation) {
+                            ItemChipOrientation.NW,
+                            ItemChipOrientation.NE,
+                            ItemChipOrientation.SW,
+                            ItemChipOrientation.SE -> this.size.height - chipWidth.dp.toPx() - highlightWidth
+                            else -> this.size.height
+                        }
+                    ),
+                )
+            }
+        })
+
+    }
+}
