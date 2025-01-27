@@ -2,12 +2,15 @@ package ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
 
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
 import com.javadocmd.simplelatlng.LatLng
+import kotlinx.datetime.Instant
 import java.io.File
 
 
 
 class MessageAuthor
-class MessageMetadata // All the matrix junk
+data class MessageMetadata(
+    val time : Instant
+)// All the matrix junk
 
 sealed class ChatMessage(
     val author : MessageAuthor,
