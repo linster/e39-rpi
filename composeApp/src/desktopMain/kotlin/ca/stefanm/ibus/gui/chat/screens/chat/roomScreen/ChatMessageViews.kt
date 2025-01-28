@@ -18,7 +18,7 @@ fun TextMessageView(textMessage: ChatMessage.TextChat, isSelected: Boolean, onCl
     ArbitraryContentsMenuItem(isSelected = isSelected, onClicked = { onClick(textMessage) }) {
         Column {
             Text(
-                text = textMessage.author.toString(),
+                text = textMessage.author.name.toString(),
                 color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                 fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 18.sp else 9.sp,
                 fontWeight = FontWeight.Normal
