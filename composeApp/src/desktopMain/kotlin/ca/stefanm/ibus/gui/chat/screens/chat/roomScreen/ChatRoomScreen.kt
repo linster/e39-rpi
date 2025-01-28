@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.folivo.trixnity.client.room
@@ -48,7 +50,7 @@ import net.folivo.trixnity.client.room.message.text
 import net.folivo.trixnity.client.room.toFlowList
 import net.folivo.trixnity.client.user
 import net.folivo.trixnity.core.model.RoomId
-import net.folivo.trixnity.core.model.events.ClientEvent
+import net.folivo.trixnity.core.model.events.*
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import javax.inject.Inject
 
@@ -131,19 +133,19 @@ class ChatRoomScreen @Inject constructor(
                 "Open Message Writer",
                 onClicked = { openMessageWriter() }
             ),
-            TextMenuItem(
-                "Open Poll Voter",
-                onClicked = { openPollVoter(
-                    ChatMessage.PollMessage(
-                        "What day",
-                        listOf(
-                            ChatMessage.PollMessage.PollItem("Tuesday", 0),
-                            ChatMessage.PollMessage.PollItem("Wednesday", 1)),
-                        MessageAuthor(),
-                        MessageMetadata(time = Clock.System.now())
-                    )
-                )}
-            ),
+//            TextMenuItem(
+//                "Open Poll Voter",
+//                onClicked = { openPollVoter(
+//                    ChatMessage.PollMessage(
+//                        "What day",
+//                        listOf(
+//                            ChatMessage.PollMessage.PollItem("Tuesday", 0),
+//                            ChatMessage.PollMessage.PollItem("Wednesday", 1)),
+//                        MessageAuthor(),
+//                        MessageMetadata(time = Clock.System.now())
+//                    )
+//                )}
+//            ),
             TextMenuItem("Room Settings", onClicked = {
                 openRoomSettingsPanel()
             }),
@@ -160,7 +162,9 @@ class ChatRoomScreen @Inject constructor(
     enum class RoomScrollMode {
         /** Ignore all knob inputs */
         None,
-        /** Rotation goes through each message, moves the virtual scroll bar */
+        /** Rotation moves the virtual scroll bar */
+        Scroll,
+        /** Rotation goes through each message, does not move the virtual scroll bar */
         ScrollSelect,
         /** Just always keep the scroll bar pinned to the max / bottom */
         AutoScrollToBottom
@@ -170,35 +174,61 @@ class ChatRoomScreen @Inject constructor(
     @Composable
     fun ChatClientScreenHolder(roomId : RoomId?) {
 
-        val messages : List<ChatMessage>
-
+        val messages : SnapshotStateList<ChatMessage>  = remember { mutableStateListOf() }
 
         LaunchedEffect(Unit, roomId) {
             roomId?.let { room ->
                 matrixService.getMatrixClient()?.let { matrixClient ->
                     matrixClient.room.getLastTimelineEvents(room)
                         .toFlowList(MutableStateFlow(20)) // we always get max. 20 TimelineEvents
-                        .collectLatest { timelineEvents -> //TODO maybe this becomes a MapLatest
-                            timelineEvents.forEach { timelineEvent ->
+                        .mapLatest { timelineEvents ->
+                            timelineEvents.map { timelineEvent ->
                                 val event = timelineEvent.first().event
                                 val content = timelineEvent.first().content?.getOrNull()
-                                val sender = event.sender.let { userId ->
-                                    matrixClient.user.getById(roomId, userId).first()?.name
+
+                                val messageAuthor = event.sender.let { userId ->
+                                    MessageAuthor(
+                                        matrixClient.user.getById(roomId, userId).first()?.name,
+                                        userId
+                                    )
                                 }
-                                when {
-                                    //TODO CONVERT the messages to ChatMessages here
-                                    //TODO then take the forEach, turn it into a map,
-                                    //TODO, then finagle it so we clear the messages list every time we update....
-                                    content is RoomMessageEventContent -> println("${sender}: ${content.body}")
-                                    content == null -> println("${sender}: not yet decrypted")
-                                    event is ClientEvent.RoomEvent.MessageEvent -> println("${sender}: $event")
-                                    event is ClientEvent.RoomEvent.StateEvent -> println("${sender}: $event")
-                                    else -> {
+
+                                val metadata = MessageMetadata(Instant.fromEpochMilliseconds(event.originTimestamp))
+
+
+                                when (content) {
+                                    null -> {
+                                        ChatMessage.TextChat(
+                                            contents = "${messageAuthor.name} not yet decrypted",
+                                            author = messageAuthor,
+                                            metadata = metadata
+                                        )
                                     }
+                                    is RoomMessageEventContent -> {
+                                        ChatMessage.TextChat(
+                                            contents = content.body,
+                                            author = messageAuthor,
+                                            metadata = metadata
+                                        )
+                                        //TODO I dunno how to make ImageChat events with the API.
+                                    }
+
+                                    is MessageEventContent,
+                                    is RedactedEventContent,
+                                    is StateEventContent,
+                                    is UnknownEventContent,
+                                    EmptyEventContent -> ChatMessage.EmptyMessage(messageAuthor, metadata)
                                 }
                             }
+
                         }
-                }
+                        .collect {
+
+                            //Put into a data structure so compose can read it
+                            messages.clear()
+                            messages.addAll(it)
+                        }
+                    }
             }
         }
 
@@ -216,8 +246,6 @@ class ChatRoomScreen @Inject constructor(
         messages : List<ChatMessage> //TODO if empty list don't show this composable
     ) {
 
-        // TODO listen to the scroll state
-
 
         val selectedIndex = remember { mutableStateOf(messages.size - 1) }
         val selectableIndices = remember { messages.indices.toList().circular() }
@@ -231,9 +259,36 @@ class ChatRoomScreen @Inject constructor(
             when (roomScrollModeFlow.value) {
                 RoomScrollMode.None -> {
                     // Do nothing
+                        knobListenerService.knobTurnEvents().collect { event ->
+                        if (event is InputEvent.NavKnobPressed) {
+                            openPopupMenu()
+                        }
+                    }
+                }
+                RoomScrollMode.Scroll -> {
+                    knobListenerService.knobTurnEvents().collect { event ->
+                        if (event is InputEvent.NavKnobPressed) {
+                            roomScrollMode.value = RoomScrollMode.None
+                            openPopupMenu()
+                        }
+                        if (event is InputEvent.NavKnobTurned) {
+                            when (event.direction) {
+                                InputEvent.NavKnobTurned.Direction.LEFT -> {
+                                    stateVertical.scrollBy(-1F * 30)
+                                }
+                                InputEvent.NavKnobTurned.Direction.RIGHT -> {
+                                    stateVertical.scrollBy(30F)
+                                }
+                            }
+                        }
+                    }
                 }
                 RoomScrollMode.ScrollSelect -> {
                     knobListenerService.knobTurnEvents().collect { event ->
+                        if (event is InputEvent.NavKnobPressed) {
+                            roomScrollMode.value = RoomScrollMode.None
+                            openChatMessagePopup(messages[selectedIndex.value])
+                        }
                         if (event is InputEvent.NavKnobTurned) {
                             when (event.direction) {
                                 InputEvent.NavKnobTurned.Direction.LEFT -> {
@@ -248,6 +303,7 @@ class ChatRoomScreen @Inject constructor(
                 }
                 RoomScrollMode.AutoScrollToBottom -> {
                     stateVertical.scrollTo(stateVertical.maxValue)
+                    roomScrollMode.value = RoomScrollMode.None
                 }
             }
         }
@@ -269,31 +325,22 @@ class ChatRoomScreen @Inject constructor(
                         .padding(20.dp)
                 ) {
 
-                    VerticalScrollbar(
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                            .fillMaxHeight(),
-                        adapter = rememberScrollbarAdapter(stateVertical)
-                    )
+//                    // TODO ScrollableColumn?
+//                    VerticalScrollbar(
+//                        modifier = Modifier.align(Alignment.CenterEnd)
+//                            .fillMaxHeight(),
+//                        adapter = rememberScrollbarAdapter(stateVertical)
+//                    )
+//
 
                     Column(
                         Modifier.wrapContentHeight()
                     ) {
                         messages.forEachIndexed { index, message ->
                             val isSelected = index == selectableIndices[selectedIndex.value]
-                            BoxWithConstraints(
-                                modifier = Modifier.wrapContentSize()
-                            ) {
-
-                                //TODO I dunno about this....
-                                LaunchedEffect(selectedIndex.value) {
-                                    if (selectedIndex.value > index) {
-                                        stateVertical.scrollBy(-1F * minHeight.value)
-                                    } else {
-                                        stateVertical.scrollBy(minHeight.value)
-                                    }
-                                }
 
                                 when (message) {
+                                    is ChatMessage.EmptyMessage -> {}
                                     is ChatMessage.GeoLocation -> {}
                                     is ChatMessage.PollMessage -> {}
                                     is ChatMessage.TextChat -> {
@@ -304,7 +351,7 @@ class ChatRoomScreen @Inject constructor(
                                         ImageMessageView(message, isSelected) { openImageMessagePopup(message) }
                                     }
                                 }
-                            }
+
                         }
                     }
                 }
@@ -344,6 +391,12 @@ class ChatRoomScreen @Inject constructor(
                     ModalMenu.ModalMenuItem(
                         title = "Close Menu",
                         onClicked = { modalMenuService.closeModalMenu() }
+                    ),
+                    ModalMenu.ModalMenuItem(
+                        title = "Scroll",
+                        onClicked = {
+                            roomScrollMode.value = RoomScrollMode.Scroll
+                        }
                     ),
                     ModalMenu.ModalMenuItem(
                         title = "Scroll-select",
@@ -494,6 +547,9 @@ class ChatRoomScreen @Inject constructor(
 
     //TODO Need a side-pane for Room Outbox (messages not yet sent), so that they can be canceled or retried
 
+    fun openChatMessagePopup(message: ChatMessage) {
+
+    }
 
     fun openTextMessagePopup(message : ChatMessage.TextChat) {
         //TODO Maybe have a side menu to select a reaction?
