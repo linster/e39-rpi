@@ -393,6 +393,13 @@ class ChatRoomScreen @Inject constructor(
                         onClicked = { modalMenuService.closeModalMenu() }
                     ),
                     ModalMenu.ModalMenuItem(
+                        title = "Close Screen",
+                        onClicked = {
+                            modalMenuService.closeModalMenu()
+                            navigationNodeTraverser.goBack()
+                        }
+                    ),
+                    ModalMenu.ModalMenuItem(
                         title = "Scroll",
                         onClicked = {
                             roomScrollMode.value = RoomScrollMode.Scroll
