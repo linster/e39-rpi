@@ -165,6 +165,8 @@ class ChatRoomScreen @Inject constructor(
     enum class RoomScrollMode {
         /** Ignore all knob inputs */
         None,
+        /** Modal menu is visible */
+        ModalMenu,
         /** Rotation moves the virtual scroll bar */
         Scroll,
         /** Rotation goes through each message, does not move the virtual scroll bar */
@@ -233,8 +235,10 @@ class ChatRoomScreen @Inject constructor(
 
         LaunchedEffect(roomScrollModeFlow.value) {
             when (roomScrollModeFlow.value) {
+                RoomScrollMode.ModalMenu -> {
+                    //Do nothing
+                }
                 RoomScrollMode.None -> {
-                    // Do nothing
                         knobListenerService.knobTurnEvents().collect { event ->
                         if (event is InputEvent.NavKnobPressed) {
                             openPopupMenu()
@@ -354,13 +358,13 @@ class ChatRoomScreen @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun openPopupMenu() {
-        roomScrollMode.value = RoomScrollMode.None
+        roomScrollMode.value = RoomScrollMode.ModalMenu
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                 menuTopLeft = IntOffset(32, 32),
                 menuWidth = 512
             ).toNormalModalMenuDimensions(),
-            autoCloseOnSelect = true,
+            autoCloseOnSelect = false,
             menuData = ModalMenu(
                 chipOrientation = ItemChipOrientation.W,
                 items = listOf(
@@ -378,19 +382,23 @@ class ChatRoomScreen @Inject constructor(
                     ModalMenu.ModalMenuItem(
                         title = "Scroll",
                         onClicked = {
+                            modalMenuService.closeModalMenu()
                             roomScrollMode.value = RoomScrollMode.Scroll
                         }
                     ),
                     ModalMenu.ModalMenuItem(
                         title = "Scroll-select",
                         onClicked = {
+
                             roomScrollMode.value = RoomScrollMode.ScrollSelect
+                            modalMenuService.closeModalMenu()
                         }
                     ),
                     ModalMenu.ModalMenuItem(
                         title = "Scroll to bottom",
                         onClicked = {
                             roomScrollMode.value = RoomScrollMode.AutoScrollToBottom
+                            modalMenuService.closeModalMenu()
                         }
                     ),
                     ModalMenu.ModalMenuItem(
@@ -416,6 +424,8 @@ class ChatRoomScreen @Inject constructor(
 
     //Need a side-pane for message building
     fun openMessageWriter() {
+//        modalMenuService.closeModalMenu()
+//        roomScrollMode.value = RoomScrollMode.None
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
             val scope = rememberCoroutineScope()
             val text = remember { mutableStateOf(inProgressMessage) }
@@ -442,7 +452,8 @@ class ChatRoomScreen @Inject constructor(
                                 text.value = newText
                                 inProgressMessage = newText
                                 openMessageWriter()
-                            }
+                            },
+                            onCloseWithoutEntry = { modalMenuService.closeModalMenu() ; openMessageWriter() }
                         )
                     }),
                     TextMenuItem("Send", onClicked = {
@@ -455,10 +466,12 @@ class ChatRoomScreen @Inject constructor(
                         scope.launch {
                             sendMessageToRoom(text.value)
                             modalMenuService.closeSidePaneOverlay(true)
+                            roomScrollMode.value = RoomScrollMode.None
                         }
                     }),
                     TextMenuItem("Go Back", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)
+                        roomScrollMode.value = RoomScrollMode.None
                     })
                 )
             )
