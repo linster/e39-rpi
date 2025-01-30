@@ -23,9 +23,10 @@ data class MessageAuthor(val name : String? = null, val userId: UserId) : StateO
 }
 data class MessageMetadata(
     val time : Instant,
-    val eventId : EventId
+    val eventId : EventId,
+    val isEncrypted : Boolean = false
 ) : StateObject {
-    val backingList = mutableStateListOf(time.toEpochMilliseconds().toString(), eventId.full)
+    val backingList = mutableStateListOf(time.toEpochMilliseconds().toString(), eventId.full, isEncrypted)
     override val firstStateRecord: StateRecord
         get() = backingList.firstStateRecord
 
