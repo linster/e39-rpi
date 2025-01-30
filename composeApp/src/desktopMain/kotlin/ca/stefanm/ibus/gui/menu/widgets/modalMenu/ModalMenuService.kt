@@ -187,10 +187,10 @@ class ModalMenuService @Inject constructor(
                 menuData = menuData.copy(
                     items = menuData.items
                         .reduceUpdateOnClick { existingOnClick ->
-                            existingOnClick()
                             if (autoCloseOnSelect) {
                                 closeModalMenu()
                             }
+                            existingOnClick()
                         }.let {
                             knobListenerService
                                 .listenForKnob(it,
@@ -223,7 +223,8 @@ class ModalMenuService @Inject constructor(
     fun showKeyboard(
         type : Keyboard.KeyboardType,
         prefilled : String = "",
-        onTextEntered : (entered : String) -> Unit
+        onCloseWithoutEntry : () -> Unit = this::closeModalMenu,
+        onTextEntered : (entered : String) -> Unit,
     ) {
         _modalMenuOverlay.value = {
             Keyboard.showKeyboard(
@@ -231,7 +232,7 @@ class ModalMenuService @Inject constructor(
                 prefilled = prefilled,
                 knobListenerService = knobListenerService,
                 onTextEntered = { onTextEntered(it); closeModalMenu() },
-                closeWithoutEntry = this::closeModalMenu
+                closeWithoutEntry = { onCloseWithoutEntry() }
             )()
         }
     }

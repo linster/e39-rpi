@@ -71,8 +71,7 @@ suspend fun MessageFetcher(room: RoomId, matrixClient: MatrixClient, logger: Log
             }
         }
         .collect { wat ->
-
-            onNewMessages(wat)
+            onNewMessages(wat.reversed())
         }
 
 }
