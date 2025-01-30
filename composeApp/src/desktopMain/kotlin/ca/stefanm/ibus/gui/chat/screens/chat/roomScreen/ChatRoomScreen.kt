@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ImageMessageView
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.MessageFetcher
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.TextMessageView
 import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -37,17 +38,18 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.folivo.trixnity.client.room
 import net.folivo.trixnity.client.room.message.text
 import net.folivo.trixnity.client.room.toFlowList
+import net.folivo.trixnity.client.roomEventEncryptionServices
+import net.folivo.trixnity.client.store.eventId
+import net.folivo.trixnity.client.store.isEncrypted
 import net.folivo.trixnity.client.user
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.events.*
@@ -69,7 +71,8 @@ class ChatRoomScreen @Inject constructor(
     private val notificationHub: NotificationHub,
     private val modalMenuService: ModalMenuService,
     private val matrixService: MatrixService,
-    private val knobListenerService: KnobListenerService
+    private val knobListenerService: KnobListenerService,
+    private val logger: Logger
 ) : NavigationNode<Nothing>{
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -177,58 +180,32 @@ class ChatRoomScreen @Inject constructor(
         val messages : SnapshotStateList<ChatMessage>  = remember { mutableStateListOf() }
 
         LaunchedEffect(Unit, roomId) {
-            roomId?.let { room ->
-                matrixService.getMatrixClient()?.let { matrixClient ->
-                    matrixClient.room.getLastTimelineEvents(room)
-                        .toFlowList(MutableStateFlow(20)) // we always get max. 20 TimelineEvents
-                        .mapLatest { timelineEvents ->
-                            timelineEvents.map { timelineEvent ->
-                                val event = timelineEvent.first().event
-                                val content = timelineEvent.first().content?.getOrNull()
 
-                                val messageAuthor = event.sender.let { userId ->
-                                    MessageAuthor(
-                                        matrixClient.user.getById(roomId, userId).first()?.name,
-                                        userId
-                                    )
-                                }
+//            launch {
+//                roomId?.let { room ->
+//                    matrixService.getMatrixClient()?.let { matrixClient ->
+//                        matrixClient.room.getLastTimelineEvents(room) {
+//
+//                        }.filterNotNull()
+//                            .flatMapMerge { it }
+//                            .flatMapMerge { it }
+//                            .collect {
+//                            logger.w("WAT", "IT ${it.content?.getOrNull()} ${it.eventId}")
+//                        }
+//                    }
+//                }
+//            }
 
-                                val metadata = MessageMetadata(Instant.fromEpochMilliseconds(event.originTimestamp))
-
-
-                                when (content) {
-                                    null -> {
-                                        ChatMessage.TextChat(
-                                            contents = "${messageAuthor.name} not yet decrypted",
-                                            author = messageAuthor,
-                                            metadata = metadata
-                                        )
-                                    }
-                                    is RoomMessageEventContent -> {
-                                        ChatMessage.TextChat(
-                                            contents = content.body,
-                                            author = messageAuthor,
-                                            metadata = metadata
-                                        )
-                                        //TODO I dunno how to make ImageChat events with the API.
-                                    }
-
-                                    is MessageEventContent,
-                                    is RedactedEventContent,
-                                    is StateEventContent,
-                                    is UnknownEventContent,
-                                    EmptyEventContent -> ChatMessage.EmptyMessage(messageAuthor, metadata)
-                                }
-                            }
-
-                        }
-                        .collect {
-
+            launch {
+                roomId?.let { room ->
+                    matrixService.getMatrixClient()?.let { matrixClient ->
+                        MessageFetcher(roomId, matrixClient, logger) {
                             //Put into a data structure so compose can read it
                             messages.clear()
                             messages.addAll(it)
                         }
                     }
+                }
             }
         }
 
@@ -242,8 +219,7 @@ class ChatRoomScreen @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     fun ChatClientScreen(
-        //TODO a parameter for the data we want to show.
-        messages : List<ChatMessage> //TODO if empty list don't show this composable
+        messages : List<ChatMessage>
     ) {
 
 
@@ -553,6 +529,7 @@ class ChatRoomScreen @Inject constructor(
 
 
     //TODO Need a side-pane for Room Outbox (messages not yet sent), so that they can be canceled or retried
+    //TODO put it in as a screen accessible from the RoomProperties pane
 
     fun openChatMessagePopup(message: ChatMessage) {
 

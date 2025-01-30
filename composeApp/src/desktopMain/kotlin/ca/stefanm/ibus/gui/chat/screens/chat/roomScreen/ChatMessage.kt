@@ -6,6 +6,7 @@ import androidx.compose.runtime.snapshots.StateRecord
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.datetime.Instant
+import net.folivo.trixnity.core.model.EventId
 import net.folivo.trixnity.core.model.UserId
 import java.io.File
 
@@ -21,9 +22,10 @@ data class MessageAuthor(val name : String? = null, val userId: UserId) : StateO
     }
 }
 data class MessageMetadata(
-    val time : Instant
+    val time : Instant,
+    val eventId : EventId
 ) : StateObject {
-    val backingList = mutableStateListOf(time.toEpochMilliseconds().toString())
+    val backingList = mutableStateListOf(time.toEpochMilliseconds().toString(), eventId.full)
     override val firstStateRecord: StateRecord
         get() = backingList.firstStateRecord
 
