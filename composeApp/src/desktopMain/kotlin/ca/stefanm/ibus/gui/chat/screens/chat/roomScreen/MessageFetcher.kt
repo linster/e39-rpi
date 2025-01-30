@@ -5,6 +5,7 @@ import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatMessage
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.MessageAuthor
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.MessageMetadata
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Instant
 import net.folivo.trixnity.client.MatrixClient
@@ -17,62 +18,61 @@ import net.folivo.trixnity.core.model.events.*
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 
 suspend fun MessageFetcher(room: RoomId, matrixClient: MatrixClient, logger: Logger, onNewMessages : (List<ChatMessage>) -> Unit) {
+
     matrixClient.room.getLastTimelineEvents(room)
         .toFlowList(MutableStateFlow(20))
         .mapLatest { timelineEvents ->
             timelineEvents.map { timelineEvent ->
-
-
-                //TODO this is a flow that might end up emitting a bunch after decryption, don't just
-                //TODO take the first one.
-                //TODO maybe make this map an inner mapLatest
-                val content = timelineEvent.onEach {
+                timelineEvent.onEach {
                     logger.w("ZOMG", "MOAR EVENT PER EVENT ${it.content?.getOrNull()}")
-                }.dropWhile { it.isEncrypted }.first().content?.getOrNull()
+                }.map {
 
-                val event = timelineEvent.first().event
-                val messageAuthor = event.sender.let { userId ->
-                    MessageAuthor(
-                        matrixClient.user.getById(room, userId).first()?.name,
-                        userId
+
+                    val event = it.event
+                    val messageAuthor = event.sender.let { userId ->
+                        MessageAuthor(
+                            matrixClient.user.getById(room, userId).first()?.name,
+                            userId
+                        )
+                    }
+
+
+                    val metadata = MessageMetadata(
+                        Instant.fromEpochMilliseconds(event.originTimestamp),
+                        event.id
                     )
-                }
 
 
-                val metadata = MessageMetadata(
-                    Instant.fromEpochMilliseconds(event.originTimestamp),
-                    event.id
-                )
+                    when (it.content?.getOrNull()) {
+                        null -> {
+                            ChatMessage.TextChat(
+                                contents = "${messageAuthor.name} not yet decrypted",
+                                author = messageAuthor,
+                                metadata = metadata.copy(isEncrypted = true)
+                            )
+                        }
 
+                        is RoomMessageEventContent -> {
+                            ChatMessage.TextChat(
+                                contents = (it.content?.getOrNull() as? RoomMessageEventContent)?.body ?: "",
+                                author = messageAuthor,
+                                metadata = metadata
+                            )
+                            //TODO I dunno how to make ImageChat events with the API.
+                        }
 
-                when (content) {
-                    null -> {
-                        ChatMessage.TextChat(
-                            contents = "${messageAuthor.name} not yet decrypted",
-                            author = messageAuthor,
-                            metadata = metadata
-                        )
+                        is MessageEventContent,
+                        is RedactedEventContent,
+                        is StateEventContent,
+                        is UnknownEventContent,
+                        EmptyEventContent -> ChatMessage.EmptyMessage(messageAuthor, metadata)
                     }
-                    is RoomMessageEventContent -> {
-                        ChatMessage.TextChat(
-                            contents = content.body,
-                            author = messageAuthor,
-                            metadata = metadata
-                        )
-                        //TODO I dunno how to make ImageChat events with the API.
-                    }
-
-                    is MessageEventContent,
-                    is RedactedEventContent,
-                    is StateEventContent,
-                    is UnknownEventContent,
-                    EmptyEventContent -> ChatMessage.EmptyMessage(messageAuthor, metadata)
-                }
+                }.first { !it.metadata.isEncrypted }
             }
-
         }
-        .collect {
-            onNewMessages(it)
+        .collect { wat ->
+
+            onNewMessages(wat)
         }
 
 }
