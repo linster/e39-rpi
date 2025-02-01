@@ -328,7 +328,9 @@ class ChatRoomScreen @Inject constructor(
                                     }
 
                                     is ChatMessage.ImageMessage -> {
-                                        ImageMessageView(message, isSelected) { openImageMessagePopup(message) }
+                                        matrixService.getMatrixClient()?.let { matrixClient ->
+                                            ImageMessageView(matrixClient, message, isSelected) { openImageMessagePopup(message) }
+                                        }
                                     }
                                 }
 

@@ -15,18 +15,16 @@ import net.folivo.trixnity.client.store.isEncrypted
 import net.folivo.trixnity.client.user
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.events.*
+import net.folivo.trixnity.core.model.events.m.room.ImageInfo
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 
 suspend fun MessageFetcher(room: RoomId, matrixClient: MatrixClient, logger: Logger, onNewMessages : (List<ChatMessage>) -> Unit) {
 
     matrixClient.room.getLastTimelineEvents(room)
-        .toFlowList(MutableStateFlow(20))
+        .toFlowList(MutableStateFlow(50))
         .mapLatest { timelineEvents ->
             timelineEvents.map { timelineEvent ->
-                timelineEvent.onEach {
-                    logger.w("ZOMG", "MOAR EVENT PER EVENT ${it.content?.getOrNull()}")
-                }.map {
-
+                timelineEvent.map {
 
                     val event = it.event
                     val messageAuthor = event.sender.let { userId ->
@@ -53,12 +51,25 @@ suspend fun MessageFetcher(room: RoomId, matrixClient: MatrixClient, logger: Log
                         }
 
                         is RoomMessageEventContent -> {
-                            ChatMessage.TextChat(
-                                contents = (it.content?.getOrNull() as? RoomMessageEventContent)?.body ?: "",
-                                author = messageAuthor,
-                                metadata = metadata
-                            )
-                            //TODO I dunno how to make ImageChat events with the API.
+
+                            if (
+                                ((it.content?.getOrNull() as? RoomMessageEventContent) is RoomMessageEventContent.FileBased) &&
+                                ((it.content?.getOrNull() as RoomMessageEventContent.FileBased).info is ImageInfo)
+                                ) {
+                                ChatMessage.ImageMessage(
+                                    text = (it.content?.getOrNull() as? RoomMessageEventContent)?.body ?: "",
+                                    image = (it.content?.getOrNull() as? RoomMessageEventContent.FileBased)?.file,
+                                    imageFileSize = (it.content?.getOrNull() as? RoomMessageEventContent.FileBased)?.info?.size ?: 0L,
+                                    author = messageAuthor,
+                                    metadata = metadata.copy(isEncrypted = false)
+                                )
+                            } else {
+                                ChatMessage.TextChat(
+                                    contents = (it.content?.getOrNull() as? RoomMessageEventContent)?.body ?: "",
+                                    author = messageAuthor,
+                                    metadata = metadata
+                                )
+                            }
                         }
 
                         is MessageEventContent,

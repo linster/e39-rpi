@@ -8,6 +8,7 @@ import com.javadocmd.simplelatlng.LatLng
 import kotlinx.datetime.Instant
 import net.folivo.trixnity.core.model.EventId
 import net.folivo.trixnity.core.model.UserId
+import net.folivo.trixnity.core.model.events.m.room.EncryptedFile
 import java.io.File
 
 
@@ -64,11 +65,12 @@ sealed class ChatMessage(
 
     class ImageMessage(
         val text : String,
-        val image : File, // Populated by trixnity-okio
+        val image : EncryptedFile?,
+        val imageFileSize : Long?,
         author: MessageAuthor,
         metadata: MessageMetadata
     ) : ChatMessage(author, metadata), StateObject {
-        val backingList = mutableStateListOf(text, image.name, author, metadata)
+        val backingList = mutableStateListOf(text, image?.url, author, metadata)
         override val firstStateRecord: StateRecord
             get() = backingList.firstStateRecord
 
