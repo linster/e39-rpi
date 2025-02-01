@@ -2,8 +2,20 @@ package ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.PlatformTextInputInterceptor
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ConjoinedListRecord
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper.defaultTheme
+import java.awt.SystemColor.window
+import java.awt.Window
+import java.awt.event.KeyEvent
+import java.awt.event.KeyEvent.*
+import java.awt.event.KeyListener
+
+object KeyboardWindowProvider {
+    val Window = compositionLocalOf<Window?> { null }
+}
 
 @Immutable
 internal interface KeyboardStateManagerScope {
@@ -32,6 +44,8 @@ internal fun StateManagedKeyboard(
     LaunchedEffect(enteredText.value, cursorPosition.value) {
         println(enteredText.value to cursorPosition.value)
     }
+
+
 
     fun String.appendToState() {
         if (cursorPosition.value == enteredText.value.length) {
@@ -94,6 +108,70 @@ internal fun StateManagedKeyboard(
                 }
                 else -> {}
             }
+        }
+    }
+
+    class OskKeyListener(private val window: Window) : KeyListener {
+        fun removeSelf() {
+            window.removeKeyListener(this)
+        }
+        override fun keyTyped(e: KeyEvent?) {
+            if (e != null) {
+//                        if (e.isShiftDown) {
+//                            isModifierCapitalized.value = !isModifierCapitalized.value
+//                        }
+                when (e.keyChar) {
+                    CHAR_UNDEFINED -> {}
+                    '\b' -> {
+                        QwertyKeyDefinition(BackSpaceLabel, BackSpaceLabel, keySize = QwertyKeyDefinition.KeySize.FLEX, specialTag = SpecialTags.BackSpace).onSelected()
+                    }
+                    else -> {
+                        e.keyChar.toString().appendToState()
+                    }
+                }
+            }
+        }
+
+        override fun keyPressed(e: KeyEvent?) {
+            if (e != null) {
+                if (e.isActionKey) {
+                    when (e.keyCode) {
+                        VK_BACK_SPACE -> {
+                            //Backspace is not an action key for some reason
+                            QwertyKeyDefinition(BackSpaceLabel, BackSpaceLabel, keySize = QwertyKeyDefinition.KeySize.FLEX, specialTag = SpecialTags.BackSpace).onSelected()
+                        }
+                        VK_END -> { cursorPosition.value = enteredText.value.length }
+                        VK_HOME -> { cursorPosition.value = 0}
+                        VK_RIGHT -> {
+                            QwertyKeyDefinition(RightArrowLabel, RightArrowLabel, specialTag = SpecialTags.RightArrow).onSelected()
+                        }
+                        VK_LEFT -> {
+                            QwertyKeyDefinition(LeftArrowLabel, LeftArrowLabel, specialTag = SpecialTags.LeftArrow).onSelected()
+                        }
+                        VK_ENTER -> {
+                            onTextEntered(enteredText.value)
+                        }
+                    }
+                }
+            }
+        }
+        override fun keyReleased(e: KeyEvent?) {}
+    }
+
+    val oskKeyListener = remember { mutableStateOf<OskKeyListener?>(null) }
+
+    KeyboardWindowProvider.Window.current?.let { window ->
+        window.requestFocus()
+        oskKeyListener.value?.removeSelf()
+        if (oskKeyListener.value == null) {
+            oskKeyListener.value = OskKeyListener(window)
+            window.addKeyListener(OskKeyListener(window))
+        }
+    }
+
+    DisposableEffect(KeyboardWindowProvider.Window.current) {
+        this.onDispose {
+            oskKeyListener.value?.removeSelf()
         }
     }
 

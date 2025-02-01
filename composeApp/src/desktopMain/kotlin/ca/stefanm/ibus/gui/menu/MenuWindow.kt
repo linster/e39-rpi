@@ -22,11 +22,14 @@ import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarClock
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.KeyboardWindowProvider
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import java.awt.event.InputEvent
+import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import javax.inject.Inject
 
 
@@ -58,7 +61,9 @@ class MenuWindow @Inject constructor(
     }
 
     override fun content(): @Composable WindowScope.() -> Unit = {
-        rootContent()
+        CompositionLocalProvider(KeyboardWindowProvider.Window provides window) {
+            rootContent()
+        }
     }
 
     override val tag: Any
