@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.VerificationSetupScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -43,49 +45,24 @@ class ChatSetupMenuRoot @Inject constructor(
         get() = ChatSetupMenuRoot::class.java
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-
-        val scope = rememberCoroutineScope()
         Column(modifier = Modifier.fillMaxSize()) {
 
             BmwSingleLineHeader("Matrix Chat Settings")
 
             FullScreenMenu.OneColumn(listOf(
                 TextMenuItem("Go Back", onClicked = { navigationNodeTraverser.goBack() }),
-                TextMenuItem("Server Credentials", onClicked = {
+                TextMenuItem("Login", onClicked = {
                     navigationNodeTraverser.navigateToNode(LoginScreen::class.java)
                 }),
                 TextMenuItem("Matrix Service", onClicked = {
                     showServiceSidePane()
                 }),
-                TextMenuItem("Notifications", onClicked = {}),
-                TextMenuItem("Logout", onClicked = { scope.launch {
-                    matrixService.logout()
-                    notificationHub.postNotification(Notification(
-                        Notification.NotificationImage.MESSAGE_CIRCLE,
-                        "Matrix Service",
-                        "Logged out"
-                    ))
-                } }),
-                TextMenuItem("Clear Local Database", onClicked = {
-                    scope.launch {
-                        matrixService.clearCache()
-                        notificationHub.postNotification(Notification(
-                            Notification.NotificationImage.MESSAGE_CIRCLE,
-                            "Matrix Service",
-                            "Cleared cache"
-                        ))
-                    }
+                TextMenuItem("Notifications", onClicked = {
+                    navigationNodeTraverser.navigateToNode(NotificationPreferencesScreen::class.java)
                 }),
-                TextMenuItem("Clear Local Media", onClicked = {
-                    scope.launch {
-                        matrixService.clearMediaCache()
-                        notificationHub.postNotification(Notification(
-                            Notification.NotificationImage.MESSAGE_CIRCLE,
-                            "Matrix Service",
-                            "Cleared media cache"
-                        ))
-                    }
-                })
+                TextMenuItem("Verification", onClicked = {
+                    navigationNodeTraverser.navigateToNode(VerificationSetupScreen::class.java)
+                }),
             ))
         }
     }
@@ -104,6 +81,34 @@ class ChatSetupMenuRoot @Inject constructor(
                 listOf(
                     TextMenuItem("Start", onClicked = { matrixService.start() }),
                     TextMenuItem("Stop", onClicked = { matrixService.stop() }),
+                    TextMenuItem("Logout", onClicked = { GlobalScope.launch {
+                        matrixService.logout()
+                        notificationHub.postNotification(Notification(
+                            Notification.NotificationImage.MESSAGE_CIRCLE,
+                            "Matrix Service",
+                            "Logged out"
+                        ))
+                    } }),
+                    TextMenuItem("Clear Local Database", onClicked = {
+                        GlobalScope.launch {
+                            matrixService.clearCache()
+                            notificationHub.postNotification(Notification(
+                                Notification.NotificationImage.MESSAGE_CIRCLE,
+                                "Matrix Service",
+                                "Cleared cache"
+                            ))
+                        }
+                    }),
+                    TextMenuItem("Clear Local Media", onClicked = {
+                        GlobalScope.launch {
+                            matrixService.clearMediaCache()
+                            notificationHub.postNotification(Notification(
+                                Notification.NotificationImage.MESSAGE_CIRCLE,
+                                "Matrix Service",
+                                "Cleared media cache"
+                            ))
+                        }
+                    }),
                     TextMenuItem("Go Back", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)})
                 )
