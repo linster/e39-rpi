@@ -45,6 +45,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
+            implementation("com.kizitonwose.calendar:compose-multiplatform:2.6.2")
+
             //https://github.com/gradle/kotlin-dsl-samples/issues/1372#issuecomment-515285784
             configurations.get("kapt").dependencies.add(project(":autoDiscovery"))
 //            kapt(project(":autoDiscovery"))

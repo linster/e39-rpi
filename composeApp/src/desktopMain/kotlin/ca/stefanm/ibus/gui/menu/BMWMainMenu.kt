@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ca.stefanm.ca.stefanm.ibus.gui.calendar.CalendarScreen
 import ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
@@ -58,6 +59,10 @@ class BMWMainMenu @Inject constructor(
                 TextMenuItem(
                     title = "Matrix Chat",
                     onClicked = { navigationNodeTraverser.navigateToNode(ChatAppHomeScreen::class.java)}
+                ),
+                TextMenuItem(
+                    title = "Calendar",
+                    onClicked = { navigationNodeTraverser.navigateToNode(CalendarScreen::class.java)}
                 )
             )
             val neItems = listOf<MenuItem>(
