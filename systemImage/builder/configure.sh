@@ -24,13 +24,15 @@ else
     touch /var/lib/e39/setup/expandedRoot
 #    raspi-config nonint do_expand_rootfs
     raspi-config --expand-rootfs
-    whiptail --infobox "Expanded root, rebooting." 20 40
-    reboot
+    #whiptail --infobox "Expanded root, rebooting." 20 40
+    #reboot
 fi
 
 
 
 apt-get update
+
+apt-get update --fix-missing
 
 whiptail --infobox "Ran apt-get update" 20 40
 
@@ -43,7 +45,7 @@ whiptail --infobox "Installed config reader deps" 20 40
 
 #X server
 apt-get install -y --no-install-recommends xserver-xorg xinit \
-  lightdm realvnc-vnc-server \
+  lightdm \
   x11-xserver-utils jwm xterm fonts-noto fonts-opensymbol \
   fonts-noto-color-emoji
   

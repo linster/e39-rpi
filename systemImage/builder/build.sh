@@ -44,6 +44,7 @@ EOF
 
 chmod -R 0777 intermediate
 
+#cp ../../build/compose/jars/e39Rpi-linux-x64-1.0.0.jar ./intermediate/e39/e39Rpi-linux-x64-1.0.0.jar
 cp ../../build/compose/jars/e39Rpi-linux-x64-1.0.0.jar ./intermediate/e39/e39Rpi-linux-x64-1.0.0.jar
 
 chmod -R 0777 intermediate

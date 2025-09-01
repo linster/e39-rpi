@@ -18,6 +18,7 @@ systemctl enable vncserver-virtuald.service
 
 
 #Setup auto-login
+# TODO STEFAN This line failed so the rest of the script didn't run
 sudo raspi-config nonint do_boot_behaviour B4
 
 #Turn off screen blanking
