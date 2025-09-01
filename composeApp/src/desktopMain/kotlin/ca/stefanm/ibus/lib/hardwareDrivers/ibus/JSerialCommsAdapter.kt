@@ -52,7 +52,7 @@ class JSerialCommsAdapter @Inject constructor(
 @ConfiguredCarScope
 class BlockingJSerialCommsReader @Inject constructor(
     private val logger: Logger,
-    serialPortProvider: JSerialCommsSerialPortProvider,
+    private val serialPortProvider: JSerialCommsSerialPortProvider,
     private val coroutineScope: CoroutineScope,
     private val flowDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val readerDispatcher : CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -73,7 +73,10 @@ class BlockingJSerialCommsReader @Inject constructor(
             .flowOn(flowDispatcher)
             .mapNotNull { it.toIbusMessage() }
             .onStart { setupJSerialComm() }
-            .onCompletion { readerJob?.cancel(ForegroundPlatform.PlatformShutdownCancellationException()) }
+            .onCompletion {
+                readerJob?.cancel(ForegroundPlatform.PlatformShutdownCancellationException())
+                port.closePort()
+            }
     }
 
     private val rawSerialPackets = Channel<UByteArray>()
@@ -89,7 +92,11 @@ class BlockingJSerialCommsReader @Inject constructor(
             while (true) {
                 val bytesAvailable = port.bytesAvailable()
                 if (bytesAvailable == 0) { yield() }
-                if (bytesAvailable == -1) { logger.w(TAG, "Port not open") ; break }
+                if (bytesAvailable == -1) {
+                    logger.w(TAG, "Port not open")
+                    serialPortProvider.setupSerialPort()
+                    port.openPort().let { logger.d(TAG, "Port opening was successful: $it") }
+                }
 
                 val readBytes = ByteArray(bytesAvailable)
 //                port.readBytes(readBytes, bytesAvailable.toLong())
@@ -203,7 +210,7 @@ class JSerialCommsSerialPortProvider @Inject constructor(
 
     val serialPort : SerialPort = setupSerialPort()
 
-    private fun setupSerialPort() : SerialPort {
+    fun setupSerialPort() : SerialPort {
         val port = try {
             SerialPort.getCommPort(deviceConfiguration.iBusInterfaceUri)
         } catch (e : SerialPortInvalidPortException) {
