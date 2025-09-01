@@ -105,6 +105,7 @@ fun MenuItem(
     val chipWidth = measurements.chipWidth
     val chipColor = ThemeWrapper.ThemeHandle.current.colors.chipColor
     val chipHighlights = ThemeWrapper.ThemeHandle.current.colors.chipHighlights
+    val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
     val highlightWidth = measurements.highlightWidth
 
     Box(modifier = boxModifier) {
@@ -270,7 +271,7 @@ fun MenuItem(
                     }.toFloat()
 
                 this.drawRect(
-                    color = Color.Green,
+                    color = selectedColor, //Color.Green,
                     topLeft = Offset(
                         x = 0F,
                         y = rectY
@@ -280,7 +281,7 @@ fun MenuItem(
                 )
 
                 this.drawRect(
-                    color = Color.Red,
+                    color = selectedColor, //Color.Red,
                     topLeft = Offset(
                         x =
                         if (chipOrientation == ItemChipOrientation.E ||
