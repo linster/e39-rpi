@@ -15,7 +15,8 @@ class ExceptionHandler @Inject constructor(
 ) {
 
     val handler : CoroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-        logger.e("CarServiceUncaughtExceptionHandler", throwable.message.toString(), throwable)
+        logger.e("CarServiceUncaughtExceptionHandler", throwable.toString(), throwable)
+        println(throwable.printStackTrace())
         notificationHub.postNotificationBackground(Notification(
             Notification.NotificationImage.ALERT_OCTAGON,
             "Uncaught Car Services Exception ${throwable.message}"
