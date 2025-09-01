@@ -8,9 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.awtEventOrNull
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpSize
@@ -102,7 +104,17 @@ class KeyEventSimulator @Inject constructor(
 
                 Row {
                     Button(
-                        modifier = Modifier.padding(5.dp),
+                        modifier = Modifier.padding(5.dp).onPreviewKeyEvent {
+                            if (it.awtEventOrNull?.keyCode == KeyEvent.VK_LEFT) {
+                                sendInputEvent(
+                                    InputEvent.NavKnobTurned(
+                                        direction = InputEvent.NavKnobTurned.Direction.LEFT,
+                                        clicks = steps.value.text.toIntOrNull() ?: 1))
+
+                                true
+                            }
+                            false
+                        },
                         onClick = { sendInputEvent(
                             InputEvent.NavKnobTurned(
                             direction = InputEvent.NavKnobTurned.Direction.LEFT,

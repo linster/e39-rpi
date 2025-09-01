@@ -129,7 +129,7 @@ object HalfScreenMenu {
     }
 
     @Composable
-    internal fun TwoColumn(
+    fun TwoColumn(
         leftItems: List<MenuItem>,
         rightItems: List<MenuItem>
     ) {
