@@ -1,24 +1,31 @@
 package ca.stefanm.ca.stefanm.ibus.gui.calendar
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
+import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
-import com.kizitonwose.calendar.compose.yearcalendar.rememberYearCalendarState
 import com.kizitonwose.calendar.core.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDate
 import javax.inject.Inject
 
@@ -36,16 +43,15 @@ class CalendarScreen @Inject constructor(
     private val modalMenuService: ModalMenuService
 ) : NavigationNode<Nothing> {
 
-//    https://github.com/jimmyale3102/compose-calendar
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = CalendarScreen::class.java
 
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
         Column(modifier = Modifier.fillMaxSize()) {
-            HalfScreenMenu.TopHalfTwoColumn(
+            HalfScreenMenu.TwoColumn(
                 leftItems = listOf(TextMenuItem(title = "Go Back", onClicked = { navigationNodeTraverser.goBack() })),
-                rightItems = listOf(TextMenuItem(title = "Calendar Menu", onClicked = {  })),
+                rightItems = listOf(TextMenuItem(title = "Calendar Menu", onClicked = { showCalendarViewMenu() })),
             )
             val currentDate = remember { LocalDate.now() }
             val currentMonth = remember { YearMonth.now() }
@@ -62,18 +68,84 @@ class CalendarScreen @Inject constructor(
             val state2 = rememberCalendarState()
 
             //https://github.com/kizitonwose/Calendar/blob/main/docs/Compose.md
-            MonthCalendar()
+
+
+            val calendarViewModeState = calendarViewMode.collectAsState(CalendarView.MonthCalendar)
+
+            when (calendarViewModeState.value) {
+                CalendarView.MonthCalendar -> BoxWithConstraints(modifier = Modifier.fillMaxHeight().border(2.dp, Color.Red)) { MonthCalendar() }
+                CalendarView.WeekCalendar -> WeekCalendar()
+                else -> {}
+            }
         }
     }
 
     enum class CalendarView {
         MonthCalendar,
         WeekCalendar,
-        TodaysAgenda
+        TodaysAgenda,
+        TodoList
+    }
+
+    private val calendarViewMode = MutableStateFlow(CalendarView.MonthCalendar)
+
+    private fun showCalendarViewMenu() {
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "Calendar Options",
+                @Composable {
+                    """
+                         
+                    """.trimIndent().split('\n').forEach { InfoLabel(it) }
+                },
+                listOf(
+                    TextMenuItem("Month View", onClicked = { calendarViewMode.value = CalendarView.MonthCalendar }),
+                    TextMenuItem("Week View", onClicked = { calendarViewMode.value = CalendarView.WeekCalendar }),
+                    TextMenuItem("Agenda View", onClicked = { calendarViewMode.value = CalendarView.TodaysAgenda }),
+                    TextMenuItem("TodoList View", onClicked = { calendarViewMode.value = CalendarView.TodoList }),
+                    TextMenuItem("New Event", onClicked = {  }),
+                    TextMenuItem("New Todo", onClicked = {  }),
+                    TextMenuItem("Go Back", onClicked = {})
+                ).map { it.copy(onClicked = { it.onClicked; modalMenuService.closeSidePaneOverlay(true)}) }
+            )
+        }
+
     }
 
     @Composable
     fun MonthCalendar() {
+
+
+        val currentMonth = remember { YearMonth.now() }
+        val startMonth = remember { currentMonth }
+
+        val state = rememberCalendarState(
+            startMonth = startMonth
+        )
+
+        //Try the MonthContainer
+        HorizontalCalendar(
+            modifier = Modifier.fillMaxHeight(),
+            state = state,
+            userScrollEnabled = false,
+            dayContent = @Composable { day ->
+                Box(
+                    modifier = Modifier
+                        .border(2.dp, Color.Black)
+                        .fillMaxWidth()
+                        .height( 50.dp ),
+                        //.aspectRatio(1f), // This is important for square sizing!
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = day.date.dayOfMonth.toString())
+                }
+            }
+        )
+
+    }
+
+    @Composable
+    fun WeekCalendar() {
 
     }
 }
