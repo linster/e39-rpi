@@ -40,13 +40,23 @@ class KnobListenerService @Inject constructor(
         }
     }
 
+    val listenerEnabled : MutableStateFlow<Boolean> = MutableStateFlow(true)
+
+    fun enableListener() {
+        listenerEnabled.value = true
+    }
+
+    fun disableListener() {
+        listenerEnabled.value = false
+    }
+
     @Composable
     inline fun <reified T> listenForKnob(
         /** This is the list data the knob will scroll through */
         listData : List<T>,
 
         /** This is a lambda that is applied to each item in the list
-         *  marking that is is selected. Return the item with the appropriate
+         *  marking that is selected. Return the item with the appropriate
          *  flag set so that the UI can know it's selected.
          */
         crossinline onSelectAdapter : (item : T, isNowSelected : Boolean) -> T,
@@ -86,10 +96,10 @@ class KnobListenerService @Inject constructor(
             }
 
             inputEvents
-//                .onSubscription { logger.d("BAZBAT", "onSubscription") }
-//                .onEmpty { logger.d("BAZBAT", "onEmpty") }
-//                .onEach { logger.d("BAZBAT", "onEach") }
-//                .onCompletion { logger.d("BAZBAT", "onCompletion") }
+                .takeWhile {
+                    logger.d("WAT", "I am ${this@KnobListenerService.hashCode()} and enable is ${listenerEnabled.value}")
+                    listenerEnabled.value
+                }
                 .collect { event ->
 
                 //logger.d("WAT", "EVENT WAT: $event")

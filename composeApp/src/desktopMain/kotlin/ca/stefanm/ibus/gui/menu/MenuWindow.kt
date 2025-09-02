@@ -12,6 +12,7 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -22,15 +23,17 @@ import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarClock
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.KeyboardWindowProvider
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.*
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import java.awt.event.InputEvent
-import java.awt.event.KeyEvent
-import java.awt.event.KeyListener
+import java.awt.Window
+import java.awt.event.*
+import java.awt.event.KeyEvent.*
 import javax.inject.Inject
+import javax.inject.Named
 
 
 @ApplicationScope
@@ -41,13 +44,20 @@ class MenuWindow @Inject constructor(
     private val notificationHub: NotificationHub,
     private val bottomBarClock: BottomBarClock,
     private val modalMenuService: ModalMenuService,
-    private val realKnobListenerService: KnobListenerService,
+
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerServiceMain: KnobListenerService,
+
+    @Named(ApplicationModule.KNOB_LISTENER_MODAL)
+    private val knobListenerServiceModal: KnobListenerService,
+
     private val configurationStorage: ConfigurationStorage,
-    private val themeConfigurationStorage: ThemeConfigurationStorage
+    private val themeConfigurationStorage: ThemeConfigurationStorage,
+    @Named(ApplicationModule.INPUT_EVENTS_WRITER) val inputEventsWriter : MutableSharedFlow<ca.stefanm.ibus.car.bordmonitor.input.InputEvent>,
 ) : WindowManager.E39Window {
 
     companion object {
-        val MenuWindowKnobListener = compositionLocalOf { DaggerApplicationComponent.create().knobListenerService() }
+        val MenuWindowKnobListener = compositionLocalOf { DaggerApplicationComponent.create().knobListenerServiceMain() }
     }
 
     override val title: String
@@ -62,6 +72,10 @@ class MenuWindow @Inject constructor(
 
     override fun content(): @Composable WindowScope.() -> Unit = {
         CompositionLocalProvider(KeyboardWindowProvider.Window provides window) {
+
+            val isKeyboardShowingState = modalMenuService.isKeyboardShowing.collectAsState(false)
+
+
             rootContent()
         }
     }
@@ -72,30 +86,17 @@ class MenuWindow @Inject constructor(
     @Composable
     private fun rootContent() {
 
-        //TODO, a KnobListener needs to be a CompositionLocal passed down all the way through
-        //TODO so we can avoid chains of passing it in as a screen parameter.
-        //TODO this is the root node of the composition so it's a pretty good place to put it.
-        //TODO https://developer.android.com/jetpack/compose/compositionlocal
-
-        val dummyKnobListenerService = KnobListenerService(MutableSharedFlow())
-        val providedKnobListenerService = remember { mutableStateOf(realKnobListenerService) }
-
         ThemeWrapper.ThemedUiWrapper(
             themeConfigurationStorage.getTheme().collectAsState(themeConfigurationStorage.getStoredTheme()).value
         ) {
             PaneManager(
                 banner = null,
-                sideSplit = {
+                sideSplit = @Composable {
                     modalMenuService.sidePaneOverlay.collectAsState().value.let {
-                        if (it.ui != null) {
-                            providedKnobListenerService.value = dummyKnobListenerService
-                            CompositionLocalProvider(
-                                MenuWindowKnobListener provides realKnobListenerService
-                            ) {
-                                it.ui?.invoke()
-                            }
-                        } else {
-                            providedKnobListenerService.value = realKnobListenerService
+                        CompositionLocalProvider(
+                            MenuWindowKnobListener provides knobListenerServiceModal
+                        ) {
+                            it.ui?.invoke()
                         }
                     }
                 },
@@ -127,7 +128,7 @@ class MenuWindow @Inject constructor(
 
 
                         CompositionLocalProvider(
-                            MenuWindowKnobListener provides providedKnobListenerService.value
+                            MenuWindowKnobListener provides knobListenerServiceMain
                         ) {
                             with(currentNode.value) {
                                 node.provideMainContent().invoke(incomingResult)
@@ -138,12 +139,7 @@ class MenuWindow @Inject constructor(
                 },
                 mainContentOverlay = {
                     modalMenuService.modalMenuOverlay.collectAsState().value.let {
-                        if (it != null) {
-                            providedKnobListenerService.value = dummyKnobListenerService
-                            it.invoke()
-                        } else {
-                            providedKnobListenerService.value = realKnobListenerService
-                        }
+                        it?.invoke()
                     }
                 }
             )

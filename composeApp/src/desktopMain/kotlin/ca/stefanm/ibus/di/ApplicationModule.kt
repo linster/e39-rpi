@@ -73,7 +73,12 @@ interface ApplicationComponent {
 
     fun windowManager() : WindowManager
 
-    fun knobListenerService() : KnobListenerService
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    fun knobListenerServiceMain() : KnobListenerService
+
+    @Named(ApplicationModule.KNOB_LISTENER_MODAL)
+    fun knobListenerServiceModal() : KnobListenerService
+
     fun modalMenuService() : ModalMenuService
     fun notificationHub() : NotificationHub
 //    @Named(ApplicationModule.INPUT_EVENTS) fun inputEvents() : SharedFlow<InputEvent>
@@ -101,6 +106,9 @@ class ApplicationModule {
         //Messages sent to rest of car
         const val IBUS_MESSAGE_INGRESS = "IbusInput"
         const val IBUS_MESSAGE_OUTPUT_CHANNEL = "IbusOutput"
+
+        const val KNOB_LISTENER_MAIN = "KnobListenerMain"
+        const val KNOB_LISTENER_MODAL = "KnobListenerModal"
 
         private val ibusOutputChannel = Channel<IBusMessage>(capacity = Channel.UNLIMITED)
 
@@ -176,4 +184,22 @@ class ApplicationModule {
     @Provides
     @ApplicationScope
     fun provideNotificationHub() : NotificationHub = notificationHub
+
+    @Provides
+    @ApplicationScope
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    fun provideKnobListenerServiceMain(
+        @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>
+    ) : KnobListenerService {
+        return KnobListenerService(inputEvents)
+    }
+
+    @Provides
+    @ApplicationScope
+    @Named(ApplicationModule.KNOB_LISTENER_MODAL)
+    fun provideKnobListenerServiceModal(
+        @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>
+    ) : KnobListenerService {
+        return KnobListenerService(inputEvents)
+    }
 }

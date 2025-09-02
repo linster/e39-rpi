@@ -5,6 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.DisposableEffectResult
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -16,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.ApplicationScope
@@ -24,6 +28,7 @@ import ca.stefanm.ibus.gui.map.MapViewer
 import ca.stefanm.ibus.gui.map.OverlayProperties
 import ca.stefanm.ibus.gui.map.PoiOverlay
 import ca.stefanm.ibus.gui.map.widget.MapScale
+import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
@@ -38,6 +43,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
+import javax.inject.Named
 
 object SidePanelMenu {
     @Composable
@@ -141,7 +147,10 @@ object SidePanelMenu {
 @ExperimentalCoroutinesApi
 @ApplicationScope
 class ModalMenuService @Inject constructor(
-    private val knobListenerService: KnobListenerService
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerServiceMain: KnobListenerService,
+    @Named(ApplicationModule.KNOB_LISTENER_MODAL)
+    private val knobListenerServiceModal: KnobListenerService,
 ) {
     private val _modalMenuOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
     val modalMenuOverlay = _modalMenuOverlay.asStateFlow()
@@ -153,6 +162,8 @@ class ModalMenuService @Inject constructor(
 
     private val _sidePaneOverlay = MutableStateFlow(SidePaneOverlay())
     val sidePaneOverlay = _sidePaneOverlay.asStateFlow()
+
+    val isKeyboardShowing = MutableStateFlow(false)
 
     interface ModalMenuDimensions {
         val menuTopLeft: IntOffset
@@ -181,6 +192,14 @@ class ModalMenuService @Inject constructor(
         autoCloseOnSelect : Boolean = true
     ) {
         _modalMenuOverlay.value = @Composable {
+            LaunchedEffect(Unit) {
+                knobListenerServiceMain.disableListener()
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    knobListenerServiceMain.enableListener()
+                }
+            }
             ModalChipMenuWindowOverlay(
                 menuTopLeft = dimensions.menuTopLeft,
                 menuWidth = dimensions.menuWidth,
@@ -192,7 +211,7 @@ class ModalMenuService @Inject constructor(
                             }
                             existingOnClick()
                         }.let {
-                            knobListenerService
+                            knobListenerServiceModal
                                 .listenForKnob(it,
                                     onSelectAdapter = { item, isNowSelected ->
                                         item.copy(isSelected = isNowSelected)
@@ -218,6 +237,7 @@ class ModalMenuService @Inject constructor(
 
     fun closeModalMenu() {
         _modalMenuOverlay.value = null
+        knobListenerServiceMain.enableListener()
     }
 
     fun showKeyboard(
@@ -226,13 +246,22 @@ class ModalMenuService @Inject constructor(
         onCloseWithoutEntry : () -> Unit = this::closeModalMenu,
         onTextEntered : (entered : String) -> Unit,
     ) {
+        isKeyboardShowing.value = true
         _modalMenuOverlay.value = {
+            LaunchedEffect(Unit) {
+                knobListenerServiceMain.disableListener()
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    knobListenerServiceMain.enableListener()
+                }
+            }
             Keyboard.showKeyboard(
                 type = type,
                 prefilled = prefilled,
-                knobListenerService = knobListenerService,
-                onTextEntered = { onTextEntered(it); closeModalMenu() },
-                closeWithoutEntry = { onCloseWithoutEntry() }
+                knobListenerService = knobListenerServiceModal,
+                onTextEntered = { isKeyboardShowing.value = false; onTextEntered(it); closeModalMenu() },
+                closeWithoutEntry = { isKeyboardShowing.value = false; onCloseWithoutEntry() }
             )()
         }
     }
@@ -242,7 +271,17 @@ class ModalMenuService @Inject constructor(
         contents : @Composable () -> Unit
     ) {
         _sidePaneOverlay.value = SidePaneOverlay(
-            ui = contents,
+            ui = @Composable {
+                LaunchedEffect(Unit) {
+                    knobListenerServiceMain.disableListener()
+                }
+                DisposableEffect(Unit) {
+                    onDispose {
+                        knobListenerServiceMain.enableListener()
+                    }
+                }
+                contents()
+            },
             darkenBackground = darkenBackground
         )
     }
