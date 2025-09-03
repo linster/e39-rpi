@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.gui.menu.Notification
@@ -57,7 +59,8 @@ class LoginScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val matrixService: MatrixService,
     private val modalMenuService: ModalMenuService,
-    private val notificationHub: NotificationHub
+    private val notificationHub: NotificationHub,
+    private val configurationStorage: ConfigurationStorage
 ) : NavigationNode<LoginScreen.LoginScreenResult>{
 
     // Should return a result if the login is okay so that we don't have
@@ -158,7 +161,11 @@ class LoginScreen @Inject constructor(
 
             scope.launch {
                 matrixService.start()
-                delay(8 * 500)
+                if (configurationStorage.config[E39Config.CarPlatformConfigSpec._isPi]) {
+                    delay(8000)
+                } else {
+                    delay(4000)
+                }
                 when (matrixService.getMatrixClient()?.loginState?.value) {
                     MatrixClient.LoginState.LOGGED_IN -> onRequestScreenStateUpdate(ScreenState.SUCCESS)
                     MatrixClient.LoginState.LOGGED_OUT_SOFT -> onRequestScreenStateUpdate(ScreenState.PROMPT_CREDENTIALS)

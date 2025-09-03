@@ -2,6 +2,8 @@ package ca.stefanm.ca.stefanm.ibus.gui.chat.service
 
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.lib.logging.Logger
 import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
@@ -24,7 +26,8 @@ import javax.inject.Singleton
 
 @ApplicationScope
 class MatrixService @Inject constructor(
-    private val logger : Logger
+    private val logger : Logger,
+    private val notificationHub: NotificationHub
 ) {
 
     private companion object Dependencies {
@@ -121,7 +124,20 @@ class MatrixService @Inject constructor(
                 password = password,
                 repositoriesModule = provideMatrixDataStore(provideMatrixDatabase()),
                 mediaStore = mediaStore
-            ).getOrNull()
+            ).fold(
+                onSuccess = { it },
+                onFailure = {
+                    logger.e(TAG, "Failed to log in: $it", it)
+                    notificationHub.postNotification(
+                        Notification(
+                            Notification.NotificationImage.ALERT_TRIANGLE,
+                            "Matrix failed to log in",
+                            "Exception: ${it.message}"
+                        )
+                    )
+                    null
+                }
+            )
 
             if (matrixClient == null) {
                 logger.w(TAG, "login() just set the client to null")

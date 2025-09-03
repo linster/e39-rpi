@@ -180,24 +180,9 @@ class ChatRoomScreen @Inject constructor(
     fun ChatClientScreenHolder(roomId : RoomId?) {
 
         val messages : SnapshotStateList<ChatMessage>  = remember { mutableStateListOf() }
+        val messagesIsEmpty = derivedStateOf { messages.isEmpty() }
 
         LaunchedEffect(Unit, roomId) {
-
-//            launch {
-//                roomId?.let { room ->
-//                    matrixService.getMatrixClient()?.let { matrixClient ->
-//                        matrixClient.room.getLastTimelineEvents(room) {
-//
-//                        }.filterNotNull()
-//                            .flatMapMerge { it }
-//                            .flatMapMerge { it }
-//                            .collect {
-//                            logger.w("WAT", "IT ${it.content?.getOrNull()} ${it.eventId}")
-//                        }
-//                    }
-//                }
-//            }
-
             launch {
                 roomId?.let { room ->
                     matrixService.getMatrixClient()?.let { matrixClient ->
@@ -211,10 +196,22 @@ class ChatRoomScreen @Inject constructor(
             }
         }
 
-
-
-        if (messages.isNotEmpty()) {
-            ChatClientScreen(messages)
+        key(messages, messagesIsEmpty.value) {
+            if (!messagesIsEmpty.value) {
+                ChatClientScreen(messages)
+            } else {
+                FullScreenMenu.OneColumn(
+                    listOf(
+                    TextMenuItem(
+                        title = "Loading Chats...",
+                        isSelectable = false,
+                        onClicked = {}),
+                    TextMenuItem(
+                        "Go Back",
+                        onClicked = { navigationNodeTraverser.goBack() }
+                    )
+                ))
+            }
         }
     }
 
@@ -384,8 +381,8 @@ class ChatRoomScreen @Inject constructor(
                     ModalMenu.ModalMenuItem(
                         title = "Scroll",
                         onClicked = {
-                            modalMenuService.closeModalMenu()
                             roomScrollMode.value = RoomScrollMode.Scroll
+                            modalMenuService.closeModalMenu()
                         }
                     ),
                     ModalMenu.ModalMenuItem(
