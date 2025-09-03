@@ -164,11 +164,22 @@ class ConfiguredCarModule(
         cliRelayReaderWriter: CliRelayReaderWriter,
         rpiRelayReaderWriter: RpiRelayReaderWriter
     ) : RelayReaderWriter {
-        return if (deviceConfiguration.isPi) {
-            rpiRelayReaderWriter
-        } else {
-            cliRelayReaderWriter
-        }
+// STEFAN in 2025: I wrote this thinking I'd one day have an i2c relay board
+// STEFAN in 2025: on the RPi, and it would turn on a cooling fan. Cooling never
+// STEFAN in 2025: turned out to be a problem IRL, and I never did install the i2c pins
+// STEFAN in 2025: on the HAT I made, so this doesn't work anyways. The Pi4j has a link error
+// STEFAN in 2025: at runtime anyways:
+// e39@raspberrypi:~ $ cat hmi.log | grep -a exception
+//ERROR : CarServiceUncaughtExceptionHandler / java.lang.UnsatisfiedLinkError:
+// 'int com.pi4j.jni.I2C.i2cOpen(java.lang.String)' exception: {java.lang.UnsatisfiedLinkError:
+// 'int com.pi4j.jni.I2C.i2cOpen(java.lang.String)'} 'int com.pi4j.jni.I2C.i2cOpen(java.lang.String)' kotlin.Unit
+//        return if (deviceConfiguration.isPi) {
+//            rpiRelayReaderWriter
+//        } else {
+//            cliRelayReaderWriter
+//        }
+
+        return cliRelayReaderWriter
     }
 
 }

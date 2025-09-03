@@ -58,7 +58,11 @@ whiptail --infobox "Installed X server" 20 40
 # Multimedia
 apt-get install -y pipewire libspa-0.2-bluetooth pulseaudio-utils wireplumber
 
+# Matrix chat needs this to login
+apt-get install -y limbolm3
 
+# RelayReaderWriter needs this so it can turn on the CPU fan
+apt-get install -y i2c-tools
 
 # Old
 #apt-get install -y --no-install-recommends xserver-xorg xinit git \

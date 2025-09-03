@@ -43,7 +43,7 @@ class CoolingFanController @Inject constructor(
         }
         prevTemp = currentTemp
 
-        coolingFanOn = currentTemp > 30.0
+        coolingFanOn = currentTemp > 70.0
         delay(8 * 1000)
     }
 
