@@ -100,31 +100,34 @@ class ChatRoomScreen @Inject constructor(
 
     var roomId : RoomId? = null
 
-    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { param ->
+    override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = content@ { param ->
 
         roomId = (param?.requestParameters as? ChatRoomScreenInputParameters)?.roomId
 
-
-        val roomName = remember { mutableStateOf("") }
-
-        val scope = rememberCoroutineScope()
-        LaunchedEffect(Unit) {
-            //Fetch the Room name for the roomId
-            scope.launch {
-                delay(1000)
-                roomName.value = roomId?.full ?: "null"
-            }
+        if (roomId == null) {
+            logger.w(TAG, "RoomId not provided")
+            return@content
         }
 
-        // Load all the members
+        val matrixClient = matrixService.getMatrixClient()
+        if (matrixClient == null) {
+            logger.w(TAG, "Could not get matrix client, going back")
+            navigationNodeTraverser.goBack()
+            return@content
+        }
+
+        val room = matrixClient.room.getById(roomId!!).collectAsState(null)
+
+        val roomName = room.value?.name?.explicitName ?: "No Room name"
+
+        val scope = rememberCoroutineScope()
+
+
 
 
         Column(modifier = Modifier.fillMaxSize()) {
 
-            BmwSingleLineHeader("Room: ${roomName.value}")
-
-
-//            DebugMenu()
+            BmwSingleLineHeader("Room: $roomName")
             ChatClientScreenHolder(roomId)
         }
     }

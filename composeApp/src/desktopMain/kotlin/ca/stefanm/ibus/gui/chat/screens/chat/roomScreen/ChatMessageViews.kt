@@ -76,7 +76,7 @@ fun ImageMessageView(matrixClient: MatrixClient, imageMessage: ChatMessage.Image
             ).fold(
                 onSuccess = {
                     it.onEach {
-                        println("WAT GOT A PICTURE ${imageMessage.image.url} ${it.size} / ${imageMessage.imageFileSize}")
+//                        println("WAT GOT A PICTURE ${imageMessage.image.url} ${it.size} / ${imageMessage.imageFileSize}")
                     }.runningReduce { accumulator, value ->
                         byteArrayOf(*accumulator, *value)
                     }.dropWhile {

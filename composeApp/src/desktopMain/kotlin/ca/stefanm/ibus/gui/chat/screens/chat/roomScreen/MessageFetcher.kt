@@ -17,6 +17,8 @@ import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.events.*
 import net.folivo.trixnity.core.model.events.m.room.ImageInfo
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
+import net.folivo.trixnity.client.flattenValues
+import net.folivo.trixnity.client.flatten
 
 suspend fun MessageFetcher(room: RoomId, matrixClient: MatrixClient, logger: Logger, onNewMessages : (List<ChatMessage>) -> Unit) {
 
@@ -76,11 +78,18 @@ suspend fun MessageFetcher(room: RoomId, matrixClient: MatrixClient, logger: Log
                         is RedactedEventContent,
                         is StateEventContent,
                         is UnknownEventContent,
-                        EmptyEventContent -> ChatMessage.EmptyMessage(messageAuthor, metadata)
+                        EmptyEventContent -> {
+                            logger.w("MessageFetcher", it.toString())
+                            ChatMessage.EmptyMessage(messageAuthor, metadata)
+                        }
                     }
-                }.first { !it.metadata.isEncrypted }
+                }
+                    //.first { !it.metadata.isEncrypted }
+//                    .dropWhile { it.metadata.isEncrypted }
+              //      .first()
             }
         }
+        .flatten()
         .collect { wat ->
             onNewMessages(wat.reversed())
         }
