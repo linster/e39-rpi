@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="e39@192.168.0.81:22" type="ssh/sftp" uuid="25b75063-72fe-4ddf-ba5c-ae6fcf8e2c5d">
+        <config>
+          <option name="projectRootOnTarget" value="/var/lib/e39" />
+          <option name="serverName" value="e39@192.168.0.81:22 password" />
+        </config>
+        <ContributedStateBase type="GradleRuntime">
+          <config />
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>

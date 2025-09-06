@@ -47,7 +47,7 @@ cat << EOF > /home/${username}/e39.sh
 #!/bin/bash
 amixer -q set PCM 95%
 export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" 
-java -jar /var/lib/e39/e39Rpi-linux-x64-1.0.0.jar > /home/${username}/hmi.log
+java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /var/lib/e39/e39Rpi-linux-x64-1.0.0.jar > /home/${username}/hmi.log
 EOF
 
 chmod 0777 /home/${username}/e39.sh
