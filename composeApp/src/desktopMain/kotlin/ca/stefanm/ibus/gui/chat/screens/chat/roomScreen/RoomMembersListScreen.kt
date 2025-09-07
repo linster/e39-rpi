@@ -18,6 +18,7 @@ import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
@@ -105,6 +106,18 @@ class RoomMembersListScreen @Inject constructor(
 
         if (membersLoaded.value == true) {
             RoomMembersList(roomId)
+        } else {
+            FullScreenMenu.OneColumn(listOf(
+                TextMenuItem(
+                    "Loading...",
+                    isSelectable = false,
+                    onClicked = {}
+                ),
+                TextMenuItem(
+                    "Go Back",
+                    onClicked = { navigationNodeTraverser.goBack() }
+                )
+            ))
         }
 
     }

@@ -5,7 +5,7 @@ export PI_USER="e39"
 export BUILD_PI="true"
 
 ./gradlew --stop
-./gradlew clean
+#./gradlew clean
 ./gradlew packageUberJarForCurrentOs
 
 unset BUILD_PI
@@ -28,7 +28,7 @@ sshpass -f ~/.ssh/pi_pass scp `ls composeApp/build/compose/jars/*.jar` `echo $PI
 echo "Setting hmiVersion hash in /var/lib/e39/version.conf"
 sshpass -f ~/.ssh/pi_pass ssh `echo $PI_USER`@`echo $PI_IP` hocon -f /var/lib/e39/version.conf set hmiVersion.hmiHash `git log -1 --pretty=format:"%h"`
 
-sshpass -f ~/.ssh/pi_pass ssh killall java
+sshpass -f ~/.ssh/pi_pass ssh `echo $PI_USER`@`echo $PI_IP` killall java
 
 echo "Restarting display manager"
 sshpass -f ~/.ssh/pi_pass ssh -t `echo $PI_USER`@`echo $PI_IP` sudo systemctl restart display-manager

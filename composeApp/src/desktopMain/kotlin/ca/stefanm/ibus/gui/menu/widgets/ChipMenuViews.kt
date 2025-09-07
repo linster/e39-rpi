@@ -736,7 +736,7 @@ fun ArbitraryContentsMenuItem(
                     }.toFloat()
 
                 this.drawRect(
-                    color = Color.Green,
+                    color = chipColor, // Color.Green,
                     topLeft = Offset(
                         x = 0F,
                         y = rectY
@@ -746,7 +746,7 @@ fun ArbitraryContentsMenuItem(
                 )
 
                 this.drawRect(
-                    color = Color.Red,
+                    color = chipColor, //Color.Red,
                     topLeft = Offset(
                         x =
                             if (chipOrientation == ItemChipOrientation.E ||
