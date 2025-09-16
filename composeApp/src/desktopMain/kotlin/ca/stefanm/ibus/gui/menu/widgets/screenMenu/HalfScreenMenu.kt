@@ -70,7 +70,7 @@ object HalfScreenMenu {
 
         val columnContents : @Composable ColumnScope.() -> Unit = {
 
-                val colItems = items.reduceUpdateOnClick { it() ; println("items") }.let {
+                val colItems = items.let { wat ->
                     MenuWindow.MenuWindowKnobListener.current.listenForKnob(
                         listData = items,
 
