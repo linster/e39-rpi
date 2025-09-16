@@ -26,6 +26,7 @@ kotlin {
             languageSettings {
                 optIn("kotlin.time.ExperimentalTime")
                 optIn("kotlin.ExperimentalUnsignedTypes")
+                optIn("kotlin.ExperimentalCoroutinesApi")
             }
         }
         //desktopMain.dependsOn(commonMain)

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -15,8 +16,12 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +36,8 @@ import javax.inject.Inject
 class ChatSetupMenuRoot @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val matrixService: MatrixService,
-    private val notificationHub: NotificationHub
+    private val notificationHub: NotificationHub,
+    private val modalMenuService: ModalMenuService
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = ChatSetupMenuRoot::class.java
@@ -45,9 +51,11 @@ class ChatSetupMenuRoot @Inject constructor(
 
             FullScreenMenu.OneColumn(listOf(
                 TextMenuItem("Go Back", onClicked = { navigationNodeTraverser.goBack() }),
-                TextMenuItem("Server Credentials", onClicked = {}),
+                TextMenuItem("Server Credentials", onClicked = {
+                    navigationNodeTraverser.navigateToNode(LoginScreen::class.java)
+                }),
                 TextMenuItem("Matrix Service", onClicked = {
-                    // Open a side-pane to start/stop
+                    showServiceSidePane()
                 }),
                 TextMenuItem("Notifications", onClicked = {}),
                 TextMenuItem("Logout", onClicked = { scope.launch {
@@ -80,5 +88,27 @@ class ChatSetupMenuRoot @Inject constructor(
                 })
             ))
         }
+    }
+
+
+    private fun showServiceSidePane() {
+        // Open a side-pane to start/stop
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "Start/stop Matrix Service",
+                @Composable {
+                    """
+                        Start or Stop the matrix service
+                    """.trimIndent().split('\n').forEach { InfoLabel(it) }
+                },
+                listOf(
+                    TextMenuItem("Start", onClicked = { matrixService.start() }),
+                    TextMenuItem("Stop", onClicked = { matrixService.stop() }),
+                    TextMenuItem("Go Back", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)})
+                )
+            )
+        }
+
     }
 }

@@ -2,10 +2,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,9 +17,15 @@ import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
+import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenPrompts
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
@@ -33,6 +36,7 @@ import ca.stefanm.ibus.resources.*
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.folivo.trixnity.client.MatrixClient
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 ///Prompt the user for a server url, username, password
@@ -51,25 +55,39 @@ import org.jetbrains.compose.resources.painterResource
 class LoginScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val matrixService: MatrixService
+    private val matrixService: MatrixService,
+    private val modalMenuService: ModalMenuService,
+    private val notificationHub: NotificationHub
 ) : NavigationNode<LoginScreen.LoginScreenResult>{
 
     // Should return a result if the login is okay so that we don't have
     // an infinte screen loop
 
     sealed class LoginScreenResult {
-        object Failed : LoginScreenResult()
+        // we can't actually fail?
+        //object Failed : LoginScreenResult()
         object Success : LoginScreenResult()
     }
 
     override val thisClass: Class<out NavigationNode<LoginScreenResult>>
         get() = LoginScreen::class.java
 
+    enum class ScreenState {
+        LOADING,
+        PROMPT_CREDENTIALS,
+        SUCCESS,
+        FAILED
+    }
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = @Composable {
 
-//        LoginFailedMessage()
+        val screenState = remember { mutableStateOf(ScreenState.LOADING) }
 
-        LoadingScreen()
+        when (screenState.value) {
+            ScreenState.LOADING -> { LoadingScreen { newState -> screenState.value = newState} }
+            ScreenState.PROMPT_CREDENTIALS -> { PromptUserCredentialScreen { newState -> screenState.value = newState} }
+            ScreenState.FAILED -> { LoginFailedMessage() }
+            ScreenState.SUCCESS -> { LoginSuccess() }
+        }
     }
 
 
@@ -88,14 +106,11 @@ class LoginScreen @Inject constructor(
         NUKE(Res.drawable.matrix_login_phone_nuke),
     }
 
-    @Composable fun LoadingScreen() {
+    @Composable fun LoadingScreen(onRequestScreenStateUpdate : (ScreenState) -> Unit) {
         /// Show while logging in / checking login state
         val pictureScope = rememberCoroutineScope()
-
         val pictureList = LoadingPictures.values().asList().circular()
-
         val pictureIndex = remember { mutableStateOf(0) }
-
         pictureScope.launch {
             while (true) {
                 delay(500)
@@ -132,10 +147,88 @@ class LoginScreen @Inject constructor(
             }
         }
 
+        val scope = rememberCoroutineScope()
+        //TODO Also actually do some work here to log in
+        LaunchedEffect(Unit) {
+
+            //Check if we have stored credentials and can login.
+            // We'll do this by just starting the matrix service and seeing if it has a login
+            // state after a few seconds.
+        // If not, go to prompt the user.
+
+            scope.launch {
+                matrixService.start()
+                delay(8 * 500)
+                when (matrixService.getMatrixClient()?.loginState?.value) {
+                    MatrixClient.LoginState.LOGGED_IN -> onRequestScreenStateUpdate(ScreenState.SUCCESS)
+                    MatrixClient.LoginState.LOGGED_OUT_SOFT -> onRequestScreenStateUpdate(ScreenState.PROMPT_CREDENTIALS)
+                    MatrixClient.LoginState.LOGGED_OUT -> onRequestScreenStateUpdate(ScreenState.PROMPT_CREDENTIALS)
+                    MatrixClient.LoginState.LOCKED -> {
+                        notificationHub.postNotification(
+                            Notification(Notification.NotificationImage.MESSAGE_CIRCLE,
+                                "Matrix Service",
+                                "Could not login, account is locked.",
+                                Notification.NotificationDuration.LONG))
+                        onRequestScreenStateUpdate(ScreenState.FAILED)
+                    }
+                    null -> onRequestScreenStateUpdate(ScreenState.PROMPT_CREDENTIALS)
+                }
+
+            }
+
+        }
+
     }
 
-    @Composable fun PromptUserCredentialScreen() {
+    @Composable fun PromptUserCredentialScreen(onRequestScreenStateUpdate : (ScreenState) -> Unit) {
 
+        //Set the state to success or fail after completion.
+
+        val scope = rememberCoroutineScope()
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            BmwSingleLineHeader("Matrix Login")
+
+            val serverUrl = remember { mutableStateOf("https://example.org") }
+            val username = remember { mutableStateOf("") }
+            val password = remember { mutableStateOf("") }
+
+            FullScreenMenu.OneColumn(listOf(
+                TextMenuItem("Go Back", onClicked = { navigationNodeTraverser.goBack() }),
+                TextMenuItem("Server URL: ${serverUrl.value}", onClicked = {
+                    modalMenuService.showKeyboard(
+                        Keyboard.KeyboardType.FULL,
+                        prefilled = "https://somechat.ca",
+                        onTextEntered = { serverUrl.value = it }
+                    )
+                }),
+                TextMenuItem("Username: ${username.value}", onClicked = {
+                    modalMenuService.showKeyboard(
+                        Keyboard.KeyboardType.FULL,
+                        prefilled = "",
+                        onTextEntered = { username.value = it }
+                    )
+
+                }),
+                TextMenuItem("Password: ${ password.value.let { if (it.isEmpty()) "[blank]" else "[entered]" }}", onClicked = {
+                    modalMenuService.showKeyboard(
+                        Keyboard.KeyboardType.FULL,
+                        prefilled = "",
+                        onTextEntered = { password.value = it }
+                    )
+                }),
+                TextMenuItem("Login" , onClicked = {
+                    matrixService.login(serverUrl.value, username.value, password.value)
+                    notificationHub.postNotificationBackground(Notification(
+                        Notification.NotificationImage.MESSAGE_CIRCLE,
+                        "Matrix Service",
+                        "Logging In",
+                        Notification.NotificationDuration.LONG
+                    ))
+                    onRequestScreenStateUpdate(ScreenState.SUCCESS)
+                })
+            ))
+        }
     }
 
     @Composable fun LoginFailedMessage() {
@@ -168,6 +261,11 @@ class LoginScreen @Inject constructor(
             }
         }
 
+    }
+
+    @Composable fun LoginSuccess() {
+        //Set the state and gtfo
+        navigationNodeTraverser.setResultAndGoBack(this, LoginScreenResult.Success)
     }
 
 
