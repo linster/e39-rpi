@@ -143,6 +143,14 @@ fun MenuItem(
 
         Canvas(modifier = Modifier.matchParentSize(), onDraw = {
             when (chipOrientation) { //TODO N, S
+                ItemChipOrientation.N -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(0.0f, (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.width, (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                }
                 ItemChipOrientation.NW -> {
                     this.drawLine(
                         brush = SolidColor(chipColor),
@@ -297,6 +305,7 @@ fun MenuItem(
                     size = Size(
                         chipWidth.dp.toPx(),
                         when (chipOrientation) {
+                            ItemChipOrientation.N -> 0.dp.toPx()
                             ItemChipOrientation.NW,
                             ItemChipOrientation.NE,
                             ItemChipOrientation.SW,
@@ -381,6 +390,14 @@ fun ImageMenuItem(
 
         Canvas(modifier = Modifier.matchParentSize(), onDraw = {
             when (chipOrientation) {
+                ItemChipOrientation.N -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(0.0f, (chipWidth * 0.5).dp.toPx()),
+                        end = Offset(this.size.width, (chipWidth * 0.5).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                }
                 ItemChipOrientation.NW -> {
                     this.drawLine(
                         brush = SolidColor(chipColor),
