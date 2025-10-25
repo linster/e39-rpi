@@ -81,6 +81,12 @@ class CreateRoomScreen @Inject constructor(
                         )
                     }
                 ),
+                TextMenuItem(
+                    "Add People...",
+                    onClicked = {
+
+                    }
+                ),
                 TextMenuItem("Create Room",
                     onClicked = {
                         scope.launch {
@@ -102,6 +108,8 @@ class CreateRoomScreen @Inject constructor(
 
         }
     }
+
+
 
     suspend fun createRoom(
         name : String,

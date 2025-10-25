@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
+import ca.stefanm.ca.stefanm.ibus.gui.calendar.views.MonthScreen
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ImageMenuItem
@@ -21,7 +22,7 @@ import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
-interface MenuItem {
+sealed interface MenuItem {
     val isSelectable : Boolean
     val isSelected : Boolean
     val onClicked : () -> Unit
@@ -36,6 +37,7 @@ interface MenuItem {
             is TextMenuItem -> this.copy(isSelected = isSelected)
             is CheckBoxMenuItem -> this.copy(isSelected = isSelected)
             is ImageMenuItem -> this.copy(isSelected = isSelected)
+            is MonthScreen.CalendarDayView -> this.copy(isSelected = isSelected)
             else -> error("Unsupported type")
         }
     }
