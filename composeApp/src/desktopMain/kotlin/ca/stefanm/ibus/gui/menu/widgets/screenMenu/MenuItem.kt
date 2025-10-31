@@ -22,7 +22,7 @@ import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
-sealed interface MenuItem {
+interface MenuItem {
     val isSelectable : Boolean
     val isSelected : Boolean
     val onClicked : () -> Unit
@@ -37,7 +37,6 @@ sealed interface MenuItem {
             is TextMenuItem -> this.copy(isSelected = isSelected)
             is CheckBoxMenuItem -> this.copy(isSelected = isSelected)
             is ImageMenuItem -> this.copy(isSelected = isSelected)
-            is MonthScreen.CalendarDayView -> this.copy(isSelected = isSelected)
             else -> error("Unsupported type")
         }
     }

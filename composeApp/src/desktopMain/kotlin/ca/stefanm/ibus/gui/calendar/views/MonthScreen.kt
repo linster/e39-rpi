@@ -3,6 +3,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.calendar.views
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -37,7 +38,9 @@ import java.time.format.TextStyle
 import java.util.*
 import javax.inject.Inject
 
-
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion.KnobObserverBuilder
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion.KnobObserverBuilderState
 
 
 @ScreenDoc(
@@ -79,28 +82,12 @@ class MonthScreen @Inject constructor(
             firstDayOfWeek = daysOfTheWeek.first()
         )
 
+
+
+        val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger)}
         val scope = rememberCoroutineScope()
         scope.launch {
-            knobListenerService.knobTurnEvents().collect {
-
-            }
-        }
-
-        val holder = KnobListenerService.rememberArbitraryComposableHolder()
-
-
-
-        val itemsList = remember { SnapshotStateList<ConjoinedListRecord<MenuItem, Placement>>() }
-        //We're going to have to make use of the fact that listenForKnob returns a
-        // Flow<SnapshotStateList>
-
-        val selectedItems = remember(itemsList) {
-            knobListenerService.listenForKnob(
-                itemsList,
-                onSelectAdapter = { item, isNowSelected -> item.item.copyAndSetIsSelected(isNowSelected) },
-                isSelectableAdapter = { item -> item.item.isSelectable },
-                onItemClickAdapter = { item -> item.item.onClicked() }
-            )
+            knobState.subscribeEvents()
         }
 
         //Try the MonthContainer
@@ -111,40 +98,19 @@ class MonthScreen @Inject constructor(
                     .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                     .fillMaxWidth()) {
 
-                LaunchedEffect(Unit) {
-                    TextMenuItem(
-                        "<-",
-                        onClicked = {}
-                    ).let { button ->
-                        if (itemsList
-                                .none {
-                                    it.sourcePlacementEnum == Placement.TOP_BAR
-                                            && (it.item as? TextMenuItem)?.title == button.title
-                                }
-                        ) {
 
-                            itemsList.add(ConjoinedListRecord(button, Placement.TOP_BAR, 1))
-                        }
-                    }
-                }
-                selectedItems.value
-                    .find {
-                        it.sourcePlacementEnum == Placement.TOP_BAR &&
-                                it.originalItemPosition == 1 }?.let {
-                                    it.item.toView(
-                                        boxModifier = Modifier.weight(1f),
-                                        chipOrientation = ItemChipOrientation.N,
-                                    )
-                    }
-                KnobListenerService.ArbtriraryScrollable(holder) { isSelected ->
+                KnobObserverBuilder(knobState) { allocatedIndex : Int, currentIndex : Int ->
                     MenuItem(
-                        boxModifier = Modifier.weight(1f),
+                        boxModifier = Modifier.weight(1f, fill = true),
                         label = "<-",
                         chipOrientation = ItemChipOrientation.N,
-                        isSelected = isSelected,
-                        onClicked = {} //TODO STEFAN HMM....
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                        }
                     )
                 }
+
 
 
                 val measurements = ThemeWrapper.ThemeHandle.current.bigItem
@@ -172,22 +138,29 @@ class MonthScreen @Inject constructor(
                 }
 
                 Row(Modifier.weight(2F)) {
-                    MenuItem(
-                        boxModifier = Modifier.weight(1f, fill = true),
-                        label = "Menu",
-                        chipOrientation = ItemChipOrientation.N,
-                        isSelected = true,
-                        onClicked = {
-                            calendarOptionsMenu.showCalendarOptionsMenu()
-                        }
-                    )
+                    KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                        MenuItem(
+                            boxModifier = Modifier.weight(1f, fill = true),
+                            label = "Menu",
+                            chipOrientation = ItemChipOrientation.N,
+                            isSelected = allocatedIndex == currentIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                calendarOptionsMenu.showCalendarOptionsMenu()
+                            }
+                        )
+                    }
 
-                    MenuItem(
-                        boxModifier = Modifier.weight(1f, fill = true),
-                        label = "->",
-                        chipOrientation = ItemChipOrientation.N,
-                        onClicked = {}
-                    )
+                    KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                        MenuItem(
+                            boxModifier = Modifier.weight(1f, fill = true),
+                            label = "->",
+                            chipOrientation = ItemChipOrientation.N,
+                            isSelected = allocatedIndex == currentIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                            }
+                        )
+                    }
                 }
             }
             Row(modifier = Modifier
@@ -207,66 +180,51 @@ class MonthScreen @Inject constructor(
                 userScrollEnabled = false,
                 dayContent = @Composable { day ->
 
-                    CalendarDayView(
-                        day = day,
-                        isSelected = false,
-                        onClicked = {}
-                    )
-
-
-
+                    KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                        CalendarDay(
+                            day = day,
+                            isSelected = allocatedIndex == currentIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {}
+                        )
+                    }
                 }
             )
         }
 
     }
 
-    data class CalendarDayView(
-        val day : CalendarDay,
-        override val isSelectable: Boolean = true,
-        override val isSelected: Boolean,
-        override val onClicked: () -> Unit
-    ) : MenuItem {
-
-
-
-        override fun toView(
-            boxModifier: Modifier,
-            chipOrientation: ItemChipOrientation
-        ): @Composable () -> Unit {
-            return { CalendarDay(day, isSelected, onClicked) }
-        }
-
-        @Composable
-        fun CalendarDay(
-            day : CalendarDay,
-            isSelected : Boolean,
-            onClicked : () -> Unit
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                    .fillMaxWidth()
-                    .border(3.dp, if (!isSelected) Color.White else ThemeWrapper.ThemeHandle.current.colors.selectedColor)
+    @Composable
+    fun CalendarDay(
+        day : CalendarDay,
+        isSelected : Boolean,
+        onClicked : () -> Unit
+    ) {
+        Box(
+            modifier = Modifier
+                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                .fillMaxWidth()
+                .border(3.dp, if (!isSelected) Color.White else ThemeWrapper.ThemeHandle.current.colors.selectedColor)
 //                        .fillMaxWidth()
-                    .height(50.dp),
-                //.aspectRatio(1f), // This is important for square sizing!
-                contentAlignment = Alignment.Center
-            ) {
-                Row {
-                    MenuItem(
-                        boxModifier = Modifier.weight(1f),
-                        label = day.date.dayOfMonth.toString(),
-                        onClicked = { onClicked() }
-                    )
-                    Column {
-                        //Event chips
-                    }
+                .height(50.dp),
+            //.aspectRatio(1f), // This is important for square sizing!
+            contentAlignment = Alignment.Center
+        ) {
+            Row {
+                MenuItem(
+                    boxModifier = Modifier.weight(1f),
+                    label = day.date.dayOfMonth.toString(),
+                    labelColor = if (isSelected) {
+                        ThemeWrapper.ThemeHandle.current.colors.selectedColor
+                    } else {
+                        ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE
+                    },
+                    onClicked = { onClicked() }
+                )
+                Column {
+                    //Event chips
                 }
             }
         }
-
-
     }
 
 
