@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.calendar.views
+package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,9 +30,6 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
-import com.kizitonwose.calendar.core.CalendarDay
-import com.kizitonwose.calendar.core.YearMonth
-import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.launch
 import java.time.format.TextStyle
 import java.util.*
@@ -41,6 +38,7 @@ import javax.inject.Inject
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion.KnobObserverBuilderState
+import com.kizitonwose.calendar.core.*
 
 
 @ScreenDoc(
@@ -72,16 +70,19 @@ class MonthScreen @Inject constructor(
     fun MonthCalendar() {
 
 
-        val currentMonth = remember { YearMonth.now() }
-        val startMonth = remember { currentMonth }
+        val currentMonth = remember { mutableStateOf(YearMonth.now()) }
+        val startMonth = remember(currentMonth) { currentMonth.value.minusMonths(50) }
+        val endMonth = remember(currentMonth) { currentMonth.value.plusMonths(50) }
 
         val daysOfTheWeek = remember { daysOfWeek() }
 
         val state = rememberCalendarState(
             startMonth = startMonth,
-            firstDayOfWeek = daysOfTheWeek.first()
-        )
+            endMonth = endMonth,
+            firstVisibleMonth = currentMonth.value,
+            firstDayOfWeek = daysOfTheWeek.first(),
 
+        )
 
 
         val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger)}
@@ -106,7 +107,11 @@ class MonthScreen @Inject constructor(
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                            scope.launch {
+                                val newMonth = currentMonth.value.minusMonths(1)
+                                currentMonth.value = newMonth
+                                state.scrollToMonth(currentMonth.value)
+                            }
                         }
                     )
                 }
@@ -130,7 +135,9 @@ class MonthScreen @Inject constructor(
                                 top = (chipWidth).dp.halveIfNotPixelDoubled(),
                                 bottom = highlightWidth.dp.halveIfNotPixelDoubled()
                             ),
-                        label = startMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                        label = currentMonth.value.let { yearMonth ->
+                            " ${yearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${yearMonth.year}"
+                        },
                         chipOrientation = ItemChipOrientation.NONE,
                         labelColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
                         onClicked = {}
@@ -157,7 +164,11 @@ class MonthScreen @Inject constructor(
                             chipOrientation = ItemChipOrientation.N,
                             isSelected = allocatedIndex == currentIndex,
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                scope.launch {
+                                    val newMonth = currentMonth.value.plusMonths(1)
+                                    currentMonth.value = newMonth
+                                    state.scrollToMonth(currentMonth.value)
+                                }
                             }
                         )
                     }
@@ -177,7 +188,8 @@ class MonthScreen @Inject constructor(
             HorizontalCalendar(
                 modifier = Modifier.fillMaxWidth(),
                 state = state,
-                userScrollEnabled = false,
+                userScrollEnabled = true,
+                calendarScrollPaged = false,
                 dayContent = @Composable { day ->
 
                     KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->

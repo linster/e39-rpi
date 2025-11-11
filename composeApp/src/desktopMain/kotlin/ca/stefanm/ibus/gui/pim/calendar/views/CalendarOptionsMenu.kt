@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.calendar.views
+package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views
 
 import androidx.compose.runtime.Composable
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -34,11 +34,12 @@ class CalendarOptionsMenu @Inject constructor(
                 },
                 listOf(
                     TextMenuItem("Change View", onClicked = {
-                        showViewModeSelect {  }
+                        showViewModeSelect { onViewModeSelected(it) }
                     }),
                     TextMenuItem("New Event", onClicked = {  }),
                     TextMenuItem("New Todo", onClicked = {  }),
                     TextMenuItem("Go Back", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
                         navigationNodeTraverser.navigateToRoot()
                     })
                 )

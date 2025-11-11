@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.calendar
+package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.calendar.views.CalendarOptionsMenu
-import ca.stefanm.ca.stefanm.ibus.gui.calendar.views.CalendarView
-import ca.stefanm.ca.stefanm.ibus.gui.calendar.views.MonthScreen
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.CalendarOptionsMenu
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.CalendarView
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode

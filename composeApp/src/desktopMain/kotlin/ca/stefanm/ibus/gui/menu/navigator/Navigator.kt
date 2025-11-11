@@ -1,8 +1,8 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
-import ca.stefanm.ca.stefanm.ibus.gui.calendar.CalendarScreen
-import ca.stefanm.ca.stefanm.ibus.gui.calendar.views.MonthScreen
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
 import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.VerificationSetupScreen
