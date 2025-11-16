@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -35,10 +37,9 @@ import java.time.format.TextStyle
 import java.util.*
 import javax.inject.Inject
 
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion.KnobObserverBuilder
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService.Companion.KnobObserverBuilderState
 import com.kizitonwose.calendar.core.*
+
+
 
 
 @ScreenDoc(
@@ -84,12 +85,28 @@ class MonthScreen @Inject constructor(
 
         )
 
-
-        val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger)}
+        //TODO STEFAN I think the logic is fine, but what's happening is that one Input event from the key event simulator
+        //TODO STEFAN is being processed twice.
+//
+//        val subcount = remember(Unit) { mutableStateOf(1)}
+        val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
-        scope.launch {
+//        scope.launch {
+//            subcount.value = subcount.value + 1
+//            knobState.subscribeEvents()//TODO stefan wtf sub count doesn't go up, but this gets called again.
+//        }
+
+        LaunchedEffect(Unit) {
             knobState.subscribeEvents()
         }
+//
+//        LaunchedEffect(knobState) {
+//            logger.d("WAT", "new knob state!!")
+//        }
+//
+//        LaunchedEffect(subcount) {
+//            logger.d("WAT", "subcount: ${subcount.value}")
+//        }
 
         //Try the MonthContainer
 
@@ -101,6 +118,7 @@ class MonthScreen @Inject constructor(
 
 
                 KnobObserverBuilder(knobState) { allocatedIndex : Int, currentIndex : Int ->
+                    logger.d("MonthView", "<- button: (allocated, current) : $allocatedIndex, $currentIndex")
                     MenuItem(
                         boxModifier = Modifier.weight(1f, fill = true),
                         label = "<-",
@@ -146,6 +164,7 @@ class MonthScreen @Inject constructor(
 
                 Row(Modifier.weight(2F)) {
                     KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                        logger.d("MonthView", "Menu button: (allocated, current) : $allocatedIndex, $currentIndex")
                         MenuItem(
                             boxModifier = Modifier.weight(1f, fill = true),
                             label = "Menu",
@@ -158,6 +177,7 @@ class MonthScreen @Inject constructor(
                     }
 
                     KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                        logger.d("MonthView", "-> button: (allocated, current) : $allocatedIndex, $currentIndex")
                         MenuItem(
                             boxModifier = Modifier.weight(1f, fill = true),
                             label = "->",

@@ -33,13 +33,13 @@ class CliRelayReaderWriter @Inject constructor(
     private val relayState = mutableMapOf<RelayReaderWriter.Relay, Boolean>()
 
     override fun writeRelayState(relay: RelayReaderWriter.Relay, enabled: Boolean) {
-        logger.d(TAG, "Relay ${relay.name} was ${relayState.getOrDefault(relay, false)} now set to value $enabled")
+        //logger.d(TAG, "Relay ${relay.name} was ${relayState.getOrDefault(relay, false)} now set to value $enabled")
         relayState[relay] = enabled
     }
 
     override fun readRelayState(relay: RelayReaderWriter.Relay): Boolean {
         return relayState.getOrDefault(relay, false).also {
-            logger.d(TAG, "Relay ${relay.name} has value $it")
+            //logger.d(TAG, "Relay ${relay.name} has value $it")
         }
     }
 }
