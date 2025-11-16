@@ -85,28 +85,11 @@ class MonthScreen @Inject constructor(
 
         )
 
-        //TODO STEFAN I think the logic is fine, but what's happening is that one Input event from the key event simulator
-        //TODO STEFAN is being processed twice.
-//
-//        val subcount = remember(Unit) { mutableStateOf(1)}
         val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
-//        scope.launch {
-//            subcount.value = subcount.value + 1
-//            knobState.subscribeEvents()//TODO stefan wtf sub count doesn't go up, but this gets called again.
-//        }
-
         LaunchedEffect(Unit) {
             knobState.subscribeEvents()
         }
-//
-//        LaunchedEffect(knobState) {
-//            logger.d("WAT", "new knob state!!")
-//        }
-//
-//        LaunchedEffect(subcount) {
-//            logger.d("WAT", "subcount: ${subcount.value}")
-//        }
 
         //Try the MonthContainer
 

@@ -140,13 +140,13 @@ class KnobObserverBuilderState(
     }
 
     suspend fun subscribeEvents() {
-        logger.d("WAT", "subscribeEvents hash ${this.hashCode()}")
+//        logger.d("WAT", "subscribeEvents hash ${this.hashCode()}")
         service.knobTurnEvents()
             .map { event ->
-                logger.d(TAG, "got an event in subscribeEvnents: $event")
+//                logger.d(TAG, "got an event in subscribeEvnents: $event")
                 when (event) {
                     is InputEvent.NavKnobPressed -> {
-                        logger.d(TAG, "NavKnobPressed on callback with getCurrentSelectedItem(): ${getCurrentSelectedItem().value}")
+//                        logger.d(TAG, "NavKnobPressed on callback with getCurrentSelectedItem(): ${getCurrentSelectedItem().value}")
                         callbacks.getOrDefault(
                             getCurrentSelectedItem().value,
                             { logger.w(TAG, "Index ${getCurrentSelectedItem().value} clicked but has no callback") }).invoke()
