@@ -293,6 +293,11 @@ class Navigator @Inject constructor(
         val indicesToDelete = (indexNewTail+ 1 .. backStack.lastIndex)
 
         indicesToDelete.reversed().forEach { backStack.removeAt(it) }
+        if (backStack.isEmpty()) {
+            logger.w("Navigator", "CleanupBackstackDescendants of has nowhere to go, navigating to root")
+            navigateToRoot()
+            return
+        }
         _mainContentScreen.value = backStack.last()
     }
 
