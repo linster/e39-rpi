@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views
+package ca.stefanm.ibus.gui.pim.calendar.views
 
 import androidx.compose.runtime.Composable
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -6,23 +6,19 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarView
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarViewConfigRepo
 import javax.inject.Inject
 
 
-enum class CalendarView {
-    MonthCalendar,
-    WeekCalendar,
-    TodaysAgenda,
-    TodoList
-}
-
 class CalendarOptionsMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val calendarViewConfigRepo: CalendarViewConfigRepo,
     private val modalMenuService: ModalMenuService
 ) {
 
     fun showCalendarOptionsMenu(
-        onViewModeSelected : (new : CalendarView) -> Unit = {}
     ) {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
             SidePanelMenu.SidePanelMenu(
@@ -34,7 +30,7 @@ class CalendarOptionsMenu @Inject constructor(
                 },
                 listOf(
                     TextMenuItem("Change View", onClicked = {
-                        showViewModeSelect { onViewModeSelected(it) }
+                        showViewModeSelect()
                     }),
                     TextMenuItem("New Event", onClicked = {  }),
                     TextMenuItem("New Todo", onClicked = {  }),
@@ -47,10 +43,15 @@ class CalendarOptionsMenu @Inject constructor(
         }
     }
 
+    private fun changeView(view : CalendarView) {
+        modalMenuService.closeSidePaneOverlay(true)
+        calendarViewConfigRepo.screenView.value = view
+        navigationNodeTraverser.cleanupBackStackDescendentsOf(CalendarScreen::class.java)
+        navigationNodeTraverser.navigateToNode(CalendarScreen::class.java)
+    }
 
-    fun showViewModeSelect(
-        onViewModeSelected : (new : CalendarView) -> Unit
-    ) {
+
+    fun showViewModeSelect() {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
             SidePanelMenu.SidePanelMenu(
                 title = "Select View",
@@ -60,12 +61,12 @@ class CalendarOptionsMenu @Inject constructor(
                     """.trimIndent().split('\n').forEach { InfoLabel(it) }
                 },
                 listOf(
-                    TextMenuItem("Month", onClicked = { onViewModeSelected(CalendarView.MonthCalendar) }),
-                    TextMenuItem("Week", onClicked = { onViewModeSelected(CalendarView.WeekCalendar) }),
-                    TextMenuItem("Agenda", onClicked = { onViewModeSelected(CalendarView.TodaysAgenda) }),
-                    TextMenuItem("TodoList", onClicked = { onViewModeSelected(CalendarView.TodoList) }),
-                    TextMenuItem("Go Back", onClicked = {})
-                ).map { it.copy(onClicked = { it.onClicked; modalMenuService.closeSidePaneOverlay(true)}) }
+                    TextMenuItem("Month", onClicked = { changeView(CalendarView.MonthCalendar) }),
+                    TextMenuItem("One Week", onClicked = { changeView(CalendarView.OneWeekCalendar) }),
+                    TextMenuItem("Two Week", onClicked = { changeView(CalendarView.TwoWeekCalendar) }),
+                    TextMenuItem("Agenda", onClicked = { changeView(CalendarView.TodaysAgenda) }),
+                    TextMenuItem("TodoList", onClicked = { changeView(CalendarView.TodoList) })
+                )
             )
         }
     }

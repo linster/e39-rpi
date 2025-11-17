@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic
+package ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

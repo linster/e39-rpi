@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.debug.MatrixServiceDebugWindow
+import ca.stefanm.ibus.gui.chat.screens.debug.MatrixServiceDebugWindow
 import ca.stefanm.ibus.gui.debug.windows.commsDebug.PicoCommsDebugWindow
 import ca.stefanm.ibus.gui.map.guidance.GuidanceDebugWindow
 import ca.stefanm.ibus.gui.map.MapDebug

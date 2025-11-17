@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic
+package ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic
 
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService

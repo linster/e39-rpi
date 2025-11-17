@@ -12,10 +12,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ImageMessageView
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.MessageFetcher
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.TextMessageView
-import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
+import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ImageMessageView
+import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.MessageFetcher
+import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.TextMessageView
+import ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
+package ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*

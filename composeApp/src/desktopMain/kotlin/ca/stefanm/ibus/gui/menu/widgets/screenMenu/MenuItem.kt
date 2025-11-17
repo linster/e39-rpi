@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
+import ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ImageMenuItem

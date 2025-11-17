@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
+package ca.stefanm.ibus.gui.chat.screens.chat.roomScreen
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatMessage

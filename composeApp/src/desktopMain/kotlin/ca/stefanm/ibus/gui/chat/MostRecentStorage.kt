@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat
+package ca.stefanm.ibus.gui.chat
 
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config

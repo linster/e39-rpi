@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
+import ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.chat.screens.chat.ContactInfoScreen

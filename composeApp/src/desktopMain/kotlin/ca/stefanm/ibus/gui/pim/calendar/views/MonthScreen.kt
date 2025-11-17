@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views
+package ca.stefanm.ibus.gui.pim.calendar.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,8 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -38,8 +38,10 @@ import java.util.*
 import javax.inject.Inject
 
 import com.kizitonwose.calendar.core.*
-
-
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toLocalDateTime
 
 
 @ScreenDoc(
@@ -58,13 +60,13 @@ class MonthScreen @Inject constructor(
 ) : NavigationNode<Nothing> {
 
 
-    enum class Placement { TOP_BAR, CALENDAR_DAY }
-
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = MonthScreen::class.java
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-        MonthCalendar()
+        Column(Modifier.fillMaxSize()) {
+            MonthCalendar()
+        }
     }
 
     @Composable
@@ -214,6 +216,11 @@ class MonthScreen @Inject constructor(
         isSelected : Boolean,
         onClicked : () -> Unit
     ) {
+
+        val isToday : Boolean = day.date.toJavaLocalDate().dayOfYear ==
+                Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                    .dayOfYear
+
         Box(
             modifier = Modifier
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
@@ -228,7 +235,7 @@ class MonthScreen @Inject constructor(
                 MenuItem(
                     boxModifier = Modifier.weight(1f),
                     label = day.date.dayOfMonth.toString(),
-                    labelColor = if (isSelected) {
+                    labelColor = if (isSelected || isToday) {
                         ThemeWrapper.ThemeHandle.current.colors.selectedColor
                     } else {
                         ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE

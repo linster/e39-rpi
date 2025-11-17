@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.di
 
-import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixChatModule
+import ca.stefanm.ibus.gui.chat.service.MatrixChatModule
 import ca.stefanm.ibus.gui.map.MapDatabaseModule
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage

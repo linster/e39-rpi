@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.chat.MostRecentStorage
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
+import ca.stefanm.ibus.gui.chat.MostRecentStorage
+import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
+import ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
 import ca.stefanm.ibus.gui.chat.screens.chat.roomScreen.ChatRoomScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot

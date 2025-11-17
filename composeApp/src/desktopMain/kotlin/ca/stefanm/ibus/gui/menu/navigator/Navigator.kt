@@ -1,11 +1,10 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.VerificationSetupScreen
+import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
+import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
+import ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
+import ca.stefanm.ibus.gui.chat.screens.setup.VerificationSetupScreen
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.CurrentDeviceViewer
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.MainBtMenu
@@ -39,6 +38,11 @@ import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
 import ca.stefanm.ibus.gui.menu.*
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
+import ca.stefanm.ibus.gui.pim.calendar.setup.views.CalendarSetupRootScreen
+import ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
+import ca.stefanm.ibus.gui.pim.calendar.views.OneWeekScreen
+import ca.stefanm.ibus.gui.pim.calendar.views.TodoListScreen
+import ca.stefanm.ibus.gui.pim.calendar.views.TwoWeekScreen
 import ca.stefanm.ibus.lib.logging.Logger
 import dagger.Module
 import dagger.Provides
@@ -126,7 +130,11 @@ class NavigationModule {
         notificationPreferencesScreen: NotificationPreferencesScreen,
         verificationSetupScreen: VerificationSetupScreen,
         calendarScreen: CalendarScreen,
-        monthScreen: MonthScreen
+        monthScreen: MonthScreen,
+        oneWeekScreen: OneWeekScreen,
+        todoListScreen: TodoListScreen,
+        twoWeekScreen: TwoWeekScreen,
+        calendarSetupRootScreen : CalendarSetupRootScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -181,7 +189,11 @@ class NavigationModule {
         notificationPreferencesScreen,
         verificationSetupScreen,
         calendarScreen,
-        monthScreen
+        monthScreen,
+        oneWeekScreen,
+        todoListScreen,
+        twoWeekScreen,
+        calendarSetupRootScreen,
     )
 }
 

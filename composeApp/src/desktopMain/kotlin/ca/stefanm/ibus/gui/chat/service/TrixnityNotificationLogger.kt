@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.service
+package ca.stefanm.ibus.gui.chat.service
 
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.lib.logging.Logger

@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup.VerificationSetupScreen
-import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
+import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
+import ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
+import ca.stefanm.ibus.gui.chat.screens.setup.VerificationSetupScreen
+import ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.gui.chat.screens.chat.CreateRoomScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover

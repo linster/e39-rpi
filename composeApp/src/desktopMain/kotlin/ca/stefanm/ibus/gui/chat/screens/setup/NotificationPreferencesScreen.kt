@@ -1,10 +1,10 @@
-package ca.stefanm.ca.stefanm.ibus.gui.chat.screens.setup
+package ca.stefanm.ibus.gui.chat.screens.setup
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.chat.service.MatrixService
+import ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.chat.screens.chat.RoomSelectorScreen
