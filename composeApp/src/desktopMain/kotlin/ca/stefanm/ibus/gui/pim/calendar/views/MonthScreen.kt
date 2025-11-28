@@ -38,10 +38,9 @@ import java.util.*
 import javax.inject.Inject
 
 import com.kizitonwose.calendar.core.*
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
+
+import kotlin.time.Clock
 
 
 @ScreenDoc(
@@ -139,7 +138,7 @@ class MonthScreen @Inject constructor(
                                 bottom = highlightWidth.dp.halveIfNotPixelDoubled()
                             ),
                         label = currentMonth.value.let { yearMonth ->
-                            " ${yearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${yearMonth.year}"
+                            " ${yearMonth.month.toJavaMonth().getDisplayName(TextStyle.FULL, Locale.getDefault())} ${yearMonth.year}"
                         },
                         chipOrientation = ItemChipOrientation.NONE,
                         labelColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
@@ -185,7 +184,7 @@ class MonthScreen @Inject constructor(
                 for (day in daysOfTheWeek) {
                     MenuItem(
                         boxModifier = Modifier.weight(1f),
-                        label = day.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                        label = day.toJavaDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                         onClicked = {}
                     )
                 }
