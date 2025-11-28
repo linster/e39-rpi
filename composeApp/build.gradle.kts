@@ -57,8 +57,11 @@ kotlin {
 
 
             configurations.get("kapt").dependencies.add(
-                DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.54"))
+                DefaultExternalModuleDependency("com.google.dagger", "dagger-compiler", "2.57.2"))
 
+
+            configurations.get("kapt").dependencies.add(
+                DefaultExternalModuleDependency("org.jetbrains.kotlin","kotlin-metadata-jvm","2.2.0"))
 
             //implementation(compose.desktop.currentOs)
             println(System.getenv("BUILD_PI"))
@@ -116,7 +119,9 @@ kotlin {
             // So that the Exposed DB for Trixnity writes to a sqlite file
             implementation("org.xerial:sqlite-jdbc:3.44.1.0")
 
-
+            implementation("io.github.pablichjenkov:daily-agenda-view:1.2.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+            
 //            desktopTestImplementation("junit:junit:4.13.1")
         }
     }

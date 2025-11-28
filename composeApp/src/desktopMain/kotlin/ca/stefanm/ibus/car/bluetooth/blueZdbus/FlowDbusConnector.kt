@@ -72,7 +72,7 @@ class FlowDbusConnector @Inject constructor(
             it.getDevices(true)
                 .filter { it.isConnected }
                 .firstOrNull { it.address == macAddress
-                    .joinToString(separator = ":") { it.toString(16) }.toUpperCase()
+                    .joinToString(separator = ":") { it.toString(16) }.uppercase()
                 }
         }
     }
@@ -81,7 +81,7 @@ class FlowDbusConnector @Inject constructor(
         return this.getDevices(true)
                 .filter { it.isConnected }
                 .firstOrNull { it.address == macAddress
-                    .joinToString(separator = ":") { it.toString(16) }.toUpperCase()
+                    .joinToString(separator = ":") { it.toString(16) }.uppercase()
                 }
     }
 

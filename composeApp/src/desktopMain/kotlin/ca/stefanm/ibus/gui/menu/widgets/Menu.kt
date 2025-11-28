@@ -27,7 +27,7 @@ fun BmwSingleLineHeader(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = text.toUpperCase(),
+                text = text.uppercase(),
                 fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                 fontWeight = FontWeight.Bold,
                 color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor
@@ -73,7 +73,7 @@ fun BmwFullScreenTrackInfoHeader(
 @Composable
 fun TrackInfoText(text: String, size : Int = 18) {
     Text(
-        text = text.toUpperCase(),
+        text = text.uppercase(),
         fontSize = size.sp,
         fontWeight = FontWeight.Bold,
         color = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent

@@ -57,7 +57,7 @@ class DbusConnector @Inject constructor(
         return deviceManager.getDevices(true)
             .filter { it.isConnected }
             .firstOrNull { it.address == macAddress
-                        .joinToString(separator = ":") { it.toString(16) }.toUpperCase()
+                        .joinToString(separator = ":") { it.toString(16) }.uppercase()
             }
     }
 
