@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRow
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -95,89 +96,31 @@ class MonthScreen @Inject constructor(
         //Try the MonthContainer
 
         Column {
-            Row(
-                modifier = Modifier
-                    .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                    .fillMaxWidth()) {
 
-
-                KnobObserverBuilder(knobState) { allocatedIndex : Int, currentIndex : Int ->
-                    logger.d("MonthView", "<- button: (allocated, current) : $allocatedIndex, $currentIndex")
-                    MenuItem(
-                        boxModifier = Modifier.weight(1f, fill = true),
-                        label = "<-",
-                        chipOrientation = ItemChipOrientation.N,
-                        isSelected = currentIndex == allocatedIndex,
-                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                            scope.launch {
-                                val newMonth = currentMonth.value.minusMonths(1)
-                                currentMonth.value = newMonth
-                                state.scrollToMonth(currentMonth.value)
-                            }
-                        }
-                    )
-                }
-
-
-
-                val measurements = ThemeWrapper.ThemeHandle.current.bigItem
-
-
-                val chipWidth = measurements.chipWidth
-                val chipColor = ThemeWrapper.ThemeHandle.current.colors.chipColor
-                val chipHighlights = ThemeWrapper.ThemeHandle.current.colors.chipHighlights
-                val highlightWidth = measurements.highlightWidth
-                Column(
-                    Modifier.weight(3f, fill = true).fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    MenuItem(
-                        boxModifier = Modifier
-                            .padding(
-                                top = (chipWidth).dp.halveIfNotPixelDoubled(),
-                                bottom = highlightWidth.dp.halveIfNotPixelDoubled()
-                            ),
-                        label = currentMonth.value.let { yearMonth ->
-                            " ${yearMonth.month.toJavaMonth().getDisplayName(TextStyle.FULL, Locale.getDefault())} ${yearMonth.year}"
-                        },
-                        chipOrientation = ItemChipOrientation.NONE,
-                        labelColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
-                        onClicked = {}
-                    )
-                }
-
-                Row(Modifier.weight(2F)) {
-                    KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
-                        logger.d("MonthView", "Menu button: (allocated, current) : $allocatedIndex, $currentIndex")
-                        MenuItem(
-                            boxModifier = Modifier.weight(1f, fill = true),
-                            label = "Menu",
-                            chipOrientation = ItemChipOrientation.N,
-                            isSelected = allocatedIndex == currentIndex,
-                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                calendarOptionsMenu.showCalendarOptionsMenu()
-                            }
-                        )
+            NorthButtonRow(
+                knobState = knobState,
+                timePeriodLabel = currentMonth.value.let { yearMonth ->
+                    " ${yearMonth.month.toJavaMonth().getDisplayName(TextStyle.FULL, Locale.getDefault())} ${yearMonth.year}"
+                },
+                onMenuClicked = {
+                    calendarOptionsMenu.showCalendarOptionsMenu()
+                },
+                onPreviousClicked = {
+                    scope.launch {
+                        val newMonth = currentMonth.value.minusMonths(1)
+                        currentMonth.value = newMonth
+                        state.scrollToMonth(currentMonth.value)
                     }
-
-                    KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
-                        logger.d("MonthView", "-> button: (allocated, current) : $allocatedIndex, $currentIndex")
-                        MenuItem(
-                            boxModifier = Modifier.weight(1f, fill = true),
-                            label = "->",
-                            chipOrientation = ItemChipOrientation.N,
-                            isSelected = allocatedIndex == currentIndex,
-                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                scope.launch {
-                                    val newMonth = currentMonth.value.plusMonths(1)
-                                    currentMonth.value = newMonth
-                                    state.scrollToMonth(currentMonth.value)
-                                }
-                            }
-                        )
+                },
+                onNextClicked = {
+                    scope.launch {
+                        val newMonth = currentMonth.value.plusMonths(1)
+                        currentMonth.value = newMonth
+                        state.scrollToMonth(currentMonth.value)
                     }
                 }
-            }
+            )
+
             Row(modifier = Modifier
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                 .fillMaxWidth()) {
