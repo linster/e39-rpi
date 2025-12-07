@@ -31,6 +31,7 @@ dependencyResolutionManagement {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven { url = uri(path = "https://jitpack.io") }
     }
+
 }
 
 include(":composeApp")

@@ -1,6 +1,15 @@
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
+//import org.jetbrains.kotlin.gradle.internal.dsl.KotlinMultiplatformSourceSetConventionsImpl.commonMain
+//import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+//import org.jetbrains.kotlin.gradle.internal.dsl.KotlinMultiplatformSourceSetConventionsImpl.commonMain
+//import org.jetbrains.kotlin.gradle.internal.dsl.KotlinMultiplatformSourceSetConventionsImpl.commonMain
+//import org.jetbrains.kotlin.gradle.internal.dsl.KotlinMultiplatformSourceSetConventionsImpl.jvmMain
+import kotlin.io.path.Path
+
+//import org.jetbrains.kotlin.gradle.internal.dsl.KotlinMultiplatformSourceSetConventionsImpl.commonMain
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
@@ -16,7 +25,6 @@ plugins {
 kotlin {
 
     jvm("desktop") {
-        withJava()
     }
 
     sourceSets {
@@ -27,6 +35,9 @@ kotlin {
                 optIn("kotlin.time.ExperimentalTime")
                 optIn("kotlin.ExperimentalUnsignedTypes")
                 optIn("kotlin.ExperimentalCoroutinesApi")
+            }
+            kotlin {
+                include(project.rootDir.absolutePath + "/localLibs/daily-agenda-view/daily-agenda-view/src/commonMain/kotlin")
             }
         }
         //desktopMain.dependsOn(commonMain)
@@ -119,8 +130,26 @@ kotlin {
             // So that the Exposed DB for Trixnity writes to a sqlite file
             implementation("org.xerial:sqlite-jdbc:3.44.1.0")
 
-            implementation("io.github.pablichjenkov:daily-agenda-view:1.2.0")
+
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+
+            val agendaViewIsLocal = true
+
+            println("WAT WAT ${project.projectDir.parentFile}")
+//            println("WAT WAT ${projects.dailyAgendaView.dailyAgendaView.jvmMain}")
+//            println("WAT WAT ${project.projectDir.parentFile.resolve("localLibs", "daily-agenda-view", "daily-agenda-view", "src", "commonMain", "kotlin")}")
+            if (agendaViewIsLocal) {
+//                implementation(projects.e39RPi.dailyAgendaView.dailyAgendaView)
+//                implementation(
+//                    files(project.rootDir.toPath()
+//                        .resolve("localLibs", "daily-agenda-view", "daily-agenda-view", "src", "commonMain", "kotlin")
+//                        .toUri()
+//                    )
+//                )
+            } else {
+                implementation("io.github.pablichjenkov:daily-agenda-view:1.2.0")
+            }
+
 
 //            desktopTestImplementation("junit:junit:4.13.1")
         }
