@@ -1,0 +1,4 @@
+[submodule "localLibs/daily-agenda-view"]
+	path = localLibs/daily-agenda-view
+	url = https://github.com/linster/daily-agenda-view.git
+	branch = main
