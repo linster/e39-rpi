@@ -73,7 +73,11 @@ class OneWeekScreen @Inject constructor(
 
         val timeSlotsStateController = remember {
             TimeSlotsStateController(
-                timeSlotConfig = TimeSlotConfig(slotScale = 2, slotHeight = 48),
+                timeSlotConfig = TimeSlotConfig(
+
+                    slotScale = 1,
+                    slotHeight = 48
+                ),
                 eventsArrangement =
                     EventsArrangement.MixedDirections(EventWidthType.FixedSizeFillLastEvent)
             ).apply {
@@ -128,13 +132,17 @@ class OneWeekScreen @Inject constructor(
                 }
             )
 
-            TimeSlotsView(timeSlotsStateController = timeSlotsStateController) { localTimeEvent ->
-                Box(modifier = Modifier.fillMaxSize().padding(all = 2.dp).background(color = Color.Gray)) {
-                    Text(
-                        text =
-                            "${localTimeEvent.title}: ${localTimeEvent.startTime}-${localTimeEvent.endTime}",
-                        fontSize = 12.sp
-                    )
+            Box(
+                modifier = Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+            ) {
+                TimeSlotsView(timeSlotsStateController = timeSlotsStateController) { localTimeEvent ->
+                    Box(modifier = Modifier.fillMaxSize().padding(all = 2.dp).background(color = Color.Gray)) {
+                        Text(
+                            text =
+                                "${localTimeEvent.title}: ${localTimeEvent.startTime}-${localTimeEvent.endTime}",
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         }
