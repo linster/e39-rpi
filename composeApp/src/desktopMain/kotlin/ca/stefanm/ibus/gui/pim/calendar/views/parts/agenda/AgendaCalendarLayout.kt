@@ -1,16 +1,20 @@
 package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstrainedLayoutReference
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.*
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotDivider
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotLabel
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.VerticalDivider
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
@@ -20,12 +24,16 @@ import kotlinx.datetime.format.char
 fun AgendaCalendarLayout(
     modifier: Modifier = Modifier,
     events : List<CalendarEventBox> = listOf(),
-    numberOfDays : Int = 1,
+
+    //TODO startDay : SomeLocalDate,
+
+    //Number of days to display past the startDay
+    numberOfDays : Int = 3,
 
 //    onDayScroll : (minHourVisible : Int, maxHourVisible: Int, minHour : Int, maxHour : Int) -> Unit,
 ) {
 
-    ConstraintLayout(modifier = modifier) {
+    ConstraintLayout(modifier = modifier) outer@ {
 
         val minHour = 0
         val maxHour = 23
@@ -66,21 +74,70 @@ fun AgendaCalendarLayout(
         //Create a barrier to the right of the time slot labels
         val slotLabelBarrier = createEndBarrier(*slotLabelRefs.values.toTypedArray(), margin = 8.dp)
 
-        val box1Ref = createRef()
+        val slotLabelBarrierDivider = createRef()
+        VerticalDivider(
+            Modifier.constrainAs(slotLabelBarrierDivider) {
+                start.linkTo(slotLabelBarrier)
+            }
+        )
 
-        //Just for giggles lets see if we can get one box in there
+        val dayRefs = mutableMapOf<Int, ConstrainedLayoutReference>()
+        (0 .. numberOfDays).forEach { dayNumber ->
+            dayRefs[dayNumber] = createRef()
+
+            VerticalDivider(
+                Modifier.constrainAs(dayRefs[dayNumber]!!) {}
+            )
+        }
+
+        val daysChain = createHorizontalChain(*dayRefs.values.toTypedArray(), chainStyle = ChainStyle.SpreadInside)
+        constrain(daysChain) {
+            start.linkTo(slotLabelBarrier)
+            end.linkTo(parent.end)
+        }
+
+        val (box1Ref, box2Ref) = createRefs()
+        
         CalendarEventBox(
             modifier = Modifier.constrainAs(box1Ref) {
-                start.linkTo(slotLabelBarrier)
-                top.linkTo(slotBarRefs[3]!!.bottom)
+
+                top.linkTo(slotBarRefs[1]!!.bottom)
                 bottom.linkTo(slotBarRefs[8]!!.top)
                 height = Dimension.fillToConstraints
+                width = Dimension.fillToConstraints
+
+                start.linkTo(dayRefs[0]!!.end)
+                end.linkTo(dayRefs[1]!!.start)
             },
             header = "Plast",
-            body = "3-8am",
+            body = "1-8am",
             isSelected = false,
             baseColor = Color.Magenta,
             onClick = {}
         )
+
+        CalendarEventBox(
+            modifier = Modifier.constrainAs(box2Ref) {
+
+                top.linkTo(slotBarRefs[3]!!.bottom)
+                bottom.linkTo(slotBarRefs[5]!!.top)
+                height = Dimension.fillToConstraints
+                width = Dimension.fillToConstraints
+
+                start.linkTo(dayRefs[1]!!.end)
+                end.linkTo(dayRefs[2]!!.start)
+            },
+            header = "Curling",
+            body = "3-5am",
+            isSelected = false,
+            baseColor = Color.Magenta,
+            onClick = {}
+        )
+
+
+
+
+        //Just for giggles lets see if we can get one box in there
+
     }
 }
