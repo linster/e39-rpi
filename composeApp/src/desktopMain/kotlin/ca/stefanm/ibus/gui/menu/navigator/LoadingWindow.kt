@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaPartsDebugWindow
 import ca.stefanm.ibus.gui.chat.screens.debug.MatrixServiceDebugWindow
 import ca.stefanm.ibus.gui.debug.windows.DebugLaunchpad
 import ca.stefanm.ibus.gui.debug.windows.DeviceConfigurationViewerWindow
@@ -51,6 +52,7 @@ class LoadingWindow @Inject constructor(
     private val themeSelectorDebugWindow: ThemeSelectorDebugWindow,
     private val picoCommsDebugWindow: PicoCommsDebugWindow,
     private val matrixServiceDebugWindow: MatrixServiceDebugWindow,
+    private val agendaPartsDebugWindow: AgendaPartsDebugWindow,
     private val windowManager : Provider<WindowManager>
 ) {
 
@@ -148,6 +150,10 @@ class LoadingWindow @Inject constructor(
                     Item(
                         "Matrix Chat Debug",
                         onClick = { windowManager.get().openDebugWindow(matrixServiceDebugWindow) }
+                    )
+                    Item(
+                        "Agenda Parts Debug",
+                        onClick = { windowManager.get().openDebugWindow(agendaPartsDebugWindow) }
                     )
                 }
                 Menu("Configuration") {

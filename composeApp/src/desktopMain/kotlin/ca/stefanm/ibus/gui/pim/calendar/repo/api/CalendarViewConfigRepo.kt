@@ -16,6 +16,6 @@ enum class CalendarView {
 @ApplicationScope
 class CalendarViewConfigRepo @Inject constructor() {
 
-    val screenView = MutableStateFlow<CalendarView>(CalendarView.MonthCalendar)
+    val screenView = MutableStateFlow<CalendarView>(CalendarView.OneWeekCalendar)
 }
 

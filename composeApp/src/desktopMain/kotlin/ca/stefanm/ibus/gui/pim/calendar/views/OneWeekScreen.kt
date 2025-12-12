@@ -27,8 +27,8 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.TimeSlotBars
 import ca.stefanm.ibus.lib.logging.Logger
-import com.macaosoftware.ui.dailyagenda.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 import javax.inject.Inject
@@ -71,47 +71,6 @@ class OneWeekScreen @Inject constructor(
             knobState.subscribeEvents()
         }
 
-        val timeSlotsStateController = remember {
-            TimeSlotsStateController(
-                timeSlotConfig = TimeSlotConfig(
-
-                    slotScale = 1,
-                    slotHeight = 48
-                ),
-                eventsArrangement =
-                    EventsArrangement.MixedDirections(EventWidthType.FixedSizeFillLastEvent)
-            ).apply {
-                timeSlotsDataUpdater.postUpdate {
-                    addEvent(
-                        uuid = Uuid.random(),
-                        startTime = LocalTime(hour = 8, minute = 0),
-                        endTime = LocalTime(hour = 8, minute = 30),
-                        title = "Event 0",
-                        description = "Description 0"
-                    )
-                    addEventList(
-                        startTime = LocalTime(hour = 8, minute = 0), // This is the slot start time
-                        events =
-                            listOf(
-                                LocalTimeEvent(
-                                    uuid = Uuid.random(),
-                                    startTime = LocalTime(hour = 8, minute = 0),
-                                    endTime = LocalTime(hour = 8, minute = 45),
-                                    title = "Event 1",
-                                    description = "Description 1"
-                                ),
-                                LocalTimeEvent(
-                                    uuid = Uuid.random(),
-                                    startTime = LocalTime(hour = 8, minute = 0),
-                                    endTime = LocalTime(hour = 9, minute = 0),
-                                    title = "Event 2",
-                                    description = "Description 2"
-                                )
-                            )
-                    )
-                }
-            }
-        }
 
         Column(Modifier.fillMaxSize()) {
 
@@ -135,15 +94,7 @@ class OneWeekScreen @Inject constructor(
             Box(
                 modifier = Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             ) {
-                TimeSlotsView(timeSlotsStateController = timeSlotsStateController) { localTimeEvent ->
-                    Box(modifier = Modifier.fillMaxSize().padding(all = 2.dp).background(color = Color.Gray)) {
-                        Text(
-                            text =
-                                "${localTimeEvent.title}: ${localTimeEvent.startTime}-${localTimeEvent.endTime}",
-                            fontSize = 12.sp
-                        )
-                    }
-                }
+                TimeSlotBars()
             }
         }
     }

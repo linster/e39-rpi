@@ -45,6 +45,15 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
+            //https://github.com/Lavmee/constraintlayout-compose-multiplatform
+            /// Compose 1.9.0+
+            implementation("tech.annexflow.compose:constraintlayout-compose-multiplatform:0.6.1")
+            /// Compose 1.9.0+ with different tech.annexflow.constraintlayout.core package
+            implementation("tech.annexflow.compose:constraintlayout-compose-multiplatform:0.6.1-shaded-core")
+            /// Compose 1.9.0+ with different tech.annexflow.constraintlayout package
+            implementation("tech.annexflow.compose:constraintlayout-compose-multiplatform:0.6.1-shaded")
+
+
             implementation("com.kizitonwose.calendar:compose-multiplatform:2.9.0")
 
             //https://github.com/gradle/kotlin-dsl-samples/issues/1372#issuecomment-515285784
