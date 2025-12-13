@@ -96,8 +96,22 @@ fun AgendaCalendarLayout(
             end.linkTo(parent.end)
         }
 
+        val labelDays = true
+        if (labelDays) {
+            (0 until  numberOfDays).forEach { dayNumber ->
+                DayHeaderChip(
+                    label = "Day $dayNumber",
+                    modifier = Modifier.constrainAs(createRef()) {
+                        bottom.linkTo(parent.bottom, 8.dp)
+                        start.linkTo(dayRefs[dayNumber]!!.start)
+                        end.linkTo(dayRefs[dayNumber + 1]!!.start)
+                    }
+                )
+            }
+        }
+
         val (box1Ref, box2Ref) = createRefs()
-        
+
         CalendarEventBox(
             modifier = Modifier.constrainAs(box1Ref) {
 
