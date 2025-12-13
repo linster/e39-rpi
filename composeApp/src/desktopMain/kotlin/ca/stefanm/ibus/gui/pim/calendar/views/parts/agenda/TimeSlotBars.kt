@@ -66,6 +66,7 @@ fun SlotDivider(
 @Composable
 fun VerticalDivider(
     modifier: Modifier = Modifier,
+
 ) {
     val theme = ThemeWrapper.ThemeHandle.current
     val strokeWidth = theme.bigItem.highlightWidth.let { it / 2F }

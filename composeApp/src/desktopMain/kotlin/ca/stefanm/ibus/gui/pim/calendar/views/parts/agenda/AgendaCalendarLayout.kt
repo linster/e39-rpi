@@ -1,31 +1,43 @@
 package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.*
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotDivider
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotLabel
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.VerticalDivider
-import kotlinx.datetime.LocalTime
-import kotlinx.datetime.format
-import kotlinx.datetime.format.DateTimeComponents
+import com.kizitonwose.calendar.core.plusDays
+import kotlinx.datetime.*
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
+import java.time.Instant
+import java.time.format.TextStyle
+import java.util.*
+import kotlin.time.Clock
+
+//Need a custom modifier that can be placed in a chain that allows slot bars to be set from not here.
+
+interface AgendaCalendarBoxModifierDescription {
+
+}
 
 @Composable
 fun AgendaCalendarLayout(
     modifier: Modifier = Modifier,
-    events : List<CalendarEventBox> = listOf(),
+    knobState : KnobObserverBuilderState,
+    events : List<AgendaCalendarEventData> = listOf(),
 
     //TODO startDay : SomeLocalDate,
+
+    startDay : LocalDate = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .toJavaLocalDateTime()
+        .toLocalDate()
+        .toKotlinLocalDate(),
 
     //Number of days to display past the startDay
     numberOfDays : Int = 3,
@@ -96,11 +108,21 @@ fun AgendaCalendarLayout(
             end.linkTo(parent.end)
         }
 
+        //TODO make a subdivision chain here.
+
         val labelDays = true
         if (labelDays) {
             (0 until  numberOfDays).forEach { dayNumber ->
+
+                val day = startDay.plusDays(dayNumber)
+                val label = "${day
+                    .dayOfWeek
+                    .toJavaDayOfWeek()
+                    .getDisplayName(TextStyle.SHORT_STANDALONE, Locale.CANADA)
+                } ${day.day} ${day.month.toJavaMonth().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.CANADA)}"
+
                 DayHeaderChip(
-                    label = "Day $dayNumber",
+                    label = label,
                     modifier = Modifier.constrainAs(createRef()) {
                         bottom.linkTo(parent.bottom, 8.dp)
                         start.linkTo(dayRefs[dayNumber]!!.start)
@@ -108,6 +130,32 @@ fun AgendaCalendarLayout(
                     }
                 )
             }
+        }
+
+        val constraintBag = object : AgendaCalendarLayoutConstrainableBag {
+            override fun getSlotBarRefForHour(hour: Int): ConstrainedLayoutReference? = slotBarRefs[hour]
+            override fun getDayRefForDay(day: Int): ConstrainedLayoutReference? = dayRefs[day]
+
+            override fun getSubdivisionRefForDay(day: Int, subdivision: Int): ConstrainedLayoutReference? {
+                TODO("Not yet implemented")
+            }
+
+            override fun getMaxSubdivisionForDay(): Int {
+                TODO("Not yet implemented")
+            }
+
+        }
+
+        events.forEach { event ->
+            val ref = createRef()
+            event.toView().invoke(
+                 Modifier.constrainAs(ref) {
+                     event.getVerticalConstraints(constraintBag)
+
+                     event.getHorizontalConstraints(constraintBag, startDay, numberOfDays)
+
+                 }, knobState
+            )
         }
 
         val (box1Ref, box2Ref) = createRefs()
@@ -136,8 +184,9 @@ fun AgendaCalendarLayout(
                 top.linkTo(slotBarRefs[3]!!.bottom)
                 bottom.linkTo(slotBarRefs[5]!!.top)
                 height = Dimension.fillToConstraints
-                width = Dimension.fillToConstraints
 
+
+                width = Dimension.fillToConstraints
                 start.linkTo(dayRefs[1]!!.end)
                 end.linkTo(dayRefs[2]!!.start)
             },
@@ -154,4 +203,21 @@ fun AgendaCalendarLayout(
         //Just for giggles lets see if we can get one box in there
 
     }
+}
+
+
+interface AgendaCalendarLayoutConstrainableBag {
+
+    /** Vertical references */
+    fun getSlotBarRefForHour(hour : Int) : ConstrainedLayoutReference?
+
+
+    /** Horizontal references */
+    // 0 is the start of the first day, 1 is the vertical line between day 0 and day 1.
+    // That way, between 0 and 1 is day 0.
+    fun getDayRefForDay(day : Int) : ConstrainedLayoutReference?
+
+    //TODO subdivisions for day
+    fun getSubdivisionRefForDay(day : Int, subdivision : Int) : ConstrainedLayoutReference?
+    fun getMaxSubdivisionForDay() : Int
 }

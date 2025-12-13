@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import kotlinx.datetime.DateTimePeriod
 
@@ -22,12 +24,6 @@ object CalendarEventColors {
 
 
 }
-
-data class CalendarEventBox(
-    val header: String,
-    val timespan : DateTimePeriod,
-    val color: Color
-)
 
 
 @Composable
@@ -45,6 +41,7 @@ fun CalendarEventBox(
     Column(
         modifier = Modifier
             .border(5.dp, if (isSelected) theme.colors.selectedColor else baseColor, shape= RoundedCornerShape(10.dp))
+            .clickable { onClick() }
             .then(modifier),
         verticalArrangement = Arrangement.Top
     ) {

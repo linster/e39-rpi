@@ -3,9 +3,8 @@ package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
@@ -15,15 +14,26 @@ import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventColors.green3
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventColors.plum1
+import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.datetime.*
+import kotlinx.datetime.TimeZone
+import java.time.format.TextStyle
+import java.util.*
 import javax.inject.Inject
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class AgendaPartsDebugWindow @Inject constructor(
-
+    private val knobListenerService: KnobListenerService,
+    private val logger: Logger
 ) : WindowManager.E39Window {
+
     override val tag: Any
         get() = this
 
@@ -36,6 +46,7 @@ class AgendaPartsDebugWindow @Inject constructor(
 
     override fun content(): @Composable WindowScope.() -> Unit = {
 
+        val startDay = remember { mutableStateOf(Clock.System.now()) }
         val numberOfDays = remember { mutableStateOf(3) }
         Row {
             Column(modifier = Modifier.weight(0.5F)) {
@@ -54,7 +65,13 @@ class AgendaPartsDebugWindow @Inject constructor(
                 }
                 NestingCard {
                     NestingCardHeader("Start Day")
-
+                    NestingCard {
+                        Text("Current Start Day")
+                        Text("${startDay.value.toLocalDateTime(TimeZone.currentSystemDefault()).date}")
+                        with (startDay.value.toLocalDateTime(TimeZone.currentSystemDefault())) {
+                            Text("${month.toJavaMonth().getDisplayName(TextStyle.SHORT, Locale.CANADA)} ${day}")
+                        }
+                    }
                 }
                 NestingCard {
                     NestingCardHeader("Event Config")
@@ -117,8 +134,37 @@ class AgendaPartsDebugWindow @Inject constructor(
                 .border(2.dp, Color.Red)
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
         ) {
+
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+            val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
+            val scope = rememberCoroutineScope()
+            LaunchedEffect(Unit) {
+                knobState.subscribeEvents()
+            }
+
             AgendaCalendarLayout(
-                numberOfDays = numberOfDays
+                numberOfDays = numberOfDays,
+                events = listOf(
+                    AgendaCalendarEventData(
+                        headerText = "Plast",
+                        start = LocalDateTime(today.year, today.month, today.day, 3, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        end = LocalDateTime(today.year, today.month, today.day, 8, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        color = Color.Magenta
+                    ),
+                    AgendaCalendarEventData(
+                        headerText = "Curling",
+                        start = LocalDateTime(today.year, today.month, today.day + 1, 4, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        end = LocalDateTime(today.year, today.month, today.day + 1, 5, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        color = Color.Magenta
+                    ),
+                    AgendaCalendarEventData(
+                        headerText = "Trivia",
+                        start = LocalDateTime(today.year, today.month, today.day + 1, 7, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        end = LocalDateTime(today.year, today.month, today.day + 1, 9, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        color = Color.Magenta
+                    ),
+                )
             )
         }
     }
