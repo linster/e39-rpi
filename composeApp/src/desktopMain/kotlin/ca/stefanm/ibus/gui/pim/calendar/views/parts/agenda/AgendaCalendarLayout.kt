@@ -147,55 +147,57 @@ fun AgendaCalendarLayout(
         }
 
         events.forEach { event ->
-            val ref = createRef()
-            event.toView().invoke(
-                 Modifier.constrainAs(ref) {
-                     event.getVerticalConstraints(constraintBag)
+            if (event.isVisibleOnCalendar(startDay, numberOfDays)) {
+                val ref = createRef()
+                event.toView().invoke(
+                    Modifier.constrainAs(ref) {
+                        event.getVerticalConstraints(constraintBag)()
 
-                     event.getHorizontalConstraints(constraintBag, startDay, numberOfDays)
+                        event.getHorizontalConstraints(constraintBag, startDay, numberOfDays)()
 
-                 }, knobState
-            )
+                    }, knobState
+                )
+            }
         }
 
-        val (box1Ref, box2Ref) = createRefs()
+//        val (box1Ref, box2Ref) = createRefs()
 
-        CalendarEventBox(
-            modifier = Modifier.constrainAs(box1Ref) {
+//        CalendarEventBox(
+//            modifier = Modifier.constrainAs(box1Ref) {
+//
+//                top.linkTo(slotBarRefs[1]!!.bottom)
+//                bottom.linkTo(slotBarRefs[8]!!.top)
+//                height = Dimension.fillToConstraints
+//                width = Dimension.fillToConstraints
+//
+//                start.linkTo(dayRefs[0]!!.end)
+//                end.linkTo(dayRefs[1]!!.start)
+//            },
+//            header = "Plast",
+//            body = "1-8am",
+//            isSelected = false,
+//            baseColor = Color.Magenta,
+//            onClick = {}
+//        )
 
-                top.linkTo(slotBarRefs[1]!!.bottom)
-                bottom.linkTo(slotBarRefs[8]!!.top)
-                height = Dimension.fillToConstraints
-                width = Dimension.fillToConstraints
-
-                start.linkTo(dayRefs[0]!!.end)
-                end.linkTo(dayRefs[1]!!.start)
-            },
-            header = "Plast",
-            body = "1-8am",
-            isSelected = false,
-            baseColor = Color.Magenta,
-            onClick = {}
-        )
-
-        CalendarEventBox(
-            modifier = Modifier.constrainAs(box2Ref) {
-
-                top.linkTo(slotBarRefs[3]!!.bottom)
-                bottom.linkTo(slotBarRefs[5]!!.top)
-                height = Dimension.fillToConstraints
-
-
-                width = Dimension.fillToConstraints
-                start.linkTo(dayRefs[1]!!.end)
-                end.linkTo(dayRefs[2]!!.start)
-            },
-            header = "Curling",
-            body = "3-5am",
-            isSelected = false,
-            baseColor = Color.Magenta,
-            onClick = {}
-        )
+//        CalendarEventBox(
+//            modifier = Modifier.constrainAs(box2Ref) {
+//
+//                top.linkTo(slotBarRefs[3]!!.bottom)
+//                bottom.linkTo(slotBarRefs[5]!!.top)
+//                height = Dimension.fillToConstraints
+//
+//
+//                width = Dimension.fillToConstraints
+//                start.linkTo(dayRefs[1]!!.end)
+//                end.linkTo(dayRefs[2]!!.start)
+//            },
+//            header = "Curling",
+//            body = "3-5am",
+//            isSelected = false,
+//            baseColor = Color.Magenta,
+//            onClick = {}
+//        )
 
 
 

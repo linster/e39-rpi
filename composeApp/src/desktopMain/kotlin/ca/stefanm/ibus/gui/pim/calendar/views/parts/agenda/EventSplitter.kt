@@ -94,6 +94,7 @@ data class AgendaCalendarEventData(
     fun isVisibleOnCalendar(startDayVisible: LocalDate, numberOfDaysVisible: Int) : Boolean {
         //If the event is not visible based on the incoming start date and number of days visible, return false
         //TODO
+        return true
     }
 
     fun getVerticalConstraints(constrainableBag: AgendaCalendarLayoutConstrainableBag) : ConstrainScope.() -> Unit {
@@ -104,10 +105,10 @@ data class AgendaCalendarEventData(
         }
     }
 
-    fun getHorizontalConstraints(constrainableBag: AgendaCalendarLayoutConstrainableBag, startDayVisible : LocalDate, numberOfDaysVisible : Int) : (ConstrainScope.() -> Unit)? {
+    fun getHorizontalConstraints(constrainableBag: AgendaCalendarLayoutConstrainableBag, startDayVisible : LocalDate, numberOfDaysVisible : Int) : ConstrainScope.() -> Unit {
         //If the event is not visible based on the incoming start date and number of days visible, return null.
         if (!isVisibleOnCalendar(startDayVisible, numberOfDaysVisible)) {
-            return null
+            return {}
         }
         return {
             //First we have to figure out what day number we are on.

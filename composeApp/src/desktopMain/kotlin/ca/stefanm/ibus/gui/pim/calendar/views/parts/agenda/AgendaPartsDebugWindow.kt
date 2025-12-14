@@ -144,6 +144,7 @@ class AgendaPartsDebugWindow @Inject constructor(
             }
 
             AgendaCalendarLayout(
+                knobState = knobState,
                 numberOfDays = numberOfDays,
                 events = listOf(
                     AgendaCalendarEventData(
