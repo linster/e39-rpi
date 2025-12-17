@@ -9,6 +9,7 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import kotlinx.datetime.*
+import kotlin.math.min
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -113,12 +114,26 @@ data class AgendaCalendarEventData(
             TimeZone.currentSystemDefault())
 
         if (end > endOfDayToday) {
+            // Make the "today" part of the event
+            val newEventToday = AgendaCalendarEventData(
+                headerText = headerText,
+                start = start,
+                end = endOfDayToday,
+                color = color,
+                onClick = onClick,
+                eventUuid = eventUuid,
+                allDayEvent = allDayEvent,
+                multiDayThisPart = multiDayThisPart,
+                multiDayTotalParts = multiDayTotalParts
+            )
             //Fabricate a new event that begins right after `endofDayToday` and runs until end.
 
-            //val newStart = TODO()
-            val newEvent = AgendaCalendarEventData(
+            //Increment endOfDayToday to be the start of the following day.
+            val newStart = LocalDateTime(startTime.year, startTime.month, startTime.day + 1, hour = 0, minute = 0, second = 0)
+                .toInstant(TimeZone.currentSystemDefault())
+            val newEventSplittable = AgendaCalendarEventData(
                 headerText = headerText,
-                start = endOfDayToday, //TODO increment this one second to start on midnight the next day.
+                start = newStart,
                 end = end,
                 color = color,
                 onClick = onClick,
@@ -127,9 +142,22 @@ data class AgendaCalendarEventData(
                 multiDayThisPart = multiDayThisPart + 1,
                 multiDayTotalParts = multiDayTotalParts
             )
+            return listOf(
+                newEventToday,
+                *newEventSplittable.splitToMultipleEvents().toTypedArray()
+            ).let {
+                if (it.all { isAllOnOneDay() }) {
+                    val totalEvents = it.size
+                    it.map { event ->
+                        event.copy(multiDayTotalParts = totalEvents)
+                    }
+                } else {
+                    it
+                }
+            }
         }
 
-        return listOf(this) //TODO recurse on the list of new events made.
+        return listOf(this)
     }
 
     fun isVisibleOnCalendar(startDayVisible: LocalDate, numberOfDaysVisible: Int) : Boolean {
