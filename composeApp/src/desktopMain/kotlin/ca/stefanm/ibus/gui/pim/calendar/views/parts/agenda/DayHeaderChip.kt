@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
 @Composable
@@ -33,7 +34,7 @@ fun DayHeaderChip(
         Text(
             modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
             text = label, color = theme.colors.TEXT_WHITE,
-            maxLines = 1, fontSize = theme.smallItem.fontSize, fontWeight = FontWeight.Bold)
+            maxLines = 1, fontSize = (theme.smallItem.fontSize.value * 0.75).sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.width(10.dp))
     }
 }

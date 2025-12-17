@@ -108,12 +108,49 @@ fun AgendaCalendarLayout(
             end.linkTo(parent.end)
         }
 
-        //TODO make a subdivision chain here.
+        // make a subdivision chain here.
+        // every day is split up into subdivisions for overlapping events
+        val subdivisionRefs = mutableMapOf<Int, MutableMap<Int, ConstrainedLayoutReference>>()
+
+        val subdivisionsPerDay = 4
+        (0 until numberOfDays).forEach { dayNumber ->
+            subdivisionRefs[dayNumber] = mutableMapOf()
+            (0 until subdivisionsPerDay).forEach { subDivisionNumber ->
+                subdivisionRefs[dayNumber]!![subDivisionNumber] = createRef()
+            }
+            val subdivisionChain = createHorizontalChain(*subdivisionRefs[dayNumber]!!.values.toTypedArray(), chainStyle = ChainStyle.SpreadInside)
+            constrain(subdivisionChain) {
+                start.linkTo(dayRefs[dayNumber]!!.start)
+                end.linkTo(dayRefs[dayNumber + 1]!!.end)
+            }
+        }
+        val drawSubdivisions = false
+        if (drawSubdivisions) {
+            (0 until numberOfDays).forEach { dayNumber ->
+                (0 until subdivisionsPerDay).forEach { subDivisionNumber ->
+                    VerticalDivider(
+                        Modifier.constrainAs(createRef()) {
+                            val guide = subdivisionRefs[dayNumber]!![subDivisionNumber]!!
+                            start.linkTo(guide.start)
+                            end.linkTo(guide.end)
+                        },
+                        Color.Cyan
+                    )
+                }
+            }
+
+        }
 
         val labelDays = true
         if (labelDays) {
             (0 until  numberOfDays).forEach { dayNumber ->
 
+                if (numberOfDays > 5) {
+                    //Only label the first day and the 2nd last
+                    if (dayNumber != 0) {
+                        return@forEach
+                    }
+                }
                 val day = startDay.plusDays(dayNumber)
                 val label = "${day
                     .dayOfWeek
@@ -132,19 +169,32 @@ fun AgendaCalendarLayout(
             }
         }
 
+        val subdivisionCalculator = SubdivisionCalculator()
+
         val constraintBag = object : AgendaCalendarLayoutConstrainableBag {
             override fun getSlotBarRefForHour(hour: Int): ConstrainedLayoutReference? = slotBarRefs[hour]
             override fun getDayRefForDay(day: Int): ConstrainedLayoutReference? = dayRefs[day]
 
             override fun getSubdivisionRefForDay(day: Int, subdivision: Int): ConstrainedLayoutReference? {
-                TODO("Not yet implemented")
+                return subdivisionRefs[day]!![subdivision]
             }
 
             override fun getMaxSubdivisionForDay(): Int {
-                TODO("Not yet implemented")
+                return subdivisionsPerDay
+            }
+
+            override fun getSubdivisionCalculator(): SubdivisionCalculator {
+                return subdivisionCalculator
             }
 
         }
+
+
+        events.forEach { event ->
+            subdivisionCalculator.contributeEventToCalculation(event)
+        }
+
+        subdivisionCalculator.calculateAllSubdivisions(constraintBag)
 
         events.forEach { event ->
             if (event.isVisibleOnCalendar(startDay, numberOfDays)) {
@@ -218,6 +268,8 @@ interface AgendaCalendarLayoutConstrainableBag {
     // 0 is the start of the first day, 1 is the vertical line between day 0 and day 1.
     // That way, between 0 and 1 is day 0.
     fun getDayRefForDay(day : Int) : ConstrainedLayoutReference?
+
+    fun getSubdivisionCalculator() : SubdivisionCalculator
 
     //TODO subdivisions for day
     fun getSubdivisionRefForDay(day : Int, subdivision : Int) : ConstrainedLayoutReference?

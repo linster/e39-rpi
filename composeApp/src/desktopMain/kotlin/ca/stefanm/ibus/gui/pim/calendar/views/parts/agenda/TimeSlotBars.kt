@@ -66,24 +66,31 @@ fun SlotDivider(
 @Composable
 fun VerticalDivider(
     modifier: Modifier = Modifier,
-
+    colorOverride : Color? = null
 ) {
     val theme = ThemeWrapper.ThemeHandle.current
     val strokeWidth = theme.bigItem.highlightWidth.let { it / 2F }
 
-    Box(
-        modifier = Modifier.width(strokeWidth.dp).fillMaxHeight()
-            .background(
-                Brush.verticalGradient(
-                    0F to Color.Transparent,
-                    0.15F to theme.colors.sideMenuBorder,
-                    0.5F to theme.colors.sideMenuBorder,
-                    0.85F to theme.colors.sideMenuBorder,
-                    1F to Color.Transparent,
-                    tileMode = TileMode.Clamp
-                )
-            ).then(modifier)
-    )
+    if (colorOverride != null) {
+        Box(
+            modifier = Modifier.width(strokeWidth.dp).fillMaxHeight()
+                .background(colorOverride).then(modifier)
+        )
+    } else {
+        Box(
+            modifier = Modifier.width(strokeWidth.dp).fillMaxHeight()
+                .background(
+                    Brush.verticalGradient(
+                        0F to Color.Transparent,
+                        0.15F to theme.colors.sideMenuBorder,
+                        0.5F to theme.colors.sideMenuBorder,
+                        0.85F to theme.colors.sideMenuBorder,
+                        1F to Color.Transparent,
+                        tileMode = TileMode.Clamp
+                    )
+                ).then(modifier)
+        )
+    }
 }
 
 @Composable

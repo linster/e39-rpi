@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.constraintlayout.compose.*
+import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
@@ -34,12 +35,22 @@ data class AgendaCalendarEventData(
     val allDayEvent : Boolean = false,
 
     val multiDayThisPart : Int = 1,
-    val multiDayTotalParts : Int = 1,
+    val multiDayTotalParts : Int = 1, //TODO actually calculate this by subtracting the LocaleDate day numbers.
 ) {
+
+    private val TAG = "AgendaCalendarEventData"
+    private val logger by lazy {
+        DaggerApplicationComponent.create().logger()
+    }
 
     private val startTime = start.toLocalDateTime(TimeZone.currentSystemDefault())
 
     private val endTime = end.toLocalDateTime(TimeZone.currentSystemDefault())
+
+    /** Return the local date of the start of the event */
+    fun getStartLocalDate() : LocalDate {
+        return startTime.date
+    }
 
     //If the event spans more than one day, set an "endTimeToday" for when today's part of the event ends
     private fun getEndTimeToday() : LocalDateTime {
@@ -88,13 +99,52 @@ data class AgendaCalendarEventData(
             return listOf(this)
         }
 
-        return listOf(this)
+        if (end < start) {
+            logger.w(TAG, "splitToMultipleEvents, end before start")
+            return listOf(this)
+        }
+
+        //Take the first event, split the rest.
+        //We're going to assume the event starts at some point today, and runs over midnight to tomorrow. It might
+        //also run for another day too.
+
+        //Take the start, set the time to midnight, then make it to an instant.
+        val endOfDayToday = LocalDateTime(startTime.date, LocalTime(hour = 23, minute = 59, second = 59)).toInstant(
+            TimeZone.currentSystemDefault())
+
+        if (end > endOfDayToday) {
+            //Fabricate a new event that begins right after `endofDayToday` and runs until end.
+
+            //val newStart = TODO()
+            val newEvent = AgendaCalendarEventData(
+                headerText = headerText,
+                start = endOfDayToday, //TODO increment this one second to start on midnight the next day.
+                end = end,
+                color = color,
+                onClick = onClick,
+                eventUuid = eventUuid,
+                allDayEvent = allDayEvent,
+                multiDayThisPart = multiDayThisPart + 1,
+                multiDayTotalParts = multiDayTotalParts
+            )
+        }
+
+        return listOf(this) //TODO recurse on the list of new events made.
     }
 
     fun isVisibleOnCalendar(startDayVisible: LocalDate, numberOfDaysVisible: Int) : Boolean {
         //If the event is not visible based on the incoming start date and number of days visible, return false
         //TODO
         return true
+    }
+
+    /** Return a set of all the timeslots this event would modify */
+    fun getConstituentSlots() : Set<Int> {
+        if (!isAllOnOneDay()) {
+            return emptySet()
+        }
+
+        return (startTime.hour .. endTime.hour).toSet()
     }
 
     fun getVerticalConstraints(constrainableBag: AgendaCalendarLayoutConstrainableBag) : ConstrainScope.() -> Unit {
@@ -139,5 +189,24 @@ data class AgendaCalendarEventData(
                 }
             )
         }
+    }
+}
+
+//
+class SubdivisionCalculator() {
+
+    private val rawEvents : MutableMap<LocalDate, MutableSet<AgendaCalendarEventData>> = mutableMapOf()
+    fun contributeEventToCalculation(event: AgendaCalendarEventData) {
+        if (!rawEvents.contains(event.getStartLocalDate())){
+            rawEvents[event.getStartLocalDate()] = mutableSetOf()
+        }
+
+        rawEvents[event.getStartLocalDate()]?.add(event)
+    }
+
+    //Next, need to split the events into multiple days.
+
+    fun calculateAllSubdivisions(constrainableBag: AgendaCalendarLayoutConstrainableBag) {
+        val maxSubdivisions = constrainableBag.getMaxSubdivisionForDay()
     }
 }
