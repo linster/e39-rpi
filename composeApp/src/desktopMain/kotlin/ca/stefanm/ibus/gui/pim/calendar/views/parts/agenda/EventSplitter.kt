@@ -162,8 +162,17 @@ data class AgendaCalendarEventData(
 
     fun isVisibleOnCalendar(startDayVisible: LocalDate, numberOfDaysVisible: Int) : Boolean {
         //If the event is not visible based on the incoming start date and number of days visible, return false
-        //TODO
-        return true
+        if (isAllOnOneDay()) {
+            //Assume start and end are on the same day
+            return startTime.dayOfYear in (startDayVisible.dayOfYear .. startDayVisible.dayOfYear + numberOfDaysVisible)
+        } else {
+            val startDays = splitToMultipleEvents().map { it.start.toLocalDateTime(TimeZone.currentSystemDefault()).dayOfYear }
+            return setOf(*startDays.toTypedArray())
+                .union(
+                    (startDayVisible.dayOfYear .. startDayVisible.dayOfYear + numberOfDaysVisible).toSet()
+                )
+                .isNotEmpty()
+        }
     }
 
     /** Return a set of all the timeslots this event would modify */
