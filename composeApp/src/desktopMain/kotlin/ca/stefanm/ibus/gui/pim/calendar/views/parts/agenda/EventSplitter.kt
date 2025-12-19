@@ -58,6 +58,10 @@ data class AgendaCalendarEventData(
         return LocalDateTime(startTime.date, LocalTime(hour = 23, minute = 59, second = 59))
     }
 
+    fun getLengthInHours() : Int {
+        return start.periodUntil(end, TimeZone.currentSystemDefault()).hours
+    }
+
     fun isAllOnOneDay() : Boolean {
         //You could have an event < 24 hours, but span two days, so don't just use the Period.
         return startTime.dayOfYear == endTime.dayOfYear
@@ -232,18 +236,66 @@ data class AgendaCalendarEventData(
 //
 class SubdivisionCalculator() {
 
-    private val rawEvents : MutableMap<LocalDate, MutableSet<AgendaCalendarEventData>> = mutableMapOf()
+    private val rawEvents = mutableSetOf<AgendaCalendarEventData>()
     fun contributeEventToCalculation(event: AgendaCalendarEventData) {
-        if (!rawEvents.contains(event.getStartLocalDate())){
-            rawEvents[event.getStartLocalDate()] = mutableSetOf()
-        }
-
-        rawEvents[event.getStartLocalDate()]?.add(event)
+        rawEvents.add(event)
     }
 
-    //Next, need to split the events into multiple days.
+
+    data class SubdivisionAllocation(
+        val event : AgendaCalendarEventData,
+        val slotsAllocated : IntRange
+    )
+
+    data class SubtractionForEvent(
+        val event : AgendaCalendarEventData,
+        val slotSubtractions : Int = 0
+    )
+
+    //Maybe keep track of number of subdivision subtractions while calculating and then allocate the subdivisions
+    //at the very end.
 
     fun calculateAllSubdivisions(constrainableBag: AgendaCalendarLayoutConstrainableBag) {
+
+        val allEventsSplitToSingleDayEvents = rawEvents.map { it.splitToMultipleEvents() }.flatten()
+
+        val eventsByStartDate = allEventsSplitToSingleDayEvents.groupBy(
+            keySelector = { it.getStartLocalDate() },
+            valueTransform = { SubtractionForEvent(it, 0) }
+        )
+
+
+        eventsByStartDate.keys.forEach { date ->
+
+            val slotToEvent : MutableMap<Int, MutableSet<SubtractionForEvent>> = mutableMapOf()
+            (0 until 24).forEach {
+                slotToEvent[it] = mutableSetOf()
+            }
+
+            eventsByStartDate[date]!!.forEach { event ->
+                event.event.getConstituentSlots().forEach { slot ->
+                    slotToEvent[slot]!!.add(event)
+                }
+            }
+            //TODO now we sort by descending length
+
+            //Then, loop over the events in order
+            //Then, for each slot the event covers, check all the other events in that slot. Give them all an extra subtraction
+
+            //Once we've figured out how narrow each thing should be (the number of subtractions), we then need to figure out
+            //which actual subdivision we allocate to.
+
+            //to do this, we again sort by descending length, then, see how many subtractions we accumulated. Give max - subtractions
+            //number of subdivisions, and pick the left most subdivision range that fits. Should maybe be ok?? (because when we had the SubtractionForEvent
+            //get built up, it calculated it for all overlaps...
+            // if subtractions > subdivisions, just do a full-width event and hope for the best.
+
+        }
+
+        //Now we need to sort the events by start slot, then by length?
+        //Maybe we need to sort by length of event first, place those, then fit everything else around it?
+        allEventsSplitToSingleDayEvents.sortedByDescending { it.getLengthInHours() }
+
         val maxSubdivisions = constrainableBag.getMaxSubdivisionForDay()
     }
 }
