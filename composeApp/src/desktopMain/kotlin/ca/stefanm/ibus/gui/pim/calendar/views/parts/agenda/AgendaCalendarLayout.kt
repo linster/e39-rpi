@@ -95,64 +95,49 @@ fun AgendaCalendarLayout(
             }
         )
 
-        val dayRefs = mutableMapOf<Int, ConstrainedLayoutReference>()
-        (0 .. numberOfDays).forEach { dayNumber ->
-            dayRefs[dayNumber] = createRef()
+        // 4 subdivisions per day means each day has subdivision indices 0, 1, 2, 3.
+        // which means that given indices
+        ///    0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+        //     D  .  .  .  D  .  .  .  D  .
+        val subdivisionsPerDay = 4
+        val drawSubdivisions = true
 
-            VerticalDivider(
-                Modifier.constrainAs(dayRefs[dayNumber]!!) {}
-            )
+        val dayRefs = mutableMapOf<Int, ConstrainedLayoutReference>()
+        (0 .. (numberOfDays * subdivisionsPerDay)).forEach { dayNumber ->
+            dayRefs[dayNumber] = createRef()
         }
 
         val daysChain = createHorizontalChain(*dayRefs.values.toTypedArray(), chainStyle = ChainStyle.SpreadInside)
         constrain(daysChain) {
-            start.linkTo(slotLabelBarrier)
-            end.linkTo(parent.end)
+            absoluteLeft.linkTo(slotLabelBarrier)
+            absoluteRight.linkTo(parent.absoluteRight)
+
         }
 
-        // make a subdivision chain here.
-        // every day is split up into subdivisions for overlapping events
-        val subdivisionRefs = mutableMapOf<Int, MutableMap<Int, ConstrainedLayoutReference>>()
-
-        val subdivisionsPerDay = 4
-        (0 until numberOfDays).forEach { dayNumber ->
-            subdivisionRefs[dayNumber] = mutableMapOf()
-            (0 .. subdivisionsPerDay).forEach { subDivisionNumber ->
-                subdivisionRefs[dayNumber]!![subDivisionNumber] = createRef()
+        (0 .. (numberOfDays * (subdivisionsPerDay + 0))).forEach { dayNumber ->
+            if (dayNumber % subdivisionsPerDay == 0) {
+                VerticalDivider(
+                    Modifier.constrainAs(dayRefs[dayNumber]!!) {}
+                )
+            } else {
+                //Invisible structural nonsense. Without this ConstraintLayout blows up and idk why.
+                VerticalDivider(
+                    Modifier.constrainAs(dayRefs[dayNumber]!!) {},
+                    colorOverride = Color.Transparent
+                )
             }
-            val subdivisionChain = createHorizontalChain(*subdivisionRefs[dayNumber]!!.values.toTypedArray(), chainStyle = ChainStyle.SpreadInside)
-            constrain(subdivisionChain) {
-                start.linkTo(dayRefs[dayNumber]!!.start)
-                end.linkTo(dayRefs[dayNumber + 1]!!.end)
-            }
-        }
-        val drawSubdivisions = false
-        if (drawSubdivisions) {
-            (0 until numberOfDays).forEach { dayNumber ->
-                (0 .. subdivisionsPerDay).forEach { subDivisionNumber ->
-                    VerticalDivider(
-                        Modifier.constrainAs(createRef()) {
-                            val guide = subdivisionRefs[dayNumber]!![subDivisionNumber]!!
-                            start.linkTo(guide.start)
-                            end.linkTo(guide.end)
-                        },
-                        Color.Cyan
-                    )
-                }
-            }
-
         }
 
         val labelDays = true
         if (labelDays) {
             (0 until  numberOfDays).forEach { dayNumber ->
 
-                if (numberOfDays > 5) {
-                    //Only label the first day and the 2nd last
-                    if (dayNumber != 0) {
-                        return@forEach
-                    }
-                }
+//                if (numberOfDays > 5) {
+//                    //Only label the first day and the 2nd last
+//                    if (dayNumber != 0) {
+//                        return@forEach
+//                    }
+//                }
                 val day = startDay.plusDays(dayNumber)
                 val label = "${day
                     .dayOfWeek
@@ -164,9 +149,9 @@ fun AgendaCalendarLayout(
                     label = label,
                     modifier = Modifier.constrainAs(createRef()) {
                         bottom.linkTo(parent.bottom, 8.dp)
-                        start.linkTo(dayRefs[dayNumber]!!.start)
-                        end.linkTo(dayRefs[dayNumber + 1]!!.start)
-                        width = Dimension.preferredWrapContent
+                        start.linkTo(dayRefs[dayNumber * subdivisionsPerDay]!!.start)
+                        end.linkTo(dayRefs[((dayNumber + 1) * subdivisionsPerDay)]!!.start)
+                        width = Dimension.fillToConstraints
                     }
                 )
             }
@@ -177,10 +162,10 @@ fun AgendaCalendarLayout(
 
         val constraintBag = object : AgendaCalendarLayoutConstrainableBag {
             override fun getSlotBarRefForHour(hour: Int): ConstrainedLayoutReference? = slotBarRefs[hour]
-            override fun getDayRefForDay(day: Int): ConstrainedLayoutReference? = dayRefs[day]
+            override fun getDayRefForDay(day: Int): ConstrainedLayoutReference? = dayRefs[(day * subdivisionsPerDay)]
 
             override fun getSubdivisionRefForDay(day: Int, subdivision: Int): ConstrainedLayoutReference? {
-                return subdivisionRefs[day]!![subdivision]!!
+                return dayRefs[ (day * subdivisionsPerDay) + subdivision]!!
             }
 
             override fun getMaxSubdivisionForDay(): Int {
@@ -206,8 +191,8 @@ fun AgendaCalendarLayout(
                 event.toView().invoke(
                     Modifier.constrainAs(ref) {
 
-                        top.linkTo(constraintBag.getSlotBarRefForHour(event.getStartHour())!!.bottom)
-                        bottom.linkTo(constraintBag.getSlotBarRefForHour(event.getEndHour())!!.top)
+                        top.linkTo(slotBarRefs[event.getStartHour()]!!.bottom)
+                        bottom.linkTo(slotBarRefs[event.getEndHour()]!!.top)
                         height = Dimension.fillToConstraints
 
                         val dayNumber = (event.startTime.dayOfYear - startDay.dayOfYear).coerceIn(0..numberOfDays)
