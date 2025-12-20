@@ -1,10 +1,12 @@
 package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.*
+import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotDivider
@@ -115,7 +117,7 @@ fun AgendaCalendarLayout(
         val subdivisionsPerDay = 4
         (0 until numberOfDays).forEach { dayNumber ->
             subdivisionRefs[dayNumber] = mutableMapOf()
-            (0 until subdivisionsPerDay).forEach { subDivisionNumber ->
+            (0 .. subdivisionsPerDay).forEach { subDivisionNumber ->
                 subdivisionRefs[dayNumber]!![subDivisionNumber] = createRef()
             }
             val subdivisionChain = createHorizontalChain(*subdivisionRefs[dayNumber]!!.values.toTypedArray(), chainStyle = ChainStyle.SpreadInside)
@@ -127,7 +129,7 @@ fun AgendaCalendarLayout(
         val drawSubdivisions = false
         if (drawSubdivisions) {
             (0 until numberOfDays).forEach { dayNumber ->
-                (0 until subdivisionsPerDay).forEach { subDivisionNumber ->
+                (0 .. subdivisionsPerDay).forEach { subDivisionNumber ->
                     VerticalDivider(
                         Modifier.constrainAs(createRef()) {
                             val guide = subdivisionRefs[dayNumber]!![subDivisionNumber]!!
@@ -164,19 +166,21 @@ fun AgendaCalendarLayout(
                         bottom.linkTo(parent.bottom, 8.dp)
                         start.linkTo(dayRefs[dayNumber]!!.start)
                         end.linkTo(dayRefs[dayNumber + 1]!!.start)
+                        width = Dimension.preferredWrapContent
                     }
                 )
             }
         }
 
-        val subdivisionCalculator = SubdivisionCalculator()
+        val logger = remember { DaggerApplicationComponent.create().logger() }
+        val subdivisionCalculator = SubdivisionCalculator(logger)
 
         val constraintBag = object : AgendaCalendarLayoutConstrainableBag {
             override fun getSlotBarRefForHour(hour: Int): ConstrainedLayoutReference? = slotBarRefs[hour]
             override fun getDayRefForDay(day: Int): ConstrainedLayoutReference? = dayRefs[day]
 
             override fun getSubdivisionRefForDay(day: Int, subdivision: Int): ConstrainedLayoutReference? {
-                return subdivisionRefs[day]!![subdivision]
+                return subdivisionRefs[day]!![subdivision]!!
             }
 
             override fun getMaxSubdivisionForDay(): Int {
@@ -194,17 +198,24 @@ fun AgendaCalendarLayout(
             subdivisionCalculator.contributeEventToCalculation(event)
         }
 
-        subdivisionCalculator.calculateAllSubdivisions(constraintBag)
+        val result = subdivisionCalculator.calculateAllSubdivisions(constraintBag)
 
         events.forEach { event ->
             if (event.isVisibleOnCalendar(startDay, numberOfDays)) {
                 val ref = createRef()
                 event.toView().invoke(
                     Modifier.constrainAs(ref) {
-                        event.getVerticalConstraints(constraintBag)()
 
-                        event.getHorizontalConstraints(constraintBag, startDay, numberOfDays)()
+                        top.linkTo(constraintBag.getSlotBarRefForHour(event.getStartHour())!!.bottom)
+                        bottom.linkTo(constraintBag.getSlotBarRefForHour(event.getEndHour())!!.top)
+                        height = Dimension.fillToConstraints
 
+                        val dayNumber = (event.startTime.dayOfYear - startDay.dayOfYear).coerceIn(0..numberOfDays)
+            start.linkTo(constraintBag.getDayRefForDay(dayNumber)!!.end)
+            end.linkTo(constraintBag.getDayRefForDay(dayNumber + 1)!!.start)
+//                        start.linkTo(constraintBag.getSubdivisionRefForDay(dayNumber, result[event]!!.first)!!.start)
+//                        end.linkTo(constraintBag.getSubdivisionRefForDay(dayNumber, result[event]!!.last)!!.end)
+                        width = Dimension.fillToConstraints
                     }, knobState
                 )
             }

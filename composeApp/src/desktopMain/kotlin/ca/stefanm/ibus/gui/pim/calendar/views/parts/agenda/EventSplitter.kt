@@ -8,6 +8,7 @@ import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.datetime.*
 import kotlin.math.min
 import kotlin.time.Instant
@@ -44,7 +45,7 @@ data class AgendaCalendarEventData(
         DaggerApplicationComponent.create().logger()
     }
 
-    private val startTime = start.toLocalDateTime(TimeZone.currentSystemDefault())
+    val startTime = start.toLocalDateTime(TimeZone.currentSystemDefault())
 
     private val endTime = end.toLocalDateTime(TimeZone.currentSystemDefault())
 
@@ -83,11 +84,11 @@ data class AgendaCalendarEventData(
         }
     }
 
-    private fun getStartHour() : Int {
+    fun getStartHour() : Int {
         return startTime.hour
     }
 
-    private fun getEndHour() : Int {
+    fun getEndHour() : Int {
         return if (isAllOnOneDay()) {
             endTime.hour
         } else {
@@ -185,34 +186,9 @@ data class AgendaCalendarEventData(
             return emptySet()
         }
 
-        return (startTime.hour .. endTime.hour).toSet()
+        return (startTime.hour until  endTime.hour).toSet()
     }
 
-    fun getVerticalConstraints(constrainableBag: AgendaCalendarLayoutConstrainableBag) : ConstrainScope.() -> Unit {
-        return {
-            top.linkTo(constrainableBag.getSlotBarRefForHour(getStartHour())!!.bottom)
-            bottom.linkTo(constrainableBag.getSlotBarRefForHour(getEndHour())!!.top)
-            height = Dimension.fillToConstraints
-        }
-    }
-
-    fun getHorizontalConstraints(constrainableBag: AgendaCalendarLayoutConstrainableBag, startDayVisible : LocalDate, numberOfDaysVisible : Int) : ConstrainScope.() -> Unit {
-        //If the event is not visible based on the incoming start date and number of days visible, return null.
-        if (!isVisibleOnCalendar(startDayVisible, numberOfDaysVisible)) {
-            return {}
-        }
-        return {
-            //First we have to figure out what day number we are on.
-
-            val dayNumber = 0
-            //TODO subdivisions
-
-            width = Dimension.fillToConstraints
-//
-            start.linkTo(constrainableBag.getDayRefForDay(dayNumber)!!.end)
-            end.linkTo(constrainableBag.getDayRefForDay(dayNumber + 1)!!.start)
-        }
-    }
 
     fun toView() : @Composable (
         modifier : Modifier, //The modifier should provide extra info about what to bind to.
@@ -234,23 +210,12 @@ data class AgendaCalendarEventData(
 }
 
 //
-class SubdivisionCalculator() {
+class SubdivisionCalculator(private val logger: Logger) {
 
     private val rawEvents = mutableSetOf<AgendaCalendarEventData>()
     fun contributeEventToCalculation(event: AgendaCalendarEventData) {
         rawEvents.add(event)
     }
-
-
-    data class SubdivisionAllocation(
-        val event : AgendaCalendarEventData,
-        val slotsAllocated : IntRange
-    )
-
-    data class SubtractionForEvent(
-        val event : AgendaCalendarEventData,
-        val slotSubtractions : Int = 0
-    )
 
     //Maybe keep track of number of subdivision subtractions while calculating and then allocate the subdivisions
     //at the very end.
@@ -279,8 +244,8 @@ class SubdivisionCalculator() {
             val events = eventsByStartDate[date]!!
             events.forEach { event ->
                 eventsToSubtractions[event] = events.count {
-                    it.getConstituentSlots().union(event.getConstituentSlots()).isNotEmpty()
-                } - 1 /* Subtract the overlap with our-self */
+                    it.getConstituentSlots().intersect(event.getConstituentSlots()).isNotEmpty()
+                } - 1 /* Remove the overlap with our-self */
 
                 //We have the width of each event now, but don't know where to place it.
             }
@@ -307,7 +272,9 @@ class SubdivisionCalculator() {
 
                 eventsPlaced[event] = leftMostSubdivision .. rightMostSubdivision
                 event.getConstituentSlots().forEach {
-                    slotToEventPlaced[it] = slotToEventPlaced[it]!!.plus(1)
+                    if (leftMostSubdivision != 0 && rightMostSubdivision != maxWidth) {
+                        slotToEventPlaced[it] = (slotToEventPlaced[it] ?: 0).plus(1)
+                    }
                 }
             }
         }
