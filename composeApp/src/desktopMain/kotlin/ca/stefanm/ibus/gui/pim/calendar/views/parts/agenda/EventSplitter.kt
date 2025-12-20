@@ -255,47 +255,62 @@ class SubdivisionCalculator() {
     //Maybe keep track of number of subdivision subtractions while calculating and then allocate the subdivisions
     //at the very end.
 
-    fun calculateAllSubdivisions(constrainableBag: AgendaCalendarLayoutConstrainableBag) {
+    private val eventsToSubtractions : MutableMap<AgendaCalendarEventData, Int> = mutableMapOf()
+
+    private val eventsPlaced : MutableMap<AgendaCalendarEventData, IntRange> = mutableMapOf()
+    private val slotToEventPlaced : MutableMap<Int, Int> = mutableMapOf()
+    fun calculateAllSubdivisions(constrainableBag: AgendaCalendarLayoutConstrainableBag) : MutableMap<AgendaCalendarEventData, IntRange> {
 
         val allEventsSplitToSingleDayEvents = rawEvents.map { it.splitToMultipleEvents() }.flatten()
 
         val eventsByStartDate = allEventsSplitToSingleDayEvents.groupBy(
             keySelector = { it.getStartLocalDate() },
-            valueTransform = { SubtractionForEvent(it, 0) }
+            valueTransform = { it }
         )
 
 
         eventsByStartDate.keys.forEach { date ->
 
-            val slotToEvent : MutableMap<Int, MutableSet<SubtractionForEvent>> = mutableMapOf()
+            val slotToEvent : MutableMap<Int, MutableSet<AgendaCalendarEventData>> = mutableMapOf()
             (0 until 24).forEach {
                 slotToEvent[it] = mutableSetOf()
             }
 
-            eventsByStartDate[date]!!.forEach { event ->
-                event.event.getConstituentSlots().forEach { slot ->
-                    slotToEvent[slot]!!.add(event)
+            val events = eventsByStartDate[date]!!
+            events.forEach { event ->
+                eventsToSubtractions[event] = events.count {
+                    it.getConstituentSlots().union(event.getConstituentSlots()).isNotEmpty()
+                } - 1 /* Subtract the overlap with our-self */
+
+                //We have the width of each event now, but don't know where to place it.
+            }
+
+            events.forEach { event ->
+                //If subtractions >= numSubdivisions, set subtractions to zero and just let the events overlap.
+                if ((eventsToSubtractions[event] ?: 0) >= constrainableBag.getMaxSubdivisionForDay()) {
+                    eventsToSubtractions[event] = 0
+                }
+
+            }
+
+            events.sortedBy { it.getConstituentSlots().min() }.forEach { event ->
+                //Now we have to
+
+                // maxSubdivisionss
+                // width = maxSubdivisions - subtractions
+                val maxWidth = constrainableBag.getMaxSubdivisionForDay()
+                val subtractions = eventsToSubtractions[event] ?: 0
+                val eventWidth = maxWidth - subtractions
+                //TODO first assume leftMost is zero.
+                val leftMostSubdivision = event.getConstituentSlots().maxOf { slotToEventPlaced[it] ?: 0 }
+                val rightMostSubdivision = eventWidth + leftMostSubdivision
+
+                eventsPlaced[event] = leftMostSubdivision .. rightMostSubdivision
+                event.getConstituentSlots().forEach {
+                    slotToEventPlaced[it] = slotToEventPlaced[it]!!.plus(1)
                 }
             }
-            //TODO now we sort by descending length
-
-            //Then, loop over the events in order
-            //Then, for each slot the event covers, check all the other events in that slot. Give them all an extra subtraction
-
-            //Once we've figured out how narrow each thing should be (the number of subtractions), we then need to figure out
-            //which actual subdivision we allocate to.
-
-            //to do this, we again sort by descending length, then, see how many subtractions we accumulated. Give max - subtractions
-            //number of subdivisions, and pick the left most subdivision range that fits. Should maybe be ok?? (because when we had the SubtractionForEvent
-            //get built up, it calculated it for all overlaps...
-            // if subtractions > subdivisions, just do a full-width event and hope for the best.
-
         }
-
-        //Now we need to sort the events by start slot, then by length?
-        //Maybe we need to sort by length of event first, place those, then fit everything else around it?
-        allEventsSplitToSingleDayEvents.sortedByDescending { it.getLengthInHours() }
-
-        val maxSubdivisions = constrainableBag.getMaxSubdivisionForDay()
+        return eventsPlaced
     }
 }
