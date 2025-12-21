@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRow
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRowWithScroll
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.lib.logging.Logger
@@ -57,7 +58,7 @@ fun AgendaScreen(
 
     key(Unit) {
         Column {
-            NorthButtonRow(
+            NorthButtonRowWithScroll(
                 knobState = knobState,
                 timePeriodLabel = agendaCalendarLayoutHeader.value,
                 onPreviousClicked = {
@@ -69,6 +70,8 @@ fun AgendaScreen(
                     timePeriodLabel.value = getLabelForDateRange(startDay.value, numberOfDays)
                 },
                 onMenuClicked = { onMenuClicked() },
+                onUpClicked = {},
+                onDownClicked = {}
             )
             AgendaCalendarLayout(
                 knobState = knobState,

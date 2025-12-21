@@ -22,8 +22,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun NorthButtonRow(
     knobState : KnobObserverBuilderState,
-    previousButtonLabel : String = "<-",
-    nextButtonLabel : String = "->",
+    previousButtonLabel : String = "⏴",
+    nextButtonLabel : String = "⏵",
     menuButtonLabel : String = "Menu",
     timePeriodLabel : String,
     onPreviousClicked : () -> Unit,
@@ -93,6 +93,114 @@ fun NorthButtonRow(
         }
 
     }
+}
 
 
+@Composable
+fun NorthButtonRowWithScroll(
+    knobState : KnobObserverBuilderState,
+    previousButtonLabel : String = "⏴",
+    nextButtonLabel : String = "⏵",
+    upButtonLabel : String = "⏶",
+    downButtonLabel : String = "⏷",
+    menuButtonLabel : String = "Menu",
+
+    timePeriodLabel : String,
+
+    onPreviousClicked : () -> Unit,
+    onNextClicked : () -> Unit,
+
+    onMenuClicked : () -> Unit,
+
+    onUpClicked : () -> Unit,
+    onDownClicked : () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+            .fillMaxWidth()
+    ) {
+
+        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+            MenuItem(
+                boxModifier = Modifier.weight(0.5F, true),
+                label = downButtonLabel,
+                chipOrientation = ItemChipOrientation.N,
+                isSelected = currentIndex == allocatedIndex,
+                onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                    onDownClicked()
+                }
+            )
+        }
+
+        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+            MenuItem(
+                boxModifier = Modifier.weight(0.5F, true),
+                label = upButtonLabel,
+                chipOrientation = ItemChipOrientation.N,
+                isSelected = currentIndex == allocatedIndex,
+                onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                    onUpClicked()
+                }
+            )
+        }
+
+        val measurements = ThemeWrapper.ThemeHandle.current.bigItem
+
+        Column(
+            Modifier.weight(3F, fill = true).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            MenuItem(
+                boxModifier = Modifier
+                    .padding(
+                        top = measurements.chipWidth.dp.halveIfNotPixelDoubled(),
+                        bottom = measurements.highlightWidth.dp.halveIfNotPixelDoubled()
+                    ),
+                label = timePeriodLabel,
+                chipOrientation = ItemChipOrientation.NONE,
+                labelColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
+                onClicked = {}
+            )
+        }
+
+        Row(Modifier.weight(2F)) {
+            KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                MenuItem(
+                    boxModifier = Modifier.weight(1.4f, fill = true),
+                    label = menuButtonLabel,
+                    chipOrientation = ItemChipOrientation.N,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                        onMenuClicked()
+                    }
+                )
+            }
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                MenuItem(
+                    boxModifier = Modifier.weight(0.8F, true),
+                    label = previousButtonLabel,
+                    chipOrientation = ItemChipOrientation.N,
+                    isSelected = currentIndex == allocatedIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                        onPreviousClicked()
+                    }
+                )
+            }
+            KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                MenuItem(
+                    boxModifier = Modifier.weight(0.8f, fill = true),
+                    label = nextButtonLabel,
+                    chipOrientation = ItemChipOrientation.N,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                        onNextClicked()
+                    }
+                )
+            }
+
+        }
+
+    }
 }
