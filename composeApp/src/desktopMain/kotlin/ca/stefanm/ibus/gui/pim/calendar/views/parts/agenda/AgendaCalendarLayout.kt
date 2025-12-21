@@ -131,13 +131,6 @@ fun AgendaCalendarLayout(
         val labelDays = true
         if (labelDays) {
             (0 until  numberOfDays).forEach { dayNumber ->
-
-//                if (numberOfDays > 5) {
-//                    //Only label the first day and the 2nd last
-//                    if (dayNumber != 0) {
-//                        return@forEach
-//                    }
-//                }
                 val day = startDay.plusDays(dayNumber)
                 val label = "${day
                     .dayOfWeek
@@ -158,32 +151,17 @@ fun AgendaCalendarLayout(
         }
 
         val logger = remember { DaggerApplicationComponent.create().logger() }
-        val subdivisionCalculator = SubdivisionCalculator(logger)
-
-        val constraintBag = object : AgendaCalendarLayoutConstrainableBag {
-            override fun getSlotBarRefForHour(hour: Int): ConstrainedLayoutReference? = slotBarRefs[hour]
-            override fun getDayRefForDay(day: Int): ConstrainedLayoutReference? = dayRefs[(day * subdivisionsPerDay)]
-
-            override fun getSubdivisionRefForDay(day: Int, subdivision: Int): ConstrainedLayoutReference? {
-                return dayRefs[ (day * subdivisionsPerDay) + subdivision]!!
-            }
-
-            override fun getMaxSubdivisionForDay(): Int {
-                return subdivisionsPerDay
-            }
-
-            override fun getSubdivisionCalculator(): SubdivisionCalculator {
-                return subdivisionCalculator
-            }
-
-        }
+        val subdivisionCalculator = SubdivisionCalculator(
+            logger,
+            maxSubdivisionsPerDay = subdivisionsPerDay
+        )
 
 
         events.forEach { event ->
             subdivisionCalculator.contributeEventToCalculation(event)
         }
 
-        val result = subdivisionCalculator.calculateAllSubdivisions(constraintBag)
+        val result = subdivisionCalculator.calculateAllSubdivisions()
 
         events.forEach { event ->
             if (event.isVisibleOnCalendar(startDay, numberOfDays)) {
@@ -196,78 +174,15 @@ fun AgendaCalendarLayout(
                         height = Dimension.fillToConstraints
 
                         val dayNumber = (event.startTime.dayOfYear - startDay.dayOfYear).coerceIn(0..numberOfDays)
-            start.linkTo(constraintBag.getDayRefForDay(dayNumber)!!.end)
-            end.linkTo(constraintBag.getDayRefForDay(dayNumber + 1)!!.start)
-//                        start.linkTo(constraintBag.getSubdivisionRefForDay(dayNumber, result[event]!!.first)!!.start)
-//                        end.linkTo(constraintBag.getSubdivisionRefForDay(dayNumber, result[event]!!.last)!!.end)
+
+//                        start.linkTo(dayRefs[(dayNumber * subdivisionsPerDay)]!!.end)
+//                        end.linkTo(dayRefs[((dayNumber + 1) * subdivisionsPerDay)]!!.start)
+                        start.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.first]!!.start)
+                        end.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.last]!!.end)
                         width = Dimension.fillToConstraints
                     }, knobState
                 )
             }
         }
-
-//        val (box1Ref, box2Ref) = createRefs()
-
-//        CalendarEventBox(
-//            modifier = Modifier.constrainAs(box1Ref) {
-//
-//                top.linkTo(slotBarRefs[1]!!.bottom)
-//                bottom.linkTo(slotBarRefs[8]!!.top)
-//                height = Dimension.fillToConstraints
-//                width = Dimension.fillToConstraints
-//
-//                start.linkTo(dayRefs[0]!!.end)
-//                end.linkTo(dayRefs[1]!!.start)
-//            },
-//            header = "Plast",
-//            body = "1-8am",
-//            isSelected = false,
-//            baseColor = Color.Magenta,
-//            onClick = {}
-//        )
-
-//        CalendarEventBox(
-//            modifier = Modifier.constrainAs(box2Ref) {
-//
-//                top.linkTo(slotBarRefs[3]!!.bottom)
-//                bottom.linkTo(slotBarRefs[5]!!.top)
-//                height = Dimension.fillToConstraints
-//
-//
-//                width = Dimension.fillToConstraints
-//                start.linkTo(dayRefs[1]!!.end)
-//                end.linkTo(dayRefs[2]!!.start)
-//            },
-//            header = "Curling",
-//            body = "3-5am",
-//            isSelected = false,
-//            baseColor = Color.Magenta,
-//            onClick = {}
-//        )
-
-
-
-
-        //Just for giggles lets see if we can get one box in there
-
     }
-}
-
-
-interface AgendaCalendarLayoutConstrainableBag {
-
-    /** Vertical references */
-    fun getSlotBarRefForHour(hour : Int) : ConstrainedLayoutReference?
-
-
-    /** Horizontal references */
-    // 0 is the start of the first day, 1 is the vertical line between day 0 and day 1.
-    // That way, between 0 and 1 is day 0.
-    fun getDayRefForDay(day : Int) : ConstrainedLayoutReference?
-
-    fun getSubdivisionCalculator() : SubdivisionCalculator
-
-    //TODO subdivisions for day
-    fun getSubdivisionRefForDay(day : Int, subdivision : Int) : ConstrainedLayoutReference?
-    fun getMaxSubdivisionForDay() : Int
 }

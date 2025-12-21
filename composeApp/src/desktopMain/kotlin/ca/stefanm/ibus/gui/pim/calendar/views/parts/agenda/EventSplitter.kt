@@ -210,7 +210,11 @@ data class AgendaCalendarEventData(
 }
 
 //
-class SubdivisionCalculator(private val logger: Logger) {
+class SubdivisionCalculator(
+    private val logger: Logger,
+    private val maxSubdivisionsPerDay : Int,
+
+) {
 
     private val rawEvents = mutableSetOf<AgendaCalendarEventData>()
     fun contributeEventToCalculation(event: AgendaCalendarEventData) {
@@ -224,7 +228,7 @@ class SubdivisionCalculator(private val logger: Logger) {
 
     private val eventsPlaced : MutableMap<AgendaCalendarEventData, IntRange> = mutableMapOf()
     private val slotToEventPlaced : MutableMap<Int, Int> = mutableMapOf()
-    fun calculateAllSubdivisions(constrainableBag: AgendaCalendarLayoutConstrainableBag) : MutableMap<AgendaCalendarEventData, IntRange> {
+    fun calculateAllSubdivisions() : MutableMap<AgendaCalendarEventData, IntRange> {
 
         val allEventsSplitToSingleDayEvents = rawEvents.map { it.splitToMultipleEvents() }.flatten()
 
@@ -252,7 +256,7 @@ class SubdivisionCalculator(private val logger: Logger) {
 
             events.forEach { event ->
                 //If subtractions >= numSubdivisions, set subtractions to zero and just let the events overlap.
-                if ((eventsToSubtractions[event] ?: 0) >= constrainableBag.getMaxSubdivisionForDay()) {
+                if ((eventsToSubtractions[event] ?: 0) >= maxSubdivisionsPerDay) {
                     eventsToSubtractions[event] = 0
                 }
 
@@ -263,7 +267,7 @@ class SubdivisionCalculator(private val logger: Logger) {
 
                 // maxSubdivisionss
                 // width = maxSubdivisions - subtractions
-                val maxWidth = constrainableBag.getMaxSubdivisionForDay()
+                val maxWidth = maxSubdivisionsPerDay
                 val subtractions = eventsToSubtractions[event] ?: 0
                 val eventWidth = maxWidth - subtractions
                 //TODO first assume leftMost is zero.
