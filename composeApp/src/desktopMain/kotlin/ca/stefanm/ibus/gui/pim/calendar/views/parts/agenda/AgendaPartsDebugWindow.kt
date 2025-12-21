@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRow
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
@@ -143,30 +144,78 @@ class AgendaPartsDebugWindow @Inject constructor(
                 knobState.subscribeEvents()
             }
 
-            AgendaCalendarLayout(
-                knobState = knobState,
-                numberOfDays = numberOfDays,
-                events = listOf(
-                    AgendaCalendarEventData(
-                        headerText = "Plast",
-                        start = LocalDateTime(today.year, today.month, today.day, 3, 0, 0).toInstant(TimeZone.currentSystemDefault()),
-                        end = LocalDateTime(today.year, today.month, today.day, 8, 0, 0).toInstant(TimeZone.currentSystemDefault()),
-                        color = Color.Magenta
-                    ),
-                    AgendaCalendarEventData(
-                        headerText = "Curling",
-                        start = LocalDateTime(today.year, today.month, today.day, 4, 0, 0).toInstant(TimeZone.currentSystemDefault()),
-                        end = LocalDateTime(today.year, today.month, today.day, 5, 0, 0).toInstant(TimeZone.currentSystemDefault()),
-                        color = Color.Magenta
-                    ),
-                    AgendaCalendarEventData(
-                        headerText = "Trivia",
-                        start = LocalDateTime(today.year, today.month, today.day + 1, 7, 0, 0).toInstant(TimeZone.currentSystemDefault()),
-                        end = LocalDateTime(today.year, today.month, today.day + 1, 9, 0, 0).toInstant(TimeZone.currentSystemDefault()),
-                        color = Color.Magenta
-                    ),
+
+            Column {
+
+
+                AgendaScreen(
+                    knobListenerService,
+                    logger,
+                    numberOfDays = numberOfDays,
+                    listOf(
+                        AgendaCalendarEventData(
+                            headerText = "Plast",
+                            start = LocalDateTime(
+                                today.year,
+                                today.month,
+                                today.day,
+                                3,
+                                0,
+                                0
+                            ).toInstant(TimeZone.currentSystemDefault()),
+                            end = LocalDateTime(
+                                today.year,
+                                today.month,
+                                today.day,
+                                14,
+                                0,
+                                0
+                            ).toInstant(TimeZone.currentSystemDefault()),
+                            color = Color.Magenta
+                        ),
+                        AgendaCalendarEventData(
+                            headerText = "Curling",
+                            start = LocalDateTime(
+                                today.year,
+                                today.month,
+                                today.day,
+                                4,
+                                0,
+                                0
+                            ).toInstant(TimeZone.currentSystemDefault()),
+                            end = LocalDateTime(
+                                today.year,
+                                today.month,
+                                today.day,
+                                5,
+                                0,
+                                0
+                            ).toInstant(TimeZone.currentSystemDefault()),
+                            color = Color.Magenta
+                        ),
+                        AgendaCalendarEventData(
+                            headerText = "Trivia",
+                            start = LocalDateTime(
+                                today.year,
+                                today.month,
+                                today.day + 1,
+                                7,
+                                0,
+                                0
+                            ).toInstant(TimeZone.currentSystemDefault()),
+                            end = LocalDateTime(
+                                today.year,
+                                today.month,
+                                today.day + 1,
+                                9,
+                                0,
+                                0
+                            ).toInstant(TimeZone.currentSystemDefault()),
+                            color = Color.Magenta
+                        )
+                    )
                 )
-            )
+            }
         }
     }
 

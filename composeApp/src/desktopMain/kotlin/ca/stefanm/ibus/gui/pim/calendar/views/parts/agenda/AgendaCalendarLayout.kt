@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotDivider
@@ -33,8 +34,6 @@ fun AgendaCalendarLayout(
     knobState : KnobObserverBuilderState,
     events : List<AgendaCalendarEventData> = listOf(),
 
-    //TODO startDay : SomeLocalDate,
-
     startDay : LocalDate = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .toJavaLocalDateTime()
@@ -45,6 +44,7 @@ fun AgendaCalendarLayout(
     numberOfDays : Int = 3,
 
 //    onDayScroll : (minHourVisible : Int, maxHourVisible: Int, minHour : Int, maxHour : Int) -> Unit,
+    onCalendarItemSelectedChange : (event : AgendaCalendarEventData) -> Unit = {}
 ) {
 
     ConstraintLayout(modifier = modifier) outer@ {
@@ -166,22 +166,36 @@ fun AgendaCalendarLayout(
         events.forEach { event ->
             if (event.isVisibleOnCalendar(startDay, numberOfDays)) {
                 val ref = createRef()
-                event.toView().invoke(
-                    Modifier.constrainAs(ref) {
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
 
-                        top.linkTo(slotBarRefs[event.getStartHour()]!!.bottom)
-                        bottom.linkTo(slotBarRefs[event.getEndHour()]!!.top)
-                        height = Dimension.fillToConstraints
+                    if (allocatedIndex == currentIndex) {
+                        onCalendarItemSelectedChange(event)
+                    }
 
-                        val dayNumber = (event.startTime.dayOfYear - startDay.dayOfYear).coerceIn(0..numberOfDays)
+                    CalendarEventBox(
+                        modifier = Modifier.constrainAs(ref) {
 
-//                        start.linkTo(dayRefs[(dayNumber * subdivisionsPerDay)]!!.end)
-//                        end.linkTo(dayRefs[((dayNumber + 1) * subdivisionsPerDay)]!!.start)
-                        start.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.first]!!.start)
-                        end.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.last]!!.end)
-                        width = Dimension.fillToConstraints
-                    }, knobState
-                )
+                            top.linkTo(slotBarRefs[event.getStartHour()]!!.bottom)
+                            bottom.linkTo(slotBarRefs[event.getEndHour()]!!.top)
+                            height = Dimension.fillToConstraints
+
+                            val dayNumber = (event.startTime.dayOfYear - startDay.dayOfYear).coerceIn(0..numberOfDays)
+
+                            // start.linkTo(dayRefs[(dayNumber * subdivisionsPerDay)]!!.end)
+                            // end.linkTo(dayRefs[((dayNumber + 1) * subdivisionsPerDay)]!!.start)
+                            start.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.first]!!.start)
+                            end.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.last]!!.end)
+                            width = Dimension.fillToConstraints
+                        },
+                        header = event.headerText,
+                        body = event.getBodyText(),
+                        isSelected = allocatedIndex == currentIndex,
+                        baseColor = event.color,
+                        onClick = CallWhen(currentIndexIs = allocatedIndex) {
+                            event.onClick(event)
+                        }
+                    )
+                }
             }
         }
     }

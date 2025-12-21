@@ -69,7 +69,7 @@ data class AgendaCalendarEventData(
         return startTime.dayOfYear == endTime.dayOfYear
     }
 
-    private fun getBodyText() : String {
+    fun getBodyText() : String {
         return if (isAllOnOneDay()) {
             "${startTime.emitHourText()} - ${endTime.emitHourText()}"
         } else {
@@ -189,25 +189,6 @@ data class AgendaCalendarEventData(
 
         return (startTime.hour until  endTime.hour).toSet()
     }
-
-
-    fun toView() : @Composable (
-        modifier : Modifier, //The modifier should provide extra info about what to bind to.
-        knobState : KnobObserverBuilderState,
-    ) -> Unit = @Composable { modifier, knobState ->
-        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-            CalendarEventBox(
-                modifier = modifier,
-                header = headerText,
-                body = getBodyText(),
-                isSelected = allocatedIndex == currentIndex,
-                baseColor = color,
-                onClick = CallWhen(currentIndexIs = allocatedIndex) {
-                    onClick(this@AgendaCalendarEventData)
-                }
-            )
-        }
-    }
 }
 
 //
@@ -242,26 +223,20 @@ class SubdivisionCalculator(
 
         eventsByStartDate.keys.forEach { date ->
 
-            val slotToEvent : MutableMap<Int, MutableSet<AgendaCalendarEventData>> = mutableMapOf()
-            (0 until 24).forEach {
-                slotToEvent[it] = mutableSetOf()
-            }
 
             val events = eventsByStartDate[date]!!
             events.forEach { event ->
                 eventsToSubtractions[event] = events.count {
                     it.getConstituentSlots().intersect(event.getConstituentSlots()).isNotEmpty()
                 } - 1 /* Remove the overlap with our-self */
-
-                //We have the width of each event now, but don't know where to place it.
             }
+            //We have the width of each event now, but don't know where to place it.
 
             events.forEach { event ->
                 //If subtractions >= numSubdivisions, set subtractions to zero and just let the events overlap.
                 if ((eventsToSubtractions[event] ?: 0) >= maxSubdivisionsPerDay) {
                     eventsToSubtractions[event] = 0
                 }
-
             }
 
             val slotToWidthAlreadyPlaced : MutableMap<Int, Int> = mutableMapOf()
@@ -276,10 +251,13 @@ class SubdivisionCalculator(
                 // 2 subtractions -> event width = 4/3 = 1.33 -> floor -> 1
                 // 3 subtractions -> eventWidth = 1
                 // 4 subtractions -> eventWidth = maxWidth
-                val eventWidth = floor(maxWidth.toFloat() / (subtractions + 1)).toInt()
+                val eventWidth = if (subtractions == maxWidth) {
+                    maxWidth
+                } else {
+                    floor(maxWidth.toFloat() / (subtractions + 1)).toInt()
+                }
 
-                //TODO, instead of doing by number of events placed, find the max of the eventWidths for each overlap.
-//                val leftMostSubdivision = event.getConstituentSlots().maxOf { slotToEventPlaced[it] ?: 0 }
+                //instead of doing by number of events placed, find the max of the eventWidths for each overlap.
                 val leftMostSubdivision = event.getConstituentSlots().maxOf { slotToWidthAlreadyPlaced[it] ?: 0 }
                 val rightMostSubdivision = eventWidth + leftMostSubdivision
 

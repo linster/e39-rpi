@@ -74,11 +74,17 @@ class AllocatedIdManager @Inject constructor(
     private var currentId : MutableStateFlow<CurrentId> = MutableStateFlow(0)
 
     fun incrementPointer() {
+        if (allocatedIds.isEmpty()) {
+            return
+        }
         val currentIdIndex = allocatedIds.indexOf(currentId.value)
         currentId.value = allocatedIds[currentIdIndex + 1]
     }
 
     fun decrementPointer() {
+        if (allocatedIds.isEmpty()) {
+            return
+        }
         val currentIdIndex = allocatedIds.indexOf(currentId.value)
         currentId.value = allocatedIds[currentIdIndex - 1]
     }
