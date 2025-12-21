@@ -10,6 +10,7 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.datetime.*
+import kotlin.math.floor
 import kotlin.math.min
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -227,7 +228,8 @@ class SubdivisionCalculator(
     private val eventsToSubtractions : MutableMap<AgendaCalendarEventData, Int> = mutableMapOf()
 
     private val eventsPlaced : MutableMap<AgendaCalendarEventData, IntRange> = mutableMapOf()
-    private val slotToEventPlaced : MutableMap<Int, Int> = mutableMapOf()
+
+
     fun calculateAllSubdivisions() : MutableMap<AgendaCalendarEventData, IntRange> {
 
         val allEventsSplitToSingleDayEvents = rawEvents.map { it.splitToMultipleEvents() }.flatten()
@@ -262,23 +264,28 @@ class SubdivisionCalculator(
 
             }
 
-            events.sortedBy { it.getConstituentSlots().min() }.forEach { event ->
-                //Now we have to
+            val slotToWidthAlreadyPlaced : MutableMap<Int, Int> = mutableMapOf()
 
-                // maxSubdivisionss
-                // width = maxSubdivisions - subtractions
+            events.sortedBy { it.getConstituentSlots().min() }.forEach { event ->
+
                 val maxWidth = maxSubdivisionsPerDay
                 val subtractions = eventsToSubtractions[event] ?: 0
-                val eventWidth = maxWidth - subtractions
-                //TODO first assume leftMost is zero.
-                val leftMostSubdivision = event.getConstituentSlots().maxOf { slotToEventPlaced[it] ?: 0 }
+                //TODO subtractions means "how many other events would this event ever overlap with?
+                //TODO which means the event width should be something like the maxWidth / (subtractions + 1)
+                // 1 subtraction -> event Width = 2 = 4/2 = 2
+                // 2 subtractions -> event width = 4/3 = 1.33 -> floor -> 1
+                // 3 subtractions -> eventWidth = 1
+                // 4 subtractions -> eventWidth = maxWidth
+                val eventWidth = floor(maxWidth.toFloat() / (subtractions + 1)).toInt()
+
+                //TODO, instead of doing by number of events placed, find the max of the eventWidths for each overlap.
+//                val leftMostSubdivision = event.getConstituentSlots().maxOf { slotToEventPlaced[it] ?: 0 }
+                val leftMostSubdivision = event.getConstituentSlots().maxOf { slotToWidthAlreadyPlaced[it] ?: 0 }
                 val rightMostSubdivision = eventWidth + leftMostSubdivision
 
                 eventsPlaced[event] = leftMostSubdivision .. rightMostSubdivision
                 event.getConstituentSlots().forEach {
-                    if (leftMostSubdivision != 0 && rightMostSubdivision != maxWidth) {
-                        slotToEventPlaced[it] = (slotToEventPlaced[it] ?: 0).plus(1)
-                    }
+                    slotToWidthAlreadyPlaced[it] = (slotToWidthAlreadyPlaced[it] ?: 0).plus(eventWidth)
                 }
             }
         }

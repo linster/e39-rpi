@@ -155,8 +155,8 @@ class AgendaPartsDebugWindow @Inject constructor(
                     ),
                     AgendaCalendarEventData(
                         headerText = "Curling",
-                        start = LocalDateTime(today.year, today.month, today.day + 1, 4, 0, 0).toInstant(TimeZone.currentSystemDefault()),
-                        end = LocalDateTime(today.year, today.month, today.day + 1, 5, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        start = LocalDateTime(today.year, today.month, today.day, 4, 0, 0).toInstant(TimeZone.currentSystemDefault()),
+                        end = LocalDateTime(today.year, today.month, today.day, 5, 0, 0).toInstant(TimeZone.currentSystemDefault()),
                         color = Color.Magenta
                     ),
                     AgendaCalendarEventData(
