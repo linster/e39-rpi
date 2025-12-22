@@ -8,12 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRow
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRow
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -21,14 +20,9 @@ import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
-import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ConjoinedListRecord
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -85,7 +79,7 @@ class MonthScreen @Inject constructor(
             firstVisibleMonth = currentMonth.value,
             firstDayOfWeek = daysOfTheWeek.first(),
 
-        )
+            )
 
         val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
@@ -100,7 +94,9 @@ class MonthScreen @Inject constructor(
             NorthButtonRow(
                 knobState = knobState,
                 timePeriodLabel = currentMonth.value.let { yearMonth ->
-                    " ${yearMonth.month.toJavaMonth().getDisplayName(TextStyle.FULL, Locale.getDefault())} ${yearMonth.year}"
+                    " ${
+                        yearMonth.month.toJavaMonth().getDisplayName(TextStyle.FULL, Locale.getDefault())
+                    } ${yearMonth.year}"
                 },
                 onMenuClicked = {
                     calendarOptionsMenu.showCalendarOptionsMenu()
@@ -121,9 +117,11 @@ class MonthScreen @Inject constructor(
                 }
             )
 
-            Row(modifier = Modifier
-                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                .fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                    .fillMaxWidth()
+            ) {
                 for (day in daysOfTheWeek) {
                     MenuItem(
                         boxModifier = Modifier.weight(1f),
@@ -151,46 +149,50 @@ class MonthScreen @Inject constructor(
         }
 
     }
+}
+@Composable
+fun CalendarDay(
+    day : CalendarDay,
+    isSelected : Boolean,
+    onClicked : () -> Unit
+) {
 
-    @Composable
-    fun CalendarDay(
-        day : CalendarDay,
-        isSelected : Boolean,
-        onClicked : () -> Unit
-    ) {
+    val isToday : Boolean = day.date.toJavaLocalDate().dayOfYear ==
+            Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                .dayOfYear
 
-        val isToday : Boolean = day.date.toJavaLocalDate().dayOfYear ==
-                Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                    .dayOfYear
-
-        Box(
-            modifier = Modifier
-                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                .fillMaxWidth()
-                .border(3.dp, if (!isSelected) Color.White else ThemeWrapper.ThemeHandle.current.colors.selectedColor)
+    Box(
+        modifier = Modifier
+            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+            .fillMaxWidth()
+            .border(3.dp, if (!isSelected) Color.White else ThemeWrapper.ThemeHandle.current.colors.selectedColor)
 //                        .fillMaxWidth()
-                .height(50.dp),
-            //.aspectRatio(1f), // This is important for square sizing!
-            contentAlignment = Alignment.Center
-        ) {
-            Row {
-                MenuItem(
-                    boxModifier = Modifier.weight(1f),
-                    label = day.date.dayOfMonth.toString(),
-                    labelColor = if (isSelected || isToday) {
-                        ThemeWrapper.ThemeHandle.current.colors.selectedColor
-                    } else {
-                        ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE
-                    },
-                    onClicked = { onClicked() }
-                )
-                Column {
-                    //Event chips
-                }
+            .height(50.dp),
+        //.aspectRatio(1f), // This is important for square sizing!
+        contentAlignment = Alignment.Center
+    ) {
+        Row {
+            MenuItem(
+                boxModifier = Modifier.weight(1f),
+                label = day.date.dayOfMonth.toString(),
+                labelColor = if (isSelected || isToday) {
+                    ThemeWrapper.ThemeHandle.current.colors.selectedColor
+                } else {
+                    ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE
+                },
+                onClicked = { onClicked() }
+            )
+            Column {
+                //Event chips
             }
         }
     }
-
-
-
 }
+
+//TODO clicking on a day should open a side menu with a quick list
+//TODO of the events on that day.
+//TODO, there should also be a button to open the week view for the week
+//TODO that contains that day
+
+
+

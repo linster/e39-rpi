@@ -55,6 +55,10 @@ data class AgendaCalendarEventData(
         return startTime.date
     }
 
+    fun getEndLocalDate() : LocalDate {
+        return endTime.date
+    }
+
     //If the event spans more than one day, set an "endTimeToday" for when today's part of the event ends
     private fun getEndTimeToday() : LocalDateTime {
         return LocalDateTime(startTime.date, LocalTime(hour = 23, minute = 59, second = 59))

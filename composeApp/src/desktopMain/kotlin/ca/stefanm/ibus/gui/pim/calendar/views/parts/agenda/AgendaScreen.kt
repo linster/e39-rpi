@@ -2,11 +2,10 @@ package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.Color
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRow
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRowWithScroll
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRowWithScroll
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRowWithScroll
 import ca.stefanm.ibus.lib.logging.Logger
 import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.plusDays

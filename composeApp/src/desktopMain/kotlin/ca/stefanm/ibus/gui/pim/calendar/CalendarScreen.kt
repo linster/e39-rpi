@@ -3,8 +3,6 @@ package ca.stefanm.ibus.gui.pim.calendar
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarView
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -17,10 +15,11 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarViewConfigRepo
+import ca.stefanm.ibus.gui.pim.calendar.setup.views.CalendarSetupRootScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.*
+import ca.stefanm.ibus.gui.pim.calendar.views.editor.CalendarEventEditScreen
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 @ScreenDoc(
@@ -48,38 +47,57 @@ class CalendarScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
+
         Column(modifier = Modifier.fillMaxSize()) {
             BmwSingleLineHeader("Calendar")
-            FullScreenMenu.OneColumn(items = listOf(
-                TextMenuItem(
-                    "Loading...",
-                    isSelectable = false,
-                    onClicked = {}
-                ),
-                TextMenuItem(
+
+            FullScreenMenu.TwoColumnFillFromCorners(
+                nw = listOf(TextMenuItem(
                     "Go back",
                     onClicked = {
                         navigationNodeTraverser.navigateToRoot()
                     }
-                )
-            ))
-
-            //https://github.com/kizitonwose/Calendar/blob/main/docs/Compose.md
-
-
-            LaunchedEffect(Unit) {
-//                navigationNodeTraverser.navigateToNode(MonthScreen::class.java)
-                delay(10)
-                val view = calendarViewConfigRepo.screenView
-                when (view.value) {
-                    CalendarView.MonthCalendar -> navigationNodeTraverser.navigateToNode(MonthScreen::class.java)
-                    CalendarView.OneWeekCalendar -> navigationNodeTraverser.navigateToNode(OneWeekScreen::class.java)
-                    CalendarView.TwoWeekCalendar -> navigationNodeTraverser.navigateToNode(TwoWeekScreen::class.java)
-                    CalendarView.TodaysAgenda,
-                    CalendarView.TodoList -> navigationNodeTraverser.navigateToNode(TodoListScreen::class.java)
-                }
-
-            }
+                )),
+                ne = listOf(
+                    TextMenuItem(
+                        "Month",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(MonthScreen::class.java)
+                        }
+                    ),
+                    TextMenuItem(
+                        "Week (1 day)",
+                        onClicked = { WeekScreen.openWithParameters(navigationNodeTraverser, WeekScreen.WeekScreenParameters(numberOfDays = 1)) }
+                    ),
+                    TextMenuItem(
+                        "Week (3 days)",
+                        onClicked = { WeekScreen.openWithParameters(navigationNodeTraverser, WeekScreen.WeekScreenParameters(numberOfDays = 3))}
+                    ),
+                    TextMenuItem(
+                        "Week (5 days)",
+                        onClicked = { WeekScreen.openWithParameters(navigationNodeTraverser, WeekScreen.WeekScreenParameters(numberOfDays = 5))}
+                    ),
+                    TextMenuItem(
+                        "Todo List",
+                        onClicked = {}
+                    )
+                ),
+                sw = listOf(
+                    TextMenuItem(
+                        "New Event",
+                        onClicked = {
+                            CalendarEventEditScreen.createNewEvent(navigationNodeTraverser)
+                        }
+                    ),
+                    TextMenuItem(
+                        "Settings",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(CalendarSetupRootScreen::class.java)
+                        }
+                    )
+                ),
+                se = listOf()
+            )
 
         }
     }

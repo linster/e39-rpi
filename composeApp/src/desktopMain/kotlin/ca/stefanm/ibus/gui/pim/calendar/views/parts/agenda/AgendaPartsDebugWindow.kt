@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.NorthButtonRow
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
@@ -28,7 +27,6 @@ import java.time.format.TextStyle
 import java.util.*
 import javax.inject.Inject
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 class AgendaPartsDebugWindow @Inject constructor(
     private val knobListenerService: KnobListenerService,

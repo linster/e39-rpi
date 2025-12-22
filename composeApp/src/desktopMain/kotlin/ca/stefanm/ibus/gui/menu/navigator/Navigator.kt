@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
@@ -26,7 +27,6 @@ import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
 import ca.stefanm.ibus.di.*
-import ca.stefanm.ibus.gui.debug.hmiScreens.*
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.chat.screens.chat.*
@@ -40,9 +40,10 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
 import ca.stefanm.ibus.gui.pim.calendar.setup.views.CalendarSetupRootScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
-import ca.stefanm.ibus.gui.pim.calendar.views.OneWeekScreen
+import ca.stefanm.ibus.gui.pim.calendar.views.WeekScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.TodoListScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.TwoWeekScreen
+import ca.stefanm.ibus.gui.pim.calendar.views.editor.CalendarEventEditScreen
 import ca.stefanm.ibus.lib.logging.Logger
 import dagger.Module
 import dagger.Provides
@@ -131,10 +132,12 @@ class NavigationModule {
         verificationSetupScreen: VerificationSetupScreen,
         calendarScreen: CalendarScreen,
         monthScreen: MonthScreen,
-        oneWeekScreen: OneWeekScreen,
+        weekScreen: WeekScreen,
         todoListScreen: TodoListScreen,
         twoWeekScreen: TwoWeekScreen,
-        calendarSetupRootScreen : CalendarSetupRootScreen
+        calendarSetupRootScreen : CalendarSetupRootScreen,
+        calendarEventEditScreen: CalendarEventEditScreen,
+        todoItemEditorScreen: TodoItemEditorScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -190,10 +193,12 @@ class NavigationModule {
         verificationSetupScreen,
         calendarScreen,
         monthScreen,
-        oneWeekScreen,
+        weekScreen,
         todoListScreen,
         twoWeekScreen,
         calendarSetupRootScreen,
+        calendarEventEditScreen,
+        todoItemEditorScreen
     )
 }
 

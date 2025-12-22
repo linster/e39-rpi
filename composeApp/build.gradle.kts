@@ -28,6 +28,7 @@ kotlin {
                 optIn("kotlin.ExperimentalUnsignedTypes")
                 optIn("kotlin.ExperimentalCoroutinesApi")
                 optIn("kotlin.uuid.ExperimentalUuidApi")
+                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
             }
         }
         //desktopMain.dependsOn(commonMain)

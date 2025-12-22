@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views
+package ca.stefanm.ibus.gui.pim.calendar.views.parts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -15,9 +15,6 @@ import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
-import ca.stefanm.ibus.gui.pim.calendar.views.OneWeekScreen.Companion.TAG
-import com.kizitonwose.calendar.core.plusMonths
-import kotlinx.coroutines.launch
 
 @Composable
 fun NorthButtonRow(
