@@ -229,8 +229,8 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        modalMenuService.showDayPicker(today) {
-
+                                        modalMenuService.showDayPicker(today.yearMonth) {
+                                            logger.d("WAT", "Start Date picked $it")
                                         }
                                     }
                                 )
@@ -300,8 +300,8 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        modalMenuService.showDayPicker(today) {
-
+                                        modalMenuService.showDayPicker(today.yearMonth) {
+                                            logger.d("WAT", "End Date picked $it")
                                         }
                                     }
                                 )

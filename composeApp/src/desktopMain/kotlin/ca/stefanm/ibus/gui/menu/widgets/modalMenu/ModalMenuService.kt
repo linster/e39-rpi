@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.menu.widgets.modalMenu
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -26,10 +27,7 @@ import ca.stefanm.ibus.gui.map.OverlayProperties
 import ca.stefanm.ibus.gui.map.PoiOverlay
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.MenuWindow
-import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
-import ca.stefanm.ibus.gui.menu.widgets.MenuItem
-import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
+import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
@@ -40,6 +38,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.pim.calendar.views.CalendarDay
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRow
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -51,11 +50,10 @@ import com.kizitonwose.calendar.core.plusMonths
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.YearMonth
-import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
 import org.jxmapviewer.viewer.GeoPosition
+import java.time.format.TextStyle
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.time.Clock
@@ -311,7 +309,7 @@ class ModalMenuService @Inject constructor(
 
 
     fun showDayPicker(
-        startMonth : LocalDate,
+        startMonthAt : YearMonth = YearMonth.now(),
         onDayPicked : (date : LocalDate) -> Unit
     ) {
         isKeyboardShowing.value = true
@@ -319,7 +317,7 @@ class ModalMenuService @Inject constructor(
 
             val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
             KeyboardViews.KeyboardPane(
-                maxHeight =  0.8F
+                maxHeight =  0.7F
             ) {
                 DisposableEffect(Unit) {
                     knobListenerServiceMain.disableListener()
@@ -335,9 +333,9 @@ class ModalMenuService @Inject constructor(
                 }
 
 
-                val currentMonth = remember { mutableStateOf(YearMonth.now()) }
-                val startMonth = remember(currentMonth) { currentMonth.value.minusMonths(50) }
-                val endMonth = remember(currentMonth) { currentMonth.value.plusMonths(50) }
+                val currentMonth = remember { mutableStateOf(startMonthAt) }
+                val startMonth = remember(currentMonth) { currentMonth.value.minusMonths(20) }
+                val endMonth = remember(currentMonth) { currentMonth.value.plusMonths(20) }
 
                 val daysOfTheWeek = remember { daysOfWeek() }
 
@@ -350,65 +348,146 @@ class ModalMenuService @Inject constructor(
                     )
 
                 Column(Modifier
-                    .fillMaxHeight()
+                    .fillMaxHeight(),
                     //.aspectRatio(1F)
-                    .border(4.dp, Color.Red),
+                    //.border(4.dp, Color.Red),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     Row(Modifier.fillMaxHeight()) {
 
-                        HorizontalCalendar(
-                            modifier = Modifier.aspectRatio(2F),
-                            state = state,
-                            userScrollEnabled = true,
-                            calendarScrollPaged = false,
-                            dayContent = @Composable { day ->
-
-                                KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
-                                    CalendarDay(
-                                        day = day,
-                                        isSelected = allocatedIndex == currentIndex,
-                                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {}
+                        Column(Modifier.weight(0.5F)) {
+                            Row(
+                                modifier = Modifier
+                                    .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                                    .fillMaxWidth()
+                            ) {
+                                for (day in daysOfTheWeek) {
+                                    MenuItem(
+                                        boxModifier = Modifier.weight(1f),
+                                        label = day.toJavaDayOfWeek()
+                                            .getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                                        isSmallSize = true,
+                                        onClicked = {}
                                     )
+                                }
+                            }
+                            HorizontalCalendar(
+                                modifier = Modifier.fillMaxWidth(),
+                                state = state,
+                                userScrollEnabled = true,
+                                calendarScrollPaged = false,
+                                dayContent = @Composable { day ->
 
-                                    val isToday : Boolean = day.date.toJavaLocalDate().dayOfYear ==
-                                            Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                                                .dayOfYear
+                                    KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                                        val isSelected = allocatedIndex == currentIndex
 
-                                    Box(
-                                        modifier = Modifier
-                                            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                                            .fillMaxWidth()
-                                            .border(3.dp, if (!isSelected) Color.White else ThemeWrapper.ThemeHandle.current.colors.selectedColor)
-                                            .height(20.dp),
-                                        //.aspectRatio(1f), // This is important for square sizing!
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Row {
-                                            MenuItem(
-                                                boxModifier = Modifier.weight(1f),
-                                                label = day.date.dayOfMonth.toString(),
-                                                labelColor = if (isSelected || isToday) {
-                                                    ThemeWrapper.ThemeHandle.current.colors.selectedColor
-                                                } else {
-                                                    ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE
-                                                },
-                                                onClicked = { onClicked() }
-                                            )
 
-                                            Column {
-                                                //Event chips
+                                        val isToday: Boolean = day.date.toJavaLocalDate().dayOfYear ==
+                                                Clock.System.now()
+                                                    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                                                    .dayOfYear
+
+                                        Box(
+                                            modifier = Modifier
+                                                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                                                .fillMaxWidth()
+                                                .border(
+                                                    3.dp,
+                                                    if (!isSelected) Color.White else ThemeWrapper.ThemeHandle.current.colors.selectedColor
+                                                )
+                                                .clickable {
+                                                    isKeyboardShowing.value = false
+                                                    _modalMenuOverlay.value = null
+                                                    onDayPicked(day.date)
+                                                }
+                                                .wrapContentHeight(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Row {
+
+                                                Text(
+                                                    text = day.date.dayOfMonth.toString(),
+                                                    color = if (isSelected) {
+                                                        ThemeWrapper.ThemeHandle.current.colors.selectedColor
+                                                    } else if (isToday) {
+                                                        Color.Red
+                                                    } else {
+                                                        ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE
+                                                    },
+                                                    fontSize = 18.sp,
+                                                    modifier = Modifier
+                                                        .padding(
+                                                            top = 5.dp.halveIfNotPixelDoubled(),
+                                                            bottom = 5.dp.halveIfNotPixelDoubled(),
+                                                            start = 25.dp.halveIfNotPixelDoubled()
+                                                        )
+                                                )
                                             }
                                         }
                                     }
-
-
                                 }
+                            )
+                        }
+                        Column(Modifier.weight(0.5F)) {
+                            MenuItem(
+                                boxModifier = Modifier.fillMaxWidth(),
+                                label = "${currentMonth.value.month.toJavaMonth().getDisplayName(TextStyle.SHORT, Locale.CANADA)} ${currentMonth.value.year}",
+                                chipOrientation = ItemChipOrientation.NONE,
+                                isSelected = false,
+                                isSmallSize = true,
+                                onClicked = {}
+                            )
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier.fillMaxWidth(),
+                                    label = "Scroll to prev month",
+                                    chipOrientation = ItemChipOrientation.E,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        currentMonth.value = currentMonth.value.minusMonth()
+                                    }
+                                )
                             }
-                        )
-                        Column {
-                            Text("foo")
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier.fillMaxWidth(),
+                                    label = "Scroll to next month",
+                                    chipOrientation = ItemChipOrientation.E,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        currentMonth.value = currentMonth.value.plusMonth()
+                                    }
+                                )
+                            }
+
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier.fillMaxWidth(),
+                                    label = "Scroll to today's month",
+                                    chipOrientation = ItemChipOrientation.E,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        currentMonth.value = YearMonth.now()
+                                    }
+                                )
+                            }
+
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier.fillMaxWidth(),
+                                    label = "Close without selection",
+                                    chipOrientation = ItemChipOrientation.E,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        _modalMenuOverlay.value = null
+                                    }
+                                )
+                            }
                         }
 
                     }
