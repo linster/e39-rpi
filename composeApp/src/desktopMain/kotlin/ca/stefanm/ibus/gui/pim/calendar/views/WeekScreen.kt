@@ -9,6 +9,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorSc
 import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -44,6 +46,7 @@ class WeekScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerService: KnobListenerService,
     private val calendarOptionsMenu: CalendarOptionsMenu,
     private val weekViewRepo: WeekViewRepo,

@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -34,6 +35,7 @@ import javax.inject.Inject
 
 import com.kizitonwose.calendar.core.*
 import kotlinx.datetime.*
+import javax.inject.Named
 
 import kotlin.time.Clock
 
@@ -49,6 +51,7 @@ class MonthScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerService: KnobListenerService,
     private val calendarOptionsMenu: CalendarOptionsMenu
 ) : NavigationNode<Nothing> {

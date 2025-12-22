@@ -108,6 +108,8 @@ class CalendarEventEditScreen @Inject constructor(
             knobState.subscribeEvents()
         }
 
+        val eventName = remember { mutableStateOf(if (isNewEvent) {"Event Name"} else { eventToEdit.value?.headerText ?: "null Event"}) }
+
         Column(Modifier
             .fillMaxSize()
             .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
@@ -132,20 +134,78 @@ class CalendarEventEditScreen @Inject constructor(
                             .map { list -> list.map { event -> event.copy(onClick = {}) } }
                             .collectAsState(listOf()).value
                         ,
-                        onCalendarItemSelectedChange = { event ->
-
-                        }
+                        onCalendarItemSelectedChange = {}
                     )
                 }
                 Column(Modifier.weight(0.3F, true)) {
                     //TODO calendar scroll buttons.
-//                    Row {
-//                        previousButtonLabel : String = "⏴",
-//                        nextButtonLabel : String = "⏵",
-//                        upButtonLabel : String = "⏶",
-//                        downButtonLabel : String = "⏷",
-//
-//                    }
+                    Column {
+                        Row {
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier,
+                                    label = "⏴",
+                                    chipOrientation = ItemChipOrientation.N,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                                    }
+                                )
+                            }
+
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier,
+                                    label = "⏵",
+                                    chipOrientation = ItemChipOrientation.N,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                                    }
+                                )
+                            }
+
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier,
+                                    label = "⏶",
+                                    chipOrientation = ItemChipOrientation.N,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                                    }
+                                )
+                            }
+
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier,
+                                    label = "⏷",
+                                    chipOrientation = ItemChipOrientation.N,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                                    }
+                                )
+                            }
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier.fillMaxWidth(),
+                                    label = "Days ⏿: 3",
+                                    chipOrientation = ItemChipOrientation.N,
+                                    isSelected = allocatedIndex == currentIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                                    }
+                                )
+                            }
+                        }
+                    }
                     KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                         MenuItem(
                             boxModifier = Modifier.fillMaxWidth(),
@@ -159,7 +219,7 @@ class CalendarEventEditScreen @Inject constructor(
                         )
                     }
 
-                    val eventName = remember { mutableStateOf(if (isNewEvent) {"Event Name"} else { eventToEdit.value?.headerText ?: "null Event"}) }
+
 
                     MenuItem(
                         boxModifier = Modifier.fillMaxWidth(),
@@ -191,40 +251,18 @@ class CalendarEventEditScreen @Inject constructor(
                                 isSmallSize = true,
                                 onClicked = {}
                             )
-                            MenuItem(
-                                boxModifier = Modifier.fillMaxWidth(),
-                                label = (eventToEdit.value?.getStartLocalDate() ?: today).format(
-                                    LocalDate.Format {
-                                        day()
-                                        char(' ')
-                                        this.monthName(MonthNames.ENGLISH_ABBREVIATED)
-                                    }
-                                ),
-                                chipOrientation = ItemChipOrientation.NONE,
-                                isSelected = false,
-                                isSmallSize = true,
-                                onClicked = {}
-                            )
-
-                            MenuItem(
-                                boxModifier = Modifier.fillMaxWidth(),
-                                label =
-                                    (eventToEdit.value
-                                        ?.start
-                                        ?.toLocalDateTime(TimeZone.currentSystemDefault())
-                                        ?: LocalDateTime(today, LocalTime(hour = 8, minute = 0, second = 59))
-                                            ).format(LocalDateTime.Format {
-                                            hour() ; char(':') ; minute()
-                                        }),
-                                chipOrientation = ItemChipOrientation.NONE,
-                                isSelected = false,
-                                isSmallSize = true,
-                                onClicked = {}
-                            )
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ Date",
+                                    label = "✐ ${
+                                        (eventToEdit.value?.getStartLocalDate() ?: today).format(
+                                            LocalDate.Format {
+                                                day()
+                                                char(' ')
+                                                this.monthName(MonthNames.ENGLISH_ABBREVIATED)
+                                            }
+                                        )
+                                    }",
                                     chipOrientation = ItemChipOrientation.E,
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
@@ -238,7 +276,15 @@ class CalendarEventEditScreen @Inject constructor(
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ Time",
+                                    label = "✐ ${
+                                        (eventToEdit.value
+                                            ?.start
+                                            ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                                            ?: LocalDateTime(today, LocalTime(hour = 8, minute = 0, second = 59))
+                                                ).format(LocalDateTime.Format {
+                                                hour() ; char(':') ; minute()
+                                            })
+                                    }",
                                     chipOrientation = ItemChipOrientation.E,
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
@@ -261,41 +307,19 @@ class CalendarEventEditScreen @Inject constructor(
                                 isSmallSize = true,
                                 onClicked = {}
                             )
-                            MenuItem(
-                                boxModifier = Modifier.fillMaxWidth(),
-                                label = (eventToEdit.value?.getEndLocalDate() ?: today).format(
-                                    LocalDate.Format {
-                                        day()
-                                        char(' ')
-                                        this.monthName(MonthNames.ENGLISH_ABBREVIATED)
-                                    }
-                                ),
-                                chipOrientation = ItemChipOrientation.NONE,
-                                isSelected = false,
-                                isSmallSize = true,
-                                onClicked = {}
-                            )
 
-
-                            MenuItem(
-                                boxModifier = Modifier.fillMaxWidth(),
-                                label =
-                                    (eventToEdit.value
-                                        ?.end
-                                        ?.toLocalDateTime(TimeZone.currentSystemDefault())
-                                        ?: LocalDateTime(today, LocalTime(hour = 13, minute = 0, second = 59))
-                                    ).format(LocalDateTime.Format {
-                                        hour() ; char(':') ; minute()
-                                    }),
-                                chipOrientation = ItemChipOrientation.NONE,
-                                isSelected = false,
-                                isSmallSize = true,
-                                onClicked = {}
-                            )
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ Date",
+                                    label = "✐ ${
+                                        (eventToEdit.value?.getEndLocalDate() ?: today).format(
+                                            LocalDate.Format {
+                                                day()
+                                                char(' ')
+                                                this.monthName(MonthNames.ENGLISH_ABBREVIATED)
+                                            }
+                                        )
+                                    }",
                                     chipOrientation = ItemChipOrientation.E,
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
@@ -309,7 +333,15 @@ class CalendarEventEditScreen @Inject constructor(
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ Time",
+                                    label = "✐ ${
+                                        (eventToEdit.value
+                                            ?.end
+                                            ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                                            ?: LocalDateTime(today, LocalTime(hour = 13, minute = 0, second = 59))
+                                                ).format(LocalDateTime.Format {
+                                                hour() ; char(':') ; minute()
+                                            })
+                                    }",
                                     chipOrientation = ItemChipOrientation.E,
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
@@ -336,11 +368,6 @@ class CalendarEventEditScreen @Inject constructor(
                             }
                         )
                     }
-
-
-
-
-
                 }
             }
         }
