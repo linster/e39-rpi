@@ -495,4 +495,11 @@ class ModalMenuService @Inject constructor(
             }
         }
     }
+
+    fun showTimePicker(
+        startTime : LocalTime,
+        onLocalTimePicked : (LocalTime) -> Unit
+    ) {
+
+    }
 }

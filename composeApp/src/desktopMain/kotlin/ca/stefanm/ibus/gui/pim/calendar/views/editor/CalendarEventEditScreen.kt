@@ -37,6 +37,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
+import kotlinx.datetime.format.DateTimeFormat
+import kotlinx.datetime.format.DateTimeFormatBuilder
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import javax.inject.Inject
@@ -108,7 +110,156 @@ class CalendarEventEditScreen @Inject constructor(
             knobState.subscribeEvents()
         }
 
-        val eventName = remember { mutableStateOf(if (isNewEvent) {"Event Name"} else { eventToEdit.value?.headerText ?: "null Event"}) }
+        val eventName = remember {
+            mutableStateOf(
+                if (isNewEvent) {
+                    "Event Name"
+                } else {
+                    eventToEdit.value?.headerText ?: "null Event"
+                }
+            )
+        }
+
+        val startDateEntered = remember { mutableStateOf<LocalDate?>(null) }
+        val endDateEntered = remember { mutableStateOf<LocalDate?>(null) }
+
+        val startLocalTime = remember { mutableStateOf<LocalTime?>(null) }
+        val endLocalTime = remember { mutableStateOf<LocalTime?>(null) }
+
+        LaunchedEffect(
+            eventName.value,
+            startDateEntered.value,
+            endDateEntered.value,
+            startLocalTime.value,
+            endLocalTime.value
+        ) effect@ {
+            val newEventName = eventName.value
+            val newStartDate = startDateEntered.value ?: return@effect
+            val newEndDate = endDateEntered.value ?: return@effect
+            val newStartLocalTime = startLocalTime.value ?: return@effect
+            val newEndLocalTime = endLocalTime.value ?: return@effect
+
+            logger.d("CalendarEventEditScren", "Updating eventToEdit")
+            eventToEdit.value = AgendaCalendarEventData(
+                headerText = newEventName,
+                start = LocalDateTime(newStartDate, newStartLocalTime).toInstant(TimeZone.currentSystemDefault()),
+                end = LocalDateTime(newEndDate, newEndLocalTime).toInstant(TimeZone.currentSystemDefault()),
+                color = eventToEdit.value?.color ?: Color.Magenta,
+                eventUuid = eventToEdit.value?.eventUuid,
+                onClick = {}
+            )
+        }
+
+        val calendarDaysVisible = remember { mutableStateOf(3) }
+
+        val events = weekViewRepo
+            .getAgendaViewEvents(today, 1)
+            .map { list -> list.map { event -> event.copy(onClick = {}) } }
+            .map { list -> if (eventToEdit.value == null) { list } else { list.plus(eventToEdit.value!!)} }
+            .collectAsState(listOf())
+
+        ContentLayout(
+            calendarEventList = events.value,
+            knobState = knobState,
+            isNewEvent = isNewEvent,
+            today = today,
+            eventToEdit = eventToEdit.value,
+            eventName = eventName.value,
+
+            onNewEventName = { eventName.value = it},
+
+            startDate = if (startDateEntered.value == null) { today } else { startDateEntered.value!!},
+            onStartDateEntered = startDateEntered@ { start ->
+                endDateEntered.value.let { end ->
+                    if (end == null) {
+                        startDateEntered.value = start
+                        return@startDateEntered
+                    }
+                    if (start > end) {
+                        notificationHub.postNotificationBackground(
+                            Notification(
+                            Notification.NotificationImage.ALERT_TRIANGLE,
+                                "Invalid Date Entered",
+                                "Start date must be before end date."
+                        ))
+                        return@startDateEntered
+                    }
+                    startDateEntered.value = start
+                } },
+            endDate = if (endDateEntered.value == null) { today } else { endDateEntered.value!!},
+            onEndDateEntered = endDateEntered@ { end ->
+                startDateEntered.value.let { start ->
+                    if (start == null) {
+                        //Quickly enter
+                        endDateEntered.value = end
+                        return@endDateEntered
+                    }
+                    if (end < start) {
+                        notificationHub.postNotificationBackground(
+                            Notification(
+                                Notification.NotificationImage.ALERT_TRIANGLE,
+                                "Invalid Date Entered",
+                                "End date must be after start date."
+                            ))
+                        return@endDateEntered
+                    }
+                    endDateEntered.value = end
+                }
+            },
+
+            startLocalTime = if (startLocalTime.value == null) { LocalTime(13, 0)} else {startLocalTime.value!! },
+            onStartLocalTimePicked = { startLocalTime.value = it},
+
+            endLocalTime = if (endLocalTime.value == null ) { LocalTime(15, 0) } else { endLocalTime.value!! },
+            onEndLocalTimePicked = { endLocalTime.value = it},
+
+            onGoBackClicked = { navigationNodeTraverser.goBack()},
+            onSaveClicked = {},
+
+
+            onCalendarScrollLeft = {},
+            onCalendarScrollRight = {},
+            onCalendarScrollUp = {},
+            onCalendarScrollDown = {},
+
+            calendarDaysVisible = calendarDaysVisible.value,
+            onCalendarDaysVisibleChanged = { calendarDaysVisible.value = it}
+        )
+
+    }
+
+    @Composable
+    fun ContentLayout(
+        calendarEventList : List<AgendaCalendarEventData>,
+        knobState : KnobObserverBuilderState,
+        isNewEvent : Boolean,
+        today : LocalDate,
+        eventToEdit : AgendaCalendarEventData?,
+        eventName : String,
+
+        onNewEventName : (String) -> Unit,
+
+        startDate : LocalDate,
+        onStartDateEntered : (LocalDate) -> Unit,
+        endDate : LocalDate,
+        onEndDateEntered : (LocalDate) -> Unit,
+
+        startLocalTime : LocalTime,
+        onStartLocalTimePicked : (LocalTime) -> Unit,
+
+        endLocalTime: LocalTime,
+        onEndLocalTimePicked : (LocalTime) -> Unit,
+
+        onGoBackClicked : () -> Unit,
+        onSaveClicked : () -> Unit,
+
+        onCalendarScrollLeft : () -> Unit,
+        onCalendarScrollRight : () -> Unit,
+        onCalendarScrollUp : () -> Unit,
+        onCalendarScrollDown : () -> Unit,
+        calendarDaysVisible : Int,
+        onCalendarDaysVisibleChanged : (Int) -> Unit,
+    ) {
 
         Column(Modifier
             .fillMaxSize()
@@ -117,28 +268,23 @@ class CalendarEventEditScreen @Inject constructor(
             if (isNewEvent) {
                 BmwSingleLineHeader("Create new event")
             } else {
-                BmwSingleLineHeader("Edit event: ${eventToEdit.value?.headerText}")
+                BmwSingleLineHeader("Edit event: ${eventToEdit?.headerText}")
             }
             Row(Modifier.fillMaxSize()) {
                 Column(Modifier.weight(0.5F)) {
                     AgendaCalendarLayout(
                         knobState = knobState,
-                        numberOfDays = 3,
+                        numberOfDays = calendarDaysVisible,
                         startDay = if (isNewEvent) {
                             today
                         } else {
-                            eventToEdit.value?.getStartLocalDate() ?: today
+                            eventToEdit?.getStartLocalDate() ?: today
                         }.minusDays(1),
-                        events = weekViewRepo
-                            .getAgendaViewEvents(today, 1)
-                            .map { list -> list.map { event -> event.copy(onClick = {}) } }
-                            .collectAsState(listOf()).value
-                        ,
+                        events = calendarEventList,
                         onCalendarItemSelectedChange = {}
                     )
                 }
                 Column(Modifier.weight(0.3F, true)) {
-                    //TODO calendar scroll buttons.
                     Column {
                         Row {
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
@@ -149,7 +295,7 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                        onCalendarScrollLeft()
                                     }
                                 )
                             }
@@ -162,7 +308,7 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                        onCalendarScrollRight()
                                     }
                                 )
                             }
@@ -175,7 +321,7 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                        onCalendarScrollUp()
                                     }
                                 )
                             }
@@ -188,19 +334,23 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                        onCalendarScrollDown()
                                     }
                                 )
                             }
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "Days ⏿: 3",
+                                    label = "Days ⏿: $calendarDaysVisible",
                                     chipOrientation = ItemChipOrientation.N,
                                     isSelected = allocatedIndex == currentIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                        modalMenuService.showKeyboard(Keyboard.KeyboardType.NUMERIC,
+                                            ""
+                                        ) {
+                                            onCalendarDaysVisibleChanged(it.toIntOrNull()?.coerceIn(1..5) ?: calendarDaysVisible)
+                                        }
                                     }
                                 )
                             }
@@ -214,16 +364,14 @@ class CalendarEventEditScreen @Inject constructor(
                             isSelected = currentIndex == allocatedIndex,
                             isSmallSize = true,
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                navigationNodeTraverser.goBack()
+                                onGoBackClicked()
                             }
                         )
                     }
 
-
-
                     MenuItem(
                         boxModifier = Modifier.fillMaxWidth(),
-                        label = "✐ ${eventName.value}",
+                        label = "✐ $eventName",
                         chipOrientation = ItemChipOrientation.E,
                         isSelected = false,
                         isSmallSize = true,
@@ -231,7 +379,7 @@ class CalendarEventEditScreen @Inject constructor(
                             modalMenuService.showKeyboard(
                                 Keyboard.KeyboardType.FULL,
                                 prefilled = "",
-                                onTextEntered = { new -> eventName.value = new}
+                                onTextEntered = { new -> onNewEventName(new)}
                             )
                         }
                     )
@@ -255,7 +403,7 @@ class CalendarEventEditScreen @Inject constructor(
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
                                     label = "✐ ${
-                                        (eventToEdit.value?.getStartLocalDate() ?: today).format(
+                                        startDate.format(
                                             LocalDate.Format {
                                                 day()
                                                 char(' ')
@@ -268,7 +416,7 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                         modalMenuService.showDayPicker(today.yearMonth) {
-                                            logger.d("WAT", "Start Date picked $it")
+                                            onStartDateEntered(it)
                                         }
                                     }
                                 )
@@ -277,19 +425,17 @@ class CalendarEventEditScreen @Inject constructor(
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
                                     label = "✐ ${
-                                        (eventToEdit.value
-                                            ?.start
-                                            ?.toLocalDateTime(TimeZone.currentSystemDefault())
-                                            ?: LocalDateTime(today, LocalTime(hour = 8, minute = 0, second = 59))
-                                                ).format(LocalDateTime.Format {
-                                                hour() ; char(':') ; minute()
-                                            })
+                                        startLocalTime.format(LocalTime.Format {
+                                            hour() ; char(':') ; minute() 
+                                        })
                                     }",
                                     chipOrientation = ItemChipOrientation.E,
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                        modalMenuService.showTimePicker(startLocalTime) {
+                                            onStartLocalTimePicked(it)
+                                        }
                                     }
                                 )
                             }
@@ -312,7 +458,7 @@ class CalendarEventEditScreen @Inject constructor(
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
                                     label = "✐ ${
-                                        (eventToEdit.value?.getEndLocalDate() ?: today).format(
+                                        endDate.format(
                                             LocalDate.Format {
                                                 day()
                                                 char(' ')
@@ -325,7 +471,7 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                         modalMenuService.showDayPicker(today.yearMonth) {
-                                            logger.d("WAT", "End Date picked $it")
+                                            onEndDateEntered(it)
                                         }
                                     }
                                 )
@@ -334,19 +480,17 @@ class CalendarEventEditScreen @Inject constructor(
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
                                     label = "✐ ${
-                                        (eventToEdit.value
-                                            ?.end
-                                            ?.toLocalDateTime(TimeZone.currentSystemDefault())
-                                            ?: LocalDateTime(today, LocalTime(hour = 13, minute = 0, second = 59))
-                                                ).format(LocalDateTime.Format {
-                                                hour() ; char(':') ; minute()
-                                            })
+                                        endLocalTime.format(LocalTime.Format {
+                                            hour() ; char(':') ; minute()
+                                        })
                                     }",
                                     chipOrientation = ItemChipOrientation.E,
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                                        modalMenuService.showTimePicker(endLocalTime) {
+                                            onEndLocalTimePicked(it)
+                                        }
                                     }
                                 )
                             }
@@ -364,7 +508,7 @@ class CalendarEventEditScreen @Inject constructor(
                             isSelected = currentIndex == allocatedIndex,
                             isSmallSize = true,
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                navigationNodeTraverser.goBack()
+                                onSaveClicked()
                             }
                         )
                     }

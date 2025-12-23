@@ -37,6 +37,7 @@ internal object GridKeyboard {
                 QwertyKeyDefinition("2"),
                 QwertyKeyDefinition("3"),
                 QwertyKeyDefinition(RightArrowLabel, RightArrowLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.RightArrow),
+                QwertyKeyDefinition(BackSpaceLabel, BackSpaceLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.BackSpace),
                 QwertyKeyDefinition(ReturnLabel, ReturnLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.Return)
             )
         )

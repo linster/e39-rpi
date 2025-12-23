@@ -41,6 +41,7 @@ data class AgendaCalendarEventData(
     val multiDayTotalParts : Int = 1, //TODO actually calculate this by subtracting the LocaleDate day numbers.
 ) {
 
+
     private val TAG = "AgendaCalendarEventData"
     private val logger by lazy {
         DaggerApplicationComponent.create().logger()
