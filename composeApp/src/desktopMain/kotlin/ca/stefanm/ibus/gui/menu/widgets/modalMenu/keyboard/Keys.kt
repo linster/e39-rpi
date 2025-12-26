@@ -30,7 +30,8 @@ enum class SpecialTags {
     Cancel,
     Return,
     Shift,
-    BackSpace
+    BackSpace,
+    Clear
 }
 
 const val TabSpacerLabel = "Tab"
@@ -43,6 +44,7 @@ const val LeftArrowLabel = "<-"
 const val RightArrowLabel = "->"
 
 const val CancelLabel = "Cancel"
+const val ClearLabel = "Clear"
 data class QwertyKeyDefinition(
     val lowerCaseLabel : String,
     val upperCaseLabel : String = lowerCaseLabel.uppercase(),

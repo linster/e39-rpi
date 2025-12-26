@@ -23,7 +23,8 @@ object Keyboard {
     enum class KeyboardType {
         FULL,
         NUMERIC,
-        TELEPHONE
+        TELEPHONE,
+        TIME_PICKER
     }
 
     fun showKeyboard(
@@ -41,6 +42,7 @@ object Keyboard {
                 KeyboardType.FULL -> if (isPixelDoubled) 0.6F else 0.68F
                 KeyboardType.NUMERIC -> if (isPixelDoubled) 0.4f else 0.45F
                 KeyboardType.TELEPHONE -> if (isPixelDoubled) 0.6F else 0.68F
+                KeyboardType.TIME_PICKER -> if (isPixelDoubled) 0.7f else 0.7F
             }
         ) {
             when (type) {
@@ -59,6 +61,13 @@ object Keyboard {
                 )
 
                 KeyboardType.TELEPHONE -> GridKeyboard.TelephoneKeyboard(
+                    prefilled,
+                    knobListenerService,
+                    onTextEntered,
+                    closeWithoutEntry
+                )
+
+                KeyboardType.TIME_PICKER -> GridKeyboard.TimePickerKeyboard(
                     prefilled,
                     knobListenerService,
                     onTextEntered,

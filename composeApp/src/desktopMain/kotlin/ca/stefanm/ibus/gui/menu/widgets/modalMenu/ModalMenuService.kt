@@ -27,6 +27,8 @@ import ca.stefanm.ibus.gui.map.OverlayProperties
 import ca.stefanm.ibus.gui.map.PoiOverlay
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.MenuWindow
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
@@ -51,7 +53,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.*
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
 import org.jxmapviewer.viewer.GeoPosition
+import java.time.format.DateTimeParseException
 import java.time.format.TextStyle
 import java.util.*
 import javax.inject.Inject
@@ -164,7 +169,8 @@ class ModalMenuService @Inject constructor(
     private val knobListenerServiceMain: KnobListenerService,
     @Named(ApplicationModule.KNOB_LISTENER_MODAL)
     private val knobListenerServiceModal: KnobListenerService,
-    private val logger: Logger
+    private val logger: Logger,
+    private val notificationHub: NotificationHub
 ) {
     private val _modalMenuOverlay = MutableStateFlow<(@Composable () -> Unit)?>(null)
     val modalMenuOverlay = _modalMenuOverlay.asStateFlow()
@@ -501,5 +507,74 @@ class ModalMenuService @Inject constructor(
         onLocalTimePicked : (LocalTime) -> Unit
     ) {
 
+        //This thing should actually check that the format returned from the keyboard is okay
+        //before returning it.
+
+        val prefilledText = startTime.format(LocalTime.Format {
+            hour() ; char(':') ; minute()
+        })
+
+        showKeyboard(
+            type = KeyboardType.TIME_PICKER,
+            prefilled = prefilledText,
+            onTextEntered = {
+
+                //If the text has "AM" or "PM" in it, parse it as an AM/PM time
+                if (it.contains("AM") || it.contains("PM")) {
+                    runCatching { LocalTime.parse(it, LocalTime.Format {
+                        amPmHour(padding = Padding.NONE)
+                        char(':')
+                        minute()
+                        char(' ')
+                        amPmMarker("AM", "PM")
+                    })}.fold(
+                        onSuccess = { parsed -> onLocalTimePicked(parsed)},
+                        onFailure = { throwable ->
+                            if (throwable.cause is DateTimeParseException) {
+                                logger.e("TimePicker", "AM/PM exception", throwable)
+                                notificationHub.postNotificationBackground(Notification(
+                                    Notification.NotificationImage.ALERT_TRIANGLE,
+                                    "Invalid time",
+                                    "Time should be HH:MM AM/PM"
+                                ))
+                            } else {
+                                logger.e("TimePicker", "AM/PM other exception", throwable)
+                                notificationHub.postNotificationBackground(Notification(
+                                    Notification.NotificationImage.ALERT_TRIANGLE,
+                                    "Format Exception",
+                                    "Could not parse LocalTime: ${throwable.message}"
+                                ))
+                            }
+                        }
+                    )
+                } else {
+                    runCatching { LocalTime.parse(it, LocalTime.Format {
+                        hour(padding = Padding.NONE)
+                        char(':')
+                        minute()
+                    })}.fold(
+                        onSuccess = { parsed -> onLocalTimePicked(parsed)},
+                        onFailure = { throwable ->
+                            if (throwable.cause is DateTimeParseException) {
+                                logger.e("TimePicker", "parse exception", throwable)
+                                notificationHub.postNotificationBackground(Notification(
+                                    Notification.NotificationImage.ALERT_TRIANGLE,
+                                    "Invalid time",
+                                    "Time should be HH:MM"
+                                ))
+                            } else {
+                                logger.e("TimePicker", "parse exception", throwable)
+                                notificationHub.postNotificationBackground(Notification(
+                                    Notification.NotificationImage.ALERT_TRIANGLE,
+                                    "Format Exception",
+                                    "Could not parse LocalTime: ${throwable.message}"
+                                ))
+                            }
+                        }
+                    )
+
+                }
+            }
+        )
     }
 }

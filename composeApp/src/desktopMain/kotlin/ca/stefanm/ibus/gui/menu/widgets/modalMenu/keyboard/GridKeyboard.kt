@@ -95,6 +95,56 @@ internal object GridKeyboard {
     }
 
     @Composable
+    internal fun TimePickerKeyboard(
+        prefilled : String = "",
+        knobListenerService: KnobListenerService,
+        onTextEntered: (entered: String) -> Unit,
+        closeWithoutEntry: () -> Unit
+    ) {
+        val keysByRow = listOf(
+            listOf(
+                QwertyKeyDefinition("1", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition("2", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition("3", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(":00", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(CancelLabel, CancelLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.Cancel),
+                QwertyKeyDefinition(ClearLabel, ClearLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.Clear),
+            ),
+            listOf(
+                QwertyKeyDefinition("4", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition("5", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition("6", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(":15", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(LeftArrowLabel, LeftArrowLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.LeftArrow),
+                QwertyKeyDefinition(" AM", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+            ),
+            listOf(
+                QwertyKeyDefinition("7", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition("8", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition("9", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(":30", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(RightArrowLabel, RightArrowLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.RightArrow),
+                QwertyKeyDefinition(" PM", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+            ),
+            listOf(
+                QwertyKeyDefinition("0", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(":", ":", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(" ", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(":45", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
+                QwertyKeyDefinition(ReturnLabel, ReturnLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.Return),
+                QwertyKeyDefinition(BackSpaceLabel, BackSpaceLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.BackSpace),
+            )
+        )
+
+        GridKeyboard(
+            prefilled, keysByRow,
+            aspectRatio = 3F,
+            knobListenerService, onTextEntered, closeWithoutEntry
+        )
+
+    }
+
+    @Composable
     private fun GridKeyboard(
         prefilled: String,
         keysByRow : List<List<QwertyKeyDefinition>>,

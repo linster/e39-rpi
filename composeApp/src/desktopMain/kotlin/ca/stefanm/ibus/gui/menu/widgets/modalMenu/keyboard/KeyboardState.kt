@@ -106,6 +106,10 @@ internal fun StateManagedKeyboard(
                         cursorPosition.value = cursorPosition.value - 1
                     }
                 }
+                SpecialTags.Clear -> {
+                    cursorPosition.value = 0
+                    enteredText.value = ""
+                }
                 else -> {}
             }
         }
