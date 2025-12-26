@@ -162,6 +162,7 @@ class CalendarEventEditScreen @Inject constructor(
         }
 
         val calendarDaysVisible = remember { mutableStateOf(3) }
+        val calendarStartHour = remember { mutableStateOf(0) }
 
         val calendarStartDate = remember { mutableStateOf(today) }
 
@@ -245,11 +246,16 @@ class CalendarEventEditScreen @Inject constructor(
 
 
             onCalendarScrollLeft = { calendarStartDate.value = calendarStartDate.value.minusDays(1) },
-            onCalendarScrollDaysResetToToday = { calendarStartDate.value = today },
+            onCalendarScrollDaysResetToToday = { calendarStartDate.value = today.minusDays(1) },
             onCalendarScrollRight = { calendarStartDate.value = calendarStartDate.value.plusDays(1) },
 
-            onCalendarScrollUp = {},
-            onCalendarScrollDown = {},
+            calendarStartHour = calendarStartHour.value,
+            onCalendarScrollUp = {
+                calendarStartHour.value = (calendarStartHour.value - 1).coerceIn(0 until 23)
+            },
+            onCalendarScrollDown = {
+                calendarStartHour.value = (calendarStartHour.value + 1).coerceIn(0 until 23)
+            },
 
             calendarDaysVisible = calendarDaysVisible.value,
             onCalendarDaysVisibleChanged = { calendarDaysVisible.value = it}
@@ -265,6 +271,7 @@ class CalendarEventEditScreen @Inject constructor(
         isNewEventComplete : Boolean,
         today : LocalDate,
         calendarStartDate : LocalDate,
+        calendarStartHour : Int,
         eventToEdit : AgendaCalendarEventData?,
         eventName : String,
 
@@ -321,6 +328,7 @@ class CalendarEventEditScreen @Inject constructor(
                         numberOfDays = calendarDaysVisible,
                         startDay = calendarStartDate,
                         events = calendarEventList,
+                        startHour = calendarStartHour,
                         onCalendarItemSelectedChange = {
                             singleLineHeaderPreview.value = "${it.headerText} ${it.getBodyText()}"
                             scope.launch {

@@ -1,19 +1,26 @@
 package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.*
+import androidx.compose.ui.LocalSystemTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotDivider
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.SlotLabel
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.VerticalDivider
 import com.kizitonwose.calendar.core.plusDays
+import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
@@ -43,11 +50,44 @@ fun AgendaCalendarLayout(
     //Number of days to display past the startDay
     numberOfDays : Int = 3,
 
-//    onDayScroll : (minHourVisible : Int, maxHourVisible: Int, minHour : Int, maxHour : Int) -> Unit,
+    startHour : Int,
+
+    onDayScroll : (minHour : Int, maxHour : Int) -> Unit = { _, _ -> },
     onCalendarItemSelectedChange : (event : AgendaCalendarEventData) -> Unit = {}
 ) {
 
-    ConstraintLayout(modifier = modifier) outer@ {
+    val theme = ThemeWrapper.ThemeHandle.current
+    val scope = rememberCoroutineScope()
+    val startHourValue = remember { mutableStateOf(startHour) }
+
+    val scrollState = rememberScrollState(0)
+
+    val screenDensity = LocalDensity.current
+
+    LaunchedEffect(startHour) {
+        if (scrollState.viewportSize != 0 && !scrollState.isScrollInProgress) {
+            //We can scroll, so jump to somewhere lol
+            println("ZOMG WAT" + scrollState.value)
+            println("ZOMG WAT start hour $startHour")
+            println("ZOMG WAT viewportSize ${scrollState.viewportSize}")
+            println("ZOMG WAT maxValue $${scrollState.maxValue}")
+
+            val scrollFraction = ((startHour ) / 24f) * scrollState.maxValue
+            println("ZOMG WAT scrollFraction ${scrollFraction}")
+            val heightPerSlot = theme.smallItem.fontSize.value.toInt() + theme.bigItem.highlightWidth.let { it / 2F }.toInt()
+            println("ZOMG WAT heightPerSlot ${heightPerSlot}")
+            println("ZOMG WAT screendenity ${screenDensity.density}")
+//            scope.launch {
+                scrollState.scrollTo((startHour * heightPerSlot * 1.75).toInt())
+//            }
+            println("ZOMG WAT" + scrollState.value)
+        }
+    }
+
+
+
+
+    ConstraintLayout(modifier = modifier.verticalScroll(scrollState)) outer@{
 
         val minHour = 0
         val maxHour = 23
@@ -55,13 +95,13 @@ fun AgendaCalendarLayout(
         val slotBarRefs = mutableMapOf<Int, ConstrainedLayoutReference>()
         val slotLabelRefs = mutableMapOf<Int, ConstrainedLayoutReference>()
 
-        (minHour .. maxHour).forEach { hour ->
+        ((minHour)..maxHour).forEach { hour ->
             slotBarRefs[hour] = createRef()
             slotLabelRefs[hour] = createRef()
             SlotDivider(Modifier.constrainAs(slotBarRefs[hour]!!) {
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-                if (hour == 0) {
+                if (hour == minHour) {
                     //Link to parent because it's the first bar
                     top.linkTo(parent.top)
                 } else {
@@ -103,7 +143,7 @@ fun AgendaCalendarLayout(
         val drawSubdivisions = true
 
         val dayRefs = mutableMapOf<Int, ConstrainedLayoutReference>()
-        (0 .. (numberOfDays * subdivisionsPerDay)).forEach { dayNumber ->
+        (0..(numberOfDays * subdivisionsPerDay)).forEach { dayNumber ->
             dayRefs[dayNumber] = createRef()
         }
 
@@ -114,15 +154,23 @@ fun AgendaCalendarLayout(
 
         }
 
-        (0 .. (numberOfDays * (subdivisionsPerDay + 0))).forEach { dayNumber ->
+        (0..(numberOfDays * (subdivisionsPerDay + 0))).forEach { dayNumber ->
             if (dayNumber % subdivisionsPerDay == 0) {
                 VerticalDivider(
-                    Modifier.constrainAs(dayRefs[dayNumber]!!) {}
+                    Modifier.constrainAs(dayRefs[dayNumber]!!) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        height = Dimension.fillToConstraints
+                    }
                 )
             } else {
                 //Invisible structural nonsense. Without this ConstraintLayout blows up and idk why.
                 VerticalDivider(
-                    Modifier.constrainAs(dayRefs[dayNumber]!!) {},
+                    Modifier.constrainAs(dayRefs[dayNumber]!!) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        height = Dimension.fillToConstraints
+                    },
                     colorOverride = Color.Transparent
                 )
             }
@@ -130,12 +178,13 @@ fun AgendaCalendarLayout(
 
         val labelDays = true
         if (labelDays) {
-            (0 until  numberOfDays).forEach { dayNumber ->
+            (0 until numberOfDays).forEach { dayNumber ->
                 val day = startDay.plusDays(dayNumber)
-                val label = "${day
-                    .dayOfWeek
-                    .toJavaDayOfWeek()
-                    .getDisplayName(TextStyle.SHORT_STANDALONE, Locale.CANADA)
+                val label = "${
+                    day
+                        .dayOfWeek
+                        .toJavaDayOfWeek()
+                        .getDisplayName(TextStyle.SHORT_STANDALONE, Locale.CANADA)
                 } ${day.day} ${day.month.toJavaMonth().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.CANADA)}"
 
                 DayHeaderChip(
@@ -179,12 +228,13 @@ fun AgendaCalendarLayout(
                             bottom.linkTo(slotBarRefs[event.getEndHour()]!!.top)
                             height = Dimension.fillToConstraints
 
-                            val dayNumber = (event.startTime.dayOfYear - startDay.dayOfYear).coerceIn(0..numberOfDays)
+                            val dayNumber =
+                                (event.startTime.dayOfYear - startDay.dayOfYear).coerceIn(0..numberOfDays)
 
                             // start.linkTo(dayRefs[(dayNumber * subdivisionsPerDay)]!!.end)
                             // end.linkTo(dayRefs[((dayNumber + 1) * subdivisionsPerDay)]!!.start)
-                            start.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.first]!!.start)
-                            end.linkTo(dayRefs[ (dayNumber * subdivisionsPerDay) + result[event]!!.last]!!.end)
+                            start.linkTo(dayRefs[(dayNumber * subdivisionsPerDay) + result[event]!!.first]!!.start)
+                            end.linkTo(dayRefs[(dayNumber * subdivisionsPerDay) + result[event]!!.last]!!.end)
                             width = Dimension.fillToConstraints
                         },
                         header = event.headerText,
@@ -199,4 +249,5 @@ fun AgendaCalendarLayout(
             }
         }
     }
+
 }

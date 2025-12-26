@@ -55,6 +55,8 @@ fun AgendaScreen(
 
     val agendaCalendarLayoutHeader = remember(timePeriodLabel.value) { mutableStateOf(timePeriodLabel.value) }
 
+    val startHour = remember { mutableStateOf(0) }
+
     key(Unit) {
         Column {
             NorthButtonRowWithScroll(
@@ -69,14 +71,19 @@ fun AgendaScreen(
                     timePeriodLabel.value = getLabelForDateRange(startDay.value, numberOfDays)
                 },
                 onMenuClicked = { onMenuClicked() },
-                onUpClicked = {},
-                onDownClicked = {}
+                onUpClicked = {
+                    startHour.value = (startHour.value - 1).coerceIn(0 until 23)
+                },
+                onDownClicked = {
+                    startHour.value = (startHour.value + 1).coerceIn(0 until 23)
+                }
             )
             AgendaCalendarLayout(
                 knobState = knobState,
                 numberOfDays = numberOfDays,
                 startDay = startDay.value,
                 events = eventData,
+                startHour = startHour.value,
                 onCalendarItemSelectedChange = { event ->
                     currentlySelectedEventLabel.value = "Event: ${event.headerText}, ${event.getBodyText()}"
                     scope.launch {

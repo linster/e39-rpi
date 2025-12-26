@@ -73,12 +73,12 @@ fun VerticalDivider(
 
     if (colorOverride != null) {
         Box(
-            modifier = Modifier.width(strokeWidth.dp).fillMaxHeight()
+            modifier = Modifier.width(strokeWidth.dp)
                 .background(colorOverride).then(modifier)
         )
     } else {
         Box(
-            modifier = Modifier.width(strokeWidth.dp).fillMaxHeight()
+            modifier = Modifier.width(strokeWidth.dp)
                 .background(
                     Brush.verticalGradient(
                         0F to Color.Transparent,
