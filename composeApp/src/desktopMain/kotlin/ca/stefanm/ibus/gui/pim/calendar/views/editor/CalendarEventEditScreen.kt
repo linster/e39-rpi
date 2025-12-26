@@ -33,6 +33,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import com.kizitonwose.calendar.core.minusDays
+import com.kizitonwose.calendar.core.plusDays
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -162,6 +163,16 @@ class CalendarEventEditScreen @Inject constructor(
 
         val calendarDaysVisible = remember { mutableStateOf(3) }
 
+        val calendarStartDate = remember { mutableStateOf(today) }
+
+        LaunchedEffect(isNewEventComplete.value, eventToEdit.value) {
+            calendarStartDate.value = if (isNewEvent && !isNewEventComplete.value) {
+                today
+            } else {
+                eventToEdit.value?.getStartLocalDate() ?: today
+            }.minusDays(1)
+        }
+
         val events = weekViewRepo
             .getAgendaViewEvents(today, 1)
             .map { list -> list.map { event -> event.copy(onClick = {}) } }
@@ -174,6 +185,7 @@ class CalendarEventEditScreen @Inject constructor(
             isNewEvent = isNewEvent,
             isNewEventComplete = isNewEventComplete.value,
             today = today,
+            calendarStartDate = calendarStartDate.value,
             eventToEdit = eventToEdit.value,
             eventName = eventName.value,
 
@@ -225,11 +237,17 @@ class CalendarEventEditScreen @Inject constructor(
             onEndLocalTimePicked = { endLocalTime.value = it},
 
             onGoBackClicked = { navigationNodeTraverser.goBack()},
-            onSaveClicked = {},
+            onSaveClicked = {
+                eventToEdit.value?.let { event ->
+                    weekViewRepo.saveEditedEvent(event)
+                }
+            },
 
 
-            onCalendarScrollLeft = {},
-            onCalendarScrollRight = {},
+            onCalendarScrollLeft = { calendarStartDate.value = calendarStartDate.value.minusDays(1) },
+            onCalendarScrollDaysResetToToday = { calendarStartDate.value = today },
+            onCalendarScrollRight = { calendarStartDate.value = calendarStartDate.value.plusDays(1) },
+
             onCalendarScrollUp = {},
             onCalendarScrollDown = {},
 
@@ -246,6 +264,7 @@ class CalendarEventEditScreen @Inject constructor(
         isNewEvent : Boolean,
         isNewEventComplete : Boolean,
         today : LocalDate,
+        calendarStartDate : LocalDate,
         eventToEdit : AgendaCalendarEventData?,
         eventName : String,
 
@@ -266,6 +285,7 @@ class CalendarEventEditScreen @Inject constructor(
         onSaveClicked : () -> Unit,
 
         onCalendarScrollLeft : () -> Unit,
+        onCalendarScrollDaysResetToToday : () -> Unit,
         onCalendarScrollRight : () -> Unit,
         onCalendarScrollUp : () -> Unit,
         onCalendarScrollDown : () -> Unit,
@@ -273,29 +293,42 @@ class CalendarEventEditScreen @Inject constructor(
         onCalendarDaysVisibleChanged : (Int) -> Unit,
     ) {
 
+        val scope = rememberCoroutineScope()
         val newEventIncompleteMarker = if (isNewEventComplete) { "" } else {"\uD83D\uDDCB"}
 
         Column(Modifier
             .fillMaxSize()
             .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
         ) {
-            if (isNewEvent) {
-                BmwSingleLineHeader("Create new event")
+            //Make the header be a scrollable preview of the selected event, which can be rather small
+            val singleLineHeaderIsPreview = remember { mutableStateOf(false) }
+            val singleLineHeaderDefault = if (isNewEvent && !isNewEventComplete) {
+                "Create new event"
             } else {
-                BmwSingleLineHeader("Edit event: ${eventToEdit?.headerText}")
+                "Edit event: ${eventToEdit?.headerText}"
             }
+            val singleLineHeaderPreview = remember { mutableStateOf("") }
+            if (singleLineHeaderIsPreview.value) {
+                BmwSingleLineHeader(singleLineHeaderPreview.value)
+            } else {
+                BmwSingleLineHeader(singleLineHeaderDefault)
+            }
+
             Row(Modifier.fillMaxSize()) {
                 Column(Modifier.weight(0.5F)) {
                     AgendaCalendarLayout(
                         knobState = knobState,
                         numberOfDays = calendarDaysVisible,
-                        startDay = if (isNewEvent) {
-                            today
-                        } else {
-                            eventToEdit?.getStartLocalDate() ?: today
-                        }.minusDays(1),
+                        startDay = calendarStartDate,
                         events = calendarEventList,
-                        onCalendarItemSelectedChange = {}
+                        onCalendarItemSelectedChange = {
+                            singleLineHeaderPreview.value = "${it.headerText} ${it.getBodyText()}"
+                            scope.launch {
+                                singleLineHeaderIsPreview.value = true
+                                delay(2.seconds)
+                                singleLineHeaderIsPreview.value = false
+                            }
+                        }
                     )
                 }
                 Column(Modifier.weight(0.4F, true)) {
@@ -310,6 +343,19 @@ class CalendarEventEditScreen @Inject constructor(
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                         onCalendarScrollLeft()
+                                    }
+                                )
+                            }
+
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier,
+                                    label = "\uD83D\uDD70",
+                                    chipOrientation = ItemChipOrientation.N,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        onCalendarScrollDaysResetToToday()
                                     }
                                 )
                             }

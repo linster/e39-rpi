@@ -92,4 +92,10 @@ class WeekViewRepo @Inject constructor() {
             startDay.plusDays(numDays)
         )
     }
+
+    fun saveEditedEvent(
+        eventData: AgendaCalendarEventData
+    ) {
+
+    }
 }
