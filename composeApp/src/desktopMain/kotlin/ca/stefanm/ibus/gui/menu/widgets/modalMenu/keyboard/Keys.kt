@@ -36,12 +36,14 @@ enum class SpecialTags {
 
 const val TabSpacerLabel = "Tab"
 const val BackSpaceLabel = "Backspace"
+const val BackSpaceIcon = "⌫"
 const val CapslockLabel = "Caps"
 const val ReturnLabel = "Return"
+const val ReturnIcon = "⤶"
 const val ShiftLabel = "Shift"
 
-const val LeftArrowLabel = "<-"
-const val RightArrowLabel = "->"
+const val LeftArrowLabel = "←"
+const val RightArrowLabel = "→"
 
 const val CancelLabel = "Cancel"
 const val ClearLabel = "Clear"

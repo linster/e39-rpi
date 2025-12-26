@@ -56,6 +56,7 @@ import kotlinx.datetime.*
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import org.jxmapviewer.viewer.GeoPosition
+import java.time.DateTimeException
 import java.time.format.DateTimeParseException
 import java.time.format.TextStyle
 import java.util.*
@@ -530,7 +531,7 @@ class ModalMenuService @Inject constructor(
                     })}.fold(
                         onSuccess = { parsed -> onLocalTimePicked(parsed)},
                         onFailure = { throwable ->
-                            if (throwable.cause is DateTimeParseException) {
+                            if (throwable.cause is IllegalArgumentException && throwable?.cause?.cause is DateTimeException) {
                                 logger.e("TimePicker", "AM/PM exception", throwable)
                                 notificationHub.postNotificationBackground(Notification(
                                     Notification.NotificationImage.ALERT_TRIANGLE,
@@ -555,7 +556,7 @@ class ModalMenuService @Inject constructor(
                     })}.fold(
                         onSuccess = { parsed -> onLocalTimePicked(parsed)},
                         onFailure = { throwable ->
-                            if (throwable.cause is DateTimeParseException) {
+                            if (throwable.cause is IllegalArgumentException && throwable?.cause?.cause is DateTimeException) {
                                 logger.e("TimePicker", "parse exception", throwable)
                                 notificationHub.postNotificationBackground(Notification(
                                     Notification.NotificationImage.ALERT_TRIANGLE,

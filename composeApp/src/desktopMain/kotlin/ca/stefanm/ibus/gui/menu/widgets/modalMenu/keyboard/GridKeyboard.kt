@@ -131,8 +131,8 @@ internal object GridKeyboard {
                 QwertyKeyDefinition(":", ":", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
                 QwertyKeyDefinition(" ", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
                 QwertyKeyDefinition(":45", "", isUpperCaseSelectable = false, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK),
-                QwertyKeyDefinition(ReturnLabel, ReturnLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.Return),
-                QwertyKeyDefinition(BackSpaceLabel, BackSpaceLabel, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.BackSpace),
+                QwertyKeyDefinition(ReturnIcon, ReturnIcon, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.Return),
+                QwertyKeyDefinition(BackSpaceIcon, BackSpaceIcon, keySize = QwertyKeyDefinition.KeySize.CAPSLOCK, specialTag = SpecialTags.BackSpace),
             )
         )
 

@@ -110,6 +110,8 @@ class CalendarEventEditScreen @Inject constructor(
             knobState.subscribeEvents()
         }
 
+        val isNewEventComplete = remember { mutableStateOf(!isNewEvent) }
+
         val eventName = remember {
             mutableStateOf(
                 if (isNewEvent) {
@@ -139,7 +141,15 @@ class CalendarEventEditScreen @Inject constructor(
             val newStartLocalTime = startLocalTime.value ?: return@effect
             val newEndLocalTime = endLocalTime.value ?: return@effect
 
-            logger.d("CalendarEventEditScren", "Updating eventToEdit")
+            logger.d("CalendarEventEditScreen", "Updating eventToEdit")
+            isNewEventComplete.value = true
+            notificationHub.postNotificationBackground(
+                Notification(
+                Notification.NotificationImage.MESSAGE_CIRCLE,
+                    "Calendar event filled in",
+                    "New event now visible on preview"
+            )
+            )
             eventToEdit.value = AgendaCalendarEventData(
                 headerText = newEventName,
                 start = LocalDateTime(newStartDate, newStartLocalTime).toInstant(TimeZone.currentSystemDefault()),
@@ -155,13 +165,14 @@ class CalendarEventEditScreen @Inject constructor(
         val events = weekViewRepo
             .getAgendaViewEvents(today, 1)
             .map { list -> list.map { event -> event.copy(onClick = {}) } }
-            .map { list -> if (eventToEdit.value == null) { list } else { list.plus(eventToEdit.value!!)} }
+            .map { list -> if (eventToEdit.value == null) { list } else { list.plus(eventToEdit.value!!.splitToMultipleEvents())} }
             .collectAsState(listOf())
 
         ContentLayout(
             calendarEventList = events.value,
             knobState = knobState,
             isNewEvent = isNewEvent,
+            isNewEventComplete = isNewEventComplete.value,
             today = today,
             eventToEdit = eventToEdit.value,
             eventName = eventName.value,
@@ -233,6 +244,7 @@ class CalendarEventEditScreen @Inject constructor(
         calendarEventList : List<AgendaCalendarEventData>,
         knobState : KnobObserverBuilderState,
         isNewEvent : Boolean,
+        isNewEventComplete : Boolean,
         today : LocalDate,
         eventToEdit : AgendaCalendarEventData?,
         eventName : String,
@@ -261,6 +273,8 @@ class CalendarEventEditScreen @Inject constructor(
         onCalendarDaysVisibleChanged : (Int) -> Unit,
     ) {
 
+        val newEventIncompleteMarker = if (isNewEventComplete) { "" } else {"\uD83D\uDDCB"}
+
         Column(Modifier
             .fillMaxSize()
             .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
@@ -284,7 +298,7 @@ class CalendarEventEditScreen @Inject constructor(
                         onCalendarItemSelectedChange = {}
                     )
                 }
-                Column(Modifier.weight(0.3F, true)) {
+                Column(Modifier.weight(0.4F, true)) {
                     Column {
                         Row {
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
@@ -371,7 +385,7 @@ class CalendarEventEditScreen @Inject constructor(
 
                     MenuItem(
                         boxModifier = Modifier.fillMaxWidth(),
-                        label = "✐ $eventName",
+                        label = "✐ ${newEventIncompleteMarker}$eventName",
                         chipOrientation = ItemChipOrientation.E,
                         isSelected = false,
                         isSmallSize = true,
@@ -402,7 +416,7 @@ class CalendarEventEditScreen @Inject constructor(
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ ${
+                                    label = "✐ ${newEventIncompleteMarker}${
                                         startDate.format(
                                             LocalDate.Format {
                                                 day()
@@ -424,7 +438,7 @@ class CalendarEventEditScreen @Inject constructor(
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ ${
+                                    label = "✐ ${newEventIncompleteMarker}${
                                         startLocalTime.format(LocalTime.Format {
                                             hour() ; char(':') ; minute() 
                                         })
@@ -457,7 +471,7 @@ class CalendarEventEditScreen @Inject constructor(
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ ${
+                                    label = "✐ ${newEventIncompleteMarker}${
                                         endDate.format(
                                             LocalDate.Format {
                                                 day()
@@ -479,7 +493,7 @@ class CalendarEventEditScreen @Inject constructor(
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
-                                    label = "✐ ${
+                                    label = "✐ ${newEventIncompleteMarker}${
                                         endLocalTime.format(LocalTime.Format {
                                             hour() ; char(':') ; minute()
                                         })
