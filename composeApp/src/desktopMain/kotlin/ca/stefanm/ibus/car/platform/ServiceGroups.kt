@@ -2,7 +2,6 @@ package ca.stefanm.ibus.car.platform
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceGroup
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
-import ca.stefanm.ibus.car.platform.Service
 import kotlin.reflect.KClass
 
 data class DiscoveredPlatformServiceGroup(
@@ -78,3 +77,10 @@ annotation class TvModuleAnnounceSim
     description = "Services that listen for PicoToPi messages and do their action"
 )
 annotation class PicoToPiParserGroup
+
+
+@PlatformServiceGroup(
+    name = "PeripheralsDesktop",
+    description = "Services that are run to subscribe to devices and services that exist on desktop installations of e39-rpi"
+)
+annotation class PeripheralsDesktopGroup

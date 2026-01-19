@@ -18,6 +18,7 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.menu.MenuWindow.Companion.MenuWindowKnobListener
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -84,7 +85,7 @@ class MonthScreen @Inject constructor(
 
             )
 
-        val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
+        val knobState = remember(MenuWindowKnobListener.current) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
         LaunchedEffect(Unit) {
             knobState.subscribeEvents()

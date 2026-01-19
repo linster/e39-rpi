@@ -134,6 +134,10 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
 
 //            desktopTestImplementation("junit:junit:4.13.1")
+
+
+            //Griffin Powermate
+            implementation("io.github.irgaly.kfswatch:kfswatch:1.4.0")
         }
     }
 }

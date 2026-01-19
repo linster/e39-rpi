@@ -10,6 +10,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaScre
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.menu.MenuWindow.Companion.MenuWindowKnobListener
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -46,8 +47,6 @@ class WeekScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
-    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
-    private val knobListenerService: KnobListenerService,
     private val calendarOptionsMenu: CalendarOptionsMenu,
     private val weekViewRepo: WeekViewRepo,
 ) : NavigationNode<Nothing> {
@@ -84,6 +83,7 @@ class WeekScreen @Inject constructor(
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             .date
 
+        val knobListenerService = MenuWindowKnobListener.current
         val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
         LaunchedEffect(Unit) {

@@ -74,11 +74,11 @@ fun AgendaCalendarLayout(
 
             val scrollFraction = ((startHour ) / 24f) * scrollState.maxValue
             println("ZOMG WAT scrollFraction ${scrollFraction}")
-            val heightPerSlot = theme.smallItem.fontSize.value.toInt() + theme.bigItem.highlightWidth.let { it / 2F }.toInt()
+            val heightPerSlot = theme.smallItem.fontSize.value.toInt() + theme.bigItem.highlightWidth.let { it / 2F }.toInt() + 8 + 2
             println("ZOMG WAT heightPerSlot ${heightPerSlot}")
             println("ZOMG WAT screendenity ${screenDensity.density}")
 //            scope.launch {
-                scrollState.scrollTo((startHour * heightPerSlot * 1.75).toInt())
+                scrollState.scrollTo((startHour * heightPerSlot ).toInt())
 //            }
             println("ZOMG WAT" + scrollState.value)
         }

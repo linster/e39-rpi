@@ -320,18 +320,22 @@ class ModalMenuService @Inject constructor(
         onDayPicked : (date : LocalDate) -> Unit
     ) {
         isKeyboardShowing.value = true
-        _modalMenuOverlay.value = {
+        _modalMenuOverlay.value = @Composable {
+
+            LaunchedEffect(Unit) {
+                knobListenerServiceMain.disableListener()
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    knobListenerServiceMain.enableListener()
+                }
+            }
 
             val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
             KeyboardViews.KeyboardPane(
                 maxHeight =  0.7F
             ) {
-                DisposableEffect(Unit) {
-                    knobListenerServiceMain.disableListener()
-                    onDispose {
-                        knobListenerServiceMain.enableListener()
-                    }
-                }
+
 
                 val knobState = remember(knobListenerServiceModal) { KnobObserverBuilderState(knobListenerServiceModal, logger) }
                 val scope = rememberCoroutineScope()

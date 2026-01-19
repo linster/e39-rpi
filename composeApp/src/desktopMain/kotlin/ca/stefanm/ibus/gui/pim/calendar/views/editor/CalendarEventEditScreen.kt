@@ -16,6 +16,9 @@ import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCale
 import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.di.ApplicationComponent
+import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.menu.MenuWindow.Companion.MenuWindowKnobListener
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -43,6 +46,7 @@ import kotlinx.datetime.format.DateTimeFormatBuilder
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
@@ -56,7 +60,6 @@ import kotlin.time.Duration.Companion.seconds
 class CalendarEventEditScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val knobListenerService: KnobListenerService,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
     private val weekViewRepo: WeekViewRepo
@@ -105,6 +108,7 @@ class CalendarEventEditScreen @Inject constructor(
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             .date
 
+        val knobListenerService = MenuWindowKnobListener.current
         val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
         LaunchedEffect(Unit) {
@@ -437,20 +441,22 @@ class CalendarEventEditScreen @Inject constructor(
                         )
                     }
 
-                    MenuItem(
-                        boxModifier = Modifier.fillMaxWidth(),
-                        label = "✐ ${newEventIncompleteMarker}$eventName",
-                        chipOrientation = ItemChipOrientation.E,
-                        isSelected = false,
-                        isSmallSize = true,
-                        onClicked = {
-                            modalMenuService.showKeyboard(
-                                Keyboard.KeyboardType.FULL,
-                                prefilled = "",
-                                onTextEntered = { new -> onNewEventName(new)}
-                            )
-                        }
-                    )
+                    KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                        MenuItem(
+                            boxModifier = Modifier.fillMaxWidth(),
+                            label = "✐ ${newEventIncompleteMarker}$eventName",
+                            chipOrientation = ItemChipOrientation.E,
+                            isSelected = currentIndex == allocatedIndex,
+                            isSmallSize = true,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                modalMenuService.showKeyboard(
+                                    Keyboard.KeyboardType.FULL,
+                                    prefilled = "",
+                                    onTextEntered = { new -> onNewEventName(new) }
+                                )
+                            }
+                        )
+                    }
 
                     Row(
                         //Modifier.border(2.dp, Color.Red) //ThemeWrapper.ThemeHandle.current.colors.sideMenuBorder)
