@@ -103,6 +103,7 @@ class GriffinPowermateReader @Inject constructor(
                     }
                 }
             }
+            .desensitize(3)
             .transform {
                 when (it) {
                     is PowerMateEvent.Turnleft -> InputEvent.NavKnobTurned(1, InputEvent.NavKnobTurned.Direction.LEFT)
@@ -225,6 +226,54 @@ class GriffinPowermateReader @Inject constructor(
         data class KnobRelease(override val timestamp: Long) : PowerMateEvent(timestamp)
         data class Turnleft(override val timestamp: Long) : PowerMateEvent(timestamp)
         data class TurnRight(override val timestamp: Long) : PowerMateEvent(timestamp)
+    }
+
+    data class DesensitizeAccumulator(
+        val lastEvent : PowerMateEvent,
+
+    )
+
+    fun Flow<PowerMateEvent>.desensitize(turnEventsPerEmission : Int) : Flow<PowerMateEvent> {
+        return this
+            .scan(
+                Pair<PowerMateEvent?, Int>(null, 0)
+            ) { (prevEvent, recordedOccurances), value ->
+                if (prevEvent == null) {
+                    value to turnEventsPerEmission
+                }
+                when (value) {
+                    //Knob presses never get filtered out,
+                    //always say enough of them have accumulated
+                    is PowerMateEvent.KnobPress,
+                    is PowerMateEvent.KnobRelease ->
+                        value to turnEventsPerEmission
+                    is PowerMateEvent.Turnleft -> {
+                        if (prevEvent is PowerMateEvent.Turnleft) {
+                            value to (recordedOccurances + 1)
+                        } else {
+                            value to 1
+                        }
+                    }
+                    is PowerMateEvent.TurnRight -> {
+                        if (prevEvent is PowerMateEvent.TurnRight) {
+                            value to (recordedOccurances + 1)
+                        } else {
+                            value to 1
+                        }
+                    }
+
+                }
+            }
+            .filterNot { it.first == null }
+            .transform {
+                if (it.second.rem(turnEventsPerEmission) == 0) {
+                    emit(it)
+                }
+            }
+            .onEach { logger.d(TAG, it.toString()) }
+            .map {
+                it.first!!
+            }
     }
 }
 
