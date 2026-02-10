@@ -49,6 +49,8 @@ class GriffinPowermateReader @Inject constructor(
     companion object {
         const val TAG = "GriffinPowermateReader"
         const val devFilePath = "/dev/input/powermate"
+
+        const val shouldLog = false
     }
 
     override suspend fun doWork() {
@@ -114,7 +116,9 @@ class GriffinPowermateReader @Inject constructor(
 
             }
             .collect {
-                logger.d(TAG, it.toString())
+                if (shouldLog) {
+                    logger.d(TAG, it.toString())
+                }
                 eventSharedFlow.emit(it)
             }
 
@@ -144,7 +148,9 @@ class GriffinPowermateReader @Inject constructor(
             // No need to awaitClose for the watcher, it'll self close
             // when producerScope is closed.
         }.onEach {
-            logger.d(TAG, "Event: $it")
+            if (shouldLog) {
+                logger.d(TAG, "Event: $it")
+            }
         }
     }
 
@@ -205,10 +211,10 @@ class GriffinPowermateReader @Inject constructor(
             val buffer = inputStream.source().buffer()
 
             launch {
-                while (isActive) {
+                while (this@callbackFlow.isActive) {
                     //logger.d(TAG, "Bytes available: ${buffer.buffer.size}")
 
-                    buffer.request(24)
+                    buffer.require(24)
                     //logger.d(TAG, "Snapshot: ${buffer.buffer.snapshot(24)}")
 
                     send(breakBufferIntoEvent(buffer.buffer))
@@ -228,10 +234,6 @@ class GriffinPowermateReader @Inject constructor(
         data class TurnRight(override val timestamp: Long) : PowerMateEvent(timestamp)
     }
 
-    data class DesensitizeAccumulator(
-        val lastEvent : PowerMateEvent,
-
-    )
 
     fun Flow<PowerMateEvent>.desensitize(turnEventsPerEmission : Int) : Flow<PowerMateEvent> {
         return this
@@ -270,7 +272,11 @@ class GriffinPowermateReader @Inject constructor(
                     emit(it)
                 }
             }
-            .onEach { logger.d(TAG, it.toString()) }
+            .onEach {
+                if (shouldLog) {
+                    logger.d(TAG, it.toString())
+                }
+            }
             .map {
                 it.first!!
             }

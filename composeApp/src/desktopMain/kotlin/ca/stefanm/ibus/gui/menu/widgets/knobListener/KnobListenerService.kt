@@ -28,7 +28,9 @@ class KnobListenerService @Inject constructor(
     fun knobTurnEvents() : Flow<InputEvent> {
         return inputEvents.filter {
             it is InputEvent.NavKnobPressed || it is InputEvent.NavKnobTurned
-        }.transform {
+        }
+            .takeWhile { listenerEnabled.value }
+            .transform {
             if (it is InputEvent.NavKnobPressed) {
                 emit(it)
             }
