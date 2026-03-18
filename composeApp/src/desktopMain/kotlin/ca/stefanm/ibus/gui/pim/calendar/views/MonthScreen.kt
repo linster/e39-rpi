@@ -57,6 +57,9 @@ class MonthScreen @Inject constructor(
     private val calendarOptionsMenu: CalendarOptionsMenu
 ) : NavigationNode<Nothing> {
 
+    companion object {
+        const val TAG = "MonthScreen"
+    }
 
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = MonthScreen::class.java
@@ -85,10 +88,10 @@ class MonthScreen @Inject constructor(
 
             )
 
-        val knobState = remember(MenuWindowKnobListener.current) { KnobObserverBuilderState(knobListenerService, logger) }
+        val knobState = remember(Unit) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
-        LaunchedEffect(Unit) {
-            knobState.subscribeEvents()
+        LaunchedEffect(knobState) {
+            knobState.subscribeEvents("monthScreen")
         }
 
         //Try the MonthContainer

@@ -60,6 +60,8 @@ import kotlin.time.Duration.Companion.seconds
 class CalendarEventEditScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerService: KnobListenerService,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
     private val weekViewRepo: WeekViewRepo
@@ -108,12 +110,15 @@ class CalendarEventEditScreen @Inject constructor(
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             .date
 
-        val knobListenerService = MenuWindowKnobListener.current
-        val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
+
+        val knobState = remember(Unit) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
-        LaunchedEffect(Unit) {
-            knobState.subscribeEvents()
+        val mainListenerEnabled = knobListenerService.listenerEnabled.collectAsState(true)
+        LaunchedEffect(mainListenerEnabled.value) {
+            logger.d("CalendarEventEditScreen", "subscribeEvents yo")
+            knobState.subscribeEvents("calendarEventEditScreen")
         }
+
 
         val isNewEventComplete = remember { mutableStateOf(!isNewEvent) }
 

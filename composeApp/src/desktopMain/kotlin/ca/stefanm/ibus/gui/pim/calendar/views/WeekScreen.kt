@@ -87,7 +87,7 @@ class WeekScreen @Inject constructor(
         val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
         val scope = rememberCoroutineScope()
         LaunchedEffect(Unit) {
-            knobState.subscribeEvents()
+            knobState.subscribeEvents("weekScreen")
         }
 
 

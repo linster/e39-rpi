@@ -145,9 +145,12 @@ class KnobObserverBuilderState(
         logger.d(computedTag, "callbacks: ${callbacks.keys}")
     }
 
-    suspend fun subscribeEvents() {
+    suspend fun subscribeEvents(tag : String? = null) {
 //        logger.d("WAT", "subscribeEvents hash ${this.hashCode()}")
         service.knobTurnEvents()
+            .onStart {
+                logger.d(TAG, "Subscription for ${tag ?: this@KnobObserverBuilderState.hashCode()} started")
+            }
             .map { event ->
 //                logger.d(TAG, "got an event in subscribeEvnents: $event")
                 when (event) {
@@ -167,6 +170,11 @@ class KnobObserverBuilderState(
 
                     else -> {}
                 }
+            }
+            .onCompletion {
+
+                logger.d(TAG, "Subscription for ${tag ?: this@KnobObserverBuilderState.hashCode()} ended. Cause: ${it}")
+
             }.collect()
     }
 

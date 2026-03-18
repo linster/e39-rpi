@@ -45,10 +45,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
-import com.kizitonwose.calendar.core.daysOfWeek
-import com.kizitonwose.calendar.core.minusMonths
-import com.kizitonwose.calendar.core.now
-import com.kizitonwose.calendar.core.plusMonths
+import com.kizitonwose.calendar.core.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -323,10 +320,12 @@ class ModalMenuService @Inject constructor(
         _modalMenuOverlay.value = @Composable {
 
             LaunchedEffect(Unit) {
+                logger.d("DayPicker", "Disabling main listener.")
                 knobListenerServiceMain.disableListener()
             }
             DisposableEffect(Unit) {
                 onDispose {
+                    logger.d("DayPicker", "Re-enabling main listener.")
                     knobListenerServiceMain.enableListener()
                 }
             }
@@ -340,7 +339,7 @@ class ModalMenuService @Inject constructor(
                 val knobState = remember(knobListenerServiceModal) { KnobObserverBuilderState(knobListenerServiceModal, logger) }
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
-                    knobState.subscribeEvents()
+                    knobState.subscribeEvents("dayPicker")
                 }
 
 
@@ -399,6 +398,11 @@ class ModalMenuService @Inject constructor(
                                                     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
                                                     .dayOfYear
 
+                                        CallWhen(currentIndexIs = allocatedIndex) {
+                                            closeModalMenu()
+                                            onDayPicked(day.date)
+                                        }
+
                                         Box(
                                             modifier = Modifier
                                                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
@@ -408,8 +412,7 @@ class ModalMenuService @Inject constructor(
                                                     if (!isSelected) Color.White else ThemeWrapper.ThemeHandle.current.colors.selectedColor
                                                 )
                                                 .clickable {
-                                                    isKeyboardShowing.value = false
-                                                    _modalMenuOverlay.value = null
+                                                    closeModalMenu()
                                                     onDayPicked(day.date)
                                                 }
                                                 .wrapContentHeight(),
@@ -495,7 +498,7 @@ class ModalMenuService @Inject constructor(
                                     isSelected = currentIndex == allocatedIndex,
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        _modalMenuOverlay.value = null
+                                        closeModalMenu()
                                     }
                                 )
                             }

@@ -25,6 +25,7 @@ import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.DebugKnobService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerServiceIdentifier
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.CompositeLogger
 import ca.stefanm.ibus.lib.logging.LogDistributionHub
@@ -189,17 +190,21 @@ class ApplicationModule {
     @ApplicationScope
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     fun provideKnobListenerServiceMain(
-        @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>
+        @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>,
+        identifier: KnobListenerServiceIdentifier,
+        logger: Logger
     ) : KnobListenerService {
-        return KnobListenerService(inputEvents)
+        return KnobListenerService(inputEvents, identifier, logger)
     }
 
     @Provides
     @ApplicationScope
     @Named(ApplicationModule.KNOB_LISTENER_MODAL)
     fun provideKnobListenerServiceModal(
-        @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>
+        @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>,
+        identifier: KnobListenerServiceIdentifier,
+        logger: Logger
     ) : KnobListenerService {
-        return KnobListenerService(inputEvents)
+        return KnobListenerService(inputEvents, identifier, logger)
     }
 }

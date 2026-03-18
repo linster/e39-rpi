@@ -23,6 +23,7 @@ import okio.buffer
 import okio.source
 import org.freedesktop.dbus.types.UInt16
 import java.io.File
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -206,7 +207,7 @@ class GriffinPowermateReader @Inject constructor(
 
 
     private fun getEvEvents(deviceFile: File) : Flow<KtEvEvent>{
-        return callbackFlow {
+        return callbackFlow<KtEvEvent> {
             val inputStream = deviceFile.inputStream()
             val buffer = inputStream.source().buffer()
 
@@ -224,7 +225,7 @@ class GriffinPowermateReader @Inject constructor(
                 buffer.close()
                 inputStream.close()
             }
-        }
+        }.retryWhen { cause: Throwable, attempt: Long -> cause is IOException || attempt < 10 }
     }
 
     sealed class PowerMateEvent(open val timestamp: Long) {

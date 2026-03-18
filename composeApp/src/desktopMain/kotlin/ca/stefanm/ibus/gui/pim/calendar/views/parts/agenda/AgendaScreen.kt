@@ -29,7 +29,7 @@ fun AgendaScreen(
     val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-        knobState.subscribeEvents()
+        knobState.subscribeEvents("agendaScreen")
     }
 
     val startDay = remember {

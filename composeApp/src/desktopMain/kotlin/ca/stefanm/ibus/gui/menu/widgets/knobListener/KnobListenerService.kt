@@ -4,6 +4,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MODAL
+import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MAIN
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.lib.logging.Logger
@@ -15,6 +17,27 @@ import java.util.LinkedList
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
+
+
+//Silly, but a way for the knob listener service to know
+//which one (of two) it is at run time
+@ApplicationScope
+class KnobListenerServiceIdentifier @Inject constructor(
+    @Named(KNOB_LISTENER_MAIN) private val main : Provider<KnobListenerService>,
+    @Named(KNOB_LISTENER_MODAL) private val modal : Provider<KnobListenerService>
+) {
+
+    fun getNameFromHashcode(hashCode : Int) : String {
+        if (hashCode == main.get().hashCode()) {
+            return "KnobListenerMain"
+        }
+        if (hashCode == modal.get().hashCode()) {
+            return "KnobListenerModal"
+        }
+        return hashCode.toString()
+    }
+}
 
 
 /** Inject this into any control that needs to listen to scroll wheel state. */
@@ -23,13 +46,22 @@ import javax.inject.Named
 @Stable
 class KnobListenerService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
+    private val identifier: KnobListenerServiceIdentifier,
+    private val logger: Logger
 ) {
+
+    val tag
+        get() = identifier.getNameFromHashcode(this.hashCode())
 
     fun knobTurnEvents() : Flow<InputEvent> {
         return inputEvents.filter {
             it is InputEvent.NavKnobPressed || it is InputEvent.NavKnobTurned
+        }.onEach {
+            logger.d("KnobListenerService", "I am ${tag} and enable is ${listenerEnabled.value}")
         }
-            .takeWhile { listenerEnabled.value }
+            .takeWhile {
+                listenerEnabled.value
+            }
             .transform {
             if (it is InputEvent.NavKnobPressed) {
                 emit(it)
@@ -46,10 +78,12 @@ class KnobListenerService @Inject constructor(
     val listenerEnabled : MutableStateFlow<Boolean> = MutableStateFlow(true)
 
     fun enableListener() {
+        logger.d("KnobListenerService", "$tag enableListener")
         listenerEnabled.value = true
     }
 
     fun disableListener() {
+        logger.d("KnobListenerService", "$tag disableListener")
         listenerEnabled.value = false
     }
 
@@ -100,7 +134,7 @@ class KnobListenerService @Inject constructor(
 
             inputEvents
                 .takeWhile {
-                    logger.d("WAT", "I am ${this@KnobListenerService.hashCode()} and enable is ${listenerEnabled.value}")
+                    logger.d("WAT", "I am ${tag} and enable is ${listenerEnabled.value}")
                     listenerEnabled.value
                 }
                 .collect { event ->
