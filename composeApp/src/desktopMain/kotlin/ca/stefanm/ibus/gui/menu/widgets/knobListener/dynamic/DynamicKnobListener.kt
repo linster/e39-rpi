@@ -1,5 +1,9 @@
 package ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.lib.logging.Logger
@@ -186,7 +190,22 @@ class KnobObserverBuilderState(
     }
 
     companion object {
-        const val TAG = "KnobListenerService"
+        const val TAG = "KnobObserverBuilderState"
+
+        //This is a nice use-case for Metro.....
+        @Composable
+        fun setupListener(
+            knobListenerService: KnobListenerService,
+            logger: Logger,
+            tag: String?
+        ) : KnobObserverBuilderState {
+            val knobState = remember(Unit) { KnobObserverBuilderState(knobListenerService, logger) }
+            val mainListenerEnabled = knobListenerService.listenerEnabled.collectAsState(true)
+            LaunchedEffect(mainListenerEnabled.value) {
+                knobState.subscribeEvents(tag)
+            }
+            return knobState
+        }
     }
 }
 

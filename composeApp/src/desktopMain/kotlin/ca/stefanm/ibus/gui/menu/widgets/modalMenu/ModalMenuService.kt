@@ -33,6 +33,7 @@ import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard.KeyboardType
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.KeyboardViews
@@ -335,13 +336,11 @@ class ModalMenuService @Inject constructor(
                 maxHeight =  0.7F
             ) {
 
-
-                val knobState = remember(knobListenerServiceModal) { KnobObserverBuilderState(knobListenerServiceModal, logger) }
-                val scope = rememberCoroutineScope()
-                LaunchedEffect(Unit) {
-                    knobState.subscribeEvents("dayPicker")
-                }
-
+                val knobState = setupListener(
+                    knobListenerServiceModal,
+                    logger,
+                    "dayPicker"
+                )
 
                 val currentMonth = remember { mutableStateOf(startMonthAt) }
                 val startMonth = remember(currentMonth) { currentMonth.value.minusMonths(20) }

@@ -30,6 +30,7 @@ import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
@@ -111,13 +112,11 @@ class CalendarEventEditScreen @Inject constructor(
             .date
 
 
-        val knobState = remember(Unit) { KnobObserverBuilderState(knobListenerService, logger) }
-        val scope = rememberCoroutineScope()
-        val mainListenerEnabled = knobListenerService.listenerEnabled.collectAsState(true)
-        LaunchedEffect(mainListenerEnabled.value) {
-            logger.d("CalendarEventEditScreen", "subscribeEvents yo")
-            knobState.subscribeEvents("calendarEventEditScreen")
-        }
+        val knobState = setupListener(
+            knobListenerService,
+            logger,
+            "CalendarEventEditScreen"
+        )
 
 
         val isNewEventComplete = remember { mutableStateOf(!isNewEvent) }

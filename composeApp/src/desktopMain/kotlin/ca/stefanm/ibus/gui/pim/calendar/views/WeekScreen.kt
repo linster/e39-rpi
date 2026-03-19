@@ -16,6 +16,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
@@ -84,12 +85,12 @@ class WeekScreen @Inject constructor(
             .date
 
         val knobListenerService = MenuWindowKnobListener.current
-        val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
-        val scope = rememberCoroutineScope()
-        LaunchedEffect(Unit) {
-            knobState.subscribeEvents("weekScreen")
-        }
 
+        val knobState = setupListener(
+            knobListenerService,
+            logger,
+            "weekScreen"
+        )
 
         Column(Modifier
             .fillMaxSize()

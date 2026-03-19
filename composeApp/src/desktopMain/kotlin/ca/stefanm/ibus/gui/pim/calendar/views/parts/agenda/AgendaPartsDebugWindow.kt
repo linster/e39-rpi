@@ -16,6 +16,7 @@ import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventColors.green3
@@ -136,12 +137,11 @@ class AgendaPartsDebugWindow @Inject constructor(
 
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-            val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
-            val scope = rememberCoroutineScope()
-            LaunchedEffect(Unit) {
-                knobState.subscribeEvents("slotLayoutTestWndow")
-            }
-
+            val knobState = setupListener(
+                knobListenerService,
+                logger,
+                "slotLayoutTestWindow"
+            )
 
             Column {
 

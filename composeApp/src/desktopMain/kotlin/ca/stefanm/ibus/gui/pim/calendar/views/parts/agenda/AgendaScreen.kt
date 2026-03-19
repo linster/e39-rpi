@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRowWithScroll
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRowWithScroll
 import ca.stefanm.ibus.lib.logging.Logger
 import com.kizitonwose.calendar.core.minusDays
@@ -26,11 +27,13 @@ fun AgendaScreen(
     eventData: List<AgendaCalendarEventData>,
     onMenuClicked : () -> Unit = {}
 ) {
-    val knobState = remember(knobListenerService) { KnobObserverBuilderState(knobListenerService, logger) }
     val scope = rememberCoroutineScope()
-    LaunchedEffect(Unit) {
-        knobState.subscribeEvents("agendaScreen")
-    }
+
+    val knobState = setupListener(
+        knobListenerService,
+        logger,
+        "agendaScreen"
+    )
 
     val startDay = remember {
         mutableStateOf(
