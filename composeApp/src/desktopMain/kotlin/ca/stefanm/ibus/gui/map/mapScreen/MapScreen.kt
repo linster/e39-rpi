@@ -36,6 +36,8 @@ import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
@@ -98,7 +100,14 @@ class MapScreen @Inject constructor(
         val scope = rememberCoroutineScope()
 
         scope.launch {
-            knobListenerService.knobTurnEvents().collect { event ->
+            knobListenerService.knobTurnEvents()
+                .onStart {
+                    logger.d(TAG, "knobTurnEvents() flow started")
+                }
+                .onCompletion { cause ->
+                    logger.d(TAG, "knobTurnEvents() flow completed. cause: ${cause}")
+                }
+                .collect { event ->
 
                 logger.d(TAG, "collect turn $event, current state: ${currentOverlayState.value}")
                 if (currentOverlayState.value == MapOverlayState.NoOverlay) {
@@ -147,7 +156,7 @@ class MapScreen @Inject constructor(
 
                         extents.value = extents.value.copy(
                             center = ExtentCalculator.newMapCenterOnPan(
-                                oldMapCenter = extents.value.center.let { LatLng(it.latitude, it.longitude) },
+                                oldMapCenter = extents.value.center,
                                 currentZoom = extents.value.mapScale,
                             bearing = direction))
                     }
@@ -163,7 +172,7 @@ class MapScreen @Inject constructor(
 
                         extents.value = extents.value.copy(
                             center = ExtentCalculator.newMapCenterOnPan(
-                                oldMapCenter = extents.value.center.let { LatLng(it.latitude, it.longitude) },
+                                oldMapCenter = extents.value.center,
                                 currentZoom = extents.value.mapScale,
                             bearing = direction))
                     }
@@ -197,15 +206,25 @@ class MapScreen @Inject constructor(
 
         LaunchedEffect(currentOverlayState.value) {
             logger.d(TAG, "Overlay State: ${currentOverlayState.value}")
+
+//            when (currentOverlayState.value) {
+//                MapOverlayState.ChangeZoom -> TODO()
+//                MapOverlayState.GuidanceMenu -> TODO()
+//                MapOverlayState.ModifyViewMenu -> TODO()
+//                MapOverlayState.NoOverlay -> TODO()
+//                MapOverlayState.PanLeftRight -> TODO()
+//                MapOverlayState.PanUpDown -> TODO()
+//                MapOverlayState.PoiMenu -> TODO()
+//            }
             if (currentOverlayState.value == MapOverlayState.ModifyViewMenu) {
                 showModifyViewMenu(
                     parameters.openMode,
-                    currentCenterAcessor = { currentCenter.value.let { center -> LatLng(center.latitude, center.longitude) }},
-                    onOverlayStateChanged = { currentOverlayState.value = it }
+                    currentCenterAcessor = { currentCenter.value },
+                    onOverlayStateChanged = { new -> currentOverlayState.value = new }
                 )
             }
             if (currentOverlayState.value == MapOverlayState.GuidanceMenu) {
-                showGuidanceMenu { currentOverlayState.value = it }
+                showGuidanceMenu { new -> currentOverlayState.value = new }
             }
             if (currentOverlayState.value == MapOverlayState.PoiMenu) {
                 showPoiOverlaymenu(
@@ -221,8 +240,7 @@ class MapScreen @Inject constructor(
             overlayProperties = OverlayProperties(
                 mapScaleVisible = currentOverlayState.value == MapOverlayState.ChangeZoom,
                 centerCrossHairsVisible =
-                    currentOverlayState.value == MapOverlayState.PanUpDown ||
-                            currentOverlayState.value == MapOverlayState.PanLeftRight ||
+                    currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
                 gpsReceptionIconVisible = false,
                 poiOverlay = poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList()).value.let { list ->
@@ -245,24 +263,25 @@ class MapScreen @Inject constructor(
                     )
                 },
                 route = let {
-                    //TODO this block infinte loops and I'm not sure why yet.
-                    val sessionState = guidanceService.getGuidanceSessionState().collectAsState(GuidanceSession.SessionState.SETTING_UP)
-                    logger.d(TAG, "Guidance session state: $sessionState")
-                    if (sessionState.value == GuidanceSession.SessionState.IN_GUIDANCE) {
-                        val session = guidanceService.getCurrentSessionInstantaneous()
-                        val route = session.route ?: listOf()
-                        LaunchedEffect(route) {
-                            logger.d(TAG, "Route changed: ${route.size}")
-                        }
-                        Route(
-                            path = route,
-                            color = Color.Magenta,
-                            stroke = Stroke(8F)
-                        )
-                        null
-                    } else {
-                        null //Don't draw a route
-                    }
+                    null
+//                    //TODO this block infinte loops and I'm not sure why yet.
+//                    val sessionState = guidanceService.getGuidanceSessionState().collectAsState(GuidanceSession.SessionState.SETTING_UP)
+//                    logger.d(TAG, "Guidance session state: $sessionState")
+//                    if (sessionState.value == GuidanceSession.SessionState.IN_GUIDANCE) {
+//                        val session = guidanceService.getCurrentSessionInstantaneous()
+//                        val route = session.route ?: listOf()
+//                        LaunchedEffect(route) {
+//                            logger.d(TAG, "Route changed: ${route.size}")
+//                        }
+//                        Route(
+//                            path = route,
+//                            color = Color.Magenta,
+//                            stroke = Stroke(8F)
+//                        )
+//                        null
+//                    } else {
+//                        null //Don't draw a route
+//                    }
                 }
             ),
             extents = extents.value,
@@ -363,7 +382,6 @@ class MapScreen @Inject constructor(
                                 )
                             )
                         }
-                        else -> { listOf() }
                     }
 
 
