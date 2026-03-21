@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen.MapScreenOpener
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
 import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
@@ -54,57 +55,8 @@ class MapScreen @Inject constructor(
     private val guidanceService: GuidanceService,
 ) : NavigationNode<MapScreenResult> {
 
-    companion object {
+    companion object : MapScreenOpener {
         const val TAG = "MapScreen"
-
-        //Open the map screen in such a way so that the user can select a point on the map.
-        //When the point is selected, return a result
-        fun openForUserLocationSelection(navigationNodeTraverser: NavigationNodeTraverser) {
-            navigationNodeTraverser.navigateToNodeWithParameters(
-                MapScreen::class.java,
-                MapScreenParameters(
-                    persistUiStateOnClose = false,
-                    openMode = MapScreenParameters.MapScreenOpenMode.LocationSelection(
-                        center = LatLng(45.3154699,-75.9194058)
-                    )
-                )
-            )
-        }
-
-        fun openForUserLocationSelection(
-            navigationNodeTraverser: NavigationNodeTraverser,
-            centerOn : LatLng
-        ) {
-            navigationNodeTraverser.navigateToNodeWithParameters(
-                MapScreen::class.java,
-                MapScreenParameters(
-                    persistUiStateOnClose = false,
-                    openMode = MapScreenParameters.MapScreenOpenMode.LocationSelection(
-                        center = centerOn
-                    )
-                )
-            )
-        }
-
-        fun openForBrowsingAtLocation(
-            navigationNodeTraverser: NavigationNodeTraverser,
-            centerOn: LatLng,
-            clearBackStack : Boolean = false
-        ) {
-            if (clearBackStack) {
-                navigationNodeTraverser.navigateToRoot()
-            }
-            navigationNodeTraverser.navigateToNodeWithParameters(
-                MapScreen::class.java,
-                MapScreenParameters(
-                    persistUiStateOnClose = false,
-                    usePersistedStateOnOpen = true,
-                    openMode = MapScreenParameters.MapScreenOpenMode.BrowsingMode(
-                        center = centerOn
-                    )
-                )
-            )
-        }
     }
 
     override val thisClass: Class<out NavigationNode<MapScreenResult>>
@@ -143,7 +95,7 @@ class MapScreen @Inject constructor(
 
         val scope = rememberCoroutineScope()
 
-        scope.launch() {
+        scope.launch {
             knobListenerService.knobTurnEvents().collect { event ->
 
                 logger.d(TAG, "collect turn $event, current state: ${currentOverlayState.value}")
