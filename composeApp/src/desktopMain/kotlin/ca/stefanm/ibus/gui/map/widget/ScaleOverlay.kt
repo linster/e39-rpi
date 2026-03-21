@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ginsberg.cirkle.circular
+import com.javadocmd.simplelatlng.LatLng
 import org.jxmapviewer.viewer.GeoPosition
 import kotlin.math.cos
 import kotlin.math.pow
@@ -42,7 +43,7 @@ enum class MapScale(
 @Composable
 fun MapScaleWidget(
     scale : MapScale,
-    mapCenter : GeoPosition,
+    mapCenter : LatLng,
     isSelected : Boolean = false //TODO when we do modal UI.
 ) {
 
@@ -76,7 +77,7 @@ fun MapScaleWidget(
                 textAlign = TextAlign.Center
             )
             if (debugScaleLength) {
-                Text("${scaleLength}")
+                Text("$scaleLength")
             } else {
 //                    Canvas(
 //                        Modifier.width((scaleLength + 3).dp).height(18.dp)

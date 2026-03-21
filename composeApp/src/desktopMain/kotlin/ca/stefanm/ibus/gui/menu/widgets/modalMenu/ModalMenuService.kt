@@ -146,7 +146,7 @@ object SidePanelMenu {
                             ))
                         ),
                         extents = Extents(
-                            center = poi.location.let { GeoPosition(it.latitude, it.longitude) },
+                            center = poi.location,
                             mapScale = mapScale
                         ),
                         onCenterPositionUpdated = {}

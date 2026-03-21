@@ -62,7 +62,7 @@ class MapDebug @Inject constructor(
         )) }
 
         val extents = remember { mutableStateOf(Extents(
-            center = GeoPosition(0.0, 0.0),
+            center = LatLng(0.0, 0.0),
             mapScale = MapScale.KILOMETERS_25
         )) }
 
@@ -131,7 +131,7 @@ class MapDebug @Inject constructor(
     ) {
 
         val zoom = remember { mutableStateOf(MapScale.METERS_100) }
-        val mapCenter = remember { mutableStateOf(GeoPosition(0.0, 0.0)) }
+        val mapCenter = remember { mutableStateOf(LatLng(0.0, 0.0)) }
 
         LaunchedEffect(zoom, mapCenter) {
             combine(
@@ -177,18 +177,18 @@ class MapDebug @Inject constructor(
 
                     Row {
                         Button(
-                            onClick = {mapCenter.value = GeoPosition(0.0, 0.0) }
+                            onClick = {mapCenter.value = LatLng(0.0, 0.0) }
                         ) { Text("0, 0")}
 
                         Button(
                             onClick = {
-                                mapCenter.value = GeoPosition(45.3154699,-75.9194058)
+                                mapCenter.value = LatLng(45.3154699,-75.9194058)
                             }
                         ) { Text("Kanata")}
 
                         Button(
                             onClick = {
-                                mapCenter.value = GeoPosition(51.031263,-114.072014)
+                                mapCenter.value = LatLng(51.031263,-114.072014)
                             }
                         ) { Text("Calgary")}
                     }
@@ -203,14 +203,14 @@ class MapDebug @Inject constructor(
                                 mapCenter.value.let { LatLng(it.latitude, it.longitude) },
                                 zoom.value,
                                 LatLngTool.Bearing.WEST,
-                            ).let { GeoPosition(it.latitude, it.longitude) }
+                            )
                         }) { Text("<--")}
                         Button(onClick = {
                             mapCenter.value = ExtentCalculator.newMapCenterOnPan(
                                 mapCenter.value.let { LatLng(it.latitude, it.longitude) },
                                 zoom.value,
                                 LatLngTool.Bearing.EAST,
-                            ).let { GeoPosition(it.latitude, it.longitude) }
+                            )
                         }) { Text("-->")}
                     }
 
@@ -220,14 +220,14 @@ class MapDebug @Inject constructor(
                                 mapCenter.value.let { LatLng(it.latitude, it.longitude) },
                                 zoom.value,
                                 LatLngTool.Bearing.NORTH,
-                            ).let { GeoPosition(it.latitude, it.longitude) }
+                            )
                         }) { Text("^")}
                         Button(onClick = {
                             mapCenter.value = ExtentCalculator.newMapCenterOnPan(
                                 mapCenter.value.let { LatLng(it.latitude, it.longitude) },
                                 zoom.value,
                                 LatLngTool.Bearing.SOUTH,
-                            ).let { GeoPosition(it.latitude, it.longitude) }
+                            )
                         }) { Text("V")}
                     }
 
@@ -291,7 +291,7 @@ class MapDebug @Inject constructor(
                 NestingCard {
                     MapScaleWidget(
                         mapScaleZoom.value,
-                        GeoPosition(0.0, 0.0)
+                        LatLng(0.0, 0.0)
                     )
                 }
 
@@ -357,7 +357,7 @@ class MapDebug @Inject constructor(
                 Row {
                     Button(
                         onClick = {
-                            mapCenter.value = GeoPosition(mapReportedCenter.latitude, mapReportedCenter.longitude)
+                            mapCenter.value = mapReportedCenter
                         }
                     ) { Text("Recenter on Reported Center")}
                 }

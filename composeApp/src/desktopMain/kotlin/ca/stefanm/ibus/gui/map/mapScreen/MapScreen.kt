@@ -15,6 +15,7 @@ import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.*
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
@@ -38,9 +39,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
-
-
-
+import javax.inject.Named
 
 
 @AutoDiscover
@@ -48,7 +47,10 @@ import javax.inject.Inject
 class MapScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
+
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerService: KnobListenerService,
+
     private val logger : Logger,
     private val configurationStorage: ConfigurationStorage,
     private val poiRepository: PoiRepository,
@@ -78,13 +80,13 @@ class MapScreen @Inject constructor(
                     LatLng(it.first, it.second)
                 }
             )
-        )
+        ).also { parameters -> logger.d(TAG, "Map Screen Parameters: $parameters") }
 
 
 
         val extents = remember { mutableStateOf(
             Extents(
-            center = parameters.openMode.center.let { center -> GeoPosition(center.latitude, center.longitude) },
+            center = parameters.openMode.center,
             mapScale = MapScale.KILOMETERS_1_6
         )
         ) }
@@ -147,7 +149,7 @@ class MapScreen @Inject constructor(
                             center = ExtentCalculator.newMapCenterOnPan(
                                 oldMapCenter = extents.value.center.let { LatLng(it.latitude, it.longitude) },
                                 currentZoom = extents.value.mapScale,
-                            bearing = direction).let { GeoPosition(it.latitude, it.longitude) })
+                            bearing = direction))
                     }
                 }
 
@@ -163,7 +165,7 @@ class MapScreen @Inject constructor(
                             center = ExtentCalculator.newMapCenterOnPan(
                                 oldMapCenter = extents.value.center.let { LatLng(it.latitude, it.longitude) },
                                 currentZoom = extents.value.mapScale,
-                            bearing = direction).let { GeoPosition(it.latitude, it.longitude) })
+                            bearing = direction))
                     }
                 }
             }
@@ -171,6 +173,8 @@ class MapScreen @Inject constructor(
 
 
         LaunchedEffect(parameters.usePersistedStateOnOpen) {
+            logger.d(TAG, "usePersistedStateOnOpen: ${parameters.usePersistedStateOnOpen}")
+            logger.d(TAG, "usePersistedStateOnOpen launched effect. $browsingState")
             extents.value = browsingState?.extents ?: return@LaunchedEffect
             currentOverlayState.value = browsingState?.mapOverlayState ?: return@LaunchedEffect
         }

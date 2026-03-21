@@ -44,7 +44,7 @@ data class OverlayProperties(
 
 //Defines how much of the world we can see
 data class Extents(
-    val center : GeoPosition,
+    val center : LatLng,
     val mapScale: MapScale
 )
 
@@ -133,7 +133,7 @@ data class PoiOverlay(
 fun MapViewer(
     overlayProperties: OverlayProperties,
     extents: Extents,
-    onCenterPositionUpdated : (newCenter : GeoPosition) -> Unit
+    onCenterPositionUpdated : (newCenter : LatLng) -> Unit
 ) {
 
     Box(
@@ -278,7 +278,7 @@ fun MapViewer(
                     ).latitude
 
                     onCenterPositionUpdated(
-                        GeoPosition(latFromNorth, longFromLeft)
+                        LatLng(latFromNorth, longFromLeft)
                     )
                 }
 

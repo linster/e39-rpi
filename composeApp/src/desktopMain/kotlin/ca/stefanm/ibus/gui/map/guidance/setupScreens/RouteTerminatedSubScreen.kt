@@ -94,7 +94,7 @@ class RouteTerminatedSubScreen @Inject constructor(
                                 gpsReceptionIconVisible = false
                             ),
                             extents = Extents(
-                                center = Route.findCenter(points).let { GeoPosition(it.latitude, it.longitude) },
+                                center = Route.findCenter(points),
                                 mapScale = Route.findMapScaleForOverview(points)
                             ),
                             onCenterPositionUpdated = {}
