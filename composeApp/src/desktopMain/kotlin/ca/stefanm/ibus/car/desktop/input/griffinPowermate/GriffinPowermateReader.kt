@@ -6,6 +6,7 @@ import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.PeripheralsDesktopGroup
 import ca.stefanm.ibus.car.platform.LongRunningService
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
@@ -109,7 +110,8 @@ class GriffinPowermateReader @Inject constructor(
                     }
                 }
             }
-            .desensitize(3)
+            .desensitizeOnMapScreenWithConfig()
+            //.desensitize(3)
             .transform {
                 when (it) {
                     is PowerMateEvent.Turnleft -> InputEvent.NavKnobTurned(1, InputEvent.NavKnobTurned.Direction.LEFT)
@@ -239,17 +241,16 @@ class GriffinPowermateReader @Inject constructor(
     }
 
     fun Flow<PowerMateEvent>.desensitizeOnMapScreenWithConfig() : Flow<PowerMateEvent> {
+        var skip = PowermateSensitivityConfig.DefaultSkip
         return this
-            .map { Triple(it, powermateSensitivityConfig.getNormalSkip(), powermateSensitivityConfig.getMapSkip()) }
-            .map { (event, normalSkip, mapSkip) ->
-                if (navigatorMapScreenListener.isOnMapScreen()) {
-                    Pair(event, mapSkip)
+            .onEach {
+                skip = if(navigatorMapScreenListener.isOnMapScreen()) {
+                    powermateSensitivityConfig.getMapSkip()
                 } else {
-                    Pair(event, normalSkip)
+                    powermateSensitivityConfig.getNormalSkip()
                 }
             }
-            .mapLatest { (event, skip) -> with(event) { desensitize(skip)} }
-
+            .desensitize(skip)
     }
 
     fun Flow<PowerMateEvent>.desensitize(turnEventsPerEmission : Int) : Flow<PowerMateEvent> {

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ca.stefanm.ibus.car.desktop.input.griffinPowermate.NavigatorMapScreenListener
 import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
@@ -38,7 +39,8 @@ class HmiNavigatorDebugWindow @Inject constructor(
     private val navigator: Provider<Navigator>,
     private val navigationNodeTraverser: Provider<NavigationNodeTraverser>,
     @Named(NavigationModule.ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
-    private val modalMenuService: ModalMenuService
+    private val modalMenuService: ModalMenuService,
+    private val navigatorMapScreenListener: NavigatorMapScreenListener
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -47,7 +49,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
     override val defaultPosition: WindowManager.E39Window.DefaultPosition
         get() = WindowManager.E39Window.DefaultPosition.ANYWHERE
 
-    override val size = DpSize(600.dp, 1200.dp)
+    override val size = DpSize(600.dp, 1500.dp)
     override val title = "HMI Navigator Debug"
 
     override fun content(): @Composable WindowScope.() -> Unit = {
@@ -109,6 +111,14 @@ class HmiNavigatorDebugWindow @Inject constructor(
 
             NestingCard {
                 OverlayServiceDebug()
+            }
+
+            NestingCard {
+                NestingCardHeader("Is Map Screen?")
+                val isMapScreenFlow = navigatorMapScreenListener.isOnMapScreenFlow().collectAsState(false)
+
+                Text("Is map screen: ${isMapScreenFlow.value}",
+                    color = if (isMapScreenFlow.value) Color.Green else Color.Red)
             }
         }
     }
