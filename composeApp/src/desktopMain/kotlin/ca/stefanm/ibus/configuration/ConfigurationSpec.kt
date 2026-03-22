@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.configuration
 
+import ca.stefanm.ca.stefanm.ibus.car.desktop.input.PowermateSensitivityConfig
 import ca.stefanm.ibus.gui.map.guidance.PersistedGuidanceSession
 import com.javadocmd.simplelatlng.LatLng
 import com.uchuhimo.konf.Config
@@ -210,5 +211,10 @@ object E39Config : ConfigSpec() {
     object MatrixMostRecentlyUsedConfig : ConfigSpec() {
         val mostRecentRoomId by optional<String?>(null, "mostRecentRoomId")
         val mostRecentDmId by optional<String?>(null, "mostRecentDmId")
+    }
+
+    object GriffinPowermateSensitivity : ConfigSpec() {
+        val normalSkip by optional<Int>(PowermateSensitivityConfig.DefaultSkip, "normalSkip")
+        val mapSkip by optional<Int>(PowermateSensitivityConfig.DefaultSkip, "mapSkip")
     }
 }

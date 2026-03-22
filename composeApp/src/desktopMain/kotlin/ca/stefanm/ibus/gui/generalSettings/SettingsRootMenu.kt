@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
 import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
@@ -31,7 +32,8 @@ import javax.inject.Inject
         ScreenDoc.NavigateTo(ThemeSelectorScreen::class),
         ScreenDoc.NavigateTo(NetworkInfoScreen::class),
         ScreenDoc.NavigateTo(BrightnessCompensationScreen::class),
-        ScreenDoc.NavigateTo(AboutScreen::class)
+        ScreenDoc.NavigateTo(AboutScreen::class),
+
     ]
 )
 @ScreenDoc.AllowsGoRoot
@@ -101,6 +103,14 @@ class SettingsRootMenu @Inject constructor(
                         onClicked = {
                             navigationNodeTraverser.navigateToNode(
                                 BrightnessCompensationScreen::class.java
+                            )
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "Griffin Powermate Sensitivity",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(
+                                GriffinPowermateConfigScreen::class.java
                             )
                         }
                     ),

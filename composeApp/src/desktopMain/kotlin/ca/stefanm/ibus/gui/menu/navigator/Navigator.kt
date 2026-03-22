@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
 import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
@@ -137,7 +138,8 @@ class NavigationModule {
         twoWeekScreen: TwoWeekScreen,
         calendarSetupRootScreen : CalendarSetupRootScreen,
         calendarEventEditScreen: CalendarEventEditScreen,
-        todoItemEditorScreen: TodoItemEditorScreen
+        todoItemEditorScreen: TodoItemEditorScreen,
+        griffinPowermateConfigScreen: GriffinPowermateConfigScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -198,7 +200,8 @@ class NavigationModule {
         twoWeekScreen,
         calendarSetupRootScreen,
         calendarEventEditScreen,
-        todoItemEditorScreen
+        todoItemEditorScreen,
+        griffinPowermateConfigScreen
     )
 }
 

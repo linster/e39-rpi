@@ -41,6 +41,8 @@ class GriffinPowermateReader @Inject constructor(
 
     private val notificationHub: NotificationHub,
 
+    private val powermateSensitivityConfig: PowermateSensitivityConfig,
+
     @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE)
     private val coroutineScope: CoroutineScope,
     @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER)
