@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.di
 
-import ca.stefanm.ca.stefanm.ibus.car.desktop.input.GriffinPowermateReader
+import ca.stefanm.ca.stefanm.ibus.car.desktop.input.griffinPowermate.GriffinPowermateReader
 import ca.stefanm.ibus.car.ExceptionHandler
 import ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService
@@ -22,7 +22,6 @@ import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.RpiRelayReaderWriter
-import ca.stefanm.ibus.lib.hardwareDrivers.ibus.*
 import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IbusInputEventCliPrinter
 import ca.stefanm.ibus.lib.logging.cli.debugPrinters.IncomingIbusMessageCliPrinter
 import ca.stefanm.ibus.lib.logging.cli.debugPrinters.PlatformMetronomeLogger

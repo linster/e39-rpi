@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.desktop.input
+package ca.stefanm.ca.stefanm.ibus.car.desktop.input.griffinPowermate
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 import okio.Buffer
 import okio.buffer
 import okio.source
-import org.freedesktop.dbus.types.UInt16
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
@@ -42,6 +41,8 @@ class GriffinPowermateReader @Inject constructor(
     private val notificationHub: NotificationHub,
 
     private val powermateSensitivityConfig: PowermateSensitivityConfig,
+
+    private val navigatorMapScreenListener: NavigatorMapScreenListener,
 
     @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE)
     private val coroutineScope: CoroutineScope,
@@ -237,6 +238,19 @@ class GriffinPowermateReader @Inject constructor(
         data class TurnRight(override val timestamp: Long) : PowerMateEvent(timestamp)
     }
 
+    fun Flow<PowerMateEvent>.desensitizeOnMapScreenWithConfig() : Flow<PowerMateEvent> {
+        return this
+            .map { Triple(it, powermateSensitivityConfig.getNormalSkip(), powermateSensitivityConfig.getMapSkip()) }
+            .map { (event, normalSkip, mapSkip) ->
+                if (navigatorMapScreenListener.isOnMapScreen()) {
+                    Pair(event, mapSkip)
+                } else {
+                    Pair(event, normalSkip)
+                }
+            }
+            .mapLatest { (event, skip) -> with(event) { desensitize(skip)} }
+
+    }
 
     fun Flow<PowerMateEvent>.desensitize(turnEventsPerEmission : Int) : Flow<PowerMateEvent> {
         return this

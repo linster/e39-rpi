@@ -1,8 +1,7 @@
-package ca.stefanm.ca.stefanm.ibus.car.desktop.input
+package ca.stefanm.ca.stefanm.ibus.car.desktop.input.griffinPowermate
 
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class PowermateSensitivityConfig @Inject constructor(
