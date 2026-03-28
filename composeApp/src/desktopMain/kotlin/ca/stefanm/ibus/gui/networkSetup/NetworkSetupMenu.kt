@@ -34,8 +34,23 @@ class NetworkSetupMenu @Inject constructor(
             BmwSingleLineHeader("Network Setup (Network Manager)")
 
             FullScreenMenu.TwoColumnFillFromCorners(
-                nw = listOf(),
-                ne = listOf(),
+                nw = listOf(
+
+                ),
+                ne = listOf(
+                    TextMenuItem(
+                        "Edit a connection",
+                        onClicked = {}
+                    ),
+                    TextMenuItem(
+                        "Activate a connection",
+                        onClicked = {}
+                    ),
+                    TextMenuItem(
+                        "Set system hostname",
+                        onClicked = {}
+                    )
+                    ),
                 sw = listOf(
                     TextMenuItem(
                         "Go Back",
