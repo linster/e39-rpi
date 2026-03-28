@@ -1,0 +1,30 @@
+package org.freedesktop.networkmanager.device;
+
+import org.freedesktop.dbus.DBusPath;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
+import org.freedesktop.dbus.annotations.DBusProperty;
+import org.freedesktop.dbus.annotations.DBusProperty.Access;
+import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.UInt64;
+
+/**
+ * Auto-generated class.
+ */
+@DBusInterfaceName("org.freedesktop.NetworkManager.Device.Macsec")
+@DBusProperty({name=Parent, type=DBusPath, access=Access.READ})
+@DBusProperty({name=Sci, type=UInt64, access=Access.READ})
+@DBusProperty({name=IcvLength, type=Byte, access=Access.READ})
+@DBusProperty({name=CipherSuite, type=UInt64, access=Access.READ})
+@DBusProperty({name=Window, type=UInt32, access=Access.READ})
+@DBusProperty({name=EncodingSa, type=Byte, access=Access.READ})
+@DBusProperty({name=Validation, type=String, access=Access.READ})
+@DBusProperty({name=Encrypt, type=Boolean, access=Access.READ})
+@DBusProperty({name=Protect, type=Boolean, access=Access.READ})
+@DBusProperty({name=IncludeSci, type=Boolean, access=Access.READ})
+@DBusProperty({name=Es, type=Boolean, access=Access.READ})
+@DBusProperty({name=Scb, type=Boolean, access=Access.READ})
+@DBusProperty({name=ReplayProtect, type=Boolean, access=Access.READ})
+public interface Macsec extends DBusInterface {
+
+}

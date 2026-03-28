@@ -11,22 +11,25 @@ RUN apt-get update && apt-get -y install \
 RUN mkdir /network-manager
 WORKDIR /network-manager
 
+ADD buildDbus.sh .
 
-RUN mkdir nm-output
+CMD [ "./buildDbus.sh" ]
 
-RUN git clone https://github.com/hypfvieh/dbus-java.git
-RUN git clone https://github.com/NetworkManager/NetworkManager.git
-
-WORKDIR /network-manager/dbus-java
-RUN mvn clean install -DskipTests=true
-
-# then, run the builder script
-WORKDIR /network-manager/dbus-java/dbus-java-utils
-
-RUN find /network-manager/NetworkManager/introspection/*.xml -type f -exec mvn exec:java \
--Dexec.mainClass="org.freedesktop.dbus.utils.generator.InterfaceCodeGenerator" \
--Dexec.executable="java" \
--Dexec.args="--inputFile {} --outputDir /network-manager/outbind/nm-output" \;
+#RUN mkdir nm-output
+#
+#RUN git clone https://github.com/hypfvieh/dbus-java.git
+#RUN git clone https://github.com/NetworkManager/NetworkManager.git
+#
+#WORKDIR /network-manager/dbus-java
+#RUN mvn clean install -DskipTests=true
+#
+## then, run the builder script
+#WORKDIR /network-manager/dbus-java/dbus-java-utils
+#
+#RUN find /network-manager/NetworkManager/introspection/*.xml -type f -exec mvn exec:java \
+#-Dexec.mainClass="org.freedesktop.dbus.utils.generator.InterfaceCodeGenerator" \
+#-Dexec.executable="java" \
+#-Dexec.args="--inputFile {} --outputDir /network-manager/outbind/nm-output" \;
 
 #WORKDIR /network-manager
 #RUN touch /network-manager/outbind/wat.txt

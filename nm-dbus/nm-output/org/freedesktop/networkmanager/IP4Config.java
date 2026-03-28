@@ -1,0 +1,76 @@
+package org.freedesktop.networkmanager;
+
+import java.util.List;
+import java.util.Map;
+import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
+import org.freedesktop.dbus.annotations.DBusProperty;
+import org.freedesktop.dbus.annotations.DBusProperty.Access;
+import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.Variant;
+
+/**
+ * Auto-generated class.
+ */
+@DBusInterfaceName("org.freedesktop.NetworkManager.IP4Config")
+@DBusProperty({name=Addresses, type=IP4Config.PropertyAddressesType, access=Access.READ})
+@DBusProperty({name=AddressData, type=IP4Config.PropertyAddressDataType, access=Access.READ})
+@DBusProperty({name=Gateway, type=String, access=Access.READ})
+@DBusProperty({name=Routes, type=IP4Config.PropertyRoutesType, access=Access.READ})
+@DBusProperty({name=RouteData, type=IP4Config.PropertyRouteDataType, access=Access.READ})
+@DBusProperty({name=Nameservers, type=IP4Config.PropertyNameserversType, access=Access.READ})
+@DBusProperty({name=NameserverData, type=IP4Config.PropertyNameserverDataType, access=Access.READ})
+@DBusProperty({name=Domains, type=IP4Config.PropertyDomainsType, access=Access.READ})
+@DBusProperty({name=Searches, type=IP4Config.PropertySearchesType, access=Access.READ})
+@DBusProperty({name=DnsOptions, type=IP4Config.PropertyDnsOptionsType, access=Access.READ})
+@DBusProperty({name=DnsPriority, type=Integer, access=Access.READ})
+@DBusProperty({name=WinsServers, type=IP4Config.PropertyWinsServersType, access=Access.READ})
+@DBusProperty({name=WinsServerData, type=IP4Config.PropertyWinsServerDataType, access=Access.READ})
+public interface IP4Config extends DBusInterface {
+
+    public static interface PropertyAddressesType extends TypeRef<List<List<UInt32>>> {
+
+    }
+
+    public static interface PropertyAddressDataType extends TypeRef<List<Map<String, Variant>>> {
+
+    }
+
+    public static interface PropertyRoutesType extends TypeRef<List<List<UInt32>>> {
+
+    }
+
+    public static interface PropertyRouteDataType extends TypeRef<List<Map<String, Variant>>> {
+
+    }
+
+    public static interface PropertyNameserversType extends TypeRef<List<UInt32>> {
+
+    }
+
+    public static interface PropertyNameserverDataType extends TypeRef<List<Map<String, Variant>>> {
+
+    }
+
+    public static interface PropertyDomainsType extends TypeRef<List<String>> {
+
+    }
+
+    public static interface PropertySearchesType extends TypeRef<List<String>> {
+
+    }
+
+    public static interface PropertyDnsOptionsType extends TypeRef<List<String>> {
+
+    }
+
+    public static interface PropertyWinsServersType extends TypeRef<List<UInt32>> {
+
+    }
+
+    public static interface PropertyWinsServerDataType extends TypeRef<List<String>> {
+
+    }
+
+}
