@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -43,6 +44,8 @@ class NetworkInfoScreen @Inject constructor(
         LaunchedEffect(Unit) {
             if (configurationStorage.config[E39Config.CarPlatformConfigSpec._isPi]) {
                 ipAddress.value = NetworkInfo.getIPAddresses()[0]
+            } else {
+                navigationNodeTraverser.navigateToNode(NetworkSetupMenu::class.java)
             }
         }
 
