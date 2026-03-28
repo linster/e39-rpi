@@ -88,8 +88,9 @@ kotlin {
             implementation("commons-io:commons-io:2.14.0")
 
             implementation("com.squareup.okio:okio:3.4.0")
-            implementation( "com.github.hypfvieh:dbus-java-osgi:3.2.3")
-            implementation( "com.github.hypfvieh:bluez-dbus:0.1.3")
+            implementation( "com.github.hypfvieh:dbus-java-core:5.2.0")
+            implementation( "com.github.hypfvieh:dbus-java-osgi:5.2.0")
+            implementation( "com.github.hypfvieh:bluez-dbus:0.3.2")
 
             implementation("com.fazecast:jSerialComm:2.10.1")
 
