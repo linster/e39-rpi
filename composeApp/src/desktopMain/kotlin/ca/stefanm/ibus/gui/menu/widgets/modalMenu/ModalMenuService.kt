@@ -48,8 +48,10 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
@@ -61,6 +63,7 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.time.Clock
+import kotlin.time.Duration
 
 object SidePanelMenu {
     @Composable
@@ -583,5 +586,38 @@ class ModalMenuService @Inject constructor(
                 }
             }
         )
+    }
+
+    fun showModalWaitDialog(
+        image : Notification.NotificationImage = Notification.NotificationImage.NONE,
+        headerText : String,
+        bodyText : String = "",
+        autoCloseTimeout : Duration?
+    ) {
+        _modalMenuOverlay.value = @Composable {
+
+            LaunchedEffect(Unit) {
+                logger.d("ModalWaitDialog", "Disabling main listener.")
+                knobListenerServiceMain.disableListener()
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    logger.d("ModalWaitDialog", "Re-enabling main listener.")
+                    knobListenerServiceMain.enableListener()
+                }
+            }
+
+            val scope = rememberCoroutineScope()
+            if (autoCloseTimeout != null) {
+                scope.launch {
+                    delay(autoCloseTimeout)
+                    closeModalMenu()
+                }
+            }
+            Box(Modifier.size(64.dp).background(Color.Yellow)) {
+
+            }
+        }
+
     }
 }
