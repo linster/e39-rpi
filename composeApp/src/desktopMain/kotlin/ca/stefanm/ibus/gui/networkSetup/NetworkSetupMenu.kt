@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.ActivateConnectionScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -45,7 +46,9 @@ class NetworkSetupMenu @Inject constructor(
                     ),
                     TextMenuItem(
                         "Activate a connection",
-                        onClicked = {}
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(ActivateConnectionScreen::class.java)
+                        }
                     ),
                     TextMenuItem(
                         "Set system hostname",
