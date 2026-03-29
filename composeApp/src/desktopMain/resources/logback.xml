@@ -1,0 +1,29 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com" level="INFO" />
+    <logger name="org" level="DEBUG" />
+    <logger name="org.freedesktop.dbus.connections" level="ERROR" />
+    <logger name="org.freedesktop.dbus.connections.impl.DirectConnection" level="ERROR" />
+    <logger name="org.freedesktop.dbus.connections.IncomingMessageThread" level="ERROR" />
+    <logger name="org.freedesktop.dbus.connections.transports.TransportBuilder" level="ERROR" />
+    <logger name="org.freedesktop.dbus.errors" level="ERROR" />
+    <logger name="org.freedesktop.dbus.messages" level="ERROR" />
+    <logger name="org.freedesktop.dbus.MessageWriter" level="ERROR" />
+    <logger name="org.freedesktop.dbus.connections.SASL" level="ERROR" />
+    <logger name="org.freedesktop.dbus.connections.ReceivingService" level="ERROR" />
+
+    <logger name="org.freedesktop.dbus.bin" level="ERROR" />
+
+    <root level="TRACE">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>
