@@ -12,7 +12,7 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.*
 import org.bluez.MediaPlayer1
-import org.freedesktop.DBus
+import org.freedesktop.dbus.interfaces.DBus
 import org.freedesktop.dbus.DBusMap
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.interfaces.DBusSigHandler

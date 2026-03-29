@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -48,7 +49,7 @@ class NetworkSetupMenu @Inject constructor(
                     ),
                     TextMenuItem(
                         "Set system hostname",
-                        onClicked = {}
+                        onClicked = { navigationNodeTraverser.navigateToNode(SetHostnameScreen::class.java)}
                     )
                     ),
                 sw = listOf(

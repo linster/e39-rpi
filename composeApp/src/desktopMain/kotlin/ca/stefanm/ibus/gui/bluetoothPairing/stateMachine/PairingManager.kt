@@ -22,10 +22,10 @@ import org.bluez.AgentManager1
 import org.bluez.Device1
 import org.bluez.exceptions.BluezDoesNotExistException
 import org.bluez.exceptions.BluezRejectedException
-import org.freedesktop.DBus
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.exceptions.DBusException
 import org.freedesktop.dbus.exceptions.DBusExecutionException
+import org.freedesktop.dbus.interfaces.DBus
 import org.freedesktop.dbus.types.UInt16
 import org.freedesktop.dbus.types.UInt32
 import javax.inject.Inject

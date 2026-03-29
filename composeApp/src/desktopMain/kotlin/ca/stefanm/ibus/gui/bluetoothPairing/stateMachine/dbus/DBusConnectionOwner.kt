@@ -4,6 +4,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.DBusConnectionOwningComponent
 import com.github.hypfvieh.bluetooth.DeviceManager
 import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import javax.inject.Inject
 
 @ApplicationScope
@@ -19,10 +20,15 @@ class DBusConnectionOwner @Inject constructor() : DBusConnectionOwningComponent 
     private lateinit var deviceManager : DeviceManager
 
     override fun onSetup() {
-        systemConnection = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM)
-        sessionConnection = DBusConnection.getConnection(DBusConnection.DBusBusType.SESSION)
+
+        systemConnection = DBusConnectionBuilder.forSystemBus().build()
+        sessionConnection = DBusConnectionBuilder.forSessionBus().build()
+        systemConnection.connect()
+        sessionConnection.connect()
+
         sessionConnection.requestBusName("ca.stefanm.e39")
-        DeviceManager.createInstance(systemConnection.address.rawAddress)
+//        DeviceManager.createInstance(systemConnection.address.rawAddress)
+        DeviceManager.createInstance(false)
         deviceManager = DeviceManager.getInstance()
     }
 

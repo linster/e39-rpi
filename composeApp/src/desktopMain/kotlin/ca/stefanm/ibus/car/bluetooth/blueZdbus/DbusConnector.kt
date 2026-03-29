@@ -11,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import javax.inject.Inject
 
 @ConfiguredCarScope
@@ -23,10 +24,12 @@ class DbusConnector @Inject constructor(
 
     override fun onCreate() {
         runBlocking {
-            connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM)
+            connection = DBusConnectionBuilder.forSystemBus().build()
+            connection.connect()
 
             logger.d("DBUS CONN", "Connected to DBus.")
-            DeviceManager.createInstance(connection.address.rawAddress)
+//            DeviceManager.createInstance(connection.address.rawAddress)
+            DeviceManager.createInstance(false)
             deviceManager = DeviceManager.getInstance()
 
             logger.d("DBUS CONN", "Created device manager.")

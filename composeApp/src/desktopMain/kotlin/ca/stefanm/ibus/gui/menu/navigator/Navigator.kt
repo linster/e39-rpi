@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.menu.navigator
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
@@ -141,7 +142,8 @@ class NavigationModule {
         calendarEventEditScreen: CalendarEventEditScreen,
         todoItemEditorScreen: TodoItemEditorScreen,
         griffinPowermateConfigScreen: GriffinPowermateConfigScreen,
-        networkSetupMenu: NetworkSetupMenu
+        networkSetupMenu: NetworkSetupMenu,
+        setHostnameScreen: SetHostnameScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -204,7 +206,8 @@ class NavigationModule {
         calendarEventEditScreen,
         todoItemEditorScreen,
         griffinPowermateConfigScreen,
-        networkSetupMenu
+        networkSetupMenu,
+        setHostnameScreen
     )
 }
 

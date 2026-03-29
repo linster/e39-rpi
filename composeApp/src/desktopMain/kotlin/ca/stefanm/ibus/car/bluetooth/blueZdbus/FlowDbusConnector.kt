@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import org.bluez.MediaPlayer1
 import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -41,15 +42,19 @@ class FlowDbusConnector @Inject constructor(
 
     override suspend fun doWork() {
 
-        _connection.value = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM)
+        _connection.value = DBusConnectionBuilder.forSystemBus().build()
 
         _connection
+            .onStart {
+                _connection.value?.connect()
+            }
             .filter { it != null }
             .map { it as DBusConnection }
             .filter { it?.isConnected == true }
             .collect {
             logger.d("DBUS CONN", "Connected to DBus.")
-            DeviceManager.createInstance(it.address.rawAddress)
+//            DeviceManager.createInstance(it.address.rawAddress)
+            DeviceManager.createInstance(false)
             deviceManager.value = DeviceManager.getInstance()
             logger.d("DBUS CONN", "Created device manager.")
         }
