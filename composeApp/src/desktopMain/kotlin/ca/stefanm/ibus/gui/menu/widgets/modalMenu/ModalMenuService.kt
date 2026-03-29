@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.menu.widgets.modalMenu
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -21,6 +23,7 @@ import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen.LoadingPictures
 import ca.stefanm.ibus.gui.map.Extents
 import ca.stefanm.ibus.gui.map.MapViewer
 import ca.stefanm.ibus.gui.map.OverlayProperties
@@ -44,6 +47,22 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.pim.calendar.views.CalendarDay
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRow
 import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.resources.Res
+import ca.stefanm.ibus.resources.notification_alert_circle
+import ca.stefanm.ibus.resources.notification_alert_octagon
+import ca.stefanm.ibus.resources.notification_alert_triangle
+import ca.stefanm.ibus.resources.notification_bluetooth
+import ca.stefanm.ibus.resources.notification_map
+import ca.stefanm.ibus.resources.notification_map_pin
+import ca.stefanm.ibus.resources.notification_message_circle
+import ca.stefanm.ibus.resources.notification_message_square
+import ca.stefanm.ibus.resources.notification_music
+import ca.stefanm.ibus.resources.notification_navigation
+import ca.stefanm.ibus.resources.notification_phone
+import ca.stefanm.ibus.resources.notification_phone_incoming
+import ca.stefanm.ibus.resources.notification_phone_missed
+import ca.stefanm.ibus.resources.notification_voicemail
+import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
@@ -51,11 +70,14 @@ import com.kizitonwose.calendar.core.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import org.jetbrains.compose.resources.painterResource
 import org.jxmapviewer.viewer.GeoPosition
 import java.time.DateTimeException
 import java.time.format.DateTimeParseException
@@ -591,6 +613,7 @@ class ModalMenuService @Inject constructor(
 
     fun showModalWaitDialog(
         image : Notification.NotificationImage = Notification.NotificationImage.NONE,
+        throbber : Boolean = false,
         headerText : String,
         bodyText : String = "",
         titleText : String? = null,
@@ -653,22 +676,82 @@ class ModalMenuService @Inject constructor(
                         }
 
                         Row(
-                            modifier = Modifier.border(3.dp, Color.Red)
+                            modifier = Modifier.padding(8.dp)
                         ) {
                             Box(
                                 Modifier
                                     .fillMaxHeight(0.7F)
                                     .aspectRatio(1F)
-                                    .background(Color.Green)
+                                //    .background(Color.Green)
+                                ,
+                                contentAlignment = Alignment.Center
                             ) {
 
+                                if (!throbber) {
+                                    if (image == Notification.NotificationImage.NONE) {
+                                        Spacer(
+                                            Modifier
+                                                .fillMaxSize(0.9F)
+                                                //.fillMaxSize(0.75F)
+                                                //.border(2.dp, Color.Red)
+                                                .aspectRatio(1.0F)
+                                        )
+                                    } else {
+                                        val resource = painterResource(
+                                            when (image) {
+                                                Notification.NotificationImage.NONE -> error("Invalid")
+                                                Notification.NotificationImage.ALERT_CIRCLE -> Res.drawable.notification_alert_circle
+                                                Notification.NotificationImage.ALERT_OCTAGON -> Res.drawable.notification_alert_octagon
+                                                Notification.NotificationImage.ALERT_TRIANGLE -> Res.drawable.notification_alert_triangle
+                                                Notification.NotificationImage.BLUETOOTH -> Res.drawable.notification_bluetooth
+                                                Notification.NotificationImage.MESSAGE_CIRCLE -> Res.drawable.notification_message_circle
+                                                Notification.NotificationImage.MESSAGE_SQUARE -> Res.drawable.notification_message_square
+                                                Notification.NotificationImage.MUSIC -> Res.drawable.notification_music
+                                                Notification.NotificationImage.PHONE -> Res.drawable.notification_phone
+                                                Notification.NotificationImage.PHONE_INCOMING -> Res.drawable.notification_phone_incoming
+                                                Notification.NotificationImage.PHONE_MISSED -> Res.drawable.notification_phone_missed
+                                                Notification.NotificationImage.VOICE_MAIL -> Res.drawable.notification_voicemail
+                                                Notification.NotificationImage.MAP_GENERAL -> Res.drawable.notification_map
+                                                Notification.NotificationImage.MAP_INSTRUCTION -> Res.drawable.notification_navigation
+                                                Notification.NotificationImage.MAP_WAYPOINT -> Res.drawable.notification_map_pin
+                                            }
+                                        )
+                                        Image(
+                                            painter = resource,
+                                            contentDescription = image.toString(),
+                                            modifier = Modifier
+                                                .fillMaxSize(0.9F)
+                                                //.fillMaxSize(0.75F)
+                                                //.border(2.dp, Color.Red)
+                                                .aspectRatio(1.0F)
+                                        )
+                                    }
+                                } else {
+                                    val pictureScope = rememberCoroutineScope()
+                                    val pictureList = LoadingPictures.values().asList().circular()
+                                    val pictureIndex = remember { mutableStateOf(0) }
+                                    LaunchedEffect(Unit) {
+                                        while (isActive) {
+                                            delay(1500)
+                                            pictureIndex.value += 1
+                                        }
+                                    }
+                                    key(pictureIndex.value) {
+                                        Image(
+                                            painter = painterResource(pictureList[pictureIndex.value].drawableResource),
+                                            contentDescription = pictureList[pictureIndex.value].name,
+                                            contentScale = ContentScale.FillHeight,
+                                            modifier = Modifier.fillMaxSize(0.9F).aspectRatio(1F)
+                                        )
+                                    }
+                                }
                             }
 
                             Column(
-                                modifier = Modifier.weight(3F, true),
+                                modifier = Modifier.weight(3F, true).align(Alignment.CenterVertically).padding(8.dp),
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                if (headerText.isNotEmpty()) {
+                                if (headerText.isNotBlank()) {
                                     Text(
                                         text = headerText,
                                         fontSize = if (isPixelDoubled) 32.sp else 16.sp,
@@ -676,7 +759,7 @@ class ModalMenuService @Inject constructor(
                                         color = Color.White
                                     )
                                 }
-                                if (bodyText.isNotEmpty()) {
+                                if (bodyText.isNotBlank()) {
                                     Text(
                                         text = bodyText,
                                         fontSize = if (isPixelDoubled) 26.sp else 13.sp,

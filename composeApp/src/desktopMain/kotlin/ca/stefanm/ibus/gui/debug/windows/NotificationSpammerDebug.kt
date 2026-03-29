@@ -204,9 +204,17 @@ class NotificationSpammerDebug @Inject constructor(
                     Button(onClick = { titleText.value = "Wait" }) { Text("Set titleText to wait") }
                 }
 
+                val showThrobber = remember { mutableStateOf(false) }
+                CheckBoxWithLabel(
+                    isChecked = showThrobber.value,
+                    onCheckChanged = { showThrobber.value = it},
+                    label = "Show Throbber?"
+                )
+
                 Button(onClick = {
                     modalMenuService.showModalWaitDialog(
                         image = selectedImage.value,
+                        throbber = showThrobber.value,
                         headerText = headerText.value,
                         bodyText = bodyText.value,
                         titleText = titleText.value,
