@@ -29,6 +29,7 @@ import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.notifications.toView
 import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
@@ -592,9 +593,13 @@ class ModalMenuService @Inject constructor(
         image : Notification.NotificationImage = Notification.NotificationImage.NONE,
         headerText : String,
         bodyText : String = "",
-        autoCloseTimeout : Duration?
+        titleText : String? = null,
+        autoCloseTimeout : Duration?,
+        isCancellable : Boolean = false,
+        onCancel : () -> Unit = {}
     ) {
         _modalMenuOverlay.value = @Composable {
+            val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
 
             LaunchedEffect(Unit) {
                 logger.d("ModalWaitDialog", "Disabling main listener.")
@@ -614,8 +619,100 @@ class ModalMenuService @Inject constructor(
                     closeModalMenu()
                 }
             }
-            Box(Modifier.size(64.dp).background(Color.Yellow)) {
+            Box(Modifier
+                .fillMaxSize()
+                //.background(Color.Yellow)
+                , contentAlignment = Alignment.Center) {
+                Box(Modifier
+                    .border(
+                        width = if (isPixelDoubled) 4.dp else 2.dp,
+                        color = ThemeWrapper.ThemeHandle.current.colors.menuBackground
+                    )
+                    .shadow(
+                        20.dp, spotColor = Color.White
+                    )
+                    .background(
+                        Brush.horizontalGradient(
+                            ThemeWrapper.ThemeHandle.current.centerGradientWithEdgeHighlight.backgroundGradientColorList
+                        )
+                    )
+                    //.wrapContentHeight()
+                    .fillMaxWidth(0.75F)
+                    .aspectRatio(3F, matchHeightConstraintsFirst = false)
 
+                ) {
+                    Column(Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth()
+                        .border(4.dp, Color.Magenta)
+                        ,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        if (titleText != null) {
+                            BmwSingleLineHeader(titleText)
+                        }
+
+                        Row(
+                            modifier = Modifier.border(3.dp, Color.Red)
+                        ) {
+                            Box(
+                                Modifier
+                                    .fillMaxHeight(0.7F)
+                                    .aspectRatio(1F)
+                                    .background(Color.Green)
+                            ) {
+
+                            }
+
+                            Column(
+                                modifier = Modifier.weight(3F, true),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                if (headerText.isNotEmpty()) {
+                                    Text(
+                                        text = headerText,
+                                        fontSize = if (isPixelDoubled) 32.sp else 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                                if (bodyText.isNotEmpty()) {
+                                    Text(
+                                        text = bodyText,
+                                        fontSize = if (isPixelDoubled) 26.sp else 13.sp,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+
+                        if (isCancellable) {
+                            val knobState = setupListener(
+                                knobListenerServiceModal,
+                                logger,
+                                "ModalWaitDialog"
+                            )
+
+
+
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier
+                                        .align(Alignment.End)
+                                        .fillMaxWidth(0.5F)
+                                    ,
+                                    label = "Cancel",
+                                    chipOrientation = ItemChipOrientation.E,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        onCancel()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
 

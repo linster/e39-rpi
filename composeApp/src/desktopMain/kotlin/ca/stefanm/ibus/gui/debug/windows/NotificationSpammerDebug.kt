@@ -183,12 +183,38 @@ class NotificationSpammerDebug @Inject constructor(
                     )
                 }
 
+
+                val titleText = remember { mutableStateOf<String?>(null) }
+                Row {
+                    Text("Title Text")
+                    TextField(
+                        value = titleText.value.toString(),
+                        onValueChange = { newStr ->
+                            titleText.value = newStr
+
+                        },
+                        modifier = Modifier.width(128.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                        singleLine = true
+                    )
+                }
+
+                Row {
+                    Button(onClick = { titleText.value = null }) { Text("Set titleText to null") }
+                    Button(onClick = { titleText.value = "Wait" }) { Text("Set titleText to wait") }
+                }
+
                 Button(onClick = {
                     modalMenuService.showModalWaitDialog(
                         image = selectedImage.value,
                         headerText = headerText.value,
                         bodyText = bodyText.value,
-                        autoCloseTimeout = autoCloseTimeout.value?.seconds
+                        titleText = titleText.value,
+                        autoCloseTimeout = autoCloseTimeout.value?.seconds,
+                        isCancellable = isCancellable.value,
+                        onCancel = {
+                            modalMenuService.closeModalMenu()
+                        }
                     )
                 }) { Text("Show") }
                 Button(onClick = {
