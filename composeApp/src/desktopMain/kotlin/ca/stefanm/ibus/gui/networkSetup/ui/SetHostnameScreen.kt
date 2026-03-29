@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBus
@@ -61,7 +62,7 @@ class SetHostnameScreen @Inject constructor(
 
 
         Column(Modifier.fillMaxSize()) {
-            BmwSingleLineHeader("Hostname")
+            BmwSingleLineHeader("Set Hostname")
 
 //            key(hostName.value) {
                 FullScreenMenu.OneColumn(
@@ -140,14 +141,11 @@ class SetHostnameScreen @Inject constructor(
 
             val handler = object : DBusSigHandler<Properties.PropertiesChanged> {
                 override fun handle(_signal: Properties.PropertiesChanged?) {
-                    this@callbackFlow.trySend(
-                        _signal
-                            ?.propertiesChanged
-                            ?.getOrDefault("Hostname", "<<no update>>") as? String
-                            ?: "no signal"
-                    )
+                    val propertiesChanged = _signal?.propertiesChanged
+                    if (propertiesChanged != null && propertiesChanged.containsKey("Hostname")) {
+                        trySend(propertiesChanged["Hostname"]!!.value as String)
+                    }
                 }
-
             }
 
             val busId = connection.getRemoteObject(
@@ -175,6 +173,8 @@ class SetHostnameScreen @Inject constructor(
                 )
             )
             emit("<Error: ${it.message}>")
+        }.onEach {
+            logger.d("SetHostnameScreen", "New hostname $it")
         }
             .distinctUntilChanged()
     }
