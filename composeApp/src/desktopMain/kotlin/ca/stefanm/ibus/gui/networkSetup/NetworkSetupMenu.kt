@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.ActivateConnectionScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -63,7 +64,14 @@ class NetworkSetupMenu @Inject constructor(
                         }
                     )
                 ),
-                se = listOf()
+                se = listOf(
+                    TextMenuItem(
+                        "Dummy ConnectionList",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(DummyConnectionListScreen::class.java)
+                        }
+                    )
+                )
             )
 
         }

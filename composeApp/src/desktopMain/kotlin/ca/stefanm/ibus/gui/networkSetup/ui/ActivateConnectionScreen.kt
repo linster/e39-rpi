@@ -9,6 +9,7 @@ import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
@@ -29,7 +30,8 @@ import kotlin.time.Duration.Companion.seconds
 class ActivateConnectionScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val logger : Logger,
-    private val notificationHub: NotificationHub
+    private val notificationHub: NotificationHub,
+    private val navigationNodeTraverser: NavigationNodeTraverser
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = ActivateConnectionScreen::class.java
@@ -43,7 +45,9 @@ class ActivateConnectionScreen @Inject constructor(
                 listOf(
                     TextMenuItem(
                         title = "Go Back",
-                        onClicked = {}
+                        onClicked = {
+                            navigationNodeTraverser.goBack()
+                        }
                     ),
                     TextMenuItem(
                         title = "Show throbber",
@@ -66,5 +70,7 @@ class ActivateConnectionScreen @Inject constructor(
             autoCloseTimeout = 3.seconds
         )
     }
+
+
 
 }

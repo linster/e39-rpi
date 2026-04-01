@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -23,6 +24,11 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "CanModify", type = Boolean.class, access = Access.READ)
 @DBusProperty(name = "VersionId", type = UInt64.class, access = Access.READ)
 public interface Settings extends DBusInterface {
+
+    /** Added by stefan */
+    @DBusBoundProperty
+    String getHostname();
+    /** Added by stefan */
 
     List<DBusPath> ListConnections();
 

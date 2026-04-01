@@ -1,0 +1,195 @@
+package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.connectionList.ConnectionListItems
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
+import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.lib.logging.Logger
+import javax.inject.Inject
+import javax.inject.Named
+
+@ScreenDoc(
+    screenName = "DummyConnectionListScreen",
+    description = "A dummy debug screen to show a fake list of connections"
+)
+@ScreenDoc.AllowsGoBack
+@AutoDiscover
+class DummyConnectionListScreen @Inject constructor(
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerService: KnobListenerService,
+    private val logger: Logger
+) : NavigationNode<Nothing> {
+
+    override val thisClass: Class<out NavigationNode<Nothing>>
+        get() = DummyConnectionListScreen::class.java
+
+    override fun provideMainContent(): @Composable ((Navigator.IncomingResult?) -> Unit) = {
+        Column(Modifier
+            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+            .fillMaxSize()
+        ) {
+            BmwSingleLineHeader("Activate Connection")
+
+            val knobState = setupListener(
+                knobListenerService,
+                logger,
+                "DummyConnectionListScreen"
+            )
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                MenuItem(
+                    label = "Go Back",
+                    chipOrientation = ItemChipOrientation.W,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                        navigationNodeTraverser.goBack()
+                    }
+                )
+            }
+
+            ConnectionListItems.ConnectionListDivider(
+                dividerHeader = "Wired",
+                modifier = Modifier,
+                chipOrientation = ItemChipOrientation.W
+            )
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "Wired Connection 1",
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "Wired Connection 2",
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+            ConnectionListItems.ConnectionListDivider(
+                dividerHeader = "Wi-Fi",
+                modifier = Modifier,
+                chipOrientation = ItemChipOrientation.W
+            )
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "Smartynk-5G",
+                    isConnected = true,
+                    strength = 100,
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "RogersIgnite404",
+                    strength = 75,
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "Kathy Network",
+                    strength = 60,
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "grantnett5g",
+                    strength = 6,
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+            ConnectionListItems.ConnectionListDivider(
+                dividerHeader = "Bridge (docker0)",
+                modifier = Modifier,
+                chipOrientation = ItemChipOrientation.W
+            )
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "docker0",
+                    isConnected = true,
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+            ConnectionListItems.ConnectionListDivider(
+                dividerHeader = "Bluetooth",
+                modifier = Modifier,
+                chipOrientation = ItemChipOrientation.W
+            )
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                ConnectionListItems.Connection(
+                    connectionName = "Stefan iPhone Network",
+                    modifier = Modifier,
+                    chipOrientation = ItemChipOrientation.W,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                    }
+                )
+            }
+
+        }
+    }
+}
