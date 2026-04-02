@@ -67,7 +67,6 @@ class DummyConnectionListScreen @Inject constructor(
             ConnectionListItems.ConnectionListDivider(
                 dividerHeader = "Wired",
                 modifier = Modifier,
-                chipOrientation = ItemChipOrientation.W
             )
 
             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
@@ -97,7 +96,6 @@ class DummyConnectionListScreen @Inject constructor(
             ConnectionListItems.ConnectionListDivider(
                 dividerHeader = "Wi-Fi",
                 modifier = Modifier,
-                chipOrientation = ItemChipOrientation.W
             )
 
             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
@@ -156,7 +154,6 @@ class DummyConnectionListScreen @Inject constructor(
             ConnectionListItems.ConnectionListDivider(
                 dividerHeader = "Bridge (docker0)",
                 modifier = Modifier,
-                chipOrientation = ItemChipOrientation.W
             )
 
             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
@@ -175,7 +172,6 @@ class DummyConnectionListScreen @Inject constructor(
             ConnectionListItems.ConnectionListDivider(
                 dividerHeader = "Bluetooth",
                 modifier = Modifier,
-                chipOrientation = ItemChipOrientation.W
             )
 
             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->

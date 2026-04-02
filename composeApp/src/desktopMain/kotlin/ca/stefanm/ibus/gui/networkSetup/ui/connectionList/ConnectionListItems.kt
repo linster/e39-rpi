@@ -87,13 +87,12 @@ object ConnectionListItems {
     fun ConnectionListDivider(
         dividerHeader : String,
         modifier: Modifier = Modifier,
-        chipOrientation: ItemChipOrientation,
     ) {
         MenuItem(
             boxModifier = modifier,
             label = dividerHeader,
             labelColor = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
-            chipOrientation = chipOrientation,
+            chipOrientation = ItemChipOrientation.NONE,
             isSelected = false,
             onClicked = { }
         )

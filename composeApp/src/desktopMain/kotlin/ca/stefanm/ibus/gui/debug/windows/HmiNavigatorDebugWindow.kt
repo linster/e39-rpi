@@ -23,6 +23,7 @@ import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn
+import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ibus.gui.menu.BMWMainMenu
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.menu.navigator.*
@@ -94,6 +95,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
                     ScreenHotKey(DebugHmiMenuTestTwoColumn::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(DebugHmiKeyboard::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(CreateOrEditPoiScreen::class.java as Class<NavigationNode<*>>)
+                    ScreenHotKey(SmoothScrollTest::class.java as Class<NavigationNode<*>>)
                 }
             }
 
