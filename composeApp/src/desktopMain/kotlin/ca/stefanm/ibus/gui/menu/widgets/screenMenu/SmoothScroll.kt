@@ -38,41 +38,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 
-// .
-// []
-// .
-// []
-// .
-
-//Each . has a dispoable effect
-// Each item wrapped in the column
-// gets a dot around it
-//
-// When you advance with a scroll click,
-// don't blindly select the next item and scroll, (scroll until??)
-// but scroll so tha the whole item is in focus (both dots for the item are visible)
-
-// but if the item is small enough that it's never out of view, then just
-// allow scrolling to the next item.
-
-// Start with making it depend on a fixed flow of items
-// which will allow it to work. There should be an arbitrary menu item somewhere which will work too.
-
-
-// .
-// .
-// []
-// .
-// .
-// []
-// .
-// .
-// [
-//
-//
-// ]
-// .
-// .
 
 object SmoothScroll {
 //https://medium.com/@david.debre/my-experience-with-subcomposelayout-71406b079305
@@ -98,10 +63,7 @@ object SmoothScroll {
         val childIndexOnPage = mutableMapOf<Int, Int>()
         var previousPage = 0
 
-        val scope = rememberCoroutineScope()
-        BoxWithConstraints(
-
-        ) {
+        BoxWithConstraints() {
             val viewPortHeight = maxHeight
             SubcomposeLayout(
                 modifier = Modifier
@@ -119,7 +81,6 @@ object SmoothScroll {
                             item(allocatedIndex, currentIndex)
                             LaunchedEffect(allocatedIndex, currentIndex) {
                                 if (allocatedIndex == currentIndex) {
-
                                     if (
                                         childIndexOnPage[currentIndex] != previousPage /* We've moved a page */
                                         && childIndexToPixelsFromTop.containsKey(currentIndex)
@@ -140,17 +101,6 @@ object SmoothScroll {
                                         //Update the page we were on before
                                         previousPage = childIndexOnPage[currentIndex] ?: -1
                                     }
-
-
-
-                                    //The current item is selected!
-                                    //This technique will probably just always keep the selected
-                                    //item at the scroll window.
-//                                    if (childIndexToPixelsFromTop.containsKey(currentIndex)) {
-//                                        childIndexToPixelsFromTop[currentIndex]?.let {
-//                                            scrollState.scrollTo(it)
-//                                        }
-//                                    }
                                 }
                             }
                         }
