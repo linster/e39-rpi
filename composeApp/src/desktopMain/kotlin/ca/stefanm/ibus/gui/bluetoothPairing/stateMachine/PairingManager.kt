@@ -331,6 +331,7 @@ class PairingManager @Inject constructor(
             is CurrentDeviceViewer.ViewResult.SetDeviceForCarPlatform -> {
                 configurationStorage.setBMBTPairedPhone(uiResult.device)
             }
+            else -> {}
         }
     }
 

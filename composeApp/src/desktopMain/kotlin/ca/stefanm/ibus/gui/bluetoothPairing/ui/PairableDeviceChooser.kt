@@ -1,20 +1,30 @@
 package ca.stefanm.ibus.gui.bluetoothPairing.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
+import javax.inject.Named
 
 //This is the screen that lets us pick devices to pair with
 
@@ -34,7 +44,11 @@ fun NavigationNodeTraverser.showPairableDevices(
 @AutoDiscover
 class PairableDeviceChooser @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val pairingManager: PairingManager
+    private val pairingManager: PairingManager,
+
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerService: KnobListenerService,
+    private val logger: Logger
 ) : NavigationNode<PairableDeviceChooser.PairableDeviceChooserResult> {
 
     data class PairableDevice(
@@ -57,7 +71,8 @@ class PairableDeviceChooser @Inject constructor(
         val pairableDevices : SharedFlow<List<PairableDevice>>
     )
 
-    sealed class PairableDeviceChooserResult : UiResult() {
+    //This used to be sealed but something was funky with the Compose compiler.
+    open class PairableDeviceChooserResult : UiResult() {
         object Cancelled : PairableDeviceChooserResult()
         data class RequestPairToDevice(val device: PairableDevice) : PairableDeviceChooserResult()
     }
@@ -66,7 +81,9 @@ class PairableDeviceChooser @Inject constructor(
         get() = PairableDeviceChooser::class.java
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-        Column {
+        Column(
+            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+        ) {
 
             BmwSingleLineHeader("Select Device to Pair With")
 
@@ -79,29 +96,43 @@ class PairableDeviceChooser @Inject constructor(
                 .pairableDevices
                 .collectAsState(listOf())
 
-            ScrollMenu.OneColumnScroll(
-                items = pairableDevices.value.map { device ->
-                    TextMenuItem(
-                        title = "${device.alias} ; isConnected ${device.isConnected.toCheckBox()} ; isPaired ${device.isPaired.toCheckBox()}",
+            SmoothScroll.SmoothScroll(
+                modifier = Modifier,
+                knobListenerService = knobListenerService,
+                tag = "Pairable Device Chooser",
+                logger = logger,
+                items = pairableDevices.value.let {
+                    listOf(TextMenuItem(
+                        title = "Go Back",
                         onClicked = {
-                            //TODO We probably end up cancelling the pairing because we complete the flow here.
-                            //TODO because the screen goes away. We actually need to
-                            navigationNodeTraverser.setResultAndGoBack(
-                                this@PairableDeviceChooser,
-                                PairableDeviceChooserResult.RequestPairToDevice(device)
-                            )
+                            navigationNodeTraverser.setResultAndGoBack(this@PairableDeviceChooser, PairableDeviceChooserResult.Cancelled)
                         }
-                    )
-                },
-                onScrollListExitSelected = {
-                    navigationNodeTraverser.setResultAndGoBack(this@PairableDeviceChooser, PairableDeviceChooserResult.Cancelled)
-                },
-                displayOptions = ScrollMenu.ScrollListOptions(
-                    itemsPerPage = 3,
-                    isExitItemOnEveryPage = true,
-                    isPageCountItemVisible = true,
-                    showSpacerRow = false
-                )
+                    )) + it.map { device ->
+                        TextMenuItem(
+                            title = "${device.alias} ; isConnected ${device.isConnected.toCheckBox()} ; isPaired ${device.isPaired.toCheckBox()}",
+                            onClicked = {
+                                //TODO We probably end up cancelling the pairing because we complete the flow here.
+                                //TODO because the screen goes away. We actually need to
+                                navigationNodeTraverser.setResultAndGoBack(
+                                    this@PairableDeviceChooser,
+                                    PairableDeviceChooserResult.RequestPairToDevice(device)
+                                )
+                            }
+                        )
+
+                    }
+                }.map {
+                    { allocatedIndex, currentIndex ->
+                        MenuItem(
+                            label = it.title,
+                            chipOrientation = ItemChipOrientation.W,
+                            isSelected = allocatedIndex == currentIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                it.onClicked()
+                            }
+                        )
+                    }
+                }
             )
         }
     }
