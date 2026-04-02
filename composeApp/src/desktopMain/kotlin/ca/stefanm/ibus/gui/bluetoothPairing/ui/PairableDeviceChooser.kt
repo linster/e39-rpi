@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
@@ -121,18 +122,7 @@ class PairableDeviceChooser @Inject constructor(
                         )
 
                     }
-                }.map {
-                    { allocatedIndex, currentIndex ->
-                        MenuItem(
-                            label = it.title,
-                            chipOrientation = ItemChipOrientation.W,
-                            isSelected = allocatedIndex == currentIndex,
-                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                it.onClicked()
-                            }
-                        )
-                    }
-                }
+                }.toDynamicLambdas()
             )
         }
     }
