@@ -6,9 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.connectionList.ConnectionListItems
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItems
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ibus.di.ApplicationComponent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -17,11 +16,6 @@ import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject

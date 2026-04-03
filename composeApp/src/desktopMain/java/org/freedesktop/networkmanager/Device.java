@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -51,6 +52,11 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "HwAddress", type = String.class, access = Access.READ)
 @DBusProperty(name = "Ports", type = Device.PropertyPortsType.class, access = Access.READ)
 public interface Device extends DBusInterface {
+
+    /* Added by Stefan */
+    @DBusBoundProperty
+    UInt32 getDeviceType();
+    /* Added by Stefan */
 
     void Reapply(Map<String, Map<String, Variant<?>>> connection, UInt64 versionId, UInt32 flags);
 
