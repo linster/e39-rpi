@@ -1,5 +1,6 @@
 package org.freedesktop.networkmanager.device;
 
+import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -15,4 +16,8 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "BtCapabilities", type = UInt32.class, access = Access.READ)
 public interface Bluetooth extends DBusInterface {
 
+    /* Added by stefan */
+    @DBusBoundProperty
+    String getName();
+    /* Added by stefan */
 }

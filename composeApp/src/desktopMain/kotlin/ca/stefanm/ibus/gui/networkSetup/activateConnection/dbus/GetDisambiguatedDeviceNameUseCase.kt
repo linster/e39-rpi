@@ -3,6 +3,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType.Companion.toNMDeviceType
 import org.freedesktop.networkmanager.Device
+import org.freedesktop.networkmanager.device.Bluetooth
 import javax.inject.Inject
 
 class GetDisambiguatedDeviceNameUseCase @Inject constructor(
@@ -22,13 +23,88 @@ class GetDisambiguatedDeviceNameUseCase @Inject constructor(
         //Loop over the devices and for each one call
         //r = get_device_generic_type_name_with_iface()
         //If no duplicates, return a listOf(device to r).associate()
-        return mapOf()
+
+        val step1 = devices.associate { device ->
+            device to getDeviceGenericTypeNameWithIFace(device)
+        }
+        if (findDuplicateKeys(step1).isEmpty()) {
+            //No duplicates! Good to go!
+            return step1
+        }
+
+        // Find out which ones are duplicated and replace only the duplicates
+        // with getDeviceTypeNameWithIFace()
+        val step2 = step1.toMutableMap()
+        findDuplicateKeys(step1).forEach {
+            step2[it] = getDeviceTypeNameWithIFace(it)
+        }
+        if (findDuplicateKeys(step2).isEmpty()) {
+            return step2
+        }
+
+        /* Try prefixing bus name (eg, "PCI Ethernet" vs "USB Ethernet") */
+
+        // TODO STEFAN this uses udev to find the bus name
+        // skip step 3
+        /* Try prefixing vendor name */
+
+        // TODO STEFAN this uses udev to find the vendor name
+        // skip step 4
+
+        /* If dealing with Bluetooth devices, try to distinguish them by
+         * device name.
+         */
+        val step5 = step2.toMutableMap()
+        findDuplicateKeys(step2).forEach {
+            if (it.deviceType.toNMDeviceType() == NMDeviceType.NM_DEVICE_TYPE_BT) {
+                it as Bluetooth
+                step5[it] = "${getDeviceTypeNameWithIFace(it)} (${it.name})"
+            }
+        }
+        if (findDuplicateKeys(step5).isEmpty()) {
+            return step5
+        }
+
+        /* We have multiple identical network cards, so we have to differentiate
+         * them by interface name.
+         */
+
+        val step6 = step5.toMutableMap()
+        findDuplicateKeys(step5).forEach {
+            val interfaceName = it.getInterface()?: ""
+
+            if (interfaceName.isNullOrBlank())
+                return@forEach
+
+            step6[it] = "${getTypeName(it)} (${interfaceName})"
+        }
+
+        return step6
+    }
+
+    fun <K, V> findDuplicateKeys(map: Map<K, V>) : Set<K> {
+        //Optimization if there are no duplicate keys
+        if (map.values.toList().size == map.values.toSet().size) {
+            //No duplicates! Good to go!
+            return emptySet()
+        }
+
+        val duplicatedKeys = mutableSetOf<K>()
+        val seenValues = mutableSetOf<V>()
+
+        for ((key, value) in map.entries) {
+            if (seenValues.contains(value)) {
+                duplicatedKeys.add(key)
+            }
+            seenValues.add(value)
+        }
+        return duplicatedKeys
     }
 
     /* get_device_generic_type_name_with_iface(NMDevice *device)
      * https://github.com/NetworkManager/NetworkManager/blob/de91bd807096255e0f8a5be1ff40180e93bd31f9/src/libnm-client-impl/nm-device.c#L1916
      */
-    private fun getDeviceGenericeTypeNameWithIFace(device: Device) : String {
+    private fun getDeviceGenericTypeNameWithIFace(device: Device) : String {
         return when (device.deviceType.toNMDeviceType()!!) {
             NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
             NMDeviceType.NM_DEVICE_TYPE_INFINIBAND -> "Wired"
@@ -48,7 +124,7 @@ class GetDisambiguatedDeviceNameUseCase @Inject constructor(
             NMDeviceType.NM_DEVICE_TYPE_TEAM,
             NMDeviceType.NM_DEVICE_TYPE_BRIDGE,
             NMDeviceType.NM_DEVICE_TYPE_VLAN -> {
-                "$typeName ${deviceGetIFace(device)}"
+                "$typeName ${device.getInterface()}"
             }
             else -> typeName
         }
@@ -100,11 +176,5 @@ class GetDisambiguatedDeviceNameUseCase @Inject constructor(
             NMDeviceType.NM_DEVICE_TYPE_UNUSED2,
             NMDeviceType.NM_DEVICE_TYPE_UNKNOWN -> "Unknown"
         }
-    }
-
-
-    //https://github.com/NetworkManager/NetworkManager/blob/main/src/libnm-core-public/nm-dbus-interface.h
-    fun getDeviceTypeNameForIntDeviceType(type : Int) : String {
-
     }
 }
