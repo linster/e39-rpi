@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.DeviceListScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -83,6 +84,12 @@ class NetworkSetupMenu @Inject constructor(
                         "GetConnectionsUseCaseTest",
                         onClicked = {
                             navigationNodeTraverser.navigateToNode(GetConnectionsUseCaseDebugScreen::class.java)
+                        }
+                    ),
+                    TextMenuItem(
+                        "GetActiveConnectionsUseCaseTest",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(GetActiveConnectionsUseCaseDebugScreen::class.java)
                         }
                     )
                 )

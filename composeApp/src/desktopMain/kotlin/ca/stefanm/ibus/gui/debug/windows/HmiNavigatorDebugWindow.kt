@@ -188,6 +188,9 @@ class HmiNavigatorDebugWindow @Inject constructor(
         if (nonRegisteredNodes.isEmpty()) {
             Text(
                 "All nodes marked with @AutoDiscover are registered in Navigation DI Module",color = Color.Green)
+            Text(
+                "Node count: ${discoveredNodes.size}"
+            )
         } else {
             Text("Nodes not registered in Navigation DI Module!!", color = Color.Red)
             nonRegisteredNodes.forEach {

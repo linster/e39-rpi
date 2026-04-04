@@ -6,6 +6,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.DeviceListScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
@@ -151,7 +152,8 @@ class NavigationModule {
         activateConnectionScreen: ActivateConnectionScreen,
         dummyConnectionListScreen: DummyConnectionListScreen,
         deviceListScreen : DeviceListScreen,
-        getConnectionsUseCaseDebugScreen: GetConnectionsUseCaseDebugScreen
+        getConnectionsUseCaseDebugScreen: GetConnectionsUseCaseDebugScreen,
+        getActiveConnectionsUseCaseDebugScreen: GetActiveConnectionsUseCaseDebugScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -219,7 +221,8 @@ class NavigationModule {
         activateConnectionScreen,
         dummyConnectionListScreen,
         deviceListScreen,
-        getConnectionsUseCaseDebugScreen
+        getConnectionsUseCaseDebugScreen,
+        getActiveConnectionsUseCaseDebugScreen
     )
 }
 
