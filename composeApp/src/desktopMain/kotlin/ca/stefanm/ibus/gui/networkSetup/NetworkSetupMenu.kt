@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.DeviceListScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -69,6 +70,12 @@ class NetworkSetupMenu @Inject constructor(
                         "Dummy ConnectionList",
                         onClicked = {
                             navigationNodeTraverser.navigateToNode(DummyConnectionListScreen::class.java)
+                        }
+                    ),
+                    TextMenuItem(
+                        "Devices List",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(DeviceListScreen::class.java)
                         }
                     )
                 )

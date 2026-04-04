@@ -28,6 +28,9 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
@@ -48,6 +51,7 @@ object SmoothScroll {
         knobListenerService: KnobListenerService,
         tag : String? = null,
         logger: Logger,
+        prependGoBackEntry : Boolean = false,
         items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
     ) {
 
@@ -75,7 +79,24 @@ object SmoothScroll {
                     .then(modifier)
             ) { constraints ->
     //https://medium.com/@olivervicente/subcomposition-in-jetpack-compose-how-to-use-measurement-phase-data-in-other-children-3965d700af8b
-                val measurables = items.flatMapIndexed { index, item ->
+                val measurables = items.let {
+                    if (prependGoBackEntry) {
+                        listOf<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>(
+                            { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    label = "Go Back",
+                                    chipOrientation = ItemChipOrientation.W,
+                                    isSelected = allocatedIndex == currentIndex,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        DaggerApplicationComponent.create().navigationNodeTraverser().goBack()
+                                    }
+                                )
+                            }
+                        ) + it
+                    } else {
+                        it
+                    }
+                }.flatMapIndexed { index, item ->
                     subcompose(slotId = index) {
                         KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                             item(allocatedIndex, currentIndex)

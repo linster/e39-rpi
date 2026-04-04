@@ -122,6 +122,7 @@ enum class NMDeviceType(val dbusValue: Int) {
 
     companion object {
         fun UInt32.toNMDeviceType(): NMDeviceType? {
+            //TODO this could one day just use a stored map
             return entries.find { it.dbusValue == this.toInt() }
         }
     }

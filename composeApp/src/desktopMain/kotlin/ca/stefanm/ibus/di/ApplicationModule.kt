@@ -21,6 +21,7 @@ import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
 import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.DebugKnobService
@@ -73,6 +74,8 @@ interface ApplicationComponent {
     fun debugKnobService() : DebugKnobService
 
     fun windowManager() : WindowManager
+
+    fun navigationNodeTraverser() : NavigationNodeTraverser
 
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     fun knobListenerServiceMain() : KnobListenerService

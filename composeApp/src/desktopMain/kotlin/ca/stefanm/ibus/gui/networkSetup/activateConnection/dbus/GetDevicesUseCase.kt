@@ -33,6 +33,7 @@ class GetDevicesUseCase @Inject constructor(
 
             connection.connect()
 
+            //TODO STEFAN connection.use {} for autoClosable??
             val nmClient = connection.getRemoteObject(
                 "org.freedesktop.NetworkManager",
                 "/org/freedesktop/NetworkManager",

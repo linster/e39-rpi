@@ -18,6 +18,20 @@ class GetDisambiguatedDeviceNameUseCase @Inject constructor(
 
     // Goes to nm_device_disambiguate_names in nm-device.c, Line 2210
 
+    data class DeviceWithDisambiguatedName(
+        val device: Device,
+        val disambiguatedName: String
+    )
+
+    fun getDisambiguatedNamesList(devices : List<Device>) : List<DeviceWithDisambiguatedName> {
+        return getDisambiguatedNames(devices).entries.map { (device, name) ->
+            DeviceWithDisambiguatedName(
+                device = device,
+                disambiguatedName = name
+            )
+        }
+    }
+
     fun getDisambiguatedNames(devices : List<Device>) : Map<Device, String> {
         /* Generic Device name */
         //Loop over the devices and for each one call
