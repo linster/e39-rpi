@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
@@ -52,6 +53,7 @@ object SmoothScroll {
         tag : String? = null,
         logger: Logger,
         prependGoBackEntry : Boolean = false,
+        navigationNodeTraverser: NavigationNodeTraverser? = null,
         items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
     ) {
 
@@ -88,7 +90,7 @@ object SmoothScroll {
                                     chipOrientation = ItemChipOrientation.W,
                                     isSelected = allocatedIndex == currentIndex,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        DaggerApplicationComponent.create().navigationNodeTraverser().goBack()
+                                        navigationNodeTraverser?.goBack()
                                     }
                                 )
                             }

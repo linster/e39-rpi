@@ -28,6 +28,9 @@ public interface Settings extends DBusInterface {
     /** Added by stefan */
     @DBusBoundProperty
     String getHostname();
+
+    @DBusBoundProperty
+    List<DBusPath> getConnections();
     /** Added by stefan */
 
     List<DBusPath> ListConnections();

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -42,6 +43,11 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "ConnectivityCheckUri", type = String.class, access = Access.READ)
 @DBusProperty(name = "GlobalDnsConfiguration", type = NetworkManager.PropertyGlobalDnsConfigurationType.class, access = Access.READ_WRITE)
 public interface NetworkManager extends DBusInterface {
+
+    /* Added by stefan */
+    @DBusBoundProperty
+    List<DBusPath> getActiveConnections();
+    /* Added by stefan */
 
     void Reload(UInt32 flags);
 
