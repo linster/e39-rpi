@@ -18,11 +18,14 @@ object Nmt {
 
     data class NmtConnectConnection(
         val name : String? = null,
-        val ssid : String? = null,
+
+        val device: Device? = null,
 
         val conn : Connection? = null,
+
+        //If it's a wifi connection,
+        val ssid : String? = null,
         val ap : AccessPoint? = null,
-        val device: Device? = null,
         //Active connection
         val active : Active? = null,
     )

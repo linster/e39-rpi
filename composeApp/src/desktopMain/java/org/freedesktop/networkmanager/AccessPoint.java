@@ -2,6 +2,7 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -24,6 +25,11 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "Strength", type = Byte.class, access = Access.READ)
 @DBusProperty(name = "LastSeen", type = Integer.class, access = Access.READ)
 public interface AccessPoint extends DBusInterface {
+
+    /* Added by Stefan */
+    @DBusBoundProperty
+    List<Byte> getSsid();
+    /* Added by Stefan */
 
     public static interface PropertySsidType extends TypeRef<List<Byte>> {
 

@@ -1,5 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections
 
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DevicePath
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,7 @@ import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.networkmanager.connection.Active
 import javax.inject.Inject
+import kotlin.collections.map
 
 /** The analog to
  *  acs         = nm_client_get_active_connections(nm_client);
@@ -26,7 +28,7 @@ class GetActiveConnectionsUseCase @Inject constructor(
         const val TAG = "GetActiveConnectionsUseCase"
     }
 
-    fun getActiveConnections() : Flow<List<Active>> {
+    fun getAllActiveConnections() : Flow<List<Active>> {
         val connection = DBusConnectionBuilder.forSystemBus().build()
         return callbackFlow {
             connection.connect()
@@ -78,6 +80,22 @@ class GetActiveConnectionsUseCase @Inject constructor(
                     Active::class.java
                 )
             }
+        }
+    }
+
+    fun Flow<List<Active>>.getActiveConnectionsByDbusDevice(
+    ) : Flow<Map<DevicePath, List<Active>>> {
+        return map {
+            it
+                .map {
+                    it to it.devices.toList()
+                }
+                .map { (connection, paths) ->
+                    paths.map { path -> connection to path }
+                }
+                .flatten()
+                .groupBy { (connection, path) -> path }
+                .mapValues { it.value.map { it.first } }
         }
     }
 }

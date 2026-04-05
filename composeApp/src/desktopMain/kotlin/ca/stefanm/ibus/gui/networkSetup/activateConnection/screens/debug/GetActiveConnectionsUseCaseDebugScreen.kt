@@ -51,7 +51,7 @@ class GetActiveConnectionsUseCaseDebugScreen @Inject constructor(
         ) {
             BmwSingleLineHeader("Debug: $TAG")
 
-            val connections = getActiveConnectionsUseCase.getActiveConnections().collectAsState(emptyList())
+            val connections = getActiveConnectionsUseCase.getAllActiveConnections().collectAsState(emptyList())
 
             SmoothScroll.SmoothScroll(
                 modifier = Modifier,

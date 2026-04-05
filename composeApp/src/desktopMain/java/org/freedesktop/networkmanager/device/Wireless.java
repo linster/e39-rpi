@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -26,6 +27,14 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "WirelessCapabilities", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "LastScan", type = Long.class, access = Access.READ)
 public interface Wireless extends DBusInterface {
+
+    /* Added by Stefan */
+    @DBusBoundProperty
+    List<DBusPath> getAccessPoints();
+
+    @DBusBoundProperty
+    DBusPath getActiveAccessPoint();
+    /* Added by Stefan */
 
     List<DBusPath> GetAccessPoints();
 

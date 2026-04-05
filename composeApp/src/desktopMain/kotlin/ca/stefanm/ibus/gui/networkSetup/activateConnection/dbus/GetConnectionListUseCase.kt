@@ -1,10 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.BroadcastFrameClock
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import app.cash.molecule.RecompositionMode
@@ -15,17 +11,12 @@ import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.networkmanager.Device
 import org.freedesktop.networkmanager.connection.Active
-import org.freedesktop.networkmanager.settings.Connection
 import javax.inject.Inject
 
 typealias DevicePath = DBusPath
@@ -87,17 +78,17 @@ class GetConnectionListUseCase @Inject constructor(
 //        NMActiveConnection *active;
 //    } NmtConnectConnection;
 
-    @Composable
-    fun combobulateItems() : List<Device> {
-
-        //Jeez, I hope this is Compose-stable?
-        val devices = getDevicesUseCase
-            .getDevices()
-            .distinctUntilChanged()
-            .collectAsState(emptyList())
-
+//    @Composable
+//    fun combobulateItems() : List<Device> {
+//
+//        //Jeez, I hope this is Compose-stable?
+//        val devices = getDevicesUseCase
+//            .getDevices()
+//            .distinctUntilChanged()
+//            .collectAsState(emptyList())
+//
 //        val activeConnections = getActiveConnectionsUseCase
-//            .getActiveConnections()
+//            .getAllActiveConnections()
 //            .distinctUntilChanged()
 //            .collectAsState(emptyList())
 //
@@ -110,9 +101,9 @@ class GetConnectionListUseCase @Inject constructor(
 //            getDisambiguatedDeviceNameUseCase
 //            .getDisambiguatedNames(devices.value)
 //            .mapKeys { DBusPath(it.key.objectPath) }
-
-        // Get a Map<DevicePath, ActiveConnection>,
-        // starting from List<Connection(List<Path>))
+//
+//        // Get a Map<DevicePath, ActiveConnection>,
+//        // starting from List<Connection(List<Path>))
 //        val devicePathToActiveConnection: Map<DevicePath, List<Active>> =
 //            activeConnections.value
 //                .map {
@@ -124,8 +115,8 @@ class GetConnectionListUseCase @Inject constructor(
 //                .flatten()
 //                .groupBy { (connection, path) -> path }
 //                .mapValues { it.value.map { it.first } }
-
-
+//
+//
 //        return key(devices.value) {
 //            devices.value.map { device ->
 //                Nmt.NmtConnectDevice(
@@ -136,12 +127,12 @@ class GetConnectionListUseCase @Inject constructor(
 //                )
 //            }
 //        }
-
-
-        return devices.value
-        //return emptyList()
-
-    }
+//
+//
+//        return devices.value
+//        //return emptyList()
+//
+//    }
 
     @Composable
     fun combobulate2(
