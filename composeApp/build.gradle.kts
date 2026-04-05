@@ -140,6 +140,8 @@ kotlin {
 
             //Griffin Powermate
             implementation("io.github.irgaly.kfswatch:kfswatch:1.4.0")
+
+            implementation("app.cash.molecule:molecule-runtime:2.2.0")
         }
     }
 }

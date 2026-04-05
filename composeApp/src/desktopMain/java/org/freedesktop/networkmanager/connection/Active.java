@@ -3,6 +3,7 @@ package org.freedesktop.networkmanager.connection;
 import java.util.List;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -33,6 +34,11 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "Controller", type = DBusPath.class, access = Access.READ)
 @DBusProperty(name = "Master", type = DBusPath.class, access = Access.READ)
 public interface Active extends DBusInterface {
+
+    /* Added by Stefan */
+    @DBusBoundProperty
+    List<DBusPath> getDevices();
+    /* Added by Stefan */
 
     public static interface PropertyDevicesType extends TypeRef<List<DBusPath>> {
 

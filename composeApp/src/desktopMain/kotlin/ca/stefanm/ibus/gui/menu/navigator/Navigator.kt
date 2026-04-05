@@ -5,9 +5,11 @@ import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScre
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.DeviceListScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetDevicesUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionListUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionsUseCaseDebugScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.NetworkManagerDebugLaunchpad
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
@@ -151,9 +153,11 @@ class NavigationModule {
         setHostnameScreen: SetHostnameScreen,
         activateConnectionScreen: ActivateConnectionScreen,
         dummyConnectionListScreen: DummyConnectionListScreen,
-        deviceListScreen : DeviceListScreen,
+        getDevicesUseCaseDebugScreen : GetDevicesUseCaseDebugScreen,
         getConnectionsUseCaseDebugScreen: GetConnectionsUseCaseDebugScreen,
-        getActiveConnectionsUseCaseDebugScreen: GetActiveConnectionsUseCaseDebugScreen
+        getActiveConnectionsUseCaseDebugScreen: GetActiveConnectionsUseCaseDebugScreen,
+        networkManagerDebugLaunchpad: NetworkManagerDebugLaunchpad,
+        getConnectionListUseCaseDebugScreen: GetConnectionListUseCaseDebugScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -220,9 +224,11 @@ class NavigationModule {
         setHostnameScreen,
         activateConnectionScreen,
         dummyConnectionListScreen,
-        deviceListScreen,
+        getDevicesUseCaseDebugScreen,
         getConnectionsUseCaseDebugScreen,
-        getActiveConnectionsUseCaseDebugScreen
+        getActiveConnectionsUseCaseDebugScreen,
+        networkManagerDebugLaunchpad,
+        getConnectionListUseCaseDebugScreen
     )
 }
 

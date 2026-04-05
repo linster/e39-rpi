@@ -2,6 +2,8 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import java.util.Map;
+
+import androidx.compose.runtime.Stable;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusBoundProperty;
@@ -51,6 +53,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "InterfaceFlags", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "HwAddress", type = String.class, access = Access.READ)
 @DBusProperty(name = "Ports", type = Device.PropertyPortsType.class, access = Access.READ)
+@Stable
 public interface Device extends DBusInterface {
 
     /* Added by Stefan */

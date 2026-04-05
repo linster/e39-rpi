@@ -3,62 +3,53 @@ package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.d
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.GetConnectionsUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItems
-import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.collections.component1
-import kotlin.collections.component2
 
-@ScreenDoc(
-    screenName = "GetConnectionsUseCaseDebugScreen",
-    description = "A screen to show all the connections from the " +
-            "GetConnectionsUseCase. These connections come from NetworkManager settings."
-)
-@ScreenDoc.AllowsGoBack
 @AutoDiscover
-class GetConnectionsUseCaseDebugScreen @Inject constructor(
+class GetConnectionListUseCaseDebugScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerService: KnobListenerService,
     private val logger: Logger,
-    private val getConnectionsUseCase : GetConnectionsUseCase
+    private val getConnectionListUseCase: GetConnectionListUseCase
 ) : NavigationNode<Nothing> {
+
     companion object {
-        const val TAG = "GetConnectionsUseCaseDebugScreen"
+        const val TAG = "GetConnectionListUseCaseDebugScreen"
     }
 
     override val thisClass: Class<out NavigationNode<Nothing>>
-        get() = GetConnectionsUseCaseDebugScreen::class.java
+        get() = GetConnectionListUseCaseDebugScreen::class.java
 
     override fun provideMainContent(): @Composable ((Navigator.IncomingResult?) -> Unit) = {
         Column(Modifier
             .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             .fillMaxSize()
         ) {
-            BmwSingleLineHeader("Debug: GetConnectionsUseCase")
+            BmwSingleLineHeader("Debug: $TAG . (Use type inference to see what's up.)")
 
-            val connections = getConnectionsUseCase.getConnections().collectAsState(emptyList())
+            val scope = rememberCoroutineScope()
+            val items = getConnectionListUseCase.getConnectionItems(
+                scope
+            ).collectAsState(emptyList())
 
             SmoothScroll.SmoothScroll(
                 modifier = Modifier,
@@ -67,10 +58,10 @@ class GetConnectionsUseCaseDebugScreen @Inject constructor(
                 logger = logger,
                 prependGoBackEntry = true,
                 navigationNodeTraverser = navigationNodeTraverser,
-                items = connections.value.map { connection ->
+                items = items.value.map { item ->
                     { allocatedIndex, currentIndex ->
                         MenuItem(
-                            label = "Object Path: ${connection.objectPath}",
+                            label = "${item.toString()}",
                             chipOrientation = ItemChipOrientation.W,
                             isSelected = allocatedIndex == currentIndex,
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {

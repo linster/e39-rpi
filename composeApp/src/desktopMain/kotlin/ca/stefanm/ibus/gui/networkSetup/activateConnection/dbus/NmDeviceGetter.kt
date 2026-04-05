@@ -11,14 +11,14 @@ import javax.inject.Inject
 //It looks like NmDevice gets decorated
 //with a connection list. The sort-order is
 //added when
-data class NmtConnectDevice(
-    val name : String,
-    val device : Device,
-
-    val sortOrder : Int,
-
-    //https://networkmanager.dev/docs/libnm/latest/NMClient.html#nm-client-get-connections ??
-    val connections : List<Connection>
-)
-class NmDeviceGetter @Inject constructor() {
-}
+//data class NmtConnectDevice(
+//    val name : String,
+//    val device : Device,
+//
+//    val sortOrder : Int,
+//
+//    //https://networkmanager.dev/docs/libnm/latest/NMClient.html#nm-client-get-connections ??
+//    val connections : List<Connection>
+//)
+//class NmDeviceGetter @Inject constructor() {
+//}

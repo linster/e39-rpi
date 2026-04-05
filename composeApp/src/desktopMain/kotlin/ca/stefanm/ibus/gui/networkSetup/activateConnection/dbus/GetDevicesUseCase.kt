@@ -83,5 +83,9 @@ class GetDevicesUseCase @Inject constructor(
             }
         }
     }
+//
+//    fun getDeviceFromDevicePath(path : DBusPath) : Device {
+//
+//    }
 
 }
