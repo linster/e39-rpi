@@ -29,6 +29,8 @@ public interface AccessPoint extends DBusInterface {
     /* Added by Stefan */
     @DBusBoundProperty
     List<Byte> getSsid();
+    @DBusBoundProperty
+    Byte getStrength();
     /* Added by Stefan */
 
     public static interface PropertySsidType extends TypeRef<List<Byte>> {

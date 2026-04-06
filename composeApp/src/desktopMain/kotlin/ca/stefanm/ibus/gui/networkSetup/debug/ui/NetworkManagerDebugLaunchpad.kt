@@ -11,6 +11,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetCo
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen.Companion.TAG
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionListUseCaseDebugScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionsForApsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetDevicesUseCaseDebugScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -111,6 +112,18 @@ class NetworkManagerDebugLaunchpad @Inject constructor(
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                 navigationNodeTraverser.navigateToNode(
                                     GetConnectionListUseCaseDebugScreen::class.java
+                                )
+                            }
+                        )
+                    },
+                    { allocatedIndex, currentIndex ->
+                        MenuItem(
+                            label = "GetConnectionsForApsUseCase Debug Screen",
+                            chipOrientation = ItemChipOrientation.W,
+                            isSelected = allocatedIndex == currentIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                navigationNodeTraverser.navigateToNode(
+                                    GetConnectionsForApsUseCaseDebugScreen::class.java
                                 )
                             }
                         )

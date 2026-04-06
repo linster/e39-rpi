@@ -8,6 +8,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.Ac
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetDevicesUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionListUseCaseDebugScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionsForApsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.NetworkManagerDebugLaunchpad
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
@@ -157,7 +158,8 @@ class NavigationModule {
         getConnectionsUseCaseDebugScreen: GetConnectionsUseCaseDebugScreen,
         getActiveConnectionsUseCaseDebugScreen: GetActiveConnectionsUseCaseDebugScreen,
         networkManagerDebugLaunchpad: NetworkManagerDebugLaunchpad,
-        getConnectionListUseCaseDebugScreen: GetConnectionListUseCaseDebugScreen
+        getConnectionListUseCaseDebugScreen: GetConnectionListUseCaseDebugScreen,
+        getConnectionsForApsUseCaseDebugScreen: GetConnectionsForApsUseCaseDebugScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -228,7 +230,8 @@ class NavigationModule {
         getConnectionsUseCaseDebugScreen,
         getActiveConnectionsUseCaseDebugScreen,
         networkManagerDebugLaunchpad,
-        getConnectionListUseCaseDebugScreen
+        getConnectionListUseCaseDebugScreen,
+        getConnectionsForApsUseCaseDebugScreen
     )
 }
 

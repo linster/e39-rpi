@@ -12,6 +12,11 @@ class GetConnectionsForDeviceUseCase @Inject constructor(
     private val getConnectionsUseCase: GetConnectionsUseCase
 ) {
 
+    //This thing actually needs to loop over all the devices
+    //and then see which one is compatible for each device.
+    //(except wifi? vpn? virtual?)
+    //nm-device.c:2924 for connection_compatible
+
     fun getConnectionsForDevices(
         devices : List<Device>
     ) : Map<Device, List<Connection>> {

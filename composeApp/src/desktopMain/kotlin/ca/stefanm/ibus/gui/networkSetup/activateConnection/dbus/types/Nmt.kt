@@ -16,6 +16,10 @@ object Nmt {
         val connections : List<NmtConnectConnection>? = null
     )
 
+    // This class needs to hold everything that the
+    // ActivateConnection() call needs.
+    // For wifi connections, one of the parameters is the object
+    // path for the access point.
     data class NmtConnectConnection(
         val name : String? = null,
 
@@ -23,9 +27,11 @@ object Nmt {
 
         val conn : Connection? = null,
 
+        val deviceIsWifi : Boolean? = null,
         //If it's a wifi connection,
         val ssid : String? = null,
         val ap : AccessPoint? = null,
+
         //Active connection
         val active : Active? = null,
     )

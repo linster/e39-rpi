@@ -23,6 +23,9 @@ class GetConnectionsForApsUseCase @Inject constructor(
         val isActive : Boolean
     )
 
+    //TODO figure out how to invalidate this when the
+    //TODO Access point added, accesspoint removed signal is
+    //TODO called for the device.
     fun fillInNmtConnectConnectionForWirelessOnly(
         devices : Map<Device, List<Nmt.NmtConnectConnection>>
     ) : Map<Device, List<Nmt.NmtConnectConnection>> {
@@ -38,6 +41,7 @@ class GetConnectionsForApsUseCase @Inject constructor(
                 Nmt.NmtConnectConnection(
                     ap = it.accessPoint,
                     ssid = it.ssid,
+                    deviceIsWifi = true
                 )
             }
         }
@@ -66,7 +70,7 @@ class GetConnectionsForApsUseCase @Inject constructor(
             AccessPointWithSsid(
                 accessPoint = ap,
                 ssid = String(ap.ssid.toByteArray()),
-                isActive = DBusPath(ap.objectPath) == wireless.activeAccessPoint
+                isActive = DBusPath(ap.objectPath) == wireless.activeAccessPoint,
             )
         }
     }
