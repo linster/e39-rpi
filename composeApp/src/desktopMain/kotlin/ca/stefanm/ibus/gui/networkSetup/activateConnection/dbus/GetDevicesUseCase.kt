@@ -4,8 +4,10 @@ import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import org.freedesktop.NetworkManager
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
@@ -49,6 +51,7 @@ class GetDevicesUseCase @Inject constructor(
                 override fun handle(_signal: Properties.PropertiesChanged?) {
                     val propertiesChanged = _signal?.propertiesChanged
                     if (propertiesChanged != null && propertiesChanged.containsKey("Devices")) {
+                        logger.d(TAG, "Properties Changed Listener")
 //                        trySend(propertiesChanged["Devices"]!!.value as List<DBusPath>)
                         trySend(nmClient.GetDevices())
                     }
@@ -68,8 +71,11 @@ class GetDevicesUseCase @Inject constructor(
                 )
                 connection.close()
             }
-        }.onEach {
-            logger.d(TAG, "Got list of paths: ${it.map { it.path }}")
+        }.onStart {
+            logger.d(TAG, "onStart")
+        }
+            .onEach {
+//            logger.d(TAG, "Got list of paths: ${it.map { it.path }}")
         }.map { pathList ->
             if (!connection.connect()) {
                 logger.w(TAG, "Connection was dropped, reconnected.")
@@ -81,6 +87,8 @@ class GetDevicesUseCase @Inject constructor(
                     Device::class.java
                 )
             }
+        }.distinctUntilChanged().onEach {
+            logger.d(TAG, "Got devices with paths ${it.map { it.objectPath }}")
         }
     }
 //

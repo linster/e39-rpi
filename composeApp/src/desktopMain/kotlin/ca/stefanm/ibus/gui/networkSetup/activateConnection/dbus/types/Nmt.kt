@@ -1,5 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types
 
+import androidx.compose.runtime.Stable
 import org.freedesktop.networkmanager.AccessPoint
 import org.freedesktop.networkmanager.Device
 import org.freedesktop.networkmanager.connection.Active
@@ -20,6 +21,7 @@ object Nmt {
     // ActivateConnection() call needs.
     // For wifi connections, one of the parameters is the object
     // path for the access point.
+    @Stable
     data class NmtConnectConnection(
         val name : String? = null,
 
@@ -31,6 +33,7 @@ object Nmt {
         //If it's a wifi connection,
         val ssid : String? = null,
         val ap : AccessPoint? = null,
+        val apIsactive : Boolean? = null,
 
         //Active connection
         val active : Active? = null,

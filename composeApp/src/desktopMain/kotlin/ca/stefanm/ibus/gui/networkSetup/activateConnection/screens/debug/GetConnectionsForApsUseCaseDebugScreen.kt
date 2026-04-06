@@ -4,12 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionsForApsUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetDevicesUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItems
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
@@ -23,7 +25,10 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import org.freedesktop.networkmanager.Device
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -51,48 +56,30 @@ class GetConnectionsForApsUseCaseDebugScreen @Inject constructor(
             BmwSingleLineHeader("Debug: $TAG.")
 
             val scope = rememberCoroutineScope()
+
+            //No Updates
+//            val items = getDevicesUseCase
+//                .getDevices()
+//                .map {
+//                    getConnectionsForApsUseCase.fillInNmtConnectConnectionForWirelessOnly(
+//                        it.associate { it to emptyList() }
+//                    )
+//                }
+//                .mapToViews()
+//                .collectAsState(emptyList())
+
             val items = getDevicesUseCase
                 .getDevices()
                 .map {
-                    getConnectionsForApsUseCase.fillInNmtConnectConnectionForWirelessOnly(
-                        it.associate { it to emptyList() }
-                    )
-                }
-                .map {
-                    val results = mutableListOf<@Composable KnobObserverBuilderScope.(Int, Int) -> Unit>()
-
-                    it.keys.forEach { device ->
-                        //Put the header
-                        results.add(
-                            { allocatedIndex, currentIndex ->
-                                ConnectionListItems.ConnectionListDivider(
-                                    device.objectPath
-                                )
-                            }
-                        )
-                        it[device]?.forEach { conn ->
-                            results.add(
-                                { allocatedIndex, currentIndex ->
-                                    ConnectionListItems.Connection(
-                                        connectionName = conn.ssid ?: "<unknown>",
-                                        strength = conn.ap?.strength?.toInt() ?: 0,
-                                        modifier = Modifier,
-                                        isConnected = false,
-                                        chipOrientation = ItemChipOrientation.W,
-                                        isSelected = allocatedIndex == currentIndex,
-                                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
-                                        }
-                                    )
-                                }
-                            )
-                        }
-
+                    it.associate {
+                        it to emptyList<Nmt.NmtConnectConnection>()
                     }
-
-                    results
                 }
-                .collectAsState(emptyList())
+                .let {
+                    getConnectionsForApsUseCase.fillInNmtConnectConnectionForWirelessOnly(it)
+                }
+                .collectAsState(emptyMap())
+
 
             SmoothScroll.SmoothScroll(
                 modifier = Modifier,
@@ -101,9 +88,49 @@ class GetConnectionsForApsUseCaseDebugScreen @Inject constructor(
                 logger = logger,
                 prependGoBackEntry = true,
                 navigationNodeTraverser = navigationNodeTraverser,
-                items = items.value
+                items = items.value.mapToViews()
             )
         }
 
     }
+
+    fun Map<Device, List<Nmt.NmtConnectConnection>>.mapToViews() : List<@Composable KnobObserverBuilderScope.(Int, Int) -> Unit> {
+
+            val results = mutableListOf<@Composable KnobObserverBuilderScope.(Int, Int) -> Unit>()
+
+            keys.forEach { device ->
+                //Put the header
+                results.add(
+                    { allocatedIndex, currentIndex ->
+                        ConnectionListItems.ConnectionListDivider(
+                            device.objectPath
+                        )
+                    }
+                )
+                this[device]?.forEach { conn ->
+                    results.add(
+                        { allocatedIndex, currentIndex ->
+
+
+                            ConnectionListItems.Connection(
+                                connectionName = conn.ssid ?: "<unknown>",
+                                strength = conn.ap?.strength?.toInt() ?: 0,
+                                modifier = Modifier,
+                                isConnected = conn.apIsactive == true,
+                                chipOrientation = ItemChipOrientation.W,
+                                isSelected = allocatedIndex == currentIndex,
+                                onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                                }
+                            )
+                        }
+                    )
+                }
+
+            }
+
+        return    results
+
+    }
+
 }
