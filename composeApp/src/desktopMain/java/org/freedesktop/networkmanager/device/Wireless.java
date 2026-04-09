@@ -34,6 +34,9 @@ public interface Wireless extends DBusInterface {
 
     @DBusBoundProperty
     DBusPath getActiveAccessPoint();
+
+    @DBusBoundProperty
+    Long getLastScan();
     /* Added by Stefan */
 
     List<DBusPath> GetAccessPoints();

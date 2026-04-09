@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections
+package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all
 
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.channels.awaitClose
@@ -11,10 +11,8 @@ import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.networkmanager.Settings
-import org.freedesktop.networkmanager.connection.Active
 import org.freedesktop.networkmanager.settings.Connection
 import javax.inject.Inject
-import kotlin.collections.map
 
 class GetConnectionsUseCase @Inject constructor(
     private val logger: Logger

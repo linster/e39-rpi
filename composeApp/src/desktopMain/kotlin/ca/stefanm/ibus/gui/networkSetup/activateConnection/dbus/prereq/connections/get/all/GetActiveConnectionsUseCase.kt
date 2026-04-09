@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections
+package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all
 
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DevicePath
 import ca.stefanm.ibus.lib.logging.Logger
@@ -14,7 +14,6 @@ import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.networkmanager.connection.Active
 import javax.inject.Inject
-import kotlin.collections.map
 
 /** The analog to
  *  acs         = nm_client_get_active_connections(nm_client);
