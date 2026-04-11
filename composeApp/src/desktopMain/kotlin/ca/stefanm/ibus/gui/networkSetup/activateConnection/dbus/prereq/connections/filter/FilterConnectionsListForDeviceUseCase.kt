@@ -1,6 +1,9 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter
 
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType.Companion.toNMDeviceType
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.lib.logging.Logger
 import org.freedesktop.networkmanager.Device
 import org.freedesktop.networkmanager.settings.Connection
@@ -9,85 +12,230 @@ import javax.inject.Inject
 
 class FilterConnectionsListForDeviceUseCase @Inject constructor(
     private val logger: Logger,
-    private val getConnectionTypeFromConnectionUseCase: GetConnectionTypeFromConnectionUseCase
+    private val getConnectionTypeFromConnectionUseCase: GetConnectionTypeFromConnectionUseCase,
+    private val getInterfaceNameFromConnectionUseCase: GetInterfaceNameFromConnectionUseCase,
+    private val notificationHub: NotificationHub
 ) {
 
     fun filter(devices : List<Device>, allConnections : List<Connection>) : Map<Device, List<Connection>> {
-
+        return devices
+            .associateWith { device ->
+                allConnections.filter { connection ->
+                    connectionMatchesDevice(device, connection)
+                }
+            }
     }
 
 
-    fun connectionMatchesDevice(device: Device, connection: Connection) : Boolean {
-        return connectionMatchesDevice(device, getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection))
+    @VisibleForTesting
+    private fun connectionMatchesDevice(device: Device, connection : Connection) : Boolean {
+
+        val connectionType = getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection)
+
+        //Filter out virtual connection types for this use case.
+        if (device.deviceType.toNMDeviceType() in setOf(
+                NMDeviceType.NM_DEVICE_TYPE_VLAN,
+                NMDeviceType.NM_DEVICE_TYPE_VETH,
+                NMDeviceType.NM_DEVICE_TYPE_BOND,
+                NMDeviceType.NM_DEVICE_TYPE_TEAM,
+                NMDeviceType.NM_DEVICE_TYPE_BRIDGE,
+                NMDeviceType.NM_DEVICE_TYPE_IP_TUNNEL,
+                NMDeviceType.NM_DEVICE_TYPE_MACSEC,
+                NMDeviceType.NM_DEVICE_TYPE_WIREGUARD,
+                NMDeviceType.NM_DEVICE_TYPE_TUN,
+
+        )) {
+            return false
+        }
+
+        //Silently reject connections in the editor for these types.
+        if (device.deviceType.toNMDeviceType() in setOf(
+
+                // Related to docker
+                // https://medium.com/@dyavanapellisujal7/docker-macvlan-and-ipvlan-explained-advanced-networking-guide-b3ba20bc22e4
+                NMDeviceType.NM_DEVICE_TYPE_MACVLAN,
+
+
+                NMDeviceType.NM_DEVICE_TYPE_WIFI_P2P,
+
+                )) {
+            return false
+        }
+
+        val wifiCheck = processWifiDevice(device, connection)
+        if (wifiCheck != null) {
+            return wifiCheck
+        }
+
+        val simpleCheck = simpleCheckConnectionMatchesDevices(device, connectionType)
+        if (simpleCheck != null) {
+            return simpleCheck
+        }
+
+        val hasInterfaceCheck = checkInterfaceNameExistsCheckConnectionMatchesDevices(device, connection)
+        if (hasInterfaceCheck != null) {
+            return hasInterfaceCheck
+        }
+
+
+
+        val rejectUnsupportedCheck = rejectNotSupportedNetworks(device, connection)
+        if (rejectUnsupportedCheck != null) {
+            return rejectUnsupportedCheck
+        }
+
+        logger.w(TAG, "Unhandled device of type ${device.deviceType.toNMDeviceType()} fell through")
+        return false
     }
 
     @VisibleForTesting
-    private fun connectionMatchesDevice(device: Device, connectionType : String?) : Boolean {
+    private fun simpleCheckConnectionMatchesDevices(device: Device, connectionType : String?) : Boolean? {
+        //This works for the device types that have no further checks in their connection_compatible
+        //methods.
 
+        val simpleCheckMap = mapOf<NMDeviceType, List<String>>(
+            NMDeviceType.NM_DEVICE_TYPE_UNKNOWN to listOf(),
+            NMDeviceType.NM_DEVICE_TYPE_UNUSED1 to listOf(),
+            NMDeviceType.NM_DEVICE_TYPE_UNUSED2 to listOf(),
+            NMDeviceType.NM_DEVICE_TYPE_ADSL to listOf("adsl"),
+            NMDeviceType.NM_DEVICE_TYPE_WPAN to listOf("wpan"),
+            NMDeviceType.NM_DEVICE_TYPE_OLPC_MESH to listOf("802-11-olpc-mesh"),
+            NMDeviceType.NM_DEVICE_TYPE_TEAM to listOf("team", /* "team-port" */),
+            NMDeviceType.NM_DEVICE_TYPE_BOND to listOf("bond",
+                //"bond-port"
+            ),
+            )
+
+        return simpleCheckMap[device.deviceType.toNMDeviceType()]?.contains(connectionType)
+    }
+
+    @VisibleForTesting
+    private fun checkInterfaceNameExistsCheckConnectionMatchesDevices(device: Device, connection: Connection) : Boolean? {
+        //These types just check that there is an interface name in their connection settings
+
+        //First check the connectionType is ok
+        val typeCheckMap = mapOf<NMDeviceType, List<String>>(
+            NMDeviceType.NM_DEVICE_TYPE_DUMMY to listOf("dummy"),
+            NMDeviceType.NM_DEVICE_TYPE_GENERIC to listOf("generic"),
+            NMDeviceType.NM_DEVICE_TYPE_OVS_INTERFACE to listOf("ovs-interface"),
+            NMDeviceType.NM_DEVICE_TYPE_OVS_PORT to listOf("ovs-port"),
+            NMDeviceType.NM_DEVICE_TYPE_OVS_BRIDGE to listOf("ovs-bridge"),
+            NMDeviceType.NM_DEVICE_TYPE_LOOPBACK to listOf("loopback"),
+            )
+
+        if (device.deviceType.toNMDeviceType() !in typeCheckMap.keys) {
+            return null
+        }
+
+        return if (typeCheckMap[device.deviceType.toNMDeviceType()]?.contains(
+                getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection)
+            ) == true) {
+            //Then check the interface type is ok
+            //These types only check that there is an interface name, they don't actually check that it's matching anything.
+            getInterfaceNameFromConnectionUseCase.getInterfaceNameFromConnection(connection) != null
+        } else {
+            false
+        }
+    }
+
+    private fun rejectNotSupportedNetworks(device: Device, connection: Connection) : Boolean? {
+        //This function explicitly rejects network types I don't want to support.
+        //My BMW, nor my phone will ever have an infiniband network, for example.
+
+        val notSupportedMatchMap = mapOf<NMDeviceType, List<String>>(
+            // In Server racks for SANs
+            NMDeviceType.NM_DEVICE_TYPE_INFINIBAND to listOf("infiniband"),
+
+            // Industrial ethernet
+            // https://en.wikipedia.org/wiki/High-availability_Seamless_Redundancy
+            NMDeviceType.NM_DEVICE_TYPE_HSR to listOf("hsr"),
+
+            NMDeviceType.NM_DEVICE_TYPE_6LOWPAN to listOf("6lowpan"),
+
+            NMDeviceType.NM_DEVICE_TYPE_WIMAX to listOf("wimax"),
+
+            )
+
+        if (device.deviceType.toNMDeviceType() in notSupportedMatchMap.keys) {
+            logger.w(TAG, "Device type ${device.deviceType.toNMDeviceType()} is unsupported.")
+            notificationHub.postNotificationBackground(Notification(
+                Notification.NotificationImage.ALERT_TRIANGLE,
+                topText = "Unsupported Network Device found",
+                contentText = "Cannot setup devices of type ${device.deviceType.toNMDeviceType()}"
+            ))
+            return false
+        }
+        return null
+    }
+
+    private fun processWifiDevice(device: Device, connection: Connection) : Boolean? {
+
+        //First, check that the connection type is wifi
+
+        val typeCheckMap = mapOf<NMDeviceType, List<String>>(
+            NMDeviceType.NM_DEVICE_TYPE_WIFI to listOf("802-11-wireless"),
+        )
+
+        if (device.deviceType.toNMDeviceType() !in typeCheckMap.keys) {
+            return null
+        }
+
+        if (typeCheckMap[device.deviceType.toNMDeviceType()]?.contains(
+                getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection)
+            ) == false) {
+            return false
+        }
+
+        //Now check the MAC address
+
+
+        //Check the MAC address is valid
+        val connectionMac = connection.GetSettings().toMap()?.get("wireless")?.get("mac-address")?.let { it.value as String }
+        if (connectionMac != null) {
+            val deviceMac = device.hwAddress
+            if (connectionMac != deviceMac) {
+                logger.d(TAG, "The MACs of the device and connection didn't match")
+                return false
+            }
+        }
+
+        //Check the device and connection have a matching mac address
+
+        //Check that the security type of the connection matches the security types supported by the device
+
+        //Who cares? The CM5 has a wpa2 capable card and won't have a wep-only device in it.
+        return true
     }
 
     companion object {
+        const val TAG = "FilterConnectionsListForDeviceUseCase"
         val matchMap = mapOf<NMDeviceType, List<String>>(
-            NMDeviceType.NM_DEVICE_TYPE_UNKNOWN to listOf(),
-            NMDeviceType.NM_DEVICE_TYPE_ETHERNET to listOf(),
-            NMDeviceType.NM_DEVICE_TYPE_WIFI to listOf("802-1x"),
-            NMDeviceType.NM_DEVICE_TYPE_UNUSED1 to listOf(),
-            NMDeviceType.NM_DEVICE_TYPE_UNUSED2 to listOf(),
-            NMDeviceType.NM_DEVICE_TYPE_BT to listOf("bluetooth"),
-            NMDeviceType.NM_DEVICE_TYPE_OLPC_MESH to listOf("802-11-olpc-mesh"),
-            NMDeviceType.NM_DEVICE_TYPE_WIMAX to listOf("wimax"),
-            NMDeviceType.NM_DEVICE_TYPE_MODEM to listOf(),
-            NMDeviceType.NM_DEVICE_TYPE_INFINIBAND to listOf("infiniband"),
-            NMDeviceType.NM_DEVICE_TYPE_BOND to listOf("bond", "bond-port"),
-            NMDeviceType.NM_DEVICE_TYPE_VLAN to listOf("vlan"),
-            NMDeviceType.NM_DEVICE_TYPE_ADSL to listOf("adsl"),
-            NMDeviceType.NM_DEVICE_TYPE_BRIDGE to listOf("bridge", "bridge-port"),
-            NMDeviceType.NM_DEVICE_TYPE_GENERIC to listOf("generic"),
-            NMDeviceType.NM_DEVICE_TYPE_TEAM to listOf("team",
-               // "team-port"
-            ),
-            NMDeviceType.NM_DEVICE_TYPE_TUN to listOf("tun"),
-            NMDeviceType.NM_DEVICE_TYPE_IP_TUNNEL to listOf("ip-tunnel"),
-            NMDeviceType.NM_DEVICE_TYPE_MACVLAN to listOf("macvlan"),
-            NMDeviceType.NM_DEVICE_TYPE_VXLAN to listOf("vxlan"),
-            NMDeviceType.NM_DEVICE_TYPE_VETH to listOf("veth"),
-            NMDeviceType.NM_DEVICE_TYPE_MACSEC to listOf("macsec"),
-            NMDeviceType.NM_DEVICE_TYPE_DUMMY to listOf("dummy"),
 
+            //TODO Needs extra processing
+            NMDeviceType.NM_DEVICE_TYPE_ETHERNET to listOf(),
+
+
+            NMDeviceType.NM_DEVICE_TYPE_BT to listOf("bluetooth"),
+
+                //TODO how do the types that don't have connections do stuff?
+                NMDeviceType.NM_DEVICE_TYPE_MODEM to listOf(),
+
+            // TODO ^^^^ actually finish these, they're important.
+
+            //?
+            NMDeviceType.NM_DEVICE_TYPE_VXLAN to listOf("vxlan"),
 
             NMDeviceType.NM_DEVICE_TYPE_PPP to listOf("ppp"),
 
-            //Verified ok
-            NMDeviceType.NM_DEVICE_TYPE_OVS_INTERFACE to listOf("ovs-interface"),
-            //Verified ok
-            NMDeviceType.NM_DEVICE_TYPE_OVS_PORT to listOf("ovs-port"),
-            //Verified ok
-            NMDeviceType.NM_DEVICE_TYPE_OVS_BRIDGE to listOf("ovs-bridge"),
-            //Verified ok.
-            NMDeviceType.NM_DEVICE_TYPE_WPAN to listOf("wpan"),
 
-            //TODO STEFAN not sure yet
-            NMDeviceType.NM_DEVICE_TYPE_6LOWPAN to listOf("6lowpan"),
-
-            //TODO STEFAN not sure yet
-            NMDeviceType.NM_DEVICE_TYPE_WIREGUARD to listOf("wireguard"),
-
-            //TODO STEFAN not sure yet.
-            NMDeviceType.NM_DEVICE_TYPE_WIFI_P2P to listOf("wifi-p2p"),
-
-            //Verified ok.
+            //TODO needs some othe processing
             NMDeviceType.NM_DEVICE_TYPE_VRF to listOf("vrf"),
 
-            //Verified ok.
-            NMDeviceType.NM_DEVICE_TYPE_LOOPBACK to listOf("loopback"),
-
-            //TODO STEFAN Not sure yet.
-            NMDeviceType.NM_DEVICE_TYPE_HSR to listOf("hsr"),
 
             //TODO STEFAN Not sure yet.
             NMDeviceType.NM_DEVICE_TYPE_IPVLAN to listOf("ipvlan"),
 
-            //Verified ok
+            //TODO needs further check.
             NMDeviceType.NM_DEVICE_TYPE_GENEVE to listOf("geneve"),
         )
     }

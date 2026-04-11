@@ -62,6 +62,9 @@ public interface Device extends DBusInterface {
 
     @DBusBoundProperty
     String getInterface();
+
+    @DBusBoundProperty
+    String getHwAddress();
     /* Added by Stefan */
 
     void Reapply(Map<String, Map<String, Variant<?>>> connection, UInt64 versionId, UInt32 flags);

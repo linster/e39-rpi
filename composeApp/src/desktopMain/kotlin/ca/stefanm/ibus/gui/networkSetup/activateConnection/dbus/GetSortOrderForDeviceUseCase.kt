@@ -10,6 +10,9 @@ class GetSortOrderForDeviceUseCase @Inject constructor(
     private val logger: Logger
 ) {
 
+    //TODO STEFAN remove this use-case. Have one that's like SortDevices, and another one that's like SortConnectionsForDevice
+    //TODO STEFAN then have a usecase that depends on those that sorts connection list.
+
     //ONLY DO the devices, not the virtual devices.
     //
     fun getSortOrderForDevice(device: Device) : Int { return 0

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
+package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.get.all
 
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.channels.awaitClose
@@ -9,14 +9,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import org.freedesktop.NetworkManager
-import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.interfaces.Properties
-import org.freedesktop.dbus.matchrules.DBusMatchRuleBuilder
-import org.freedesktop.dbus.messages.constants.MessageTypes
 import org.freedesktop.networkmanager.Device
-import org.freedesktop.networkmanager.Settings
 import javax.inject.Inject
 
 // Get the devices from the network manager and subscribe to the singals
