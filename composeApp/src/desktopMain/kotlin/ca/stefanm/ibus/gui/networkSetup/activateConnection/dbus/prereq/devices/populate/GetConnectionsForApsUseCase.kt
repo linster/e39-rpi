@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
+package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate
 
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType.Companion.toNMDeviceType
@@ -9,21 +9,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
-import org.freedesktop.NetworkManager
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.networkmanager.AccessPoint
 import org.freedesktop.networkmanager.Device
 import org.freedesktop.networkmanager.device.Wireless
-import org.freedesktop.networkmanager.settings.Connection
 import org.jetbrains.annotations.VisibleForTesting
 import javax.inject.Inject
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlin.time.TimeSource
 
 class GetConnectionsForApsUseCase @Inject constructor(
     private val logger: Logger

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
+package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate
 
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.FilterConnectionsListForDeviceUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.GetConnectionIdFromConnectionUseCase
@@ -7,7 +7,6 @@ import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.freedesktop.networkmanager.Device
-import org.freedesktop.networkmanager.settings.Connection
 import javax.inject.Inject
 
 // After getting a device, we need to populate it

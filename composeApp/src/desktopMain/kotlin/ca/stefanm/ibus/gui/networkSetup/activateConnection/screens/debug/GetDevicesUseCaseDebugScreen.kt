@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.get.all.GetDevicesUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetDisambiguatedDeviceNameUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItems
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetDisambiguatedDeviceNameUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItemViews
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
@@ -73,7 +73,7 @@ class GetDevicesUseCaseDebugScreen @Inject constructor(
                 navigationNodeTraverser = navigationNodeTraverser,
                 items = devices.value.map { deviceInfo ->
                     { _, _ ->
-                        ConnectionListItems.ConnectionListDivider(
+                        ConnectionListItemViews.ConnectionListDivider(
                             dividerHeader = deviceInfo.toString() ?: "null device name",
                             modifier = Modifier,
                         )

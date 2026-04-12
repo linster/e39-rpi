@@ -3,32 +3,25 @@ package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.d
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItems
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 @ScreenDoc(
     screenName = "GetConnectionsUseCaseDebugScreen",

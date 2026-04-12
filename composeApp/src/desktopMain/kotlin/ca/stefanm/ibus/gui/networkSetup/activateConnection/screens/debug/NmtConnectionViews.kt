@@ -3,7 +3,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.d
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItems
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItemViews
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import org.freedesktop.networkmanager.Device
@@ -17,7 +17,7 @@ fun Map<Device, List<Nmt.NmtConnectConnection>>.mapToViews() : List<@Composable 
         //Put the header
         results.add(
             { allocatedIndex, currentIndex ->
-                ConnectionListItems.ConnectionListDivider(
+                ConnectionListItemViews.ConnectionListDivider(
                     device.objectPath
                 )
             }
@@ -27,7 +27,7 @@ fun Map<Device, List<Nmt.NmtConnectConnection>>.mapToViews() : List<@Composable 
                 { allocatedIndex, currentIndex ->
 
 
-                    ConnectionListItems.Connection(
+                    ConnectionListItemViews.Connection(
                         connectionName = conn.ssid ?: "<unknown>",
                         strength = conn.ap?.strength?.toInt() ?: 0,
                         modifier = Modifier,

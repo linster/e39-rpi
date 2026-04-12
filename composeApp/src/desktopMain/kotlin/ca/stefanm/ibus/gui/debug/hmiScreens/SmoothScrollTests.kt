@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItems
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItemViews
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -57,13 +57,13 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { _, _ ->
-                        ConnectionListItems.ConnectionListDivider(
+                        ConnectionListItemViews.ConnectionListDivider(
                             dividerHeader = "Wired",
                             modifier = Modifier,
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "Wired Connection 1",
                             modifier = Modifier,
                             chipOrientation = ItemChipOrientation.W,
@@ -74,7 +74,7 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "Wired Connection 2",
                             modifier = Modifier,
                             chipOrientation = ItemChipOrientation.W,
@@ -85,13 +85,13 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { _, _ ->
-                        ConnectionListItems.ConnectionListDivider(
+                        ConnectionListItemViews.ConnectionListDivider(
                             dividerHeader = "Wi-Fi",
                             modifier = Modifier,
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "Smartynk-5G",
                             isConnected = true,
                             strength = 100,
@@ -104,7 +104,7 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "RogersIgnite404",
                             strength = 75,
                             modifier = Modifier,
@@ -116,7 +116,7 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "Kathy Network",
                             strength = 60,
                             modifier = Modifier,
@@ -128,7 +128,7 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "grantnett5g",
                             strength = 6,
                             modifier = Modifier,
@@ -140,13 +140,13 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { _, _ ->
-                        ConnectionListItems.ConnectionListDivider(
+                        ConnectionListItemViews.ConnectionListDivider(
                             dividerHeader = "Bridge (docker0)",
                             modifier = Modifier,
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "docker0",
                             isConnected = true,
                             modifier = Modifier,
@@ -158,13 +158,13 @@ class SmoothScrollTest @Inject constructor(
                         )
                     },
                     { _, _ ->
-                        ConnectionListItems.ConnectionListDivider(
+                        ConnectionListItemViews.ConnectionListDivider(
                             dividerHeader = "Bluetooth",
                             modifier = Modifier,
                         )
                     },
                     { allocatedIndex, currentIndex ->
-                        ConnectionListItems.Connection(
+                        ConnectionListItemViews.Connection(
                             connectionName = "Stefan iPhone Network",
                             modifier = Modifier,
                             chipOrientation = ItemChipOrientation.W,

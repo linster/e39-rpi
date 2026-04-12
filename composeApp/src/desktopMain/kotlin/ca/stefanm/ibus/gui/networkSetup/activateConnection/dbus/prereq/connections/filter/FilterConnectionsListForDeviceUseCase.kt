@@ -90,7 +90,7 @@ class FilterConnectionsListForDeviceUseCase @Inject constructor(
             return hasInterfaceCheck
         }
 
-        
+
         val rejectUnsupportedCheck = rejectNotSupportedNetworks(device, connection)
         if (rejectUnsupportedCheck != null) {
             return rejectUnsupportedCheck
