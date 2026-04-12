@@ -269,18 +269,27 @@ class FilterConnectionsListForDeviceUseCase @Inject constructor(
         // Now check the connection bdaddr matches the device mac
         val deviceMac = device.hwAddress
 
+        val deviceMacRaw = deviceMac
+            .split(':')
+            .map { it.toUInt(16) }
+            .map { it.toUByte() }
+
         val connectionMacRaw = connection.GetSettings().toMap()["bluetooth"]?.get("bdaddr")?.value as? List<Int>?
 
+        if (connectionMacRaw == null) {
+            logger.w(TAG, "bdAddr on connection $connection was null")
+            return false
+        }
         //Convert the bdaddr to a mac string so it can be compared
-        val connectionMac = connectionMacRaw
-            ?.fold("") { acc: String, i: Int -> acc + i.toString(16) }
-            ?.windowed(2, 2, true) { "$it:" }
-            ?.fold("") { acc: String, s: String -> acc + s }
-            ?.removeSuffix(":")
-            ?: "None"
+        val connectionMac = connectionMacRaw.map { it.toUByte() }
 
-        if (deviceMac != connectionMac) {
-            logger.d(TAG, "Rejecting bt connection where connectioMac is ${connectionMac} and device mac is ${deviceMac}")
+        logger.d(TAG, "DeviceMac: ${deviceMac}")
+        logger.d(TAG, "DeviceMacRaw: ${deviceMacRaw}")
+        logger.d(TAG, "ConnectionMac : $connectionMac}")
+        logger.d(TAG, "ConnectionMacRaw : $connectionMacRaw}")
+        logger.d(TAG, "ConnectionMacRaw Unsigned : ${connectionMacRaw?.map { it.toUByte() }}}")
+        if (deviceMacRaw != connectionMac) {
+            logger.d(TAG, "Rejecting bt connection where connectionMac is ${connectionMac} and device mac is ${deviceMacRaw}")
             return false
         }
 

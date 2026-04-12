@@ -1,8 +1,10 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.onClick
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -94,7 +96,9 @@ class ActivateConnectionScreen @Inject constructor(
                     views.add { allocatedIndex, currentIndex ->
                         ConnectionListItemViews.ConnectionListDivider(
                             dividerHeader = item.name,
-                            modifier = Modifier
+                            onClicked =  {
+                                desktopClickOnDevice(item.nmtConnectDevice)
+                            }
                         )
                     }
                 }
@@ -144,11 +148,14 @@ class ActivateConnectionScreen @Inject constructor(
                     InfoLabel("SSID: ${conn.ssid}")
                     InfoLabel("Strength: \t (${conn.strength}) ${ConnectionListItemViews.toStrengthBars(conn.strength)}")
 
-                    InfoLabel("${conn.nmtConnectConnection.ap}")
 
-                    InfoLabel("Object Path (Access Point): ${conn.nmtConnectConnection.ap?.objectPath}")
-                    InfoLabel("Object Path (Connection): ${conn.nmtConnectConnection.conn?.objectPath}")
-                    InfoLabel("Object Path (Active): ${conn.nmtConnectConnection.active?.objectPath}")
+                    InfoLabel("Object Path (Access Point): ${
+                        conn.nmtConnectConnection.ap
+                            ?.objectPath
+                            ?.let { path -> path.split('/').takeLast(2).fold("", { acc, seg -> "$acc/$seg" })}
+                    }")
+
+
 
                 },
                 listOf(
@@ -184,6 +191,18 @@ class ActivateConnectionScreen @Inject constructor(
                 )
             )
         }
+    }
+
+    private fun desktopClickOnDevice(device : Nmt.NmtConnectDevice) {
+        //Just for desktop debugging, not actually selectable with a scroll wheel.
+        logger.d(TAG, "desktopClickOnDevice($device)")
+        modalMenuService.showModalWaitDialog(
+            image = Notification.NotificationImage.NONE,
+            throbber = false,
+            headerText = device.device.objectPath?.split('/')?.takeLast(2).toString(),
+            bodyText = device.toString(),
+            autoCloseTimeout = 5.seconds
+        )
     }
 
     private fun connect(connectDevice: Nmt.NmtConnectConnection) {

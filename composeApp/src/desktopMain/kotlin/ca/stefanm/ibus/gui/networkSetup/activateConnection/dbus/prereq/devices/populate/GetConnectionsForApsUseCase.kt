@@ -146,6 +146,11 @@ class GetConnectionsForApsUseCase @Inject constructor(
         wireless: Wireless
     ) : List<AccessPointWithSsid> {
         val accessPoints = wireless.GetAccessPoints().toList().map { getAccessPointFromPath(it) }
+        //TODO STEFAN
+        //TODO STEFAN this is where hash_ap is used in nmtui to prevent duplicates from being added
+        //TODO STEFAN to the list.
+        //TODO STEFAN before using hash collisions to prune out duplicates, the connections are sorted by strength,
+        //TODO STEFAN which means only the strongest access point for the network will survive.
         return accessPoints.map { ap ->
             AccessPointWithSsid(
                 accessPoint = ap,

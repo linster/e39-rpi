@@ -82,6 +82,7 @@ object ConnectionListItemViews {
     fun ConnectionListDivider(
         dividerHeader : String,
         modifier: Modifier = Modifier,
+        onClicked: () -> Unit = {}
     ) {
         MenuItem(
             boxModifier = modifier,
@@ -89,7 +90,7 @@ object ConnectionListItemViews {
             labelColor = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             chipOrientation = ItemChipOrientation.NONE,
             isSelected = false,
-            onClicked = { }
+            onClicked = { onClicked() }
         )
     }
 

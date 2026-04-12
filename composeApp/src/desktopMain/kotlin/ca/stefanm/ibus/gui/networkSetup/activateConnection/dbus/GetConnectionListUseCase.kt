@@ -5,6 +5,7 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetActiveConnectionsUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.SortDevicesUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.get.all.GetDevicesUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetConnectionsForApsUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetConnectionsForDeviceUseCase
@@ -29,6 +30,7 @@ class GetConnectionListUseCase @Inject constructor(
     private val getDevicesUseCase: GetDevicesUseCase,
     private val getDisambiguatedDeviceNameUseCase: GetDisambiguatedDeviceNameUseCase,
 
+    private val sortDevicesUseCase: SortDevicesUseCase,
 
 
     private val getConnectionsForApsUseCase: GetConnectionsForApsUseCase,
@@ -94,9 +96,10 @@ class GetConnectionListUseCase @Inject constructor(
             }
             .map {
                 //Sort the devices
-                it
+                sortDevicesUseCase.sortDevices(it)
             }.map {
                 //Sort the connections within each device
+                //TODO this is where the multiple access points are merged together, I think?
                 it
             }.map {
                 // Set the isConnected flag on each connection by checking with the active connection use-case
