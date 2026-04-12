@@ -24,6 +24,7 @@ class GetConnectionsForDeviceUseCase @Inject constructor(
     ) : Flow<Map<Device, List<Nmt.NmtConnectConnection>>> {
 
         return devices.combine(getConnectionsUseCase.getConnections()) { devices, connections ->
+            //TODO also do the virtual devices from this usecase too. Use the FilterConnectionListForVirtualDevicesUseCase
             filterConnectionsListForDeviceUseCase.filter(devices, connections).mapValues {
                 it.value.map { conn ->
                     Nmt.NmtConnectConnection(

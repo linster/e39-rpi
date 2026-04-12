@@ -31,6 +31,21 @@ public interface AccessPoint extends DBusInterface {
     List<Byte> getSsid();
     @DBusBoundProperty
     Byte getStrength();
+
+    @DBusBoundProperty
+    UInt32 getWpaFlags();
+
+    @DBusBoundProperty
+    UInt32 getRsnFlags();
+
+    @DBusBoundProperty
+    UInt32 getMaxBitrate();
+
+    @DBusBoundProperty
+    Integer getLastSeen();
+
+    @DBusBoundProperty
+    UInt32 getFrequency();
     /* Added by Stefan */
 
     public static interface PropertySsidType extends TypeRef<List<Byte>> {

@@ -16,7 +16,7 @@ class FilterConnectionsListForDeviceUseCase @Inject constructor(
     private val logger: Logger,
     private val getConnectionTypeFromConnectionUseCase: GetConnectionTypeFromConnectionUseCase,
     private val getInterfaceNameFromConnectionUseCase: GetInterfaceNameFromConnectionUseCase,
-    private val convertDeviceToBluetoothUseCase: ConvertDeviceToBluetoothUseCase
+    private val convertDeviceToBluetoothUseCase: ConvertDeviceToBluetoothUseCase,
     private val notificationHub: NotificationHub
 ) {
 

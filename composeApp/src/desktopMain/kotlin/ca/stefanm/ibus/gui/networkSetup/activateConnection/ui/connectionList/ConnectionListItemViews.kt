@@ -95,9 +95,9 @@ object ConnectionListItemViews {
 
 
 
-    private fun toStrengthBars(
+    fun toStrengthBars(
         strength : Int /* 0..100 */
-    ) : String{
+    ) : String {
         //Wifi Strength Bars
         //https://github.com/NetworkManager/NetworkManager/blob/fb1104d27889dec326ef0863bf894f6de9e88991/src/libnmc-base/nm-client-utils.c#L655
         return if (strength > 80)

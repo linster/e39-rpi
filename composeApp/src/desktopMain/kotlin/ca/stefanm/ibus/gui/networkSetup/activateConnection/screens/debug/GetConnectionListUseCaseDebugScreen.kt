@@ -47,9 +47,7 @@ class GetConnectionListUseCaseDebugScreen @Inject constructor(
             BmwSingleLineHeader("Debug: $TAG . (Use type inference to see what's up.)")
 
             val scope = rememberCoroutineScope()
-            val items = getConnectionListUseCase.getConnectionItems(
-                scope
-            ).collectAsState(emptyList())
+            val items = getConnectionListUseCase.getConnectionItems().collectAsState(emptyList())
 
             SmoothScroll.SmoothScroll(
                 modifier = Modifier,

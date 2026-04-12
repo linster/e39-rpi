@@ -6,13 +6,17 @@ import app.cash.molecule.launchMolecule
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetActiveConnectionsUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.get.all.GetDevicesUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetConnectionsForApsUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetConnectionsForDeviceUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetDisambiguatedDeviceNameUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
 import ca.stefanm.ibus.lib.logging.Logger
+import io.ktor.network.sockets.Connection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.freedesktop.dbus.DBusPath
@@ -25,7 +29,10 @@ class GetConnectionListUseCase @Inject constructor(
     private val getDevicesUseCase: GetDevicesUseCase,
     private val getDisambiguatedDeviceNameUseCase: GetDisambiguatedDeviceNameUseCase,
 
-    private val getConnectionsUseCase: GetConnectionsUseCase,
+
+
+    private val getConnectionsForApsUseCase: GetConnectionsForApsUseCase,
+
     private val getActiveConnectionsUseCase: GetActiveConnectionsUseCase,
 
     private val getConnectionsForDeviceUseCase: GetConnectionsForDeviceUseCase,
@@ -36,7 +43,8 @@ class GetConnectionListUseCase @Inject constructor(
     sealed interface ConnectionListItem {
         data class DeviceHeader(
             val name : String,
-            val device: Device
+            val device: Device,
+            val nmtConnectDevice: Nmt.NmtConnectDevice
         ) : ConnectionListItem
 
         sealed interface ConnectionListConnection : ConnectionListItem {
@@ -57,21 +65,81 @@ class GetConnectionListUseCase @Inject constructor(
 
 
 
-    fun getConnectionItems(
-        scope : CoroutineScope
-    ) : Flow<List<Device?>> {
-        val devicesFlow = getDevicesUseCase.getDevices().distinctUntilChanged()
-        return scope.launchMolecule(
-            mode = RecompositionMode.Immediate
-        ) {
-//            combobulateItems()
-//            combobulate2(devices = devicesFlow)
+    fun getConnectionItems() : Flow<List<ConnectionListItem>> {
 
-            devicesFlow.collectAsState(null).value?.firstOrNull()
+        val foo = getDevicesUseCase.getDevices()
+            .let { upstream ->
+                getConnectionsForDeviceUseCase.getConnectionsForDevices(upstream)
+            }
+            .let { upstream ->
+                getConnectionsForApsUseCase.fillInNmtConnectConnectionForWirelessOnly(upstream)
+            }
+            .map {
+                val allNames = it.keys
+                val disambiguatedNames = getDisambiguatedDeviceNameUseCase.getDisambiguatedNames(allNames.toList())
+                it.mapKeys { entry ->
+                    Nmt.NmtConnectDevice(
+                        device = entry.key,
+                        name = disambiguatedNames[entry.key] ?: entry.key.objectPath
+                    )
+                }
+            }
+            .map {
+                it.mapKeys {
+                    it.key.copy(
+                        connections = it.value
+                    )
+                }.keys
+                //By now we should have a populated NmtConnectDevice
+            }
+            .map {
+                //Sort the devices
+                it
+            }.map {
+                //Sort the connections within each device
+                it
+            }.map {
+                // Set the isConnected flag on each connection by checking with the active connection use-case
+                // This should also fill-in the Active? connection for the NmtConnectConnection
+                it
+            }.map {
+                val result = mutableListOf<ConnectionListItem>()
+                it.forEach { device ->
+                    result.add(
+                        ConnectionListItem.DeviceHeader(
+                            name = device.name,
+                            device = device.device,
+                            nmtConnectDevice = device
+                        )
+                    )
+                    device.connections?.forEach { connection ->
+                        if (connection.deviceIsWifi == true) {
+                            result.add(
+                                ConnectionListItem.ConnectionListConnection.WifiAccessPoint(
+                                    ssid = connection?.ssid ?: "<unknown ssid>",
+                                    isConnected = connection?.apIsactive == true,
+                                    strength = connection.ap?.strength?.toInt() ?: 0,
+                                    nmtConnectConnection = connection
+                                )
+                            )
+                        } else {
+                            result.add(
+                                ConnectionListItem.ConnectionListConnection.OtherConnection(
+                                    name = connection.name ?: "<unknown connection>",
+                                    isConnected = connection?.active != null,
+                                    nmtConnectConnection = connection
+                                )
+                            )
+                        }
+                    }
+                }
+                result
+            }
 
 
-        }.onEach { logger.d("WAT", "EMITTING") }
-            .map { listOf(it) }
+
+
+        return foo
     }
 
 }

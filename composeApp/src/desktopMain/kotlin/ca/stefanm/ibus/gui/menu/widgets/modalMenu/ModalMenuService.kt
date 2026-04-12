@@ -619,7 +619,8 @@ class ModalMenuService @Inject constructor(
         titleText : String? = null,
         autoCloseTimeout : Duration?,
         isCancellable : Boolean = false,
-        onCancel : () -> Unit = {}
+        onCancel : () -> Unit = {},
+        onTimeout : () -> Unit = {}
     ) {
         _modalMenuOverlay.value = @Composable {
             val isPixelDoubled = ThemeWrapper.ThemeHandle.current.isPixelDoubled
@@ -640,6 +641,7 @@ class ModalMenuService @Inject constructor(
                 scope.launch {
                     delay(autoCloseTimeout)
                     closeModalMenu()
+                    onTimeout()
                 }
             }
             Box(Modifier
