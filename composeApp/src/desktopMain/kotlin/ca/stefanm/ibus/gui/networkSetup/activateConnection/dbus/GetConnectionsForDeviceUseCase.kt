@@ -1,6 +1,11 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.FilterConnectionsListForDeviceUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.GetConnectionIdFromConnectionUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import org.freedesktop.networkmanager.Device
 import org.freedesktop.networkmanager.settings.Connection
 import javax.inject.Inject
@@ -9,8 +14,29 @@ import javax.inject.Inject
 // into a fatter device by adding the connections for the device
 
 class GetConnectionsForDeviceUseCase @Inject constructor(
-    private val getConnectionsUseCase: GetConnectionsUseCase
+    private val getConnectionsUseCase: GetConnectionsUseCase,
+    private val filterConnectionsListForDeviceUseCase: FilterConnectionsListForDeviceUseCase,
+    private val getConnectionIdFromConnectionUseCase: GetConnectionIdFromConnectionUseCase
 ) {
+
+
+    fun getConnectionsForDevices(
+        devices : Flow<List<Device>>
+    ) : Flow<Map<Device, List<Nmt.NmtConnectConnection>>> {
+
+        return devices.combine(getConnectionsUseCase.getConnections()) { devices, connections ->
+            filterConnectionsListForDeviceUseCase.filter(devices, connections).mapValues {
+                it.value.map { conn ->
+                    Nmt.NmtConnectConnection(
+                        name = getConnectionIdFromConnectionUseCase.getConnectionIdFromConnection(conn),
+                        device = it.key,
+                        conn = conn,
+
+                    )
+                }
+            }
+        }
+    }
 
     //This thing actually needs to loop over all the devices
     //and then see which one is compatible for each device.
@@ -48,20 +74,5 @@ class GetConnectionsForDeviceUseCase @Inject constructor(
     //TODO does that come from each device's availableConnections?
     //TODO nope, it's nmSettings.getConnections() (getConnections() on NetworkManagerSettings object).
 
-    fun getConnectionsForDevices(
-        devices : List<Device>
-    ) : Map<Device, List<Connection>> {
-        return devices.map { device ->
-            device to getConnectionsForDevice(device)
-        }.associate { (device, connections) ->
-            device to connections
-        }
-    }
 
-    fun getConnectionsForDevice(
-        device: Device
-    ) : List<Connection> {
-//        getConnectionsUseCase.
-        return emptyList()
-    }
 }

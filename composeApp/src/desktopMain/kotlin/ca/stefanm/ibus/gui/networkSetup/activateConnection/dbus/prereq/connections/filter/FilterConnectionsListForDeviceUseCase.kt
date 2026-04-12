@@ -1,10 +1,12 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter
 
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert.ConvertDeviceToBluetoothUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType.Companion.toNMDeviceType
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.lib.logging.Logger
+import org.freedesktop.dbus.types.UInt32
 import org.freedesktop.networkmanager.Device
 import org.freedesktop.networkmanager.settings.Connection
 import org.jetbrains.annotations.VisibleForTesting
@@ -14,6 +16,7 @@ class FilterConnectionsListForDeviceUseCase @Inject constructor(
     private val logger: Logger,
     private val getConnectionTypeFromConnectionUseCase: GetConnectionTypeFromConnectionUseCase,
     private val getInterfaceNameFromConnectionUseCase: GetInterfaceNameFromConnectionUseCase,
+    private val convertDeviceToBluetoothUseCase: ConvertDeviceToBluetoothUseCase
     private val notificationHub: NotificationHub
 ) {
 
@@ -67,6 +70,16 @@ class FilterConnectionsListForDeviceUseCase @Inject constructor(
             return wifiCheck
         }
 
+        val btCheck = processBtDevice(device, connection)
+        if (btCheck != null) {
+            return btCheck
+        }
+
+        val ethCheck = processEthernetDevice(device, connection)
+        if (ethCheck != null) {
+            return ethCheck
+        }
+
         val simpleCheck = simpleCheckConnectionMatchesDevices(device, connectionType)
         if (simpleCheck != null) {
             return simpleCheck
@@ -77,8 +90,7 @@ class FilterConnectionsListForDeviceUseCase @Inject constructor(
             return hasInterfaceCheck
         }
 
-
-
+        
         val rejectUnsupportedCheck = rejectNotSupportedNetworks(device, connection)
         if (rejectUnsupportedCheck != null) {
             return rejectUnsupportedCheck
@@ -198,24 +210,145 @@ class FilterConnectionsListForDeviceUseCase @Inject constructor(
                 return false
             }
         }
-
         //Check the device and connection have a matching mac address
-
         //Check that the security type of the connection matches the security types supported by the device
-
-        //Who cares? The CM5 has a wpa2 capable card and won't have a wep-only device in it.
+        //TODO STEFAN Who cares? The CM5 has a wpa2 capable card and won't have a wep-only device in it.
         return true
+    }
+
+    private fun processEthernetDevice(device: Device, connection: Connection) : Boolean? {
+        val typeCheckMap = mapOf<NMDeviceType, List<String>>(
+            NMDeviceType.NM_DEVICE_TYPE_ETHERNET to listOf(
+                "pppoe",
+                "802-3-ethernet",
+                "veth"
+            ),
+        )
+
+        if (device.deviceType.toNMDeviceType() !in typeCheckMap.keys) {
+            return null
+        }
+
+        if (typeCheckMap[device.deviceType.toNMDeviceType()]?.contains(
+                getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection)
+            ) == false) {
+            return false
+        }
+
+        //There's a bunch of checks here for PPoE, s390 subchannels that I skipped.
+
+        return true
+    }
+
+    private fun processBtDevice(device: Device, connection: Connection) : Boolean? {
+        val typeCheckMap = mapOf<NMDeviceType, List<String>>(
+            NMDeviceType.NM_DEVICE_TYPE_BT to listOf(
+                "bluetooth"
+            ),
+        )
+
+        if (device.deviceType.toNMDeviceType() !in typeCheckMap.keys) {
+            return null
+        }
+
+        if (typeCheckMap[device.deviceType.toNMDeviceType()]?.contains(
+                getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection)
+            ) == false) {
+            return false
+        }
+
+        //Now we have to check that the connection isn't a BT NAP
+
+        if (getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection) == "nap") {
+            return false
+        }
+
+        // Now check that the bt address is valid
+        // TODO STEFAN just assume it's fine.
+
+        // Now check the connection bdaddr matches the device mac
+        val deviceMac = device.hwAddress
+
+        val connectionMacRaw = connection.GetSettings().toMap()["bluetooth"]?.get("bdaddr")?.value as? List<Int>?
+
+        //Convert the bdaddr to a mac string so it can be compared
+        val connectionMac = connectionMacRaw
+            ?.fold("") { acc: String, i: Int -> acc + i.toString(16) }
+            ?.windowed(2, 2, true) { "$it:" }
+            ?.fold("") { acc: String, s: String -> acc + s }
+            ?.removeSuffix(":")
+            ?: "None"
+
+        if (deviceMac != connectionMac) {
+            logger.d(TAG, "Rejecting bt connection where connectioMac is ${connectionMac} and device mac is ${deviceMac}")
+            return false
+        }
+
+
+        val bluetooth = convertDeviceToBluetoothUseCase.deviceToBluetooth(device)
+
+        // Check device capabilities
+//
+//        /**
+//         * NMBluetoothCapabilities:
+//         * @NM_BT_CAPABILITY_NONE: device has no usable capabilities
+//         * @NM_BT_CAPABILITY_DUN: device provides Dial-Up Networking capability
+//         * @NM_BT_CAPABILITY_NAP: device provides Network Access Point capability
+//         *
+//         * #NMBluetoothCapabilities values indicate the usable capabilities of a
+//         * Bluetooth device.
+//         **/
+//        typedef enum /*< flags >*/ {
+//            NM_BT_CAPABILITY_NONE = 0x00000000,
+//            NM_BT_CAPABILITY_DUN  = 0x00000001,
+//            NM_BT_CAPABILITY_NAP  = 0x00000002,
+//        } NMBluetoothCapabilities;
+
+        //Will return a UInt32
+        val deviceCapabilities = bluetooth.btCapabilities
+        // Check conn capabilities
+        // Will return a string like "panu"
+        val connectionCapabilites = connection.GetSettings()
+            .toMap()
+            .get("bluetooth")
+            ?.get("type")
+            ?.value
+            ?.let { it as? String }
+            ?.let {
+                when (it) {
+                    "panu" -> {
+                        // Personal Area Networking connections can connect to devices that
+                        // support the Network Access (NAP) profile
+                        UInt32(2L)
+                    }
+                    "nap" -> {
+                        //Already filtered out above
+                        //I think this is for making new bt hotspots that share some other connection over bt
+                        // like how my iPhone shares it's gsm via bt
+                        // We can't connect to our own Network Access Point (self-referential)
+                        // so return 0L here so that there's no overlap
+                        UInt32(0L)
+                    }
+                    "dun-gsm" -> {
+                        UInt32(1L)
+                    }
+                    "dun-cdma" -> {
+                        UInt32(1L)
+                    }
+                    else -> UInt32(0L)
+                }
+            }
+            ?: UInt32(0L)
+
+        // Bit-wise AND them and make sure the result isn't falsey
+        return deviceCapabilities.toInt().and(connectionCapabilites.toInt()) != 0
+
     }
 
     companion object {
         const val TAG = "FilterConnectionsListForDeviceUseCase"
         val matchMap = mapOf<NMDeviceType, List<String>>(
 
-            //TODO Needs extra processing
-            NMDeviceType.NM_DEVICE_TYPE_ETHERNET to listOf(),
-
-
-            NMDeviceType.NM_DEVICE_TYPE_BT to listOf("bluetooth"),
 
                 //TODO how do the types that don't have connections do stuff?
                 NMDeviceType.NM_DEVICE_TYPE_MODEM to listOf(),

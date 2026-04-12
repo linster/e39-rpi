@@ -1,6 +1,7 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter
 
-import io.ktor.util.logging.Logger
+
+import ca.stefanm.ibus.lib.logging.Logger
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.networkmanager.settings.Connection

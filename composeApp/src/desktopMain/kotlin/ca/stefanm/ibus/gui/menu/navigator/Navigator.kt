@@ -5,6 +5,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScre
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.FilterConnectionsListForDevicesUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetDevicesUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionListUseCaseDebugScreen
@@ -159,7 +160,8 @@ class NavigationModule {
         getActiveConnectionsUseCaseDebugScreen: GetActiveConnectionsUseCaseDebugScreen,
         networkManagerDebugLaunchpad: NetworkManagerDebugLaunchpad,
         getConnectionListUseCaseDebugScreen: GetConnectionListUseCaseDebugScreen,
-        getConnectionsForApsUseCaseDebugScreen: GetConnectionsForApsUseCaseDebugScreen
+        getConnectionsForApsUseCaseDebugScreen: GetConnectionsForApsUseCaseDebugScreen,
+        filterConnectionsListForDevicesUseCaseDebugScreen: FilterConnectionsListForDevicesUseCaseDebugScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -231,7 +233,8 @@ class NavigationModule {
         getActiveConnectionsUseCaseDebugScreen,
         networkManagerDebugLaunchpad,
         getConnectionListUseCaseDebugScreen,
-        getConnectionsForApsUseCaseDebugScreen
+        getConnectionsForApsUseCaseDebugScreen,
+        filterConnectionsListForDevicesUseCaseDebugScreen
     )
 }
 

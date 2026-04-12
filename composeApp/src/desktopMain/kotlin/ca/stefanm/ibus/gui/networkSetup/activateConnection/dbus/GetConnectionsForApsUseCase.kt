@@ -38,10 +38,6 @@ class GetConnectionsForApsUseCase @Inject constructor(
         val isActive : Boolean
     )
 
-    //TODO figure out how to invalidate this when the
-    //TODO Access point added, accesspoint removed signal is
-    //TODO called for the device.
-
     //Invalidate whatever is returned and recompute when there's more wifi
     //devices that come in...
     fun fillInNmtConnectConnectionForWirelessOnly(

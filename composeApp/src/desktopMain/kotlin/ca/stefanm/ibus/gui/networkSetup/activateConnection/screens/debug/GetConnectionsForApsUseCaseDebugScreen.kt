@@ -94,43 +94,5 @@ class GetConnectionsForApsUseCaseDebugScreen @Inject constructor(
 
     }
 
-    fun Map<Device, List<Nmt.NmtConnectConnection>>.mapToViews() : List<@Composable KnobObserverBuilderScope.(Int, Int) -> Unit> {
-
-            val results = mutableListOf<@Composable KnobObserverBuilderScope.(Int, Int) -> Unit>()
-
-            keys.forEach { device ->
-                //Put the header
-                results.add(
-                    { allocatedIndex, currentIndex ->
-                        ConnectionListItems.ConnectionListDivider(
-                            device.objectPath
-                        )
-                    }
-                )
-                this[device]?.forEach { conn ->
-                    results.add(
-                        { allocatedIndex, currentIndex ->
-
-
-                            ConnectionListItems.Connection(
-                                connectionName = conn.ssid ?: "<unknown>",
-                                strength = conn.ap?.strength?.toInt() ?: 0,
-                                modifier = Modifier,
-                                isConnected = conn.apIsactive == true,
-                                chipOrientation = ItemChipOrientation.W,
-                                isSelected = allocatedIndex == currentIndex,
-                                onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
-                                }
-                            )
-                        }
-                    )
-                }
-
-            }
-
-        return    results
-
-    }
 
 }

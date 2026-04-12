@@ -3,6 +3,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prer
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.networkmanager.settings.Connection
+import javax.inject.Inject
 
 //From the connection settings object
 //{'bridge': {'interface-name': 'docker0', 'stp': False, 'vlans': []},
@@ -12,7 +13,7 @@ import org.freedesktop.networkmanager.settings.Connection
 //    'permissions': [],
 
 //Not all connections will specify this.
-class GetInterfaceNameFromConnectionUseCase {
+class GetInterfaceNameFromConnectionUseCase @Inject constructor() {
 
     fun getInterfaceNameFromConnection(path : DBusPath) : String? {
         val dbus = DBusConnectionBuilder.forSystemBus().build()

@@ -19,5 +19,11 @@ public interface Bluetooth extends DBusInterface {
     /* Added by stefan */
     @DBusBoundProperty
     String getName();
+
+    @DBusBoundProperty
+    String getHwAddress();
+
+    @DBusBoundProperty
+    UInt32 getBtCapabilities();
     /* Added by stefan */
 }

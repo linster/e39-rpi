@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.FilterConnectionsListForDevicesUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetActiveConnectionsUseCaseDebugScreen.Companion.TAG
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetConnectionListUseCaseDebugScreen
@@ -124,6 +125,18 @@ class NetworkManagerDebugLaunchpad @Inject constructor(
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                 navigationNodeTraverser.navigateToNode(
                                     GetConnectionsForApsUseCaseDebugScreen::class.java
+                                )
+                            }
+                        )
+                    },
+                    { allocatedIndex, currentIndex ->
+                        MenuItem(
+                            label = "FilterConnectionsListForDevicesUseCaseDebugScreen Debug Screen",
+                            chipOrientation = ItemChipOrientation.W,
+                            isSelected = allocatedIndex == currentIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                navigationNodeTraverser.navigateToNode(
+                                    FilterConnectionsListForDevicesUseCaseDebugScreen::class.java
                                 )
                             }
                         )
