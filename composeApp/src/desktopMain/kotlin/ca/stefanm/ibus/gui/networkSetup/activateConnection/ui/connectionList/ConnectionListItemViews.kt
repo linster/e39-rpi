@@ -16,7 +16,7 @@ import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 
 object ConnectionListItemViews {
-    
+
 
     @Composable
     fun Connection(
