@@ -46,6 +46,9 @@ public interface AccessPoint extends DBusInterface {
 
     @DBusBoundProperty
     UInt32 getFrequency();
+
+    @DBusBoundProperty
+    UInt32 getMode();
     /* Added by Stefan */
 
     public static interface PropertySsidType extends TypeRef<List<Byte>> {

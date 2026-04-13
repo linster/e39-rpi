@@ -9,8 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.ConnectNmtDeviceConnectionUseCase
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DisconnectNmtDeviceConnectionUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase.ConnectionListItem
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NM80211Mode
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItemViews
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.Throbbers
@@ -56,7 +59,9 @@ class ActivateConnectionScreen @Inject constructor(
     private val notificationHub: NotificationHub,
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val throbbers: Throbbers,
-    private val getConnectionListUseCase: GetConnectionListUseCase
+    private val getConnectionListUseCase: GetConnectionListUseCase,
+    private val connectNmtDeviceConnectionUseCase: ConnectNmtDeviceConnectionUseCase,
+    private val disconnectNmtDeviceConnectionUseCase: DisconnectNmtDeviceConnectionUseCase
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -148,6 +153,7 @@ class ActivateConnectionScreen @Inject constructor(
                     InfoLabel("SSID: ${conn.ssid}")
                     InfoLabel("Strength: \t (${conn.strength}) ${ConnectionListItemViews.toStrengthBars(conn.strength)}")
 
+                    InfoLabel("AP Mode: ${conn.nmtConnectConnection.ap?.mode?.let { NM80211Mode.toSidebarList(it.toInt()) }}")
 
                     InfoLabel("Object Path (Access Point): ${
                         conn.nmtConnectConnection.ap
@@ -199,8 +205,8 @@ class ActivateConnectionScreen @Inject constructor(
         modalMenuService.showModalWaitDialog(
             image = Notification.NotificationImage.NONE,
             throbber = false,
-            headerText = device.device.objectPath?.split('/')?.takeLast(2).toString(),
-            bodyText = device.toString(),
+            headerText = "",
+            bodyText = device.device.objectPath?.split('/')?.takeLast(2).toString(),
             autoCloseTimeout = 5.seconds
         )
     }
