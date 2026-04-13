@@ -100,6 +100,8 @@ class GetConnectionListUseCase @Inject constructor(
             }.map {
                 //Sort the connections within each device
                 //TODO this is where the multiple access points are merged together, I think?
+                //TODO sort the wifi connections before merging them, then actually merge them.
+                //TODO >1 AP will get smooshed.
                 it
             }.map {
                 // Set the isConnected flag on each connection by checking with the active connection use-case
