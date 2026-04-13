@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.map.mapScreen
+package ca.stefanm.ibus.gui.map.mapScreen
 
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters

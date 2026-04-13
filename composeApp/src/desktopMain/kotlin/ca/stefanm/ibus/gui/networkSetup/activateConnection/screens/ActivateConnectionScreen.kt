@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,15 +8,15 @@ import androidx.compose.foundation.onClick
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.ConnectNmtDeviceConnectionUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DisconnectNmtDeviceConnectionUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase.ConnectionListItem
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NM80211Mode
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItemViews
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.Throbbers
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.ConnectNmtDeviceConnectionUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DisconnectNmtDeviceConnectionUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.GetConnectionListUseCase.ConnectionListItem
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NM80211Mode
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.ConnectionListItemViews
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.Throbbers
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule

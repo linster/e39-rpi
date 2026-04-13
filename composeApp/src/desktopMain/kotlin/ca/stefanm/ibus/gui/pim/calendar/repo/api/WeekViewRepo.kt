@@ -1,7 +1,7 @@
-package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.repo.api
+package ca.stefanm.ibus.gui.pim.calendar.repo.api
 
 import androidx.compose.ui.graphics.Color
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
 import com.kizitonwose.calendar.core.plusDays
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

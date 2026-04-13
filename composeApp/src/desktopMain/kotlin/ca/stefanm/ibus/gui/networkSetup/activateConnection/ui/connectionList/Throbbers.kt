@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList
 
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.car.desktop.input.griffinPowermate
+package ca.stefanm.ibus.car.desktop.input.griffinPowermate
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent

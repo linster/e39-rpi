@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter
 
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
 import javax.inject.Inject
 import kotlin.collections.listOf
 

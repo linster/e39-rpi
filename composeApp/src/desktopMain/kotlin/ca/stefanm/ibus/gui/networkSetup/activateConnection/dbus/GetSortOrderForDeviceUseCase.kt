@@ -1,7 +1,7 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType.Companion.toNMDeviceType
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMDeviceType.Companion.toNMDeviceType
 import ca.stefanm.ibus.lib.logging.Logger
 import org.freedesktop.networkmanager.Device
 import javax.inject.Inject

@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import kotlinx.datetime.DateTimePeriod
 

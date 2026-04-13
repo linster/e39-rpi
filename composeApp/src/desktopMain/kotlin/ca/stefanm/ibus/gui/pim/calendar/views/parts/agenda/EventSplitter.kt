@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
+package ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

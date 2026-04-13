@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
+package ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

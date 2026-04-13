@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.repo.api
+package ca.stefanm.ibus.gui.pim.calendar.repo.api
 
 import javax.inject.Inject
 

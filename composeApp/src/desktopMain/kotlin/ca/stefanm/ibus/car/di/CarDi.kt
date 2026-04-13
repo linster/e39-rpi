@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.car.di
 
-import ca.stefanm.ca.stefanm.ibus.car.desktop.input.griffinPowermate.GriffinPowermateReader
+import ca.stefanm.ibus.car.desktop.input.griffinPowermate.GriffinPowermateReader
 import ca.stefanm.ibus.car.ExceptionHandler
 import ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
 import ca.stefanm.ibus.car.bluetooth.blueZdbus.DbusTrackListenerService

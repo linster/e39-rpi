@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 
 import org.freedesktop.networkmanager.Device
 import org.freedesktop.networkmanager.settings.Connection

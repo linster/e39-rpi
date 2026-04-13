@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types
 
 import androidx.compose.runtime.Stable
 import org.freedesktop.networkmanager.AccessPoint

@@ -1,14 +1,14 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup
+package ca.stefanm.ibus.gui.networkSetup
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetDevicesUseCaseDebugScreen
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.debug.ui.NetworkManagerDebugLaunchpad
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
+import ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetDevicesUseCaseDebugScreen
+import ca.stefanm.ibus.gui.networkSetup.debug.ui.NetworkManagerDebugLaunchpad
+import ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode

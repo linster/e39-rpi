@@ -10,10 +10,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.repo.api.WeekViewRepo
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarLayout
-import ca.stefanm.ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaScreen
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.WeekViewRepo
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarLayout
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationComponent

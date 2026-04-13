@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate
 
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.FilterConnectionsListForDeviceUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.GetConnectionIdFromConnectionUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.FilterConnectionsListForDeviceUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.GetConnectionIdFromConnectionUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.freedesktop.networkmanager.Device

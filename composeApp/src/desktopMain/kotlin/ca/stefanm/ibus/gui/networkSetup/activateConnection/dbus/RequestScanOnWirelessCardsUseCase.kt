@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject

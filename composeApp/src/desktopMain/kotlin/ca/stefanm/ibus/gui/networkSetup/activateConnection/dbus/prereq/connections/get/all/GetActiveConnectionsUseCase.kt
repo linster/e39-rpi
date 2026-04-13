@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all
 
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DevicePath
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DevicePath
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

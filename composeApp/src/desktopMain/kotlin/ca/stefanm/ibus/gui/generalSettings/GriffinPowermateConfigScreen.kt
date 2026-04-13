@@ -1,11 +1,11 @@
-package ca.stefanm.ca.stefanm.ibus.gui.generalSettings
+package ca.stefanm.ibus.gui.generalSettings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import ca.stefanm.ca.stefanm.ibus.car.desktop.input.griffinPowermate.PowermateSensitivityConfig
+import ca.stefanm.ibus.car.desktop.input.griffinPowermate.PowermateSensitivityConfig
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode

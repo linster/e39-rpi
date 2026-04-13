@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
