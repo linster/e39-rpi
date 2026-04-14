@@ -8,6 +8,7 @@ import androidx.compose.foundation.onClick
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert.ConvertDeviceToWirelessUseCase
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.ConnectNmtDeviceConnectionUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DisconnectNmtDeviceConnectionUseCase
@@ -35,6 +36,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NM80211ApSecurityFlags
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.map
@@ -60,6 +62,7 @@ class ActivateConnectionScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val throbbers: Throbbers,
     private val getConnectionListUseCase: GetConnectionListUseCase,
+    private val convertDeviceToWirelessUseCase: ConvertDeviceToWirelessUseCase,
     private val connectNmtDeviceConnectionUseCase: ConnectNmtDeviceConnectionUseCase,
     private val disconnectNmtDeviceConnectionUseCase: DisconnectNmtDeviceConnectionUseCase
 ) : NavigationNode<Nothing> {
@@ -147,7 +150,7 @@ class ActivateConnectionScreen @Inject constructor(
     fun openSidebarForConnection(conn: ConnectionListItem.ConnectionListConnection.WifiAccessPoint) {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
             SidePanelMenu.SidePanelMenu(
-                title = "Wifi Connection Info: ${conn.ssid}",
+                title = "Wifi Connection Info",
                 @Composable {
 
                     InfoLabel("SSID: ${conn.ssid}")
@@ -155,6 +158,22 @@ class ActivateConnectionScreen @Inject constructor(
 
                     InfoLabel("AP Mode: ${conn.nmtConnectConnection.ap?.mode?.let { NM80211Mode.toSidebarList(it.toInt()) }}")
 
+                    InfoLabel("AP Security: ${
+                        conn.nmtConnectConnection
+                            .ap
+                            ?.let { ap ->
+                                val rsnFlags = ap.rsnFlags
+                                    .let { NM80211ApSecurityFlags.flagsFromInt(it.toInt()) }
+                                    .map { NM80211ApSecurityFlags.prettyPrint(it) }
+                                    .toSet()
+                                val wpaFlags = ap.wpaFlags
+                                    .let { NM80211ApSecurityFlags.flagsFromInt(it.toInt()) }
+                                    .map { NM80211ApSecurityFlags.prettyPrint(it) }
+                                    .toSet()
+                                
+                                rsnFlags.union(wpaFlags).toString()
+                            } ?: "Unknown"
+                            }")
                     InfoLabel("Object Path (Access Point): ${
                         conn.nmtConnectConnection.ap
                             ?.objectPath
@@ -181,9 +200,9 @@ class ActivateConnectionScreen @Inject constructor(
     fun openSidebarForConnection(conn: ConnectionListItem.ConnectionListConnection.OtherConnection) {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
             SidePanelMenu.SidePanelMenu(
-                title = "Connection Info: ${conn.name}",
+                title = "Connection Info",
                 @Composable {
-
+                    InfoLabel("Name: ${conn.name}")
                     InfoLabel("Object Path (Connection): ${conn.nmtConnectConnection.conn?.objectPath}")
                     InfoLabel("Object Path (Active): ${conn.nmtConnectConnection.active?.objectPath}")
                 },

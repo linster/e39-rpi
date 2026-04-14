@@ -30,7 +30,7 @@ object NM80211Mode {
         return when (Mode.entries.find { it.raw == mode }) {
             Mode.NM_802_11_MODE_UNKNOWN -> "Unknown"
             Mode.NM_802_11_MODE_ADHOC -> "Adhoc"
-            Mode.NM_802_11_MODE_INFRA -> "Infrastructure (For device object, device is client/station. For AP object, means connectivity provided to clients)"
+            Mode.NM_802_11_MODE_INFRA -> "Infrastructure" // (For device object, device is client/station. For AP object, means connectivity provided to clients)"
             Mode.NM_802_11_MODE_AP -> "Access point. (Local machine is hotspot)"
             Mode.NM_802_11_MODE_MESH -> "Mesh"
             null -> TODO()
