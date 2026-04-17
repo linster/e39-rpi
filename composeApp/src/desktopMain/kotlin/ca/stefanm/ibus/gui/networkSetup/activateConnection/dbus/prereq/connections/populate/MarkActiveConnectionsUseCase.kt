@@ -1,5 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.populate
 
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert.ConvertDeviceToWirelessUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.get.all.GetDeviceFromDevicePathUseCase
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMActiveConnectionState
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DevicePath
@@ -15,7 +16,8 @@ import javax.inject.Inject
 class MarkActiveConnectionsUseCase @Inject constructor(
     private val logger: Logger,
     private val getActiveConnectionsUseCase: GetActiveConnectionsUseCase,
-    private val getDeviceFromDevicePathUseCase: GetDeviceFromDevicePathUseCase
+    private val getDeviceFromDevicePathUseCase: GetDeviceFromDevicePathUseCase,
+    private val convertDeviceToWirelessUseCase: ConvertDeviceToWirelessUseCase
 ) {
 
     companion object {
@@ -41,13 +43,16 @@ class MarkActiveConnectionsUseCase @Inject constructor(
     internal fun markActive(devices : List<Nmt.NmtConnectDevice>, active : List<Active>) : List<Nmt.NmtConnectDevice> {
         return devices.map { device ->
             device.copy(
-                connections = markActive(device, active)
+                connections = if (device.connections?.all { it.deviceIsWifi == true } == true) {
+                    markActiveForWifi(device, active)
+                } else {
+                    markActive(device, active)
+                }
             )
         }
     }
 
     internal fun markActive(device: Nmt.NmtConnectDevice, activeConns : List<Active>) : List<Nmt.NmtConnectConnection>? {
-        //active.associate { it. }
         //Get all the device paths from the active list
         //We have List<Active>, and each Active has a List<Device>
         //Do the old reverse the map trick to get Map<Device, Active>
@@ -135,4 +140,19 @@ class MarkActiveConnectionsUseCase @Inject constructor(
         }
     }
 
+    internal fun markActiveForWifi(device: Nmt.NmtConnectDevice, activeConns : List<Active>) : List<Nmt.NmtConnectConnection>? {
+
+        //Run the other markActive so that the NmtConnection.active gets set, but then also
+        // Do a match on the APs.
+
+        return markActive(device, activeConns)?.map { conn ->
+            val ap = conn.ap?.objectPath
+            val wireless = convertDeviceToWirelessUseCase.deviceToWireless(device.device)
+            val apIsActive = wireless.activeAccessPoint.path == ap
+
+            conn.copy(
+                apIsactive = apIsActive
+            )
+        }
+    }
 }
