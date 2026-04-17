@@ -33,7 +33,7 @@ object NM80211Mode {
             Mode.NM_802_11_MODE_INFRA -> "Infrastructure" // (For device object, device is client/station. For AP object, means connectivity provided to clients)"
             Mode.NM_802_11_MODE_AP -> "Access point. (Local machine is hotspot)"
             Mode.NM_802_11_MODE_MESH -> "Mesh"
-            null -> TODO()
+            null -> "null"
         }
     }
 }

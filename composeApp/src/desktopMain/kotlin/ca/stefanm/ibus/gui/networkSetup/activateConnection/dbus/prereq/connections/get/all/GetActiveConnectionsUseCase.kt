@@ -27,6 +27,8 @@ class GetActiveConnectionsUseCase @Inject constructor(
         const val TAG = "GetActiveConnectionsUseCase"
     }
 
+    //TODO for each Active returned for it, listen to the StateChanged signal
+    //TODO and make it re-emit the whole list of Active
     fun getAllActiveConnections() : Flow<List<Active>> {
         val connection = DBusConnectionBuilder.forSystemBus().build()
         return callbackFlow {
@@ -45,7 +47,7 @@ class GetActiveConnectionsUseCase @Inject constructor(
             val handler = object : DBusSigHandler<Properties.PropertiesChanged> {
                 override fun handle(_signal: Properties.PropertiesChanged?) {
                     val propertiesChanged = _signal?.propertiesChanged
-                    if (propertiesChanged != null && propertiesChanged.containsKey("Devices")) {
+                    if (propertiesChanged != null && propertiesChanged.containsKey("ActiveConnections")) {
 //                        trySend(propertiesChanged["Devices"]!!.value as List<DBusPath>)
                         trySend(nmClient.activeConnections)
                     }

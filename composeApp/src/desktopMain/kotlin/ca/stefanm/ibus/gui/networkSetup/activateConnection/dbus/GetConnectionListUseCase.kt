@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 import androidx.compose.runtime.collectAsState
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
+import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.populate.MarkActiveConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetActiveConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.SortDevicesUseCase
@@ -38,6 +39,8 @@ class GetConnectionListUseCase @Inject constructor(
     private val getActiveConnectionsUseCase: GetActiveConnectionsUseCase,
 
     private val getConnectionsForDeviceUseCase: GetConnectionsForDeviceUseCase,
+
+    private val markActiveConnectionsUseCase: MarkActiveConnectionsUseCase,
 
     private val logger: Logger
 ) {
@@ -103,10 +106,10 @@ class GetConnectionListUseCase @Inject constructor(
                 //TODO sort the wifi connections before merging them, then actually merge them.
                 //TODO >1 AP will get smooshed.
                 it
-            }.map {
+            }.let {
                 // Set the isConnected flag on each connection by checking with the active connection use-case
                 // This should also fill-in the Active? connection for the NmtConnectConnection
-                it
+                markActiveConnectionsUseCase.markActiveConnections(it)
             }.map {
                 val result = mutableListOf<ConnectionListItem>()
                 it.forEach { device ->

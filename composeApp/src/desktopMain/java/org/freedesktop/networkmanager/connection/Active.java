@@ -38,6 +38,10 @@ public interface Active extends DBusInterface {
     /* Added by Stefan */
     @DBusBoundProperty
     List<DBusPath> getDevices();
+    @DBusBoundProperty
+    UInt32 getState();
+    @DBusBoundProperty
+    DBusPath getConnection();
     /* Added by Stefan */
 
     public static interface PropertyDevicesType extends TypeRef<List<DBusPath>> {
