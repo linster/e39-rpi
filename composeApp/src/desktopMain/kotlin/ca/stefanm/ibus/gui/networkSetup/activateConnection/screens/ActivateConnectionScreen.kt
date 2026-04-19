@@ -239,9 +239,8 @@ class ActivateConnectionScreen @Inject constructor(
     }
 
     private fun disconnect(connectDevice: Nmt.NmtConnectConnection) {
-        //Hide the sidebar
-        //Show the throbber
-        //start the usecase to do the disconnect
+        disconnectNmtDeviceConnectionUseCase.disconnect(connectDevice)
+        modalMenuService.closeSidePaneOverlay(true)
     }
 
 }

@@ -39,7 +39,7 @@ class GetActiveConnectionsUseCase @Inject constructor(
     companion object {
         const val TAG = "GetActiveConnectionsUseCase"
     }
-    
+
     fun getAllActiveConnections() : Flow<List<Active>> {
         val connection = DBusConnectionBuilder.forSystemBus().build()
         return callbackFlow {
