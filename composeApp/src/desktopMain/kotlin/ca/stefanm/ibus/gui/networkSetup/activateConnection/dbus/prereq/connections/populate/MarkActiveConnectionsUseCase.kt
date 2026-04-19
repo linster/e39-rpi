@@ -8,7 +8,10 @@ import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connectio
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.retryWhen
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.networkmanager.connection.Active
 import javax.inject.Inject
@@ -87,23 +90,15 @@ class MarkActiveConnectionsUseCase @Inject constructor(
         }.mapValues {
             it.value.map { MultiActiveLogInfo(DBusPath(it.objectPath), it.devices, NMActiveConnectionState.fromInt(it.state)) }
         }.let {
-            logger.i(TAG, "Cardinality of ActiveConnections to Devices is not currently 1:1: $it")
+            if (it.isNotEmpty()) {
+                logger.i(TAG, "Cardinality of ActiveConnections to Devices is not currently 1:1: $it")
+            }
         }
 
-        //If `device` in the map, set the bool, and set the active parameter on the connection
-        //TODO APRIL 16 MORNING --> This check fails
-        //TODO APRIL 16 MORNING --> The DeviceToActive map looks fine
-        // DeviceToActive: {
-        // /org/freedesktop/NetworkManager/Devices/4=[org.freedesktop.NetworkManager:/org/freedesktop/NetworkManager/ActiveConnection/2:interface org.freedesktop.networkmanager.connection.Active],
-        // /org/freedesktop/NetworkManager/Devices/2=[org.freedesktop.NetworkManager:/org/freedesktop/NetworkManager/ActiveConnection/1:interface org.freedesktop.networkmanager.connection.Active]}
         if (devicePath.path in deviceToActive.keys) {
-            //TODO Can a device ever have more than one active connection?
-            //TODO Yes it can.
             //For each one, check the State
             //https://networkmanager.dev/docs/api/latest/nm-dbus-types.html#NMActiveConnectionState
             //and only take the one that is ACTIVATED
-            //
-            // Also, if
 
             val allActiveConnectionsForDevice = deviceToActive.getOrDefault(devicePath.path, emptyList<Active>())
             logger.d(TAG, "allActiveConnectionsForDevice $devicePath: ${allActiveConnectionsForDevice.map { it.objectPath }}")
@@ -118,20 +113,24 @@ class MarkActiveConnectionsUseCase @Inject constructor(
                 device.connections
             } else {
                 //Update the list by finding the matching connection path
-                device.connections?.filter {
-                    it.conn?.objectPath == activatedForDevice.connection.path
-                }?.map {
+                //TODO also preserve the connections the device already had.
+
+                val connections = device.connections
+                if (connections == null) {
+                    //Nothing to update
+                    return null
+                }
+
+                val (activeConnections, others) = connections.partition { it.conn?.objectPath == activatedForDevice.connection.path }
+
+                //Update the matching active connections
+                val updatedActive = activeConnections.map {
                     it.copy(
                         active = activatedForDevice
                     )
-                }?.let {
-                    if (it.isEmpty()) {
-                        device.connections
-                    } else {
-                        it
-                    }
                 }
 
+                return updatedActive + others
             }
         } else {
             //The device doesn't belong to any active connections.
