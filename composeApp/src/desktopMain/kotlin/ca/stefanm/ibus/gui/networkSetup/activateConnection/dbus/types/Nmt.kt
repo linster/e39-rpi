@@ -36,6 +36,7 @@ object Nmt {
         val apIsactive : Boolean? = null,
 
         //Active connection
+        val hasActiveConnection : Boolean = false,
         val active : Active? = null,
     )
 

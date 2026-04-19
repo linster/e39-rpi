@@ -68,7 +68,13 @@ class MarkActiveConnectionsUseCase @Inject constructor(
         // active-connections can reference the same device or settings-connection
         // as they are waiting to be activated or to be deactivated.
         val deviceToActive = mutableMapOf<String, MutableList<Active>>()
-        activeConns.forEach { active ->
+        activeConns.filter {
+            try {
+                NMActiveConnectionState.fromInt(it.state) == NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED
+            } catch(e : Throwable) {
+                false
+            }
+        }.forEach { active ->
             active.devices.forEach { devicePath ->
                 val device = getDeviceFromDevicePathUseCase.getDevice(devicePath)
                 if (!deviceToActive.containsKey(devicePath.path)) {
@@ -113,7 +119,7 @@ class MarkActiveConnectionsUseCase @Inject constructor(
                 device.connections
             } else {
                 //Update the list by finding the matching connection path
-                //TODO also preserve the connections the device already had.
+                //also preserve the connections the device already had.
 
                 val connections = device.connections
                 if (connections == null) {
@@ -126,6 +132,7 @@ class MarkActiveConnectionsUseCase @Inject constructor(
                 //Update the matching active connections
                 val updatedActive = activeConnections.map {
                     it.copy(
+                        hasActiveConnection = true,
                         active = activatedForDevice
                     )
                 }

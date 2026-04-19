@@ -2,14 +2,27 @@ package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connecti
 
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DevicePath
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformLatest
+import net.folivo.trixnity.client.flatten
 import org.freedesktop.NetworkManager
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
+import org.freedesktop.dbus.interfaces.DBus
 import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.networkmanager.connection.Active
@@ -26,9 +39,7 @@ class GetActiveConnectionsUseCase @Inject constructor(
     companion object {
         const val TAG = "GetActiveConnectionsUseCase"
     }
-
-    //TODO for each Active returned for it, listen to the StateChanged signal
-    //TODO and make it re-emit the whole list of Active
+    
     fun getAllActiveConnections() : Flow<List<Active>> {
         val connection = DBusConnectionBuilder.forSystemBus().build()
         return callbackFlow {
@@ -48,7 +59,6 @@ class GetActiveConnectionsUseCase @Inject constructor(
                 override fun handle(_signal: Properties.PropertiesChanged?) {
                     val propertiesChanged = _signal?.propertiesChanged
                     if (propertiesChanged != null && propertiesChanged.containsKey("ActiveConnections")) {
-//                        trySend(propertiesChanged["Devices"]!!.value as List<DBusPath>)
                         trySend(nmClient.activeConnections)
                     }
                 }
@@ -82,21 +92,57 @@ class GetActiveConnectionsUseCase @Inject constructor(
                 )
             }
         }
+            .updateListWhenAnyConnectionStateChanges()
     }
 
-    fun Flow<List<Active>>.getActiveConnectionsByDbusDevice(
-    ) : Flow<Map<DevicePath, List<Active>>> {
-        return map {
-            it
-                .map {
-                    it to it.devices.toList()
+    internal fun Flow<List<Active>>.updateListWhenAnyConnectionStateChanges() : Flow<List<Active>> {
+        return this.map {
+            it.getReactiveList()
+        }.flatten() //Thank you Trixnity
+    }
+
+    internal fun List<Active>.getReactiveList() : List<Flow<Active>> {
+        return this.map { it.getReactiveActive() }
+    }
+
+    internal fun Active.getReactiveActive() : Flow<Active> {
+        return flowOf(this).combineTransform(this.getStateChanged()) { active, stateChanged ->
+            emit(active)
+        }
+    }
+
+    internal fun Active.getStateChanged() : Flow<Active.StateChanged?> {
+        val active = this
+        return callbackFlow {
+            val connection = DBusConnectionBuilder.forSystemBus().build()
+            connection.connect()
+
+            val handler = object : DBusSigHandler<Active.StateChanged> {
+                override fun handle(_signal: Active.StateChanged?) {
+                    if (_signal != null) {
+                        trySend(_signal)
+                    }
                 }
-                .map { (connection, paths) ->
-                    paths.map { path -> connection to path }
-                }
-                .flatten()
-                .groupBy { (connection, path) -> path }
-                .mapValues { it.value.map { it.first } }
+            }
+
+            trySend(null)
+
+            connection.addSigHandler(
+                Active.StateChanged::class.java,
+                connection.getRemoteObject(
+                    "org.freedesktop.DBus", "/org/freedesktop/DBus", DBus::class.java
+                )!!.GetNameOwner("org.freedesktop.NetworkManager")!!,
+                active,
+                handler
+            )
+
+            awaitClose {
+                connection.removeSigHandler(
+                    Active.StateChanged::class.java,
+                    handler
+                )
+                connection.close()
+            }
         }
     }
 }

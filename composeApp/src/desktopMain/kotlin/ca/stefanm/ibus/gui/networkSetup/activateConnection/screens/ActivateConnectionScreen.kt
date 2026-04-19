@@ -40,6 +40,7 @@ import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NM80211ApS
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -204,6 +205,7 @@ class ActivateConnectionScreen @Inject constructor(
                 @Composable {
                     InfoLabel("Name: ${conn.name}")
                     InfoLabel("Object Path (Connection): ${conn.nmtConnectConnection.conn?.objectPath}")
+                    InfoLabel("Has Active: ${conn.nmtConnectConnection.hasActiveConnection}")
                     InfoLabel("Object Path (Active): ${conn.nmtConnectConnection.active?.objectPath}")
                 },
                 listOf(

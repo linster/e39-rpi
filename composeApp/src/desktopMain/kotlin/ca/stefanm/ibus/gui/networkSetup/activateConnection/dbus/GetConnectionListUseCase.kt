@@ -134,7 +134,7 @@ class GetConnectionListUseCase @Inject constructor(
                             result.add(
                                 ConnectionListItem.ConnectionListConnection.OtherConnection(
                                     name = connection.name ?: "<unknown connection>",
-                                    isConnected = connection?.active != null,
+                                    isConnected = connection.hasActiveConnection,
                                     nmtConnectConnection = connection
                                 )
                             )
