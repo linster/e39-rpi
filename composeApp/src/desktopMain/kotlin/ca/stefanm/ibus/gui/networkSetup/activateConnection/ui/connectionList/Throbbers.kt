@@ -10,13 +10,15 @@ class Throbbers @Inject constructor(
 ) {
 
     fun showConnectingThrobber(
+        headerText : String = "Connecting...",
+        bodyText : String,
         onTimeout : () -> Unit
     ) {
         modalMenuService.showModalWaitDialog(
             image = Notification.NotificationImage.NONE,
             throbber = true,
-            headerText = "Connecting...",
-            bodyText = "Activating Connection",
+            headerText = headerText,
+            bodyText = bodyText,
             isCancellable = false,
             autoCloseTimeout = 3.seconds,
             onTimeout = onTimeout

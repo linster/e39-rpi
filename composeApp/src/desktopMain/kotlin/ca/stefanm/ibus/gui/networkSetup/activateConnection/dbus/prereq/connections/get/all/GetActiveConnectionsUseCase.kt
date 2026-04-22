@@ -105,7 +105,7 @@ class GetActiveConnectionsUseCase @Inject constructor(
         return this.map { it.getReactiveActive() }
     }
 
-    internal fun Active.getReactiveActive() : Flow<Active> {
+    fun Active.getReactiveActive() : Flow<Active> {
         return flowOf(this).combineTransform(this.getStateChanged()) { active, stateChanged ->
             emit(active)
         }
@@ -143,6 +143,17 @@ class GetActiveConnectionsUseCase @Inject constructor(
                 )
                 connection.close()
             }
+        }
+    }
+
+    fun getActiveConnection(path : DBusPath) : Active {
+        val connection = DBusConnectionBuilder.forSystemBus().build()
+        return connection.use {
+            connection.getRemoteObject(
+                "org.freedesktop.NetworkManager",
+                path,
+                Active::class.java
+            )
         }
     }
 }

@@ -47,6 +47,8 @@ public interface NetworkManager extends DBusInterface {
     /* Added by stefan */
     @DBusBoundProperty
     List<DBusPath> getActiveConnections();
+    @DBusBoundProperty
+    String getVersion();
     /* Added by stefan */
 
     void Reload(UInt32 flags);

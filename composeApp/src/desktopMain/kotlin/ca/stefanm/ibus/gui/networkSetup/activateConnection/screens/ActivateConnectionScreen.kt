@@ -236,6 +236,10 @@ class ActivateConnectionScreen @Inject constructor(
         //Hide the sidebar
         //Show the throbber
         //start the usecase to make the connection
+        GlobalScope.launch {
+            modalMenuService.closeSidePaneOverlay(true)
+            connectNmtDeviceConnectionUseCase.connect(connectDevice)
+        }
     }
 
     private fun disconnect(connectDevice: Nmt.NmtConnectConnection) {

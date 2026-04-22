@@ -29,6 +29,9 @@ object Nmt {
 
         val conn : Connection? = null,
 
+        val deviceIsVpn : Boolean? = null,
+
+
         val deviceIsWifi : Boolean? = null,
         //If it's a wifi connection,
         val ssid : String? = null,
