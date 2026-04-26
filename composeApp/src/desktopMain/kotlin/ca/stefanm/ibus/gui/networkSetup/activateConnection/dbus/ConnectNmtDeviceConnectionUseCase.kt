@@ -168,6 +168,9 @@ class ConnectNmtDeviceConnectionUseCase @Inject constructor(
             specificObject = DBusPath(conn.ap!!.objectPath)
         )
         //TODO register an AgentManager so that the user can enter a password if needed
+        //TODO check with NetworkManager if there already is a secret for this network. If so,
+        //TODO then try to connect with it anyways.
+        //TODO If not, then go to a secret entry screen, and then prompt the user to connect there.
 
         return newConn
     }
