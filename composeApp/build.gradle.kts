@@ -142,6 +142,9 @@ kotlin {
             implementation("io.github.irgaly.kfswatch:kfswatch:1.4.0")
 
             implementation("app.cash.molecule:molecule-runtime:2.2.0")
+
+            //PDF
+            implementation("dev.nucleusframework:pdfium:149.0.7802.0b")
         }
     }
 }

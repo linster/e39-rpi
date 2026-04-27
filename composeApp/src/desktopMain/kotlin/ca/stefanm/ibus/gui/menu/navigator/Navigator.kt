@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.PromptSecretScreen
 import ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
 import ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
@@ -163,7 +164,8 @@ class NavigationModule {
         getConnectionListUseCaseDebugScreen: GetConnectionListUseCaseDebugScreen,
         getConnectionsForApsUseCaseDebugScreen: GetConnectionsForApsUseCaseDebugScreen,
         filterConnectionsListForDevicesUseCaseDebugScreen: FilterConnectionsListForDevicesUseCaseDebugScreen,
-        promptSecretScreen: PromptSecretScreen
+        promptSecretScreen: PromptSecretScreen,
+        pdfViewerScreen: PdfViewerScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -237,7 +239,8 @@ class NavigationModule {
         getConnectionListUseCaseDebugScreen,
         getConnectionsForApsUseCaseDebugScreen,
         filterConnectionsListForDevicesUseCaseDebugScreen,
-        promptSecretScreen
+        promptSecretScreen,
+        pdfViewerScreen
     )
 }
 
