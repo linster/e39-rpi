@@ -1,42 +1,35 @@
 package ca.stefanm.ibus.gui.debug.hmiScreens
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
-import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollTest
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.gui.menu.Notification
-import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
-import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
-import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.*
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem.Companion.SPACER
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
+import javax.inject.Named
 
 @ApplicationScope
 @Stable
 @AutoDiscover
 class DebugHmiRoot @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
+
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerService: KnobListenerService,
+    private val logger: Logger
 ) : NavigationNode<Nothing>{
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -44,11 +37,19 @@ class DebugHmiRoot @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
 
-        Column {
-            BmwSingleLineHeader("Debug")
+        Column(
+            modifier = Modifier.background(
+                ThemeWrapper.ThemeHandle.current.colors.menuBackground
+            )
+        ) {
+            BmwSingleLineHeader("Debug HmiRoot")
 
-            HalfScreenMenu.OneColumn(
-                alignment = Alignment.Start,
+            SmoothScroll.SmoothScroll(
+                modifier = Modifier,
+                knobListenerService = knobListenerService,
+                tag = null,
+                logger = logger,
+                prependGoBackEntry = true,
                 items = listOf(
                     TextMenuItem(
                         title = "Go Back",
@@ -61,12 +62,14 @@ class DebugHmiRoot @Inject constructor(
                     TextMenuItem(
                         title = "Smooth Scroll test",
                         onClicked = { navigationNodeTraverser.navigateToNode(SmoothScrollTest::class.java)}
-                    )
-//                    TextMenuItem(
-//                        title = "DBus-BlueZ",
-//                        onClicked = { }
-//                    )
-                )
+                    ),
+                    TextMenuItem(
+                        title = "Smooth Grid Scroll test",
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(SmoothGridScrollTest::class.java)
+                        }
+                    ),
+                ).toDynamicLambdas()
             )
         }
 

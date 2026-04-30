@@ -1,34 +1,24 @@
 package ca.stefanm.ibus.gui.menu.widgets.screenMenu
 
+import androidx.annotation.FloatRange
 import androidx.compose.foundation.ScrollbarAdapter
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.BoxWithConstraintsScope
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.VerticalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
@@ -38,7 +28,6 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 
@@ -66,7 +55,7 @@ object SmoothScroll {
         val scrollState = rememberScrollState(0)
         val childIndexToPixelsFromTop = mutableMapOf<Int, Int>()
 
-        val childIndexOnPage = mutableMapOf<Int, Int>()
+        val childIndexToPage = mutableMapOf<Int, Int>()
         var previousPage = 0
 
         BoxWithConstraints() {
@@ -105,7 +94,7 @@ object SmoothScroll {
                             LaunchedEffect(allocatedIndex, currentIndex) {
                                 if (allocatedIndex == currentIndex) {
                                     if (
-                                        childIndexOnPage[currentIndex] != previousPage /* We've moved a page */
+                                        childIndexToPage[currentIndex] != previousPage /* We've moved a page */
                                         && childIndexToPixelsFromTop.containsKey(currentIndex)
                                     ) {
                                         childIndexToPixelsFromTop[currentIndex]?.let {
@@ -114,15 +103,15 @@ object SmoothScroll {
                                             //What we actually want is to scroll to the page.
                                             scrollState.scrollTo(
                                                 childIndexToPixelsFromTop[
-                                                    childIndexOnPage
-                                                        .filterValues { it == childIndexOnPage[currentIndex] ?: 0 }
+                                                    childIndexToPage
+                                                        .filterValues { it == childIndexToPage[currentIndex] ?: 0 }
                                                         .keys
                                                         .min()
                                                     ] ?: 0
                                             )
                                         }
                                         //Update the page we were on before
-                                        previousPage = childIndexOnPage[currentIndex] ?: -1
+                                        previousPage = childIndexToPage[currentIndex] ?: -1
                                     }
                                 }
                             }
@@ -141,7 +130,7 @@ object SmoothScroll {
                     placeables.forEachIndexed { index, item ->
                         item.placeRelative(x = 0, y = y)
                         childIndexToPixelsFromTop[index] = y
-                        childIndexOnPage[index] = if (y == 0) {
+                        childIndexToPage[index] = if (y == 0) {
                             0
                         } else {
                             var intermediatePage = y.floorDiv(viewPortHeight.value.toInt())
@@ -174,4 +163,151 @@ object SmoothScroll {
             )
         }
     }
+
+
+    @Composable
+    fun GridScroll(
+        modifier: Modifier,
+        knobListenerService: KnobListenerService,
+        tag : String? = null,
+        logger: Logger,
+        prependGoBackEntry : Boolean = false,
+        goBackEntryProvider : @Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit = @Composable { _, _ -> },
+        navigationNodeTraverser: NavigationNodeTraverser? = null,
+
+        /** How tall should each row be as a fraction of viewport height?
+         * Because the screen is small, we're not going to be fancy with having a responsive layout.
+         * (For example, a 2-wide grid centered in the middle of the layout)
+         * For example, 0.85 means that each row should be as high as 85% of the viewport height.
+         * For having multiple
+         */
+        @FloatRange(0.0, 1.0)
+        rowHeightFraction : Float,
+
+        /** What's the aspect ratio each item should try to achieve?
+         * 1.0F means square.
+         */
+        desiredItemAspectRatio : Float,
+
+        items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
+    ) {
+
+        val knobState = KnobObserverBuilderState.setupListener(
+            knobListenerService = knobListenerService,
+            logger,
+            "${(tag ?: "")} SmoothGrid Scroll"
+        )
+
+        val scrollState = rememberScrollState(0)
+
+        val childIndexToPixelsFromTop = mutableMapOf<Int, Int>()
+
+        val childIndexToPage = mutableMapOf<Int, Int>()
+        var previousPage = 0
+
+        BoxWithConstraints {
+            val viewPortHeight = maxHeight
+            val viewPortWidth = maxWidth
+
+            SubcomposeLayout(
+                modifier = Modifier
+                    .padding(end = 24.dp)
+                    .verticalScroll(
+                        state = scrollState,
+                        enabled = true
+                    )
+                    .then(modifier)
+            ) { constraints ->
+
+                val measurables = items.let {
+                    if (prependGoBackEntry) {
+                        listOf<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>(
+                            { allocatedIndex, currentIndex ->
+                                goBackEntryProvider(allocatedIndex, currentIndex)
+                            }
+                        ) + it
+                    } else {
+                        it
+                    }
+                }.flatMapIndexed { index, item ->
+                    subcompose(slotId = index) {
+                        //TODO maybe we want to put the height and aspect ratios as a modifier on a Box
+                        //TODO surrounding this?
+                        Box(
+                            Modifier
+                                .height((viewPortHeight.value * rowHeightFraction).dp)
+                                .aspectRatio(desiredItemAspectRatio, true)
+                        ) {
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                item(allocatedIndex, currentIndex)
+                                LaunchedEffect(allocatedIndex, currentIndex) {
+                                    if (allocatedIndex == currentIndex) {
+                                        if (
+                                            childIndexToPage[currentIndex] != previousPage /* We've moved a page */
+                                            && childIndexToPixelsFromTop.containsKey(currentIndex)
+                                        ) {
+                                            childIndexToPixelsFromTop[currentIndex]?.let {
+                                                //Scrolls to the item that happens to be on the next page
+                                                //scrollState.scrollTo(it)
+                                                //What we actually want is to scroll to the page.
+                                                scrollState.scrollTo(
+                                                    childIndexToPixelsFromTop[
+                                                        childIndexToPage
+                                                            .filterValues { it == childIndexToPage[currentIndex] ?: 0 }
+                                                            .keys
+                                                            .min()
+                                                    ] ?: 0
+                                                )
+                                            }
+                                            //Update the page we were on before
+                                            previousPage = childIndexToPage[currentIndex] ?: -1
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //Now I think we can measure each measurable.
+                //I placed them in a Box so that the constraints can be applied to their size.
+                val placeables = measurables.map {
+                    it.measure(constraints)
+                }
+
+                // TODO now we have to window() the items(), check with placeables, and see
+                // TODO how we're going to divvy up the items into a kind of AlignStart flowLayout. (but one where each item was given the same aspect ratio)
+
+
+
+                //TODO For each row, find the max height item. Sum the maxes for each row to find
+                //TODO the height of the layout we'll be making.
+                val layoutHeight = placeables.sumOf { it.height }
+
+
+                layout(width = viewPortWidth.roundToPx(), height = layoutHeight) {
+                    //TODO instead of using placeables.flatmapIndexed, maybe look into our windowed row thing we setup
+                    //TODO two lines up.
+                }
+            }
+
+            VerticalScrollbar(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .align(Alignment.TopEnd)
+                ,
+                adapter = ScrollbarAdapter(scrollState),
+                style = ScrollbarStyle(
+                    minimalHeight = 16.dp,
+                    thickness = 16.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    hoverDurationMillis = 300,
+                    unhoverColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
+                    hoverColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent
+                )
+            )
+
+        }
+    }
+
 }

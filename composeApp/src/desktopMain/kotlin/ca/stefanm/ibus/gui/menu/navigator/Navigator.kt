@@ -165,7 +165,8 @@ class NavigationModule {
         getConnectionsForApsUseCaseDebugScreen: GetConnectionsForApsUseCaseDebugScreen,
         filterConnectionsListForDevicesUseCaseDebugScreen: FilterConnectionsListForDevicesUseCaseDebugScreen,
         promptSecretScreen: PromptSecretScreen,
-        pdfViewerScreen: PdfViewerScreen
+        pdfViewerScreen: PdfViewerScreen,
+        smoothGridScrollTest: SmoothGridScrollTest
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -240,7 +241,8 @@ class NavigationModule {
         getConnectionsForApsUseCaseDebugScreen,
         filterConnectionsListForDevicesUseCaseDebugScreen,
         promptSecretScreen,
-        pdfViewerScreen
+        pdfViewerScreen,
+        smoothGridScrollTest
     )
 }
 
