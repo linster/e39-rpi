@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -275,19 +276,59 @@ object SmoothScroll {
                     it.measure(constraints)
                 }
 
-                // TODO now we have to window() the items(), check with placeables, and see
-                // TODO how we're going to divvy up the items into a kind of AlignStart flowLayout. (but one where each item was given the same aspect ratio)
+                val placeablesByRow : MutableList<MutableList<Placeable>> = mutableListOf()
+                placeablesByRow.add(mutableListOf())
+                var rowIndex = 0
 
+                val placablesCopy = placeables.toMutableList()
+                while (placablesCopy.isNotEmpty()) {
+                    val candidate = placablesCopy.removeFirst()
 
+                    if ((placeablesByRow[rowIndex].sumOf { it.width } + candidate.width).dp <= viewPortWidth) {
+                        //Place the candidate in this row
+                    } else {
+                        //Place the candidate in the next row
+                        rowIndex += 1
+                    }
 
-                //TODO For each row, find the max height item. Sum the maxes for each row to find
-                //TODO the height of the layout we'll be making.
-                val layoutHeight = placeables.sumOf { it.height }
+                    if (placeablesByRow.indices.last < rowIndex) {
+                        placeablesByRow.add(mutableListOf())
+                    }
+                    placeablesByRow[rowIndex].add(candidate)
+                }
 
+                val layoutHeight = placeablesByRow.sumOf { row ->
+                    row.maxOf { sq -> sq.height }
+                }
 
                 layout(width = viewPortWidth.roundToPx(), height = layoutHeight) {
-                    //TODO instead of using placeables.flatmapIndexed, maybe look into our windowed row thing we setup
-                    //TODO two lines up.
+
+                    var x = 0
+                    var y = 0
+
+                    placeablesByRow.forEachIndexed { rowIndex, row ->
+                        var rowHeight = 0
+                        row.forEachIndexed { itemIndex, item ->
+                            item.placeRelative(x = x, y = y)
+
+                            //TODO don't use this item index. You actually need the index of the item from subCompose(slotId)
+                            //TODO because the childIndexToPixelsFromTop only ever has one row of stuff in it.
+                            childIndexToPixelsFromTop[itemIndex] = y
+                            childIndexToPage[itemIndex] = if (y == 0) {
+                                0
+                            } else {
+                                var intermediatePage = y.floorDiv(viewPortHeight.value.toInt())
+                                if (abs((y).rem(viewPortHeight.value) - viewPortHeight.value) < (item.height *0.75)) {
+                                    intermediatePage += 1
+                                }
+                                intermediatePage
+                            }
+                            x += item.width
+                            rowHeight = maxOf(rowHeight, item.height)
+                        }
+                        x = 0
+                        y += rowHeight
+                    }
                 }
             }
 
