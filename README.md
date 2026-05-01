@@ -5,4 +5,4 @@ Ths program listens to the steering wheel Previous & Next track inputs, and rout
 
 Where there has been previous research and work done to interface with the BMW IBus (a LIN bus), I am the first to do it with Kotlin using co-routines, flows, and channels. 
 
-More details are available about the project at https://sites.google.com/stefanm.ca/e39/ 
+More details are available about the project at https://e39.dev
