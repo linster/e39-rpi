@@ -306,15 +306,14 @@ object SmoothScroll {
                     var x = 0
                     var y = 0
 
+                    var slotId = 0
                     placeablesByRow.forEachIndexed { rowIndex, row ->
                         var rowHeight = 0
                         row.forEachIndexed { itemIndex, item ->
                             item.placeRelative(x = x, y = y)
 
-                            //TODO don't use this item index. You actually need the index of the item from subCompose(slotId)
-                            //TODO because the childIndexToPixelsFromTop only ever has one row of stuff in it.
-                            childIndexToPixelsFromTop[itemIndex] = y
-                            childIndexToPage[itemIndex] = if (y == 0) {
+                            childIndexToPixelsFromTop[slotId] = y
+                            childIndexToPage[slotId] = if (y == 0) {
                                 0
                             } else {
                                 var intermediatePage = y.floorDiv(viewPortHeight.value.toInt())
@@ -325,6 +324,8 @@ object SmoothScroll {
                             }
                             x += item.width
                             rowHeight = maxOf(rowHeight, item.height)
+
+                            slotId += 1
                         }
                         x = 0
                         y += rowHeight
