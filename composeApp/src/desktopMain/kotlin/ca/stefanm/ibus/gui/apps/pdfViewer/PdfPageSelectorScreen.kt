@@ -3,18 +3,28 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
@@ -22,18 +32,21 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.calendar.views.editor.CalendarEventEditScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.lib.logging.Logger
+import dev.nucleusframework.pdfium.PdfPage
 import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.PdfThumbnail
 import dev.nucleusframework.pdfium.rememberPdfReaderState
@@ -199,19 +212,28 @@ class PdfPageSelectorScreen @Inject constructor(
         lastPageNumber: Int
     ) {
         modalMenuService.showSidePaneOverlay(true) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                    .border(width = 4.dp.halveIfNotPixelDoubled(), color = ThemeWrapper.ThemeHandle.current.colors.sideMenuBorder)
+                    .shadow(4.dp.halveIfNotPixelDoubled(), RectangleShape),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
 
-            SidePanelMenu.SidePanelMenu(title = "Page $pageNumber") {
-                Column {
-                    PdfThumbnail(
-                        state = reader,
-                        pageIndex = pageNumber,
-                        Modifier.fillMaxHeight(0.5F)
-                    )
+                BmwSingleLineHeader("Page $pageNumber", Modifier.weight(1F))
 
-                    SmoothScroll.SmoothScroll(
-                        knobListenerService = knobListenerServiceModal,
-                        logger = logger,
-                        modifier = Modifier.height(50.dp),
+                PdfPage(
+                    state = reader,
+                    pageIndex = pageNumber,
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier.weight(2F, true).align(Alignment.CenterHorizontally)
+                )
+
+                Box(Modifier.weight(1F), contentAlignment = Alignment.BottomStart) {
+                    HalfScreenMenu.OneColumn(
+                        alignment = Alignment.End,
+                        fullWidth = true,
                         items = listOf(
                             TextMenuItem("Select Page", onClicked = {
                                 modalMenuService.closeSidePaneOverlay(true)
@@ -226,45 +248,11 @@ class PdfPageSelectorScreen @Inject constructor(
                             TextMenuItem("Close Menu", onClicked = {
                                 modalMenuService.closeSidePaneOverlay(true)
                             })
-                        ).toDynamicLambdas()
+                        )
+
                     )
                 }
             }
-
-
-//            SidePanelMenu.SidePanelMenu(
-//                title = "Page $pageNumber",
-//                @Composable {
-//
-//                    Column(
-//                        Modifier.layout { measurable, constraints ->
-//                            layout(constraints.maxWidth, )
-//                        }
-//                    ) {
-//                        PdfThumbnail(
-//                            state = reader,
-//                            pageIndex = pageNumber,
-//                            Modifier
-//                        )
-//                    }
-//                },
-//                listOf(
-//                    TextMenuItem("Select Page", onClicked = {
-//                        modalMenuService.closeSidePaneOverlay(true)
-//                        navigationNodeTraverser.setResultAndGoBack(
-//                            thisClass,
-//                            PageSelectorResult.PageSelected(
-//                                selectedPageNumber = pageNumber,
-//                                lastPageNumber = lastPageNumber
-//                            )
-//                        )
-//                    }),
-//                    TextMenuItem("Close Menu", onClicked = {
-//                        modalMenuService.closeSidePaneOverlay(true)
-//                    })
-//                )
-//            )
-
         }
     }
 }

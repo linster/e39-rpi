@@ -20,11 +20,12 @@ import ca.stefanm.ibus.gui.menu.widgets.bottombar.BmwFullScreenBottomBar
 
 @Composable
 fun BmwSingleLineHeader(
-    text : String = "Menu"
+    text : String = "Menu",
+    modifier: Modifier = Modifier
 ) {
     CenterGradientWithEdgeHighlight {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().then(modifier)
         ) {
             Text(
                 text = text.uppercase(),
