@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
@@ -67,6 +68,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
@@ -799,8 +804,29 @@ class ModalMenuService @Inject constructor(
     /** Allow the user to play with a zoom slider without having to exit the modal dialog
      *  and re-enter it to see what every step looks like.
      */
+
+    fun showFloatSlider(
+        currentValue : Flow<Float>,
+        initialValue: Float,
+        validItems : ClosedRange<Float>,
+        step : Float,
+        precision : Int = 1000,
+        onCurrentValueChanged : (Float) -> Unit,
+        hintText : String? = null
+    ) {
+        showIntSlider(
+            currentValue = currentValue.map { (it * precision).toInt() },
+            initialValue = (initialValue * precision).toInt(),
+            validItems = ((validItems.start * precision).toInt()) .. ((validItems.endInclusive * precision).toInt()) step ((step * precision).toInt()),
+            onCurrentValueChanged = { newInt ->
+                onCurrentValueChanged(newInt.div(precision.toFloat()))
+            },
+            hintText = hintText
+        )
+    }
     fun showIntSlider(
         currentValue : Flow<Int>,
+        initialValue : Int,
         validItems : IntProgression,
         onCurrentValueChanged : (Int) -> Unit,
         hintText : String? = null
@@ -809,34 +835,58 @@ class ModalMenuService @Inject constructor(
         _modalMenuOverlay.value = @Composable {
 
             LaunchedEffect(Unit) {
-                logger.d("DayPicker", "Disabling main listener.")
+                logger.d("IntSlider", "Disabling main listener.")
                 knobListenerServiceMain.disableListener()
             }
             DisposableEffect(Unit) {
                 onDispose {
-                    logger.d("DayPicker", "Re-enabling main listener.")
+                    logger.d("IntSlider", "Re-enabling main listener.")
                     knobListenerServiceMain.enableListener()
                 }
             }
 
-            //TODO do a flatmap latest here or something
             val intState = currentValue.collectAsState(validItems.first)
-            val sliderState = remember() { mutableStateOf(intState.value) }
+            val sliderState = remember { mutableStateOf(intState.value) }
 
 
+            LaunchedEffect(Unit) {
+                snapshotFlow { sliderState.value }
+                    .distinctUntilChanged()
+                    .collect {
+                        onCurrentValueChanged(it)
+                    }
+            }
 
-            //TODO draw a keyboard pane here with a really small height.
-            // Heirarchical scroll, click.
-            // Left is Slider. Click to toggle to {Slide, Close, Reset}
+            LaunchedEffect(intState.value) {
+                if (intState.value != sliderState.value) {
+                    sliderState.value = intState.value
+                }
+            }
+
 
             val scrollOnLeftPane = remember { mutableStateOf(true) }
-
 
             val knobState = setupListener(
                 knobListenerServiceModal,
                 logger,
                 "intSlider"
             )
+
+            LaunchedEffect(scrollOnLeftPane.value) {
+                if (scrollOnLeftPane.value) {
+                    knobListenerServiceModal.knobTurnEvents().collect {
+                        if (it is InputEvent.NavKnobPressed) {
+                            scrollOnLeftPane.value = false
+                        }
+                        if (it is InputEvent.NavKnobTurned) {
+                            val directionSign = if (it.direction == InputEvent.NavKnobTurned.Direction.RIGHT) { 1 } else { -1 }
+                            sliderState.value = (sliderState.value + (validItems.step * directionSign)).coerceIn(validItems.first, validItems.last)
+                        }
+                    }
+                } else {
+                    knobState.resetIndexToStart()
+                }
+            }
 
             KeyboardViews.KeyboardPane(
                 maxHeight =  0.18F
@@ -853,16 +903,16 @@ class ModalMenuService @Inject constructor(
                         isSmallSize = true,
                         labelColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
                         chipOrientation = ItemChipOrientation.NONE,
-                        onClicked = {}
+                        onClicked = {
+                            //Trap door for debugging.
+                            scrollOnLeftPane.value = !scrollOnLeftPane.value
+                        }
                     )
 
 
                     Box(
                         Modifier.weight(1F)
                     ) {
-
-                        //TODO outline when select mode on.
-
                         if (scrollOnLeftPane.value) {
                             val strokeWidth = ThemeWrapper.ThemeHandle.current.smallItem.highlightWidth
                             val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
@@ -896,9 +946,7 @@ class ModalMenuService @Inject constructor(
                                 ),
                             enabled = true,
                             valueRange = validItems.first.toFloat()..validItems.last.toFloat(),
-                            steps = (
-                                    validItems.last - validItems.first
-                                    ).div(validItems.step),
+                            steps = (validItems.last - validItems.first).div(validItems.step),
                             onValueChangeFinished = null,
                             //colors =
 
@@ -908,47 +956,61 @@ class ModalMenuService @Inject constructor(
                     Row (
                         Modifier.weight(2F)
                     ) {
-                        MenuItem(
-                            label = "Select-scroll",
-                            boxModifier = Modifier,
-                            isSmallSize = true,
-                            chipOrientation = if(scrollOnLeftPane.value) {
-                                ItemChipOrientation.NONE
-                            } else {
-                                ItemChipOrientation.S
-                            },
-                            onClicked = {
-                                if (!scrollOnLeftPane.value) {
-                                    scrollOnLeftPane.value = true
+                        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                            MenuItem(
+                                label = "Select-scroll",
+                                boxModifier = Modifier,
+                                isSmallSize = true,
+                                isSelected = (allocatedIndex == currentIndex) && !(scrollOnLeftPane.value),
+                                chipOrientation = if (scrollOnLeftPane.value) {
+                                    ItemChipOrientation.NONE
+                                } else {
+                                    ItemChipOrientation.S
+                                },
+                                onClicked = CallWhen(currentIndexIs = allocatedIndex){
+                                    if (!scrollOnLeftPane.value) {
+                                        knobState.resetIndexToStart()
+                                        scrollOnLeftPane.value = true
+                                    }
                                 }
-                            }
-                        )
-                        MenuItem(
-                            label = "Use value",
-                            boxModifier = Modifier,
-                            isSmallSize = true,
-                            chipOrientation = if(scrollOnLeftPane.value) {
-                                ItemChipOrientation.NONE
-                            } else {
-                                ItemChipOrientation.S
-                            },
-                            onClicked = {
-
-                            }
-                        )
-                        MenuItem(
-                            label = "Reset",
-                            boxModifier = Modifier,
-                            isSmallSize = true,
-                            chipOrientation = if(scrollOnLeftPane.value) {
-                                ItemChipOrientation.NONE
-                            } else {
-                                ItemChipOrientation.S
-                            },
-                            onClicked = {
-
-                            }
-                        )
+                            )
+                        }
+                        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                            MenuItem(
+                                label = "Use value",
+                                boxModifier = Modifier,
+                                isSmallSize = true,
+                                isSelected = (allocatedIndex == currentIndex) && !(scrollOnLeftPane.value),
+                                chipOrientation = if (scrollOnLeftPane.value) {
+                                    ItemChipOrientation.NONE
+                                } else {
+                                    ItemChipOrientation.S
+                                },
+                                onClicked = CallWhen(currentIndexIs = allocatedIndex){
+                                    if (!scrollOnLeftPane.value) {
+                                        closeModalMenu()
+                                    }
+                                }
+                            )
+                        }
+                        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                            MenuItem(
+                                label = "Reset",
+                                boxModifier = Modifier,
+                                isSmallSize = true,
+                                isSelected = (allocatedIndex == currentIndex) && !(scrollOnLeftPane.value),
+                                chipOrientation = if (scrollOnLeftPane.value) {
+                                    ItemChipOrientation.NONE
+                                } else {
+                                    ItemChipOrientation.S
+                                },
+                                onClicked = CallWhen(currentIndexIs = allocatedIndex){
+                                    if (!scrollOnLeftPane.value) {
+                                        sliderState.value = initialValue
+                                    }
+                                }
+                            )
+                        }
 
                     }
                 }

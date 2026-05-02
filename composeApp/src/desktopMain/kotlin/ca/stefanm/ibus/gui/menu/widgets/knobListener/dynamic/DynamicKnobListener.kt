@@ -77,6 +77,12 @@ class AllocatedIdManager @Inject constructor(
 
     private var currentId : MutableStateFlow<CurrentId> = MutableStateFlow(0)
 
+    fun resetPointerToStart() {
+        if (allocatedIds.isEmpty()) {
+            return
+        }
+        currentId.value = allocatedIds.min()
+    }
     fun incrementPointer() {
         if (allocatedIds.isEmpty()) {
             return
@@ -123,6 +129,9 @@ class KnobObserverBuilderState(
 
     fun getCurrentSelectedItem(): StateFlow<Int> = allocatedIdManager.getCurrentId()
 
+    fun resetIndexToStart() {
+        allocatedIdManager.resetPointerToStart()
+    }
     private fun incrementCurrentIndex() {
         //logState("beforeIncrement")
         allocatedIdManager.incrementPointer()

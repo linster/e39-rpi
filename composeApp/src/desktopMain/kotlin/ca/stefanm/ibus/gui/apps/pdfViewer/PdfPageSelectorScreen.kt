@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -268,11 +269,15 @@ class PdfPageSelectorScreen @Inject constructor(
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = allocatedIndex == currentIndex,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                            modalMenuService.showIntSlider(
-                                flowOf(1),
-                                (1 .. 10 step 1),
-                                {},
-                                "Zoom"
+                            modalMenuService.showFloatSlider(
+                                currentValue = flowOf(rowHeight),
+                                initialValue = rowHeight,
+                                validItems = 0.3F .. 1.1F,
+                                step = 0.1F,
+                                onCurrentValueChanged = {
+                                    onChangeRowHeightFraction(it)
+                                },
+                                hintText = "Zoom"
                             )
                         }
                     )
@@ -285,7 +290,16 @@ class PdfPageSelectorScreen @Inject constructor(
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = allocatedIndex == currentIndex,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-
+                            modalMenuService.showFloatSlider(
+                                hintText = "Aspect",
+                                initialValue = aspectRatio,
+                                validItems = 0.5F .. 2.0F,
+                                step = 0.1F,
+                                onCurrentValueChanged = {
+                                    onChangeDesiredItemAspectRatio(it)
+                                },
+                                currentValue = flowOf(aspectRatio)
+                            )
                         }
                     )
                 }
