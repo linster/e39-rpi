@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
@@ -32,9 +35,13 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
@@ -50,6 +57,7 @@ import dev.nucleusframework.pdfium.PdfPage
 import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.PdfThumbnail
 import dev.nucleusframework.pdfium.rememberPdfReaderState
+import kotlinx.coroutines.flow.flowOf
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
@@ -144,19 +152,32 @@ class PdfPageSelectorScreen @Inject constructor(
         fileName : File?,
         reader : PdfReaderState,
         ) {
+
+        val knobState = KnobObserverBuilderState.setupListener(
+            knobListenerService = knobListenerService,
+            logger,
+            TAG
+        )
+
         Column(
             Modifier.fillMaxSize()
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
         ) {
             BmwSingleLineHeader("Page Selector : ${fileName?.absolutePath}")
 
+            val rowHeightFraction = remember { mutableStateOf(0.5F) }
+            val desiredItemAspectRatio = remember { mutableStateOf(1.0F)}
 
-            Row {
-
-            }
+            ZoomRow(
+                knobState = knobState,
+                rowHeight = rowHeightFraction.value,
+                aspectRatio = desiredItemAspectRatio.value,
+                onChangeRowHeightFraction = { rowHeightFraction.value = it },
+                onChangeDesiredItemAspectRatio = { desiredItemAspectRatio.value = it }
+            )
 
             val items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit> =
-                (0 until reader.pageCount).map { pageNumber ->
+                (0 .. reader.pageCount).map { pageNumber ->
                     { allocatedIndex, currentIndex ->
                         val chipWidth = ThemeWrapper.ThemeHandle.current.smallItem.chipWidth
                         val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
@@ -182,9 +203,10 @@ class PdfPageSelectorScreen @Inject constructor(
                                     Modifier
                                 })
                         ) {
-                            PdfThumbnail(
+                            PdfPage(
                                 state = reader,
                                 pageIndex = pageNumber,
+                                contentScale = ContentScale.Inside,
                                 modifier = Modifier
                             )
                         }
@@ -193,16 +215,85 @@ class PdfPageSelectorScreen @Inject constructor(
 
             SmoothScroll.GridScroll(
                 modifier = Modifier,
-                knobListenerService,
+                knobState = knobState,
                 tag = TAG,
                 logger = logger,
                 items = items,
                 prependGoBackEntry = false,
                 navigationNodeTraverser = navigationNodeTraverser,
-                rowHeightFraction = 0.4F,
-                desiredItemAspectRatio = 1F
+                rowHeightFraction = rowHeightFraction.value,
+                desiredItemAspectRatio = desiredItemAspectRatio.value
             )
         }
+    }
+
+    @Composable
+    fun ZoomRow(
+        knobState : KnobObserverBuilderState,
+        rowHeight : Float,
+        aspectRatio : Float,
+        onChangeRowHeightFraction : (new : Float) -> Unit,
+        onChangeDesiredItemAspectRatio : (new : Float) -> Unit
+    ) {
+        Row(
+            modifier = Modifier
+                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                MenuItem(
+                    boxModifier = Modifier.weight(1F, true),
+                    label = "Close Screen",
+                    isSmallSize = true,
+                    chipOrientation = ItemChipOrientation.N,
+                    isSelected = currentIndex == allocatedIndex,
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                        navigationNodeTraverser.setResultAndGoBack(
+                            thisClass,
+                            PageSelectorResult.NoSelection
+                        )
+                    }
+                )
+            }
+            val measurements = ThemeWrapper.ThemeHandle.current.bigItem
+
+            Row(Modifier.weight(2F)) {
+                KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1f, fill = true),
+                        label = "Zoom (${"%.2f".format(rowHeight)}) ...",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = allocatedIndex == currentIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            modalMenuService.showIntSlider(
+                                flowOf(1),
+                                (1 .. 10 step 1),
+                                {},
+                                "Zoom"
+                            )
+                        }
+                    )
+                }
+                KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1f, fill = true),
+                        label = "Aspect (${"%.2f".format(aspectRatio)}) ...",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = allocatedIndex == currentIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+
+                        }
+                    )
+                }
+
+            }
+
+        }
+
     }
 
 

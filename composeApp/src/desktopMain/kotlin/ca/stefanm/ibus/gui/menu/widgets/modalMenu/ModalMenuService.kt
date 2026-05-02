@@ -1,19 +1,21 @@
 package ca.stefanm.ibus.gui.menu.widgets.modalMenu
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -29,23 +31,17 @@ import ca.stefanm.ibus.gui.map.MapViewer
 import ca.stefanm.ibus.gui.map.OverlayProperties
 import ca.stefanm.ibus.gui.map.PoiOverlay
 import ca.stefanm.ibus.gui.map.widget.MapScale
-import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
-import ca.stefanm.ibus.gui.menu.notifications.toView
 import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard.KeyboardType
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.KeyboardViews
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
-import ca.stefanm.ibus.gui.pim.calendar.views.CalendarDay
-import ca.stefanm.ibus.gui.pim.calendar.views.parts.NorthButtonRow
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.resources.Res
 import ca.stefanm.ibus.resources.notification_alert_circle
@@ -63,14 +59,13 @@ import ca.stefanm.ibus.resources.notification_phone_incoming
 import ca.stefanm.ibus.resources.notification_phone_missed
 import ca.stefanm.ibus.resources.notification_voicemail
 import com.ginsberg.cirkle.circular
-import com.javadocmd.simplelatlng.LatLng
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -78,9 +73,7 @@ import kotlinx.datetime.*
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import org.jetbrains.compose.resources.painterResource
-import org.jxmapviewer.viewer.GeoPosition
 import java.time.DateTimeException
-import java.time.format.DateTimeParseException
 import java.time.format.TextStyle
 import java.util.*
 import javax.inject.Inject
@@ -802,4 +795,169 @@ class ModalMenuService @Inject constructor(
         }
 
     }
+
+    /** Allow the user to play with a zoom slider without having to exit the modal dialog
+     *  and re-enter it to see what every step looks like.
+     */
+    fun showIntSlider(
+        currentValue : Flow<Int>,
+        validItems : IntProgression,
+        onCurrentValueChanged : (Int) -> Unit,
+        hintText : String? = null
+    ) {
+        isKeyboardShowing.value = true
+        _modalMenuOverlay.value = @Composable {
+
+            LaunchedEffect(Unit) {
+                logger.d("DayPicker", "Disabling main listener.")
+                knobListenerServiceMain.disableListener()
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    logger.d("DayPicker", "Re-enabling main listener.")
+                    knobListenerServiceMain.enableListener()
+                }
+            }
+
+            //TODO do a flatmap latest here or something
+            val intState = currentValue.collectAsState(validItems.first)
+            val sliderState = remember() { mutableStateOf(intState.value) }
+
+
+
+            //TODO draw a keyboard pane here with a really small height.
+            // Heirarchical scroll, click.
+            // Left is Slider. Click to toggle to {Slide, Close, Reset}
+
+            val scrollOnLeftPane = remember { mutableStateOf(true) }
+
+
+            val knobState = setupListener(
+                knobListenerServiceModal,
+                logger,
+                "intSlider"
+            )
+
+            KeyboardViews.KeyboardPane(
+                maxHeight =  0.18F
+            ) {
+                Row(
+                    Modifier.padding(
+                        top = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.headerPadding.top,
+                    )
+                ) {
+
+                    MenuItem(
+                        label = (hintText ?: "").uppercase() ,
+                        boxModifier = Modifier.weight(0.7F),
+                        isSmallSize = true,
+                        labelColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
+                        chipOrientation = ItemChipOrientation.NONE,
+                        onClicked = {}
+                    )
+
+
+                    Box(
+                        Modifier.weight(1F)
+                    ) {
+
+                        //TODO outline when select mode on.
+
+                        if (scrollOnLeftPane.value) {
+                            val strokeWidth = ThemeWrapper.ThemeHandle.current.smallItem.highlightWidth
+                            val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
+                            Canvas(
+                                Modifier.fillMaxSize()
+                            ) {
+                                drawRect(
+                                    selectedColor,
+                                    size = size.copy(
+                                        width = size.width - strokeWidth,
+                                        height = size.height - strokeWidth
+                                    ),
+                                    style = Stroke(
+                                        width = strokeWidth
+                                    )
+                                )
+                            }
+                        }
+
+                        Slider(
+                            value = sliderState.value.toFloat(),
+                            onValueChange = {
+                                sliderState.value = it.toInt()
+                                onCurrentValueChanged(it.toInt())
+                                logger.d("WAT SLIDER", "value; ${it.toInt()}")
+                            },
+                            modifier = Modifier
+                                .padding(
+                                    start = ThemeWrapper.ThemeHandle.current.smallItem.chipWidth.dp,
+                                    end = ThemeWrapper.ThemeHandle.current.smallItem.chipWidth.dp
+                                ),
+                            enabled = true,
+                            valueRange = validItems.first.toFloat()..validItems.last.toFloat(),
+                            steps = (
+                                    validItems.last - validItems.first
+                                    ).div(validItems.step),
+                            onValueChangeFinished = null,
+                            //colors =
+
+                        )
+                    }
+
+                    Row (
+                        Modifier.weight(2F)
+                    ) {
+                        MenuItem(
+                            label = "Select-scroll",
+                            boxModifier = Modifier,
+                            isSmallSize = true,
+                            chipOrientation = if(scrollOnLeftPane.value) {
+                                ItemChipOrientation.NONE
+                            } else {
+                                ItemChipOrientation.S
+                            },
+                            onClicked = {
+                                if (!scrollOnLeftPane.value) {
+                                    scrollOnLeftPane.value = true
+                                }
+                            }
+                        )
+                        MenuItem(
+                            label = "Use value",
+                            boxModifier = Modifier,
+                            isSmallSize = true,
+                            chipOrientation = if(scrollOnLeftPane.value) {
+                                ItemChipOrientation.NONE
+                            } else {
+                                ItemChipOrientation.S
+                            },
+                            onClicked = {
+
+                            }
+                        )
+                        MenuItem(
+                            label = "Reset",
+                            boxModifier = Modifier,
+                            isSmallSize = true,
+                            chipOrientation = if(scrollOnLeftPane.value) {
+                                ItemChipOrientation.NONE
+                            } else {
+                                ItemChipOrientation.S
+                            },
+                            onClicked = {
+
+                            }
+                        )
+
+                    }
+                }
+
+            }
+
+
+
+        }
+    }
+
 }

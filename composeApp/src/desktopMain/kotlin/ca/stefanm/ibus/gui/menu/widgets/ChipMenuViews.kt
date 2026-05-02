@@ -258,6 +258,14 @@ fun MenuItem(
                         strokeWidth = highlightWidth
                     )
                 }
+                ItemChipOrientation.S -> {
+                    this.drawLine(
+                        brush = SolidColor(chipColor),
+                        start = Offset(0.0f, (this.size.height - (chipWidth * 0.5)).dp.toPx()),
+                        end = Offset(this.size.width, (this.size.height - (chipWidth * 0.5)).dp.toPx()),
+                        strokeWidth = chipWidth.dp.toPx()
+                    )
+                }
                 else -> {}
             }
 

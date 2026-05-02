@@ -165,11 +165,59 @@ object SmoothScroll {
         }
     }
 
+    @Composable
+    fun GridScroll(
+        modifier: Modifier,
+        //TODO make a version of this where you can pass in a knob state
+        knobListenerService: KnobListenerService,
+        tag : String? = null,
+        logger: Logger,
+        prependGoBackEntry : Boolean = false,
+        goBackEntryProvider : @Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit = @Composable { _, _ -> },
+        navigationNodeTraverser: NavigationNodeTraverser? = null,
+
+        /** How tall should each row be as a fraction of viewport height?
+         * Because the screen is small, we're not going to be fancy with having a responsive layout.
+         * (For example, a 2-wide grid centered in the middle of the layout)
+         * For example, 0.85 means that each row should be as high as 85% of the viewport height.
+         * For having multiple
+         */
+        @FloatRange(0.0, 1.0)
+        rowHeightFraction : Float,
+
+        /** What's the aspect ratio each item should try to achieve?
+         * 1.0F means square.
+         */
+        desiredItemAspectRatio : Float,
+
+        items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
+    ) {
+
+        val knobState = KnobObserverBuilderState.setupListener(
+            knobListenerService = knobListenerService,
+            logger,
+            "${(tag ?: "")} SmoothGrid Scroll"
+        )
+
+        GridScroll(
+            modifier = modifier,
+            knobState = knobState,
+            tag = tag,
+            logger = logger,
+            prependGoBackEntry = prependGoBackEntry,
+            goBackEntryProvider = goBackEntryProvider,
+            navigationNodeTraverser = navigationNodeTraverser,
+            rowHeightFraction = rowHeightFraction,
+            desiredItemAspectRatio = desiredItemAspectRatio,
+            items = items
+        )
+    }
+
 
     @Composable
     fun GridScroll(
         modifier: Modifier,
-        knobListenerService: KnobListenerService,
+        knobState: KnobObserverBuilderState,
         tag : String? = null,
         logger: Logger,
         prependGoBackEntry : Boolean = false,
@@ -197,11 +245,7 @@ object SmoothScroll {
             return
         }
 
-        val knobState = KnobObserverBuilderState.setupListener(
-            knobListenerService = knobListenerService,
-            logger,
-            "${(tag ?: "")} SmoothGrid Scroll"
-        )
+
 
         val scrollState = rememberScrollState(0)
 
