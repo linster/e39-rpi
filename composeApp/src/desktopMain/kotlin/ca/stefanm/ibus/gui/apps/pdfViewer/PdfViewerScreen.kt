@@ -5,20 +5,27 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
+import dev.nucleusframework.pdfium.PdfReaderState
+import dev.nucleusframework.pdfium.rememberPdfReaderState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -30,7 +37,8 @@ class PdfViewerScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val notificationHub: NotificationHub
+    private val notificationHub: NotificationHub,
+    private val loaderUtils: LoaderUtils
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -103,37 +111,25 @@ class PdfViewerScreen @Inject constructor(
                     null
                 }
 
-                if (bytesFromParameters != null) {
-                    PdfViewer(bytesFromParameters)
-                    return@content
-                }
-
-                if (fileName == null) {
+                if (fileName == null && bytesFromParameters == null) {
                     InstructionalPage()
                     return@content
-                } else {
-
-                    val filebytes: State<ByteArray?> = produceState(null, fileName) {
-                        loadFileBytes(fileName).fold(
-                            onSuccess = {
-                                value = it
-                            },
-                            onFailure = {
-                                logger.e(TAG, "Could not open file $fileName", it)
-                                notificationHub.postNotificationBackground(
-                                    Notification(
-                                        topText = "Could not open ${fileName}",
-                                        contentText = "${it.message}"
-                                    )
-                                )
-                                delay(5.seconds)
-                                navigationNodeTraverser.goBack()
-                            }
-                        )
-                    }
-                    filebytes.value?.let { PdfViewer(it) }
                 }
 
+                val fileBytes = loaderUtils.loadFileBytes(fileName, bytesFromParameters)
+
+                val reader = rememberPdfReaderState()
+                fileBytes.value?.let {
+                    loaderUtils.loadPdf(reader, it)
+                }
+
+                //PdfViewer(reader)
+
+                LaunchedEffect(fileBytes) {
+                    fileBytes.value?.let {
+                        PdfPageSelectorScreen.openWithByteArray(navigationNodeTraverser, fileName, it)
+                    }
+                }
             }
 
     }
@@ -160,20 +156,19 @@ class PdfViewerScreen @Inject constructor(
         }
     }
 
-    suspend fun loadFileBytes(
-        filename: File
-    ) : Result<ByteArray> {
-        return runCatching {
-            filename.readBytes()
-        }
-    }
+
 
     @Composable
-    fun PdfViewer(contents : ByteArray) {
+    fun PdfViewer(reader : PdfReaderState) {
         Column(
-            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+            Modifier
+                .fillMaxSize()
+                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
         ) {
 
+            MenuItem(
+                label = "PageCount: ${reader.pageCount}"
+            ) {}
         }
     }
 }

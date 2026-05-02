@@ -33,5 +33,6 @@ data class Notification(
     enum class NotificationDuration(val duration: kotlin.time.Duration) {
         SHORT(3.seconds),
         LONG(8.seconds),
+        INDEFINITE(Duration.INFINITE)
     }
 }

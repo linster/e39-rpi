@@ -131,7 +131,7 @@ object SmoothScroll {
                     placeables.forEachIndexed { index, item ->
                         item.placeRelative(x = 0, y = y)
                         childIndexToPixelsFromTop[index] = y
-                        childIndexToPage[index] = if (y == 0) {
+                        childIndexToPage[index] = if (y == 0 || viewPortHeight.value.toInt() == 0) {
                             0
                         } else {
                             var intermediatePage = y.floorDiv(viewPortHeight.value.toInt())
@@ -192,6 +192,10 @@ object SmoothScroll {
 
         items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
     ) {
+
+        if (items.isEmpty()) {
+            return
+        }
 
         val knobState = KnobObserverBuilderState.setupListener(
             knobListenerService = knobListenerService,

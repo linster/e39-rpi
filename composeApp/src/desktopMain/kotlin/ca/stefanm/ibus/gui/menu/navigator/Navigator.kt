@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfPageSelectorScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.PromptSecretScreen
 import ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
@@ -166,7 +167,8 @@ class NavigationModule {
         filterConnectionsListForDevicesUseCaseDebugScreen: FilterConnectionsListForDevicesUseCaseDebugScreen,
         promptSecretScreen: PromptSecretScreen,
         pdfViewerScreen: PdfViewerScreen,
-        smoothGridScrollTest: SmoothGridScrollTest
+        smoothGridScrollTest: SmoothGridScrollTest,
+        pdfPageSelectorScreen: PdfPageSelectorScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -242,7 +244,8 @@ class NavigationModule {
         filterConnectionsListForDevicesUseCaseDebugScreen,
         promptSecretScreen,
         pdfViewerScreen,
-        smoothGridScrollTest
+        smoothGridScrollTest,
+        pdfPageSelectorScreen
     )
 }
 
