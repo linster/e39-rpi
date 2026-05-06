@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
+import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -63,6 +64,11 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
 
+@ScreenDoc(
+    screenName = "PdfPageSelectorScreen",
+    description = "A multi-up screen that allows users to select a page in a pdf to quickly scroll to"
+)
+@ScreenDoc.AllowsGoBack
 @AutoDiscover
 class PdfPageSelectorScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
@@ -82,7 +88,10 @@ class PdfPageSelectorScreen @Inject constructor(
         const val TAG = "PdfPageSelectorScreen"
 
         //The caller should have already chosen the file, made sure it could be opened, and read it.
-        fun openWithByteArray(navigationNodeTraverser: NavigationNodeTraverser, name : File?, bytes : ByteArray) {
+        fun openWithByteArray(navigationNodeTraverser: NavigationNodeTraverser,
+                              name : File?,
+                              bytes : ByteArray
+        ) {
             navigationNodeTraverser.navigateToNodeWithParameters(
                 PdfPageSelectorScreen::class.java,
                 ScreenParameters(name, bytes)
@@ -92,7 +101,7 @@ class PdfPageSelectorScreen @Inject constructor(
 
     data class ScreenParameters(
         val fileName : File?,
-        val fileBytes : ByteArray
+        val fileBytes : ByteArray,
     ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -114,12 +123,51 @@ class PdfPageSelectorScreen @Inject constructor(
         }
     }
 
-    sealed interface PageSelectorResult {
-        object NoSelection : PageSelectorResult
+    //TODO replay OpenParameters from pdf viewer root so that it has parameters to use for it's pdf viewer after selecting a page.
+    sealed class PageSelectorResult(
+        open val fileName : File?,
+        open val fileBytes : ByteArray,
+    ) {
+        data class NoSelection(
+            override val fileName : File?,
+            override val fileBytes : ByteArray,
+        ) : PageSelectorResult(fileName, fileBytes) {
+            override fun toString(): String {
+                return "NoSelection()"
+            }
+        }
         data class PageSelected(
             val selectedPageNumber : Int,
             val lastPageNumber : Int,
-        )
+            override val fileName : File?,
+            override val fileBytes : ByteArray,
+        ) : PageSelectorResult(fileName, fileBytes) {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as PageSelected
+
+                if (selectedPageNumber != other.selectedPageNumber) return false
+                if (lastPageNumber != other.lastPageNumber) return false
+                if (fileName != other.fileName) return false
+                if (!fileBytes.contentEquals(other.fileBytes)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = selectedPageNumber
+                result = 31 * result + lastPageNumber
+                result = 31 * result + (fileName?.hashCode() ?: 0)
+                result = 31 * result + fileBytes.contentHashCode()
+                return result
+            }
+
+            override fun toString(): String {
+                return "PageSelected(lastPageNumber=$lastPageNumber, selectedPageNumber=$selectedPageNumber)"
+            }
+        }
     }
 
     override val thisClass
@@ -143,14 +191,14 @@ class PdfPageSelectorScreen @Inject constructor(
             loaderUtils.loadPdf(reader, it)
         }
         Selector(
-            params.requestParameters.fileName,
+            params.requestParameters,
             reader
         )
     }
 
     @Composable
     fun Selector(
-        fileName : File?,
+        params : ScreenParameters,
         reader : PdfReaderState,
         ) {
 
@@ -164,7 +212,7 @@ class PdfPageSelectorScreen @Inject constructor(
             Modifier.fillMaxSize()
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
         ) {
-            BmwSingleLineHeader("Page Selector : ${fileName?.absolutePath}")
+            BmwSingleLineHeader("Page Selector : ${params.fileName?.absolutePath}")
 
             val rowHeightFraction = remember { mutableStateOf(0.5F) }
             val desiredItemAspectRatio = remember { mutableStateOf(1.0F)}
@@ -174,7 +222,8 @@ class PdfPageSelectorScreen @Inject constructor(
                 rowHeight = rowHeightFraction.value,
                 aspectRatio = desiredItemAspectRatio.value,
                 onChangeRowHeightFraction = { rowHeightFraction.value = it },
-                onChangeDesiredItemAspectRatio = { desiredItemAspectRatio.value = it }
+                onChangeDesiredItemAspectRatio = { desiredItemAspectRatio.value = it },
+                screenParameters = params
             )
 
             val items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit> =
@@ -187,7 +236,8 @@ class PdfPageSelectorScreen @Inject constructor(
                             openSidebarForPage(
                                 reader = reader,
                                 pageNumber = pageNumber,
-                                lastPageNumber = reader.pageCount
+                                lastPageNumber = reader.pageCount,
+                                screenParameters = params
                             )
                         }
 
@@ -230,6 +280,7 @@ class PdfPageSelectorScreen @Inject constructor(
 
     @Composable
     fun ZoomRow(
+        screenParameters: ScreenParameters,
         knobState : KnobObserverBuilderState,
         rowHeight : Float,
         aspectRatio : Float,
@@ -253,7 +304,7 @@ class PdfPageSelectorScreen @Inject constructor(
                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                         navigationNodeTraverser.setResultAndGoBack(
                             thisClass,
-                            PageSelectorResult.NoSelection
+                            PageSelectorResult.NoSelection(screenParameters.fileName, screenParameters.fileBytes)
                         )
                     }
                 )
@@ -313,6 +364,7 @@ class PdfPageSelectorScreen @Inject constructor(
 
     fun openSidebarForPage(
         reader: PdfReaderState,
+        screenParameters: ScreenParameters,
         pageNumber : Int,
         lastPageNumber: Int
     ) {
@@ -346,7 +398,9 @@ class PdfPageSelectorScreen @Inject constructor(
                                     thisClass,
                                     PageSelectorResult.PageSelected(
                                         selectedPageNumber = pageNumber,
-                                        lastPageNumber = lastPageNumber
+                                        lastPageNumber = lastPageNumber,
+                                        screenParameters.fileName,
+                                        screenParameters.fileBytes
                                     )
                                 )
                             }),

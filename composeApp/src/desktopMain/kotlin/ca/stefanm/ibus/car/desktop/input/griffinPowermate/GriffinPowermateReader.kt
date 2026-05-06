@@ -212,8 +212,8 @@ class GriffinPowermateReader @Inject constructor(
 
 
     private fun getEvEvents(deviceFile: File) : Flow<KtEvEvent>{
+        val inputStream = deviceFile.inputStream()
         return callbackFlow<KtEvEvent> {
-            val inputStream = deviceFile.inputStream()
             val buffer = inputStream.source().buffer()
 
             launch {

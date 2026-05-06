@@ -9,6 +9,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
@@ -35,6 +36,13 @@ class LoaderUtils @Inject constructor(
 
     //TODO use the PDF library to load the file
 
+    @Composable
+    fun loadFileBytes(openParameters: PdfViewerScreen.OpenParameters) {
+        when (openParameters) {
+            is PdfViewerScreen.OpenParameters.Bytes -> loadFileBytes(null, openParameters.bytes)
+            is PdfViewerScreen.OpenParameters.FileName -> loadFileBytes(openParameters.filename, null)
+        }
+    }
 
     @Composable
     fun loadFileBytes(fileName : File?, fileBytes: ByteArray?) : State<ByteArray?>{
