@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -113,6 +114,8 @@ fun MenuItem(
             text = label,
             color = labelColor,
             fontSize = measurements.fontSize,
+//            maxLines = 1,
+//            overflow = TextOverflow.Visible,
             modifier = Modifier
                 .clickable { onClicked() }
                 .then(

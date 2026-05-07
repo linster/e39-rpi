@@ -1,12 +1,20 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,8 +22,13 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfPageSelectorScreen.PageSelectorResult
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
@@ -118,7 +131,7 @@ class PdfViewerScreen @Inject constructor(
                     FilePickerScreen.Companion.FilePickerResult.NoFileChosen -> null
                     else -> null
                 }
-            } else if (params.resultFrom == PdfPageSelectorScreen::class.java && params.result is PdfPageSelectorScreen.PageSelectorResult) {
+            } else if (params.resultFrom == PdfPageSelectorScreen::class.java && params.result is PageSelectorResult) {
                 params.result.fileName
             } else {
                 if (params.requestParameters is OpenParameters.FileName) {
@@ -130,7 +143,7 @@ class PdfViewerScreen @Inject constructor(
 
         val bytesFromParameters = if (params.requestParameters is OpenParameters.Bytes) {
             params.requestParameters.bytes
-        } else if (params.resultFrom == PdfPageSelectorScreen::class.java && params.result is PdfPageSelectorScreen.PageSelectorResult) {
+        } else if (params.resultFrom == PdfPageSelectorScreen::class.java && params.result is PageSelectorResult) {
             params.result.fileBytes
         } else {
             null
@@ -154,7 +167,7 @@ class PdfViewerScreen @Inject constructor(
             fileName = fileName,
             pageSelectorResult = if (
                 params.resultFrom == PdfPageSelectorScreen::class.java &&
-                params.result is PdfPageSelectorScreen.PageSelectorResult
+                params.result is PageSelectorResult
                 ) {
                 params.result
             } else {
@@ -212,7 +225,7 @@ class PdfViewerScreen @Inject constructor(
     fun PdfViewer(
         reader : PdfReaderState,
         fileName : File?,
-        pageSelectorResult: PdfPageSelectorScreen.PageSelectorResult? = null,
+        pageSelectorResult: PageSelectorResult? = null,
         requestSelectPage: () -> Unit
     ) {
         val knobState = KnobObserverBuilderState.setupListener(
@@ -231,13 +244,26 @@ class PdfViewerScreen @Inject constructor(
             )
 
 
-            TopMenuBar(reader = reader,
+            TopMenuBar(
+                reader = reader,
                 knobState = knobState,
-                requestSelectPage = { requestSelectPage() }
+                uiState = UiState.SCROLL_LEFT_RIGHT,
+                zoomPercent = 100,
+                requestSelectPage = { requestSelectPage() },
+                requestZoomPercentSlider = {  },
+                requestZoomFitWidth = {  },
+                requestZoomFitHeight = {  },
+                requestZoomFitPage = {  }
             )
 
 
         }
+    }
+
+    enum class UiState {
+        SCROLL_LEFT_RIGHT,
+        SCROLL_UP_DOWN,
+        SELECT
     }
 
     @Composable
@@ -275,6 +301,15 @@ class PdfViewerScreen @Inject constructor(
     fun TopMenuBar(
         reader: PdfReaderState,
         knobState : KnobObserverBuilderState,
+
+        uiState: UiState,
+        zoomPercent : Int,
+
+        requestZoomPercentSlider : () -> Unit,
+        requestZoomFitWidth : () -> Unit,
+        requestZoomFitHeight : () -> Unit,
+        requestZoomFitPage : () -> Unit,
+
         requestSelectPage : () -> Unit,
     ) {
         // {Close} {Select Page} { Fit : { Width } { Height } { Page } } { Zoom }
@@ -285,30 +320,146 @@ class PdfViewerScreen @Inject constructor(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                MenuItem(
-                    boxModifier = Modifier.weight(1F, true),
-                    label = "Close",
-                    isSmallSize = true,
-                    chipOrientation = ItemChipOrientation.N,
-                    isSelected = currentIndex == allocatedIndex,
-                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                        navigationNodeTraverser.navigateToRoot()
+
+
+            Box(Modifier.width(IntrinsicSize.Min)) {
+
+                @Composable
+                fun Dp.halveIfNotPixelDoubled() : Dp = if (!ThemeWrapper.ThemeHandle.current.isPixelDoubled) (this.value / 2F).dp else this
+
+                val measurements = ThemeWrapper.ThemeHandle.current.smallItem
+                val colors = ThemeWrapper.ThemeHandle.current.colors
+
+
+                Row(
+                    modifier = Modifier
+                        .padding(top = measurements.chipWidth.dp)
+                        .width(IntrinsicSize.Max),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        Modifier
+                            .background(
+                                color = colors.textMenuColorAccent, RoundedCornerShape(50)
+                            )
+                    ) {
+                        //Scroll up-down
+                        Text(
+                            "\uD83D\uDCDC \uD83E\uDC59",
+                            fontSize = measurements.fontSize,
+                            modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+                        )
                     }
-                )
+
+                    Box(
+                        Modifier
+                            .background(
+                                color = colors.textMenuColorAccent, RoundedCornerShape(50)
+                            )
+                    ) {
+                        //Scroll left-right
+                        Text("\uD83D\uDCDC \uD83E\uDC58",
+                            fontSize = measurements.fontSize,
+                            modifier = Modifier.padding(start = 10.dp, end = 10.dp))
+                    }
+
+                    Box(
+                        Modifier
+                            .background(
+                                color = colors.textMenuColorAccent, RoundedCornerShape(50)
+                            )
+                    ) {
+                        //Mouse
+                        Text("\uD83D\uDDB0",
+                            fontSize = measurements.fontSize,
+                            modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+                        )
+                    }
+                }
             }
 
-            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                MenuItem(
-                    boxModifier = Modifier.weight(1F, true),
-                    label = "Select Page...",
-                    isSmallSize = true,
-                    chipOrientation = ItemChipOrientation.N,
-                    isSelected = currentIndex == allocatedIndex,
-                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                        requestSelectPage()
-                    }
-                )
+            Row(
+                Modifier.fillMaxWidth()
+            ) {
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1F, true),
+                        label = "Close",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            navigationNodeTraverser.navigateToRoot()
+                        }
+                    )
+                }
+
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1.5F, true),
+                        label = "\uD83D\uDC07\uD83E\uDE83\uD83D\uDCD1",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            requestSelectPage()
+                        }
+                    )
+                }
+
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1.5F, true),
+                        label = "\uD83D\uDD0D $zoomPercent%",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            requestZoomPercentSlider()
+                        }
+                    )
+                }
+
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1F, true),
+                        label = "\uD83D\uDD0D \uD83E\uDC58",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            requestZoomFitWidth()
+                        }
+                    )
+                }
+
+
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1F, true),
+                        label = "\uD83D\uDD0D \uD83E\uDC59",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            requestZoomFitHeight()
+                        }
+                    )
+                }
+
+
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1F, true),
+                        label = "\uD83D\uDD0D \uD83D\uDDCE",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            requestZoomFitPage()
+                        }
+                    )
+                }
             }
 
             val measurements = ThemeWrapper.ThemeHandle.current.bigItem
