@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfPageSelectorScreen.PageSelectorResult
@@ -45,6 +46,7 @@ import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
@@ -253,7 +255,9 @@ class PdfViewerScreen @Inject constructor(
                 requestZoomPercentSlider = {  },
                 requestZoomFitWidth = {  },
                 requestZoomFitHeight = {  },
-                requestZoomFitPage = {  }
+                requestZoomFitPage = {  },
+                requestTextSearch = {},
+                requestUiModeScroll = {}
             )
 
 
@@ -305,12 +309,16 @@ class PdfViewerScreen @Inject constructor(
         uiState: UiState,
         zoomPercent : Int,
 
+        requestUiModeScroll : (UiState) -> Unit,
+
         requestZoomPercentSlider : () -> Unit,
         requestZoomFitWidth : () -> Unit,
         requestZoomFitHeight : () -> Unit,
         requestZoomFitPage : () -> Unit,
 
         requestSelectPage : () -> Unit,
+
+        requestTextSearch : () -> Unit,
     ) {
         // {Close} {Select Page} { Fit : { Width } { Height } { Page } } { Zoom }
         Row(
@@ -333,7 +341,10 @@ class PdfViewerScreen @Inject constructor(
 
                 Row(
                     modifier = Modifier
-                        .padding(top = measurements.chipWidth.dp)
+                        .padding(
+                            top = (measurements.chipWidth * 0.5).dp.halveIfNotPixelDoubled(),
+                            start = (measurements.chipWidth * 0.5).dp.halveIfNotPixelDoubled(),
+                        )
                         .width(IntrinsicSize.Max),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -347,20 +358,20 @@ class PdfViewerScreen @Inject constructor(
                         Text(
                             "\uD83D\uDCDC \uD83E\uDC59",
                             fontSize = measurements.fontSize,
-                            modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+                            modifier = Modifier.padding(start = 10.dp.halveIfNotPixelDoubled(), end = 10.dp.halveIfNotPixelDoubled())
                         )
                     }
 
                     Box(
                         Modifier
                             .background(
-                                color = colors.textMenuColorAccent, RoundedCornerShape(50)
+                                color = colors.selectedColor, RoundedCornerShape(50)
                             )
                     ) {
                         //Scroll left-right
                         Text("\uD83D\uDCDC \uD83E\uDC58",
                             fontSize = measurements.fontSize,
-                            modifier = Modifier.padding(start = 10.dp, end = 10.dp))
+                            modifier = Modifier.padding(start = 10.dp.halveIfNotPixelDoubled(), end = 10.dp.halveIfNotPixelDoubled()))
                     }
 
                     Box(
@@ -379,25 +390,79 @@ class PdfViewerScreen @Inject constructor(
             }
 
             Row(
-                Modifier.fillMaxWidth()
+                Modifier.wrapContentWidth(Alignment.End)
             ) {
+
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
-                        boxModifier = Modifier.weight(1F, true),
-                        label = "Close",
+                        boxModifier = Modifier,
+                        label = "\uD83D\uDCDC",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                            navigationNodeTraverser.navigateToRoot()
+                            modalMenuService.showModalMenu(
+                                dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                                    menuTopLeft = IntOffset(320, 50),
+                                    menuWidth = 210
+                                ).toNormalModalMenuDimensions(),
+                                menuData = ModalMenu(
+                                    chipOrientation = ItemChipOrientation.W,
+                                    items = listOf(
+                                        ModalMenu.ModalMenuItem(
+                                            title = "\uD83D\uDCDC \uD83E\uDC59",
+                                            onClicked = { requestUiModeScroll(UiState.SCROLL_UP_DOWN) }
+                                        ),
+                                        ModalMenu.ModalMenuItem(
+                                            title = "\uD83D\uDCDC \uD83E\uDC58",
+                                            onClicked = { requestUiModeScroll(UiState.SCROLL_LEFT_RIGHT) }
+                                        ),
+                                    )
+                                )
+                            )
+
                         }
                     )
                 }
 
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
-                        boxModifier = Modifier.weight(1.5F, true),
-                        label = "\uD83D\uDC07\uD83E\uDE83\uD83D\uDCD1",
+                        boxModifier = Modifier,
+                        label = "⏻",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            modalMenuService.showModalMenu(
+                                dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                                    menuTopLeft = IntOffset(50, 50),
+                                    menuWidth = 550
+                                ).toNormalModalMenuDimensions(),
+                                menuData = ModalMenu(
+                                    chipOrientation = ItemChipOrientation.W,
+                                    items = listOf(
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Back to Document",
+                                            onClicked = { modalMenuService.closeModalMenu() }
+                                        ),
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Close PDF Reader",
+                                            onClicked = {
+                                                navigationNodeTraverser.navigateToRoot()
+                                            }
+                                        )
+                                    )
+                                )
+                            )
+
+                        }
+                    )
+                }
+
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier,
+                        label = "\uD83E\uDE83\uD83D\uDCD1",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,
@@ -409,8 +474,22 @@ class PdfViewerScreen @Inject constructor(
 
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
-                        boxModifier = Modifier.weight(1.5F, true),
-                        label = "\uD83D\uDD0D $zoomPercent%",
+                        boxModifier = Modifier,
+                        label = "\uD83D\uDD75", //Sleuth
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            requestTextSearch()
+                        }
+                    )
+                }
+
+
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier,
+                        label = "\uD83D\uDD0D$zoomPercent%",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,
@@ -422,8 +501,8 @@ class PdfViewerScreen @Inject constructor(
 
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
-                        boxModifier = Modifier.weight(1F, true),
-                        label = "\uD83D\uDD0D \uD83E\uDC58",
+                        boxModifier = Modifier,
+                        label = "\uD83D\uDD0D\uD83E\uDC58",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,
@@ -436,8 +515,8 @@ class PdfViewerScreen @Inject constructor(
 
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
-                        boxModifier = Modifier.weight(1F, true),
-                        label = "\uD83D\uDD0D \uD83E\uDC59",
+                        boxModifier = Modifier,
+                        label = "\uD83D\uDD0D\uD83E\uDC59",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,
@@ -450,8 +529,8 @@ class PdfViewerScreen @Inject constructor(
 
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
-                        boxModifier = Modifier.weight(1F, true),
-                        label = "\uD83D\uDD0D \uD83D\uDDCE",
+                        boxModifier = Modifier,
+                        label = "\uD83D\uDD0D\uD83D\uDDCE",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,

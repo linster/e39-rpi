@@ -120,7 +120,14 @@ fun MenuItem(
                 .clickable { onClicked() }
                 .then(
                     when (chipOrientation) { //TODO N, S
-                        ItemChipOrientation.N,
+                        ItemChipOrientation.N -> {
+                            Modifier.padding(
+                                top = (chipWidth).dp.halveIfNotPixelDoubled(),
+                                bottom = highlightWidth.dp.halveIfNotPixelDoubled(),
+                                start = (chipWidth).dp.halveIfNotPixelDoubled(),
+                                end = (chipWidth).dp.halveIfNotPixelDoubled(),
+                                )
+                        }
                         ItemChipOrientation.NW,
                         ItemChipOrientation.NE -> {
                             Modifier.padding(top = (chipWidth).dp.halveIfNotPixelDoubled(), bottom = highlightWidth.dp.halveIfNotPixelDoubled(), start = (chipWidth * 1.5).dp)
