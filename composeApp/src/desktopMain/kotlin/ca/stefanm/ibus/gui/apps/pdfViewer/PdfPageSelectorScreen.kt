@@ -321,7 +321,6 @@ class PdfPageSelectorScreen @Inject constructor(
                         isSelected = allocatedIndex == currentIndex,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                             modalMenuService.showFloatSlider(
-                                currentValue = flowOf(rowHeight),
                                 initialValue = rowHeight,
                                 validItems = 0.3F .. 1.1F,
                                 step = 0.1F,
@@ -348,8 +347,7 @@ class PdfPageSelectorScreen @Inject constructor(
                                 step = 0.1F,
                                 onCurrentValueChanged = {
                                     onChangeDesiredItemAspectRatio(it)
-                                },
-                                currentValue = flowOf(aspectRatio)
+                                }
                             )
                         }
                     )

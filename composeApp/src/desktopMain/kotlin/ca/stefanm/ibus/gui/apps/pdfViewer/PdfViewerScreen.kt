@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -29,6 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Companion
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -53,6 +58,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
+import dev.nucleusframework.pdfium.PdfPage
 import dev.nucleusframework.pdfium.PdfReader
 import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.rememberPdfReaderState
@@ -259,14 +265,14 @@ class PdfViewerScreen @Inject constructor(
                 zoomPercent = (reader.renderScale * 100).toInt(),
                 requestSelectPage = { requestSelectPage() },
                 requestZoomPercentSlider = {
+                    val scale = 100
                     modalMenuService.showFloatSlider(
-                        currentValue = readerRenderScale,
                         initialValue = reader.renderScale,
-                        validItems = ReaderUiState.ZOOM_MIN ..ReaderUiState.ZOOM_MAX,
-                        step = 5F,
+                        validItems = (ReaderUiState.ZOOM_MIN * scale) ..(ReaderUiState.ZOOM_MAX * scale),
+                        step = (5F),
                         hintText = "Zoom",
                         onCurrentValueChanged = {
-                            reader.renderScale = it
+                            reader.renderScale = (it / scale)
                         }
                     )
                 },
@@ -282,12 +288,36 @@ class PdfViewerScreen @Inject constructor(
             BoxWithConstraints(
                 Modifier.fillMaxHeight()
             ) {
-                PdfReader(
-                    state = reader,
-                    modifier = Modifier,
 
-                )
-            }
+                LaunchedEffect(Unit) {
+                    readerUiState.updateViewport(IntSize(
+                        constraints.maxWidth,
+                        constraints.maxHeight
+                    ))
+                }
+                val density = LocalDensity.current
+                val pageWidthPx = with(density) {
+                    ((constraints.maxWidth - 16.dp.toPx()) * reader.renderScale).coerceAtLeast(80.dp.toPx())
+
+                }
+                val pages = (0 until reader.pageCount).toList()
+                LazyColumn(
+                    modifier = Modifier
+                        .onSizeChanged { readerUiState.updateViewport(it)},
+                    state = readerUiState.mainListState,
+                    //contentPadding = contentPadding,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(pages.size, key = { it }) { pageIndex ->
+                        PdfPage(
+                            state = reader,
+                            pageIndex = pageIndex,
+                            modifier = Modifier
+                                .padding(horizontal = 0.dp)
+                                .width(pageWidthPx.dp),
+                        )
+                    }
+                }            }
 
 
         }

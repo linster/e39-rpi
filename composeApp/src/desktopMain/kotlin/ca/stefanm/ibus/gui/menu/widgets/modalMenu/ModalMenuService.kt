@@ -806,7 +806,6 @@ class ModalMenuService @Inject constructor(
      */
 
     fun showFloatSlider(
-        currentValue : Flow<Float>,
         initialValue: Float,
         validItems : ClosedRange<Float>,
         step : Float,
@@ -815,7 +814,6 @@ class ModalMenuService @Inject constructor(
         hintText : String? = null
     ) {
         showIntSlider(
-            currentValue = currentValue.map { (it * precision).toInt() },
             initialValue = (initialValue * precision).toInt(),
             validItems = ((validItems.start * precision).toInt()) .. ((validItems.endInclusive * precision).toInt()) step ((step * precision).toInt()),
             onCurrentValueChanged = { newInt ->
@@ -825,7 +823,6 @@ class ModalMenuService @Inject constructor(
         )
     }
     fun showIntSlider(
-        currentValue : Flow<Int>,
         initialValue : Int,
         validItems : IntProgression,
         onCurrentValueChanged : (Int) -> Unit,
@@ -845,9 +842,7 @@ class ModalMenuService @Inject constructor(
                 }
             }
 
-            val intState = currentValue.collectAsState(validItems.first)
-            val sliderState = remember { mutableStateOf(intState.value) }
-
+            val sliderState = remember { mutableStateOf(initialValue) }
 
             LaunchedEffect(Unit) {
                 snapshotFlow { sliderState.value }
@@ -856,13 +851,6 @@ class ModalMenuService @Inject constructor(
                         onCurrentValueChanged(it)
                     }
             }
-
-            LaunchedEffect(intState.value) {
-                if (intState.value != sliderState.value) {
-                    sliderState.value = intState.value
-                }
-            }
-
 
             val scrollOnLeftPane = remember { mutableStateOf(true) }
 
