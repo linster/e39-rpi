@@ -1,40 +1,43 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfPageSelectorScreen.PageSelectorResult
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
 import ca.stefanm.ibus.di.ApplicationModule
-import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -48,19 +51,18 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
+import dev.nucleusframework.pdfium.PdfReader
 import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.rememberPdfReaderState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.math.log
-import kotlin.time.Duration.Companion.seconds
+import kotlin.math.max
 
 class PdfViewerScreen @Inject constructor(
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
@@ -235,6 +237,11 @@ class PdfViewerScreen @Inject constructor(
             logger,
             TAG
         )
+
+        val readerUiState = ReaderUiState.rememberReaderUiStae(reader)
+
+        val readerRenderScale : Flow<Float> = snapshotFlow { reader.renderScale }
+
         Column(
             Modifier
                 .fillMaxSize()
@@ -242,29 +249,51 @@ class PdfViewerScreen @Inject constructor(
         ) {
 
             HeaderBar(
-                reader, fileName, 3,
+                reader, fileName, readerUiState.currentPage,
             )
 
 
             TopMenuBar(
-                reader = reader,
                 knobState = knobState,
-                uiState = UiState.SCROLL_LEFT_RIGHT,
-                zoomPercent = 100,
+                scrollMode = ScrollMode.SELECT, //todo borrow the ideas in https://github.com/kdroidFilter/ComposePdf/blob/master/example/src/commonMain/kotlin/dev/nucleusframework/pdf/reader/ReaderScreenState.kt
+                zoomPercent = (reader.renderScale * 100).toInt(),
                 requestSelectPage = { requestSelectPage() },
-                requestZoomPercentSlider = {  },
-                requestZoomFitWidth = {  },
-                requestZoomFitHeight = {  },
-                requestZoomFitPage = {  },
+                requestZoomPercentSlider = {
+                    modalMenuService.showFloatSlider(
+                        currentValue = readerRenderScale,
+                        initialValue = reader.renderScale,
+                        validItems = ReaderUiState.ZOOM_MIN ..ReaderUiState.ZOOM_MAX,
+                        step = 5F,
+                        hintText = "Zoom",
+                        onCurrentValueChanged = {
+                            reader.renderScale = it
+                        }
+                    )
+                },
+                requestZoomFitWidth = { readerUiState.fitWidth() },
+                requestZoomFitHeight = { readerUiState.fitHeight() },
+                requestZoomFitPage = { readerUiState.fitPage() },
                 requestTextSearch = {},
-                requestUiModeScroll = {}
+                requestUiModeScroll = { mode ->
+
+                }
             )
+
+            BoxWithConstraints(
+                Modifier.fillMaxHeight()
+            ) {
+                PdfReader(
+                    state = reader,
+                    modifier = Modifier,
+
+                )
+            }
 
 
         }
     }
 
-    enum class UiState {
+    enum class ScrollMode {
         SCROLL_LEFT_RIGHT,
         SCROLL_UP_DOWN,
         SELECT
@@ -303,13 +332,12 @@ class PdfViewerScreen @Inject constructor(
 
     @Composable
     fun TopMenuBar(
-        reader: PdfReaderState,
         knobState : KnobObserverBuilderState,
 
-        uiState: UiState,
+        scrollMode: ScrollMode,
         zoomPercent : Int,
 
-        requestUiModeScroll : (UiState) -> Unit,
+        requestUiModeScroll : (ScrollMode) -> Unit,
 
         requestZoomPercentSlider : () -> Unit,
         requestZoomFitWidth : () -> Unit,
@@ -320,15 +348,12 @@ class PdfViewerScreen @Inject constructor(
 
         requestTextSearch : () -> Unit,
     ) {
-        // {Close} {Select Page} { Fit : { Width } { Height } { Page } } { Zoom }
         Row(
             modifier = Modifier
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
-
 
             Box(Modifier.width(IntrinsicSize.Min)) {
 
@@ -349,10 +374,10 @@ class PdfViewerScreen @Inject constructor(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        Modifier
-                            .background(
-                                color = colors.textMenuColorAccent, RoundedCornerShape(50)
-                            )
+                        Modifier.background(
+                            color = if (scrollMode == ScrollMode.SCROLL_UP_DOWN) { colors.selectedColor } else { colors.textMenuColorAccent },
+                            shape = RoundedCornerShape(50)
+                        )
                     ) {
                         //Scroll up-down
                         Text(
@@ -363,9 +388,9 @@ class PdfViewerScreen @Inject constructor(
                     }
 
                     Box(
-                        Modifier
-                            .background(
-                                color = colors.selectedColor, RoundedCornerShape(50)
+                        Modifier.background(
+                            color = if (scrollMode == ScrollMode.SCROLL_LEFT_RIGHT) { colors.selectedColor } else { colors.textMenuColorAccent },
+                            shape = RoundedCornerShape(50)
                             )
                     ) {
                         //Scroll left-right
@@ -375,10 +400,10 @@ class PdfViewerScreen @Inject constructor(
                     }
 
                     Box(
-                        Modifier
-                            .background(
-                                color = colors.textMenuColorAccent, RoundedCornerShape(50)
-                            )
+                        Modifier.background(
+                            color = if (scrollMode == ScrollMode.SELECT) { colors.selectedColor } else { colors.textMenuColorAccent },
+                            shape = RoundedCornerShape(50)
+                        )
                     ) {
                         //Mouse
                         Text("\uD83D\uDDB0",
@@ -411,11 +436,11 @@ class PdfViewerScreen @Inject constructor(
                                     items = listOf(
                                         ModalMenu.ModalMenuItem(
                                             title = "\uD83D\uDCDC \uD83E\uDC59",
-                                            onClicked = { requestUiModeScroll(UiState.SCROLL_UP_DOWN) }
+                                            onClicked = { requestUiModeScroll(ScrollMode.SCROLL_UP_DOWN) }
                                         ),
                                         ModalMenu.ModalMenuItem(
                                             title = "\uD83D\uDCDC \uD83E\uDC58",
-                                            onClicked = { requestUiModeScroll(UiState.SCROLL_LEFT_RIGHT) }
+                                            onClicked = { requestUiModeScroll(ScrollMode.SCROLL_LEFT_RIGHT) }
                                         ),
                                     )
                                 )
@@ -592,4 +617,106 @@ class PdfViewerScreen @Inject constructor(
         }
 
     }
+
+    @Stable
+    class ReaderUiState(
+        private val reader : PdfReaderState,
+        private val scope : CoroutineScope,
+        val mainListState : LazyListState
+    ) {
+
+        companion object {
+            internal const val ZOOM_MIN = 0.1F
+            internal const val ZOOM_MAX = 4F
+
+            @Composable
+            fun rememberReaderUiStae(
+                reader: PdfReaderState
+            ) : ReaderUiState {
+                val mainListState = rememberLazyListState()
+                val scope = rememberCoroutineScope()
+                return remember(reader, scope) {
+                    ReaderUiState(reader, scope, mainListState)
+                }
+            }
+        }
+
+        /**
+         * Size in device pixels of the reader's viewport (the region where pages scroll).
+         * The reader surface reports its own dimensions here so the state holder can compute
+         * "Fit Width" / "Fit Height" / "Fit Page" scales without peeking into composables.
+         */
+        var contentViewportPx: IntSize by mutableStateOf(IntSize.Zero)
+            private set
+
+        fun updateViewport(size: IntSize) {
+            if (size != contentViewportPx) contentViewportPx = size
+        }
+
+        val entries : List<Int> by derivedStateOf {
+            val count = reader.pageCount
+            List(count) { it }
+        }
+
+
+        /** Top-most fully visible page index, clamped to the current document. */
+        val currentPage: Int by derivedStateOf {
+            val entries = entries
+            val itemIdx = mainListState.firstVisibleItemIndex
+            val pageIdx = entries.getOrNull(itemIdx) ?: 0
+            pageIdx.coerceIn(0, max(0, reader.pageCount - 1))
+        }
+
+        fun jumpToPage(index: Int) {
+            scope.launch {
+                val entries = entries
+                val row = entries.indexOfFirst { it == index }
+                    .coerceAtLeast(0)
+                // scrollToItem teleports to the target; animateScrollToItem would walk through
+                // every intermediate item, rendering each page on the way (slow for large jumps).
+                mainListState.scrollToItem(row)
+            }
+        }
+
+        // ---- Fit actions ----
+        //
+        // Maths: at scale = 1.0, a single page fills the viewport width. Page height = width / aspect.
+        //  - Fit Width   → scale = 1.0 (trivial; page width ≡ viewport width).
+        //  - Fit Height  → scale so that page height == viewport height:
+        //                  pageHeight = (viewportWidth × scale) / aspect = viewportHeight
+        //                  ⇒ scale = viewportHeight × aspect / viewportWidth
+        //  - Fit Page    → page fits entirely: min(Fit-Width, Fit-Height) — i.e. min(1.0, heightScale).
+        //
+        // In Double mode, each rendered page is half-width, so "Fit Height" scales up by 2 to keep
+        // the same on-screen page height — handled here rather than in the rendering code.
+
+        fun fitWidth() {
+            reader.renderScale = 1f.coerceIn(ZOOM_MIN, ZOOM_MAX)
+        }
+
+        fun fitHeight() {
+            scope.launch {
+                val scale = computeFitHeightScale() ?: return@launch
+                reader.renderScale = scale.coerceIn(ZOOM_MIN, ZOOM_MAX)
+            }
+        }
+
+        fun fitPage() {
+            scope.launch {
+                val heightScale = computeFitHeightScale() ?: return@launch
+                val scale = minOf(1f, heightScale).coerceIn(ZOOM_MIN, ZOOM_MAX)
+                reader.renderScale = scale
+            }
+        }
+
+        private suspend fun computeFitHeightScale(): Float? {
+            val vw = contentViewportPx.width.toFloat()
+            val vh = contentViewportPx.height.toFloat()
+            if (vw <= 0f || vh <= 0f || reader.pageCount == 0) return null
+            val aspect = reader.pageSize(0)?.aspectRatio?.takeIf { it > 0f } ?: return null
+            return (vh * aspect) / vw
+        }
+    }
+
+
 }
