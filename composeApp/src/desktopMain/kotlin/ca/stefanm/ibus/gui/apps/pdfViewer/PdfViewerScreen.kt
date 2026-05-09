@@ -1,6 +1,11 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
 
+import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.ScrollbarAdapter
+import androidx.compose.foundation.ScrollbarStyle
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -10,13 +15,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -269,7 +277,7 @@ class PdfViewerScreen @Inject constructor(
                     modalMenuService.showFloatSlider(
                         initialValue = reader.renderScale,
                         validItems = (ReaderUiState.ZOOM_MIN * scale) ..(ReaderUiState.ZOOM_MAX * scale),
-                        step = (5F),
+                        step = 5F,
                         hintText = "Zoom",
                         onCurrentValueChanged = {
                             reader.renderScale = (it / scale)
@@ -301,8 +309,11 @@ class PdfViewerScreen @Inject constructor(
 
                 }
                 val pages = (0 until reader.pageCount).toList()
+
                 LazyColumn(
                     modifier = Modifier
+                        .height(constraints.maxHeight.dp)
+                        .width(constraints.maxWidth.dp)
                         .onSizeChanged { readerUiState.updateViewport(it)},
                     state = readerUiState.mainListState,
                     //contentPadding = contentPadding,
@@ -317,7 +328,46 @@ class PdfViewerScreen @Inject constructor(
                                 .width(pageWidthPx.dp),
                         )
                     }
-                }            }
+                }
+
+                VerticalScrollbar(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .align(Alignment.TopEnd)
+                    ,
+                    adapter = ScrollbarAdapter(readerUiState.mainListState),
+                    style = ScrollbarStyle(
+                        minimalHeight = 16.dp,
+                        thickness = 16.dp,
+                        shape = RoundedCornerShape(8.dp),
+                        hoverDurationMillis = 300,
+                        unhoverColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
+                        hoverColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent
+                    )
+                )
+
+                HorizontalScrollbar(
+                    modifier = Modifier
+                        //.height(16.dp)
+                        .padding(end = 16.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomStart)
+                    ,
+                    adapter = ScrollbarAdapter(readerUiState.mainListState),
+                    style = ScrollbarStyle(
+                        minimalHeight = 16.dp,
+                        thickness = 16.dp,
+                        shape = RoundedCornerShape(8.dp),
+                        hoverDurationMillis = 300,
+                        unhoverColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
+                        hoverColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent
+                    )
+                )
+
+
+
+
+            }
 
 
         }
