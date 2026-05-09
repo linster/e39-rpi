@@ -275,7 +275,7 @@ class PdfViewerScreen @Inject constructor(
                 requestZoomPercentSlider = {
                     val scale = 100
                     modalMenuService.showFloatSlider(
-                        initialValue = reader.renderScale,
+                        initialValue = reader.renderScale * scale,
                         validItems = (ReaderUiState.ZOOM_MIN * scale) ..(ReaderUiState.ZOOM_MAX * scale),
                         step = 5F,
                         hintText = "Zoom",
@@ -310,10 +310,13 @@ class PdfViewerScreen @Inject constructor(
                 }
                 val pages = (0 until reader.pageCount).toList()
 
+                val horizontalScrollState = rememberScrollState()
+
                 LazyColumn(
                     modifier = Modifier
-                        .height(constraints.maxHeight.dp)
                         .width(constraints.maxWidth.dp)
+                        .horizontalScroll(horizontalScrollState)
+                        .padding(bottom = 16.dp)
                         .onSizeChanged { readerUiState.updateViewport(it)},
                     state = readerUiState.mainListState,
                     //contentPadding = contentPadding,
@@ -353,7 +356,7 @@ class PdfViewerScreen @Inject constructor(
                         .fillMaxWidth()
                         .align(Alignment.BottomStart)
                     ,
-                    adapter = ScrollbarAdapter(readerUiState.mainListState),
+                    adapter = ScrollbarAdapter(horizontalScrollState),
                     style = ScrollbarStyle(
                         minimalHeight = 16.dp,
                         thickness = 16.dp,
