@@ -336,6 +336,7 @@ class PdfViewerScreen @Inject constructor(
                 VerticalScrollbar(
                     modifier = Modifier
                         .fillMaxHeight()
+                        .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                         .align(Alignment.TopEnd)
                     ,
                     adapter = ScrollbarAdapter(readerUiState.mainListState),
@@ -354,6 +355,7 @@ class PdfViewerScreen @Inject constructor(
                         //.height(16.dp)
                         .padding(end = 16.dp)
                         .fillMaxWidth()
+                        .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                         .align(Alignment.BottomStart)
                     ,
                     adapter = ScrollbarAdapter(horizontalScrollState),
