@@ -112,6 +112,11 @@ class ApplicationModule {
         const val IBUS_MESSAGE_OUTPUT_CHANNEL = "IbusOutput"
 
         const val KNOB_LISTENER_MAIN = "KnobListenerMain"
+
+        /** Use this if you have scrollable states (like on Map, or PDF viewer)
+         *  and want to disable the menu select knob listener while in a scroll state.
+         */
+        const val KNOB_LISTENER_MAIN_AUX = "KnobListenerMainAux"
         const val KNOB_LISTENER_MODAL = "KnobListenerModal"
 
         private val ibusOutputChannel = Channel<IBusMessage>(capacity = Channel.UNLIMITED)
@@ -193,6 +198,17 @@ class ApplicationModule {
     @ApplicationScope
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     fun provideKnobListenerServiceMain(
+        @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>,
+        identifier: KnobListenerServiceIdentifier,
+        logger: Logger
+    ) : KnobListenerService {
+        return KnobListenerService(inputEvents, identifier, logger)
+    }
+
+    @Provides
+    @ApplicationScope
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN_AUX)
+    fun provideKnobListenerServiceMainAux(
         @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>,
         identifier: KnobListenerServiceIdentifier,
         logger: Logger

@@ -12,7 +12,13 @@ sealed class InputEvent {
 
     object NavKnobPressed : InputEvent()
     data class NavKnobTurned(val clicks : Int, val direction : Direction) : InputEvent() {
-        enum class Direction { LEFT, RIGHT }
+        enum class Direction {
+            LEFT,
+            RIGHT;
+            fun toSign() : Int {
+                return if (this == LEFT) -1 else 1
+            }
+        }
     }
 
     //https://github.com/f1xpl/openauto/wiki/Keyboard-button-bindings

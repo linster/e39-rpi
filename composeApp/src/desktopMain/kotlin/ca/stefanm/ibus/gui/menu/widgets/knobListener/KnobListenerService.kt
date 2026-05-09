@@ -6,6 +6,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MODAL
 import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MAIN
+import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MAIN_AUX
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.lib.logging.Logger
@@ -21,16 +22,20 @@ import javax.inject.Provider
 
 
 //Silly, but a way for the knob listener service to know
-//which one (of two) it is at run time
+//which one (of three) it is at run time
 @ApplicationScope
 class KnobListenerServiceIdentifier @Inject constructor(
     @Named(KNOB_LISTENER_MAIN) private val main : Provider<KnobListenerService>,
+    @Named(KNOB_LISTENER_MAIN_AUX) private val mainAux : Provider<KnobListenerService>,
     @Named(KNOB_LISTENER_MODAL) private val modal : Provider<KnobListenerService>
 ) {
 
     fun getNameFromHashcode(hashCode : Int) : String {
         if (hashCode == main.get().hashCode()) {
             return "KnobListenerMain"
+        }
+        if (hashCode == mainAux.get().hashCode()) {
+            return "KnobListenerMainAux"
         }
         if (hashCode == modal.get().hashCode()) {
             return "KnobListenerModal"
@@ -53,11 +58,15 @@ class KnobListenerService @Inject constructor(
     val tag
         get() = identifier.getNameFromHashcode(this.hashCode())
 
-    fun knobTurnEvents() : Flow<InputEvent> {
+    fun knobTurnEvents(filterEvents : Boolean = true) : Flow<InputEvent> {
         return inputEvents.filter {
-            it is InputEvent.NavKnobPressed || it is InputEvent.NavKnobTurned
+            if (filterEvents) {
+                it is InputEvent.NavKnobPressed || it is InputEvent.NavKnobTurned
+            } else {
+                true
+            }
         }.onEach {
-            logger.d("KnobListenerService", "I am ${tag} and enable is ${listenerEnabled.value}")
+            logger.d(tag, "I am ${tag} and enable is ${listenerEnabled.value}")
         }
             .takeWhile {
                 listenerEnabled.value
@@ -65,12 +74,17 @@ class KnobListenerService @Inject constructor(
             .transform {
             if (it is InputEvent.NavKnobPressed) {
                 emit(it)
+                return@transform
             }
 
             if (it is InputEvent.NavKnobTurned) {
                 repeat(it.clicks) { _ ->
                     emit(InputEvent.NavKnobTurned(1, it.direction))
                 }
+                return@transform
+            }
+            if (!filterEvents) {
+                emit(it)
             }
         }
     }

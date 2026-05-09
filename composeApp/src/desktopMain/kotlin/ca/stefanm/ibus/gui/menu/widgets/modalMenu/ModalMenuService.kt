@@ -854,6 +854,7 @@ class ModalMenuService @Inject constructor(
 
             val scrollOnLeftPane = remember { mutableStateOf(true) }
 
+            //TODO maybe there should be a ModalAux listener too...
             val knobState = setupListener(
                 knobListenerServiceModal,
                 logger,

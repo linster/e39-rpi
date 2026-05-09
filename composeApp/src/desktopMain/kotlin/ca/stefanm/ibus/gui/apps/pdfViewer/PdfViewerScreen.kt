@@ -5,6 +5,8 @@ import androidx.compose.foundation.ScrollbarAdapter
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,21 +17,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.onClick
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Modifier.Companion
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfPageSelectorScreen.PageSelectorResult
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
+import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -67,20 +69,26 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import dev.nucleusframework.pdfium.PdfPage
-import dev.nucleusframework.pdfium.PdfReader
 import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.rememberPdfReaderState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.math.log
 import kotlin.math.max
 
 class PdfViewerScreen @Inject constructor(
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
-    private val knobListenerService: KnobListenerService,
+    private val knobListenerServiceMain: KnobListenerService,
+
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN_AUX)
+    private val knobListenerServiceMainAux: KnobListenerService,
 
     private val modalMenuService: ModalMenuService,
     private val logger: Logger,
@@ -133,7 +141,9 @@ class PdfViewerScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable ((Navigator.IncomingResult?) -> Unit) = content@ { params ->
 
-
+        LaunchedEffect(Unit) {
+            //knobListenerServiceMainAux.disableListener()
+        }
 
         if (params == null) {
             logger.d(TAG, "params were null")
@@ -246,15 +256,124 @@ class PdfViewerScreen @Inject constructor(
         pageSelectorResult: PageSelectorResult? = null,
         requestSelectPage: () -> Unit
     ) {
-        val knobState = KnobObserverBuilderState.setupListener(
-            knobListenerService = knobListenerService,
+
+        val knobStateMain = KnobObserverBuilderState.setupListener(
+            knobListenerService = knobListenerServiceMain,
             logger,
             TAG
         )
 
+        val auxListenerEnabled = knobListenerServiceMainAux.listenerEnabled.collectAsState(true)
+
         val readerUiState = ReaderUiState.rememberReaderUiStae(reader)
 
-        val readerRenderScale : Flow<Float> = snapshotFlow { reader.renderScale }
+        LaunchedEffect(pageSelectorResult) {
+            logger.d(TAG, "Page selector result effect, result is $pageSelectorResult")
+            if (pageSelectorResult != null && pageSelectorResult is PageSelectorResult.PageSelected) {
+                logger.d(TAG, "Page Selector Result effect scrolling to ${pageSelectorResult.selectedPageNumber}")
+                readerUiState.jumpToPage(pageSelectorResult.selectedPageNumber)
+            }
+        }
+
+        val scrollMode = remember { mutableStateOf(ScrollMode.SELECT)}
+        val horizontalScrollState = rememberScrollState()
+
+        LaunchedEffect(scrollMode.value) {
+            logger.d(TAG, "ScrollMode changing ${scrollMode.value}")
+            when (scrollMode.value) {
+                ScrollMode.SCROLL_LEFT_RIGHT,
+                ScrollMode.SCROLL_UP_DOWN -> {
+                    knobListenerServiceMain.disableListener()
+                    knobListenerServiceMainAux.enableListener()
+                }
+                ScrollMode.SELECT -> {
+                    knobListenerServiceMainAux.disableListener()
+                    knobListenerServiceMain.enableListener()
+                }
+            }
+//        }
+//
+//        //Now we gotta hook up the MainAux listener to the scroll bars, and to change the scroll mode.
+//
+//        val scope = rememberCoroutineScope()
+//        LaunchedEffect(auxListenerEnabled.value)
+//        {
+//            scope.launch {
+                //TODO this isn't starting....
+                logger.d(TAG, "WAT knobListenerServiceMainAux")
+                knobListenerServiceMainAux.knobTurnEvents(false)
+                    .onStart {
+                        logger.d(TAG, "knobListenerServiceMainAux subscription started")
+                    }
+                    .onEach {
+                        logger.d(TAG, "knobListenerServiceMainAux got event $it")
+                    }
+                    .onCompletion {
+                        logger.d(TAG, "knobListenerServiceMainAux subscription ended")
+                    }
+                    .collect { event ->
+                        when (event) {
+                            InputEvent.NavKnobPressed -> {
+                                // When this listener is enabled, we are only in a scroll mode,
+                                // so a click must mean transition to click mode.
+                                scrollMode.value = ScrollMode.SELECT
+                            }
+
+                            is InputEvent.NavKnobTurned -> {
+
+                                logger.d("WAT", event.toString())
+                                when (scrollMode.value) {
+                                    ScrollMode.SCROLL_LEFT_RIGHT -> {
+                                        val direction = event.direction.toSign()
+                                        val step = 5F * direction
+                                        horizontalScrollState.scrollBy(step)
+                                    }
+
+                                    ScrollMode.SCROLL_UP_DOWN -> {
+
+                                    }
+
+                                    else -> {}
+                                }
+
+                            }
+
+                            InputEvent.NextTrack -> {
+                                //Scroll to end of scroll bar
+                                when (scrollMode.value) {
+                                    ScrollMode.SCROLL_LEFT_RIGHT -> {
+                                        horizontalScrollState.scrollTo(horizontalScrollState.maxValue)
+                                    }
+
+                                    ScrollMode.SCROLL_UP_DOWN -> {
+
+                                    }
+
+                                    else -> {}
+                                }
+                            }
+
+                            InputEvent.PrevTrack -> {
+                                //Scroll to beginning of scroll bar
+                                when (scrollMode.value) {
+                                    ScrollMode.SCROLL_LEFT_RIGHT -> {
+                                        horizontalScrollState.scrollTo(0)
+                                    }
+
+                                    ScrollMode.SCROLL_UP_DOWN -> {
+
+                                    }
+
+                                    else -> {}
+                                }
+
+                            }
+
+                            else -> {}
+                        }
+                    }
+            }
+        //}
 
         Column(
             Modifier
@@ -268,8 +387,8 @@ class PdfViewerScreen @Inject constructor(
 
 
             TopMenuBar(
-                knobState = knobState,
-                scrollMode = ScrollMode.SELECT, //todo borrow the ideas in https://github.com/kdroidFilter/ComposePdf/blob/master/example/src/commonMain/kotlin/dev/nucleusframework/pdf/reader/ReaderScreenState.kt
+                knobState = knobStateMain,
+                scrollMode = scrollMode.value,
                 zoomPercent = (reader.renderScale * 100).toInt(),
                 requestSelectPage = { requestSelectPage() },
                 requestZoomPercentSlider = {
@@ -287,9 +406,11 @@ class PdfViewerScreen @Inject constructor(
                 requestZoomFitWidth = { readerUiState.fitWidth() },
                 requestZoomFitHeight = { readerUiState.fitHeight() },
                 requestZoomFitPage = { readerUiState.fitPage() },
-                requestTextSearch = {},
+                requestTextSearch = {
+                    reader.renderScale = 2F
+                },
                 requestUiModeScroll = { mode ->
-
+                    scrollMode.value = mode
                 }
             )
 
@@ -310,7 +431,6 @@ class PdfViewerScreen @Inject constructor(
                 }
                 val pages = (0 until reader.pageCount).toList()
 
-                val horizontalScrollState = rememberScrollState()
 
                 LazyColumn(
                     modifier = Modifier
@@ -352,7 +472,6 @@ class PdfViewerScreen @Inject constructor(
 
                 HorizontalScrollbar(
                     modifier = Modifier
-                        //.height(16.dp)
                         .padding(end = 16.dp)
                         .fillMaxWidth()
                         .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
@@ -368,10 +487,6 @@ class PdfViewerScreen @Inject constructor(
                         hoverColor = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent
                     )
                 )
-
-
-
-
             }
 
 
@@ -468,7 +583,9 @@ class PdfViewerScreen @Inject constructor(
                         Text(
                             "\uD83D\uDCDC \uD83E\uDC59",
                             fontSize = measurements.fontSize,
-                            modifier = Modifier.padding(start = 10.dp.halveIfNotPixelDoubled(), end = 10.dp.halveIfNotPixelDoubled())
+                            modifier = Modifier
+                                .clickable { requestUiModeScroll(ScrollMode.SCROLL_UP_DOWN)}
+                                .padding(start = 10.dp.halveIfNotPixelDoubled(), end = 10.dp.halveIfNotPixelDoubled())
                         )
                     }
 
@@ -481,7 +598,9 @@ class PdfViewerScreen @Inject constructor(
                         //Scroll left-right
                         Text("\uD83D\uDCDC \uD83E\uDC58",
                             fontSize = measurements.fontSize,
-                            modifier = Modifier.padding(start = 10.dp.halveIfNotPixelDoubled(), end = 10.dp.halveIfNotPixelDoubled()))
+                            modifier = Modifier
+                                .clickable { requestUiModeScroll(ScrollMode.SCROLL_LEFT_RIGHT)}
+                                .padding(start = 10.dp.halveIfNotPixelDoubled(), end = 10.dp.halveIfNotPixelDoubled()))
                     }
 
                     Box(
@@ -493,7 +612,9 @@ class PdfViewerScreen @Inject constructor(
                         //Mouse
                         Text("\uD83D\uDDB0",
                             fontSize = measurements.fontSize,
-                            modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+                            modifier = Modifier
+                                .clickable { requestUiModeScroll(ScrollMode.SELECT) }
+                                .padding(start = 10.dp, end = 10.dp)
                         )
                     }
                 }
@@ -703,6 +824,8 @@ class PdfViewerScreen @Inject constructor(
 
     }
 
+    // Basically this https://github.com/kdroidFilter/ComposePdf/blob/master/example/src/commonMain/kotlin/dev/nucleusframework/pdf/reader/ReaderScreenState.kt
+    // but without the two-up view. It's a 400*234 screen, no one needs a 2-up view.
     @Stable
     class ReaderUiState(
         private val reader : PdfReaderState,
