@@ -72,6 +72,7 @@ import dev.nucleusframework.pdfium.PdfPage
 import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.rememberPdfReaderState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -291,87 +292,77 @@ class PdfViewerScreen @Inject constructor(
                     knobListenerServiceMain.enableListener()
                 }
             }
-//        }
-//
-//        //Now we gotta hook up the MainAux listener to the scroll bars, and to change the scroll mode.
-//
-//        val scope = rememberCoroutineScope()
-//        LaunchedEffect(auxListenerEnabled.value)
-//        {
-//            scope.launch {
-                //TODO this isn't starting....
-                logger.d(TAG, "WAT knobListenerServiceMainAux")
-                knobListenerServiceMainAux.knobTurnEvents(false)
-                    .onStart {
-                        logger.d(TAG, "knobListenerServiceMainAux subscription started")
-                    }
-                    .onEach {
-                        logger.d(TAG, "knobListenerServiceMainAux got event $it")
-                    }
-                    .onCompletion {
-                        logger.d(TAG, "knobListenerServiceMainAux subscription ended")
-                    }
-                    .collect { event ->
-                        when (event) {
-                            InputEvent.NavKnobPressed -> {
-                                // When this listener is enabled, we are only in a scroll mode,
-                                // so a click must mean transition to click mode.
-                                scrollMode.value = ScrollMode.SELECT
-                            }
 
-                            is InputEvent.NavKnobTurned -> {
-
-                                logger.d("WAT", event.toString())
-                                when (scrollMode.value) {
-                                    ScrollMode.SCROLL_LEFT_RIGHT -> {
-                                        val direction = event.direction.toSign()
-                                        val step = 5F * direction
-                                        horizontalScrollState.scrollBy(step)
-                                    }
-
-                                    ScrollMode.SCROLL_UP_DOWN -> {
-
-                                    }
-
-                                    else -> {}
-                                }
-
-                            }
-
-                            InputEvent.NextTrack -> {
-                                //Scroll to end of scroll bar
-                                when (scrollMode.value) {
-                                    ScrollMode.SCROLL_LEFT_RIGHT -> {
-                                        horizontalScrollState.scrollTo(horizontalScrollState.maxValue)
-                                    }
-
-                                    ScrollMode.SCROLL_UP_DOWN -> {
-
-                                    }
-
-                                    else -> {}
-                                }
-                            }
-
-                            InputEvent.PrevTrack -> {
-                                //Scroll to beginning of scroll bar
-                                when (scrollMode.value) {
-                                    ScrollMode.SCROLL_LEFT_RIGHT -> {
-                                        horizontalScrollState.scrollTo(0)
-                                    }
-
-                                    ScrollMode.SCROLL_UP_DOWN -> {
-
-                                    }
-
-                                    else -> {}
-                                }
-
-                            }
-
-                            else -> {}
+            logger.d(TAG, "WAT knobListenerServiceMainAux")
+            knobListenerServiceMainAux.knobTurnEvents(false)
+                .onStart {
+                    logger.d(TAG, "knobListenerServiceMainAux subscription started")
+                }
+                .onEach {
+                    logger.d(TAG, "knobListenerServiceMainAux got event $it")
+                }
+                .onCompletion {
+                    logger.d(TAG, "knobListenerServiceMainAux subscription ended")
+                }
+                .collect { event ->
+                    when (event) {
+                        InputEvent.NavKnobPressed -> {
+                            // When this listener is enabled, we are only in a scroll mode,
+                            // so a click must mean transition to click mode.
+                            scrollMode.value = ScrollMode.SELECT
                         }
+
+                        is InputEvent.NavKnobTurned -> {
+                            val direction = event.direction.toSign()
+                            when (scrollMode.value) {
+                                ScrollMode.SCROLL_LEFT_RIGHT -> {
+                                    val step = 5F * direction
+                                    horizontalScrollState.scrollBy(step)
+                                }
+
+                                ScrollMode.SCROLL_UP_DOWN -> {
+                                    val step = 5F * direction
+                                    readerUiState.mainListState.scrollBy(step)
+                                }
+                                else -> {}
+                            }
+
+                        }
+
+                        InputEvent.NextTrack -> {
+                            //Scroll to end of scroll bar
+                            when (scrollMode.value) {
+                                ScrollMode.SCROLL_LEFT_RIGHT -> {
+                                    horizontalScrollState.scrollTo(horizontalScrollState.maxValue)
+                                }
+
+                                ScrollMode.SCROLL_UP_DOWN -> {
+
+                                }
+
+                                else -> {}
+                            }
+                        }
+
+                        InputEvent.PrevTrack -> {
+                            //Scroll to beginning of scroll bar
+                            when (scrollMode.value) {
+                                ScrollMode.SCROLL_LEFT_RIGHT -> {
+                                    horizontalScrollState.scrollTo(0)
+                                }
+
+                                ScrollMode.SCROLL_UP_DOWN -> {
+
+                                }
+
+                                else -> {}
+                            }
+
+                        }
+
+                        else -> {}
                     }
+                }
             }
         //}
 
@@ -637,16 +628,29 @@ class PdfViewerScreen @Inject constructor(
                                     menuTopLeft = IntOffset(320, 50),
                                     menuWidth = 210
                                 ).toNormalModalMenuDimensions(),
+                                autoCloseOnSelect = false,
                                 menuData = ModalMenu(
                                     chipOrientation = ItemChipOrientation.W,
                                     items = listOf(
                                         ModalMenu.ModalMenuItem(
                                             title = "\uD83D\uDCDC \uD83E\uDC59",
-                                            onClicked = { requestUiModeScroll(ScrollMode.SCROLL_UP_DOWN) }
+                                            onClicked = {
+                                                //Fix weird race condition by pushing a coroutine
+                                                //to run in a jiffy
+                                                GlobalScope.launch {
+                                                    modalMenuService.closeModalMenu()
+                                                    requestUiModeScroll(ScrollMode.SCROLL_UP_DOWN)
+                                                }
+                                            }
                                         ),
                                         ModalMenu.ModalMenuItem(
                                             title = "\uD83D\uDCDC \uD83E\uDC58",
-                                            onClicked = { requestUiModeScroll(ScrollMode.SCROLL_LEFT_RIGHT) }
+                                            onClicked = {
+                                                GlobalScope.launch {
+                                                    modalMenuService.closeModalMenu()
+                                                    requestUiModeScroll(ScrollMode.SCROLL_LEFT_RIGHT)
+                                                }
+                                            }
                                         ),
                                     )
                                 )
