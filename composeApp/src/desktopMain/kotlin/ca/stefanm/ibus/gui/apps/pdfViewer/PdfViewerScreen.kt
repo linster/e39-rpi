@@ -142,10 +142,6 @@ class PdfViewerScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable ((Navigator.IncomingResult?) -> Unit) = content@ { params ->
 
-        LaunchedEffect(Unit) {
-            //knobListenerServiceMainAux.disableListener()
-        }
-
         if (params == null) {
             logger.d(TAG, "params were null")
             InstructionalPage()
@@ -210,20 +206,6 @@ class PdfViewerScreen @Inject constructor(
                 )
             })
 
-//                LaunchedEffect(fileBytes) {
-//                    fileBytes.value?.let {
-//                        if (params.requestParameters is OpenParameters) {
-//                            PdfPageSelectorScreen.openWithByteArray(
-//                                navigationNodeTraverser,
-//                                fileName,
-//                                it,
-//                                replayParams = params.requestParameters
-//                            )
-//                        }
-//                    }
-//                }
-
-
     }
 
     @Composable
@@ -263,8 +245,6 @@ class PdfViewerScreen @Inject constructor(
             logger,
             TAG
         )
-
-        val auxListenerEnabled = knobListenerServiceMainAux.listenerEnabled.collectAsState(true)
 
         val readerUiState = ReaderUiState.rememberReaderUiStae(reader)
 
@@ -775,55 +755,7 @@ class PdfViewerScreen @Inject constructor(
                     )
                 }
             }
-
-            val measurements = ThemeWrapper.ThemeHandle.current.bigItem
-
-//            Row(Modifier.weight(2F)) {
-//                KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
-//                    MenuItem(
-//                        boxModifier = Modifier.weight(1f, fill = true),
-//                        label = "Zoom (${"%.2f".format(rowHeight)}) ...",
-//                        isSmallSize = true,
-//                        chipOrientation = ItemChipOrientation.N,
-//                        isSelected = allocatedIndex == currentIndex,
-//                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-//                            modalMenuService.showFloatSlider(
-//                                currentValue = flowOf(rowHeight),
-//                                initialValue = rowHeight,
-//                                validItems = 0.3F .. 1.1F,
-//                                step = 0.1F,
-//                                onCurrentValueChanged = {
-//                                    onChangeRowHeightFraction(it)
-//                                },
-//                                hintText = "Zoom"
-//                            )
-//                        }
-//                    )
-//                }
-//                KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
-//                    MenuItem(
-//                        boxModifier = Modifier.weight(1f, fill = true),
-//                        label = "Aspect (${"%.2f".format(aspectRatio)}) ...",
-//                        isSmallSize = true,
-//                        chipOrientation = ItemChipOrientation.N,
-//                        isSelected = allocatedIndex == currentIndex,
-//                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-//                            modalMenuService.showFloatSlider(
-//                                hintText = "Aspect",
-//                                initialValue = aspectRatio,
-//                                validItems = 0.5F .. 2.0F,
-//                                step = 0.1F,
-//                                onCurrentValueChanged = {
-//                                    onChangeDesiredItemAspectRatio(it)
-//                                },
-//                                currentValue = flowOf(aspectRatio)
-//                            )
-//                        }
-//                    )
-//                }
-//
-//            }
-
+            
         }
 
     }
