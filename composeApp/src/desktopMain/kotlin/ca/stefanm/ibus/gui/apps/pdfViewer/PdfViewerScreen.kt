@@ -268,7 +268,7 @@ class PdfViewerScreen @Inject constructor(
 
         val readerUiState = ReaderUiState.rememberReaderUiStae(reader)
 
-        LaunchedEffect(pageSelectorResult) {
+        LaunchedEffect(readerUiState.entries) {
             logger.d(TAG, "Page selector result effect, result is $pageSelectorResult")
             if (pageSelectorResult != null && pageSelectorResult is PageSelectorResult.PageSelected) {
                 logger.d(TAG, "Page Selector Result effect scrolling to ${pageSelectorResult.selectedPageNumber}")
@@ -887,6 +887,7 @@ class PdfViewerScreen @Inject constructor(
                 // scrollToItem teleports to the target; animateScrollToItem would walk through
                 // every intermediate item, rendering each page on the way (slow for large jumps).
                 mainListState.scrollToItem(row)
+//                mainListState.animateScrollToItem(row)
             }
         }
 
