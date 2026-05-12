@@ -945,7 +945,7 @@ class ModalMenuService @Inject constructor(
                     Row (
                         Modifier.weight(2F)
                     ) {
-                        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                         KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                             MenuItem(
                                 label = "Select-scroll",
                                 boxModifier = Modifier,
@@ -1005,9 +1005,33 @@ class ModalMenuService @Inject constructor(
                 }
 
             }
+        }
+    }
 
 
-
+    fun showArbitraryToolbar(
+        tag : String,
+        contents: @Composable (
+            knobListenerServiceModal : KnobListenerService,
+            logger : Logger,
+        ) -> Unit
+    ) {
+        isKeyboardShowing.value = true
+        _modalMenuOverlay.value = @Composable {
+            LaunchedEffect(Unit) {
+                logger.d(tag, "Disabling main listener.")
+                knobListenerServiceMain.disableListener()
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    logger.d(tag, "Re-enabling main listener.")
+                    knobListenerServiceMain.enableListener()
+                }
+            }
+            contents(
+                knobListenerServiceModal,
+                logger,
+            )
         }
     }
 
