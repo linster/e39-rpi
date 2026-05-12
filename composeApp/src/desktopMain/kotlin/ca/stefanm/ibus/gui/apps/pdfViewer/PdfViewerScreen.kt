@@ -358,7 +358,8 @@ class PdfViewerScreen @Inject constructor(
             reader,
             rootScope,
             modalMenuService,
-            logger
+            logger,
+            navigationNodeTraverser
         )
         Column(
             Modifier
@@ -924,7 +925,7 @@ class PdfViewerScreen @Inject constructor(
             val text: String
         )
 
-        private suspend fun doSearch(
+        private fun doSearch(
             query: String,
             ignoreCase : Boolean = true
         ): List<SearchHit> {
@@ -933,7 +934,7 @@ class PdfViewerScreen @Inject constructor(
                 //TODO let the UI specify which pages to search.
                 //TODO the ibus.pdf seems to break search for anything past page 1?
                 for (page in 0 until reader.pageCount) {
-                    val layout = reader.pageTextLayout(page)
+                    val layout = layouts[page]
                     if (layout == null) {
                         logger.d(TAG, "No Layout for page $page for query $query")
                         continue

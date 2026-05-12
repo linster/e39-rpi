@@ -84,7 +84,7 @@ class BMWMainMenu @Inject constructor(
 //                            PdfViewerScreen::class.java
 //                        )
                         PdfViewerScreen.openWithFilename(navigationNodeTraverser,
-                            File("/home/stefan/Downloads/ibus.pdf")
+                            File("/home/stefan/Downloads/Quiz1_assignment.pdf")
                             )
                     }
                 ),
