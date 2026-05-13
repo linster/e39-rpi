@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
+package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState

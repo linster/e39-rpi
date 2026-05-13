@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfPageSelectorScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.PromptSecretScreen
 import ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen

@@ -1,35 +1,25 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
+package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
@@ -44,22 +34,15 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
-import ca.stefanm.ibus.gui.pim.calendar.views.editor.CalendarEventEditScreen
-import ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.lib.logging.Logger
 import dev.nucleusframework.pdfium.PdfPage
 import dev.nucleusframework.pdfium.PdfReaderState
-import dev.nucleusframework.pdfium.PdfThumbnail
 import dev.nucleusframework.pdfium.rememberPdfReaderState
-import kotlinx.coroutines.flow.flowOf
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
@@ -215,7 +198,7 @@ class PdfPageSelectorScreen @Inject constructor(
             BmwSingleLineHeader("Page Selector : ${params.fileName?.absolutePath}")
 
             val rowHeightFraction = remember { mutableStateOf(0.5F) }
-            val desiredItemAspectRatio = remember { mutableStateOf(1.0F)}
+            val desiredItemAspectRatio = remember { mutableStateOf(1.0F) }
 
             ZoomRow(
                 knobState = knobState,
@@ -226,8 +209,8 @@ class PdfPageSelectorScreen @Inject constructor(
                 screenParameters = params
             )
 
-            val items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit> =
-                (0 .. reader.pageCount).map { pageNumber ->
+            val items: List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit> =
+                (0..reader.pageCount).map { pageNumber ->
                     { allocatedIndex, currentIndex ->
                         val chipWidth = ThemeWrapper.ThemeHandle.current.smallItem.chipWidth
                         val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
@@ -246,26 +229,28 @@ class PdfPageSelectorScreen @Inject constructor(
                                 .padding((chipWidth * 2).dp)
                                 .clickable { onClick() }
                                 .wrapContentHeight(unbounded = true)
-                                .then(if (currentIndex == allocatedIndex) {
-                                    Modifier.border(
-                                        chipWidth.dp, selectedColor
-                                    )
-                                } else {
-                                    Modifier
-                                })
+                                .then(
+                                    if (currentIndex == allocatedIndex) {
+                                        Modifier.border(
+                                            chipWidth.dp, selectedColor
+                                        )
+                                    } else {
+                                        Modifier.Companion
+                                    }
+                                )
                         ) {
                             PdfPage(
                                 state = reader,
                                 pageIndex = pageNumber,
                                 contentScale = ContentScale.Inside,
-                                modifier = Modifier
+                                modifier = Modifier.Companion
                             )
                         }
                     }
                 }
 
             SmoothScroll.GridScroll(
-                modifier = Modifier,
+                modifier = Modifier.Companion,
                 knobState = knobState,
                 tag = TAG,
                 logger = logger,
@@ -322,7 +307,7 @@ class PdfPageSelectorScreen @Inject constructor(
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                             modalMenuService.showFloatSlider(
                                 initialValue = rowHeight,
-                                validItems = 0.3F .. 1.1F,
+                                validItems = 0.3F..1.1F,
                                 step = 0.1F,
                                 onCurrentValueChanged = {
                                     onChangeRowHeightFraction(it)
@@ -343,7 +328,7 @@ class PdfPageSelectorScreen @Inject constructor(
                             modalMenuService.showFloatSlider(
                                 hintText = "Aspect",
                                 initialValue = aspectRatio,
-                                validItems = 0.5F .. 2.0F,
+                                validItems = 0.5F..2.0F,
                                 step = 0.1F,
                                 onCurrentValueChanged = {
                                     onChangeDesiredItemAspectRatio(it)
@@ -371,7 +356,10 @@ class PdfPageSelectorScreen @Inject constructor(
                 Modifier
                     .fillMaxSize()
                     .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                    .border(width = 4.dp.halveIfNotPixelDoubled(), color = ThemeWrapper.ThemeHandle.current.colors.sideMenuBorder)
+                    .border(
+                        width = 4.dp.halveIfNotPixelDoubled(),
+                        color = ThemeWrapper.ThemeHandle.current.colors.sideMenuBorder
+                    )
                     .shadow(4.dp.halveIfNotPixelDoubled(), RectangleShape),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {

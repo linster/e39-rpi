@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
+package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -7,22 +7,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -31,25 +26,20 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfPageSelectorScreen.PageSelectorResult
+import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
-import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.KeyboardViews
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import dev.nucleusframework.pdfium.PageSize
@@ -446,7 +436,10 @@ internal class SearchState(
                 Modifier
                     .fillMaxSize()
                     .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                    .border(width = 4.dp.halveIfNotPixelDoubled(), color = ThemeWrapper.ThemeHandle.current.colors.sideMenuBorder)
+                    .border(
+                        width = 4.dp.halveIfNotPixelDoubled(),
+                        color = ThemeWrapper.ThemeHandle.current.colors.sideMenuBorder
+                    )
                     .shadow(4.dp.halveIfNotPixelDoubled(), RectangleShape),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -467,7 +460,7 @@ internal class SearchState(
                     }
                 }
 
-                val results : Map<Int, List<SearchHit>> = (sessionState.value as? SearchSession.SearchFinished)?.let {
+                val results: Map<Int, List<SearchHit>> = (sessionState.value as? SearchSession.SearchFinished)?.let {
                     it.results
                         .groupBy { it.page }
                         .mapValues { entry -> entry.value.sortedBy { it.rect.top } }
@@ -505,7 +498,7 @@ internal class SearchState(
                                     PdfPage(
                                         state = reader,
                                         pageIndex = pageKey,
-                                        modifier = Modifier
+                                        modifier = Modifier.Companion
                                         //.matchParentSize()
                                     )
                                     val items = results[pageKey]
@@ -514,7 +507,7 @@ internal class SearchState(
                                         LaunchedEffect(pageKey) { pageSize = reader.pageSize(pageKey) }
                                         val size = pageSize ?: return@Box
                                         Canvas(Modifier.matchParentSize()) {
-                                            val sx = this.size.width  / size.widthPoints
+                                            val sx = this.size.width / size.widthPoints
                                             val sy = this.size.height / size.heightPoints
                                             items.forEach { item ->
                                                 val r = item.rect
