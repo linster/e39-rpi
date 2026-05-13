@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="23" />
+    <bytecodeTargetLevel target="22" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="e39-RPi.autoDiscovery.main" options="-proc:none" />
+      <module name="e39-RPi.autoDiscovery.test" options="-proc:none" />
+      <module name="e39-RPi.composeApp.main" options="-proc:none" />
+      <module name="e39-RPi.composeApp.test" options="-proc:none" />
+    </option>
   </component>
 </project>
