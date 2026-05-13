@@ -1,11 +1,11 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.ScrollbarAdapter
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
@@ -22,16 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,8 +34,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -61,34 +57,25 @@ import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
-import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
-import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
-import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.KeyboardViews
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
-import dev.nucleusframework.pdfium.PageTextLayout
+import dev.nucleusframework.pdfium.PageSize
 import dev.nucleusframework.pdfium.PdfPage
 import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.rememberPdfReaderState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.math.max
-import kotlin.time.Duration
 
 class PdfViewerScreen @Inject constructor(
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
@@ -309,7 +296,7 @@ class PdfViewerScreen @Inject constructor(
                                 }
 
                                 ScrollMode.SCROLL_UP_DOWN -> {
-                                    val step = 5F * direction
+                                    val step = 10F * direction
                                     readerUiState.mainListState.scrollBy(step)
                                 }
                                 else -> {}
@@ -325,7 +312,7 @@ class PdfViewerScreen @Inject constructor(
                                 }
 
                                 ScrollMode.SCROLL_UP_DOWN -> {
-
+                                    //TODO scroll to next page
                                 }
 
                                 else -> {}
@@ -340,7 +327,7 @@ class PdfViewerScreen @Inject constructor(
                                 }
 
                                 ScrollMode.SCROLL_UP_DOWN -> {
-
+                                    //TODO scroll to prev page
                                 }
 
                                 else -> {}
@@ -359,8 +346,14 @@ class PdfViewerScreen @Inject constructor(
             rootScope,
             modalMenuService,
             logger,
-            navigationNodeTraverser
+            navigationNodeTraverser,
+            readerUiState
         )
+
+        LaunchedEffect(readerUiState.currentPage) {
+            searchState.setCurrentReaderPage(readerUiState.currentPage)
+        }
+
         Column(
             Modifier
                 .fillMaxSize()
@@ -432,13 +425,40 @@ class PdfViewerScreen @Inject constructor(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(pages.size, key = { it }) { pageIndex ->
-                        PdfPage(
-                            state = reader,
-                            pageIndex = pageIndex,
-                            modifier = Modifier
+                        //TODO draw the highlights if we got any from the search results.
+
+                        Box(
+                            Modifier
                                 .padding(horizontal = 0.dp)
-                                .width(pageWidthPx.dp),
-                        )
+                                .width(pageWidthPx.dp)
+                        ) {
+                            PdfPage(
+                                state = reader,
+                                pageIndex = pageIndex,
+                                modifier = Modifier
+                                    //.matchParentSize()
+                            )
+                            val items = searchState.highlights.value.filter { it.page == pageIndex }
+                            if (items.isNotEmpty()) {
+                                var pageSize by remember { mutableStateOf<PageSize?>(null) }
+                                LaunchedEffect(pageIndex) { pageSize = reader.pageSize(pageIndex) }
+                                val size = pageSize ?: return@Box
+                                Canvas(Modifier.matchParentSize()) {
+                                    val sx = this.size.width  / size.widthPoints
+                                    val sy = this.size.height / size.heightPoints
+                                    items.forEach { item ->
+                                        val r = item.rect
+                                        drawRect(
+                                            color = Color(0x665AB1FF),
+                                            topLeft = Offset(r.left * sx, r.top * sy),
+                                            size = Size((r.right - r.left) * sx, (r.bottom - r.top) * sy),
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+
                     }
                 }
 
@@ -777,482 +797,6 @@ class PdfViewerScreen @Inject constructor(
         }
 
     }
-
-    // Basically this https://github.com/kdroidFilter/ComposePdf/blob/master/example/src/commonMain/kotlin/dev/nucleusframework/pdf/reader/ReaderScreenState.kt
-    // but without the two-up view. It's a 400*234 screen, no one needs a 2-up view.
-    @Stable
-    class ReaderUiState(
-        private val reader : PdfReaderState,
-        private val scope : CoroutineScope,
-        val mainListState : LazyListState
-    ) {
-
-        companion object {
-            internal const val ZOOM_MIN = 0.1F
-            internal const val ZOOM_MAX = 4F
-
-            @Composable
-            fun rememberReaderUiState(
-                reader: PdfReaderState,
-                scope: CoroutineScope,
-            ) : ReaderUiState {
-                val mainListState = rememberLazyListState()
-                return remember(reader, scope) {
-                    ReaderUiState(reader, scope, mainListState)
-                }
-            }
-        }
-
-        /**
-         * Size in device pixels of the reader's viewport (the region where pages scroll).
-         * The reader surface reports its own dimensions here so the state holder can compute
-         * "Fit Width" / "Fit Height" / "Fit Page" scales without peeking into composables.
-         */
-        var contentViewportPx: IntSize by mutableStateOf(IntSize.Zero)
-            private set
-
-        fun updateViewport(size: IntSize) {
-            if (size != contentViewportPx) contentViewportPx = size
-        }
-
-        val entries : List<Int> by derivedStateOf {
-            val count = reader.pageCount
-            List(count) { it }
-        }
-
-
-        /** Top-most fully visible page index, clamped to the current document. */
-        val currentPage: Int by derivedStateOf {
-            val entries = entries
-            val itemIdx = mainListState.firstVisibleItemIndex
-            val pageIdx = entries.getOrNull(itemIdx) ?: 0
-            pageIdx.coerceIn(0, max(0, reader.pageCount - 1))
-        }
-
-        fun jumpToPage(index: Int) {
-            scope.launch {
-                val entries = entries
-                val row = entries.indexOfFirst { it == index }
-                    .coerceAtLeast(0)
-                // scrollToItem teleports to the target; animateScrollToItem would walk through
-                // every intermediate item, rendering each page on the way (slow for large jumps).
-                mainListState.scrollToItem(row)
-//                mainListState.animateScrollToItem(row)
-            }
-        }
-
-        // ---- Fit actions ----
-        //
-        // Maths: at scale = 1.0, a single page fills the viewport width. Page height = width / aspect.
-        //  - Fit Width   → scale = 1.0 (trivial; page width ≡ viewport width).
-        //  - Fit Height  → scale so that page height == viewport height:
-        //                  pageHeight = (viewportWidth × scale) / aspect = viewportHeight
-        //                  ⇒ scale = viewportHeight × aspect / viewportWidth
-        //  - Fit Page    → page fits entirely: min(Fit-Width, Fit-Height) — i.e. min(1.0, heightScale).
-        //
-        // In Double mode, each rendered page is half-width, so "Fit Height" scales up by 2 to keep
-        // the same on-screen page height — handled here rather than in the rendering code.
-
-        fun fitWidth() {
-            reader.renderScale = 1f.coerceIn(ZOOM_MIN, ZOOM_MAX)
-        }
-
-        fun fitHeight() {
-            scope.launch {
-                val scale = computeFitHeightScale() ?: return@launch
-                reader.renderScale = scale.coerceIn(ZOOM_MIN, ZOOM_MAX)
-            }
-        }
-
-        fun fitPage() {
-            scope.launch {
-                val heightScale = computeFitHeightScale() ?: return@launch
-                val scale = minOf(1f, heightScale).coerceIn(ZOOM_MIN, ZOOM_MAX)
-                reader.renderScale = scale
-            }
-        }
-
-        private suspend fun computeFitHeightScale(): Float? {
-            val vw = contentViewportPx.width.toFloat()
-            val vh = contentViewportPx.height.toFloat()
-            if (vw <= 0f || vh <= 0f || reader.pageCount == 0) return null
-            val aspect = reader.pageSize(0)?.aspectRatio?.takeIf { it > 0f } ?: return null
-            return (vh * aspect) / vw
-        }
-    }
-
-    @Stable
-    class SearchState(
-        private val reader : PdfReaderState,
-        private val scope : CoroutineScope,
-        private val modalMenuService: ModalMenuService,
-        private val logger: Logger,
-        private val navigationNodeTraverser: NavigationNodeTraverser
-    ) {
-        companion object {
-            @Composable
-            fun rememberSearchState(
-                reader: PdfReaderState,
-                rootScope : CoroutineScope,
-                modalMenuService: ModalMenuService,
-                logger: Logger,
-                navigationNodeTraverser: NavigationNodeTraverser
-            ): SearchState {
-                return remember(reader, rootScope, modalMenuService, logger) {
-                    SearchState(reader, rootScope, modalMenuService, logger, navigationNodeTraverser)
-                }
-            }
-        }
-
-
-        //UI for this should have a few options.
-        // Scroll to prev, next search Hit
-        // but maybe also summarize them on the modal menu sidebar for where they all are?
-        // Yes. Let's do a sidebar list where each page with a result has a preview, and you can smooth-scroll
-        // that sidebar
-        ///
-        ///  { Side Bar}
-        ///    [page 1]
-        ///   | result 1
-        ///   | result 2
-        ///    [page n]
-        //    | result 3
-        ///   / Go Back
-
-        data class SearchHit(
-            val page: Int,
-            val rect: Rect,
-            val text: String
-        )
-
-        private fun doSearch(
-            query: String,
-            ignoreCase : Boolean = true
-        ): List<SearchHit> {
-            //if (query.length < 2) return emptyList()
-            return buildList {
-                //TODO let the UI specify which pages to search.
-                //TODO the ibus.pdf seems to break search for anything past page 1?
-                for (page in 0 until reader.pageCount) {
-                    val layout = layouts[page]
-                    if (layout == null) {
-                        logger.d(TAG, "No Layout for page $page for query $query")
-                        continue
-                    }
-                    for (i in 0 until layout.rectCount) {
-                        val run = layout.text(i)
-                        if (run.contains(query, ignoreCase)) {
-                            val pageH = layout.pageSize.heightPoints
-                            val rect = Rect(
-                                left = layout.left(i),
-                                top = pageH - layout.top(i),
-                                right = layout.right(i),
-                                bottom = pageH - layout.bottom(i)
-                            )
-                            add(SearchHit(page = page, rect = rect, text = run))
-                        }
-                    }
-                }
-            }
-        }
-
-        sealed interface SearchSession {
-            object EmptySession : SearchSession
-            open class TextEntered(open val query : String) : SearchSession
-            data class SearchFinished(
-                override val query : String,
-                val results : List<SearchHit>
-            ) : SearchSession, TextEntered(query = query)
-        }
-
-        //This might have to be a stateFlow that is collected...
-        val sessionState : MutableStateFlow<SearchSession> =
-            MutableStateFlow(SearchSession.EmptySession)
-
-        fun openSearchUi() {
-
-            scope.launch {
-
-                modalMenuService.showModalWaitDialog(
-                    throbber = true,
-                    headerText = "Fetching Page Text Layouts",
-                    isCancellable = true,
-                    autoCloseTimeout = Duration.INFINITE,
-                    onCancel = { modalMenuService.closeModalMenu() ; navigationNodeTraverser.navigateToRoot() }
-                )
-                // Fetch the page text layouts ahead of time before opening the toolbar.
-                fetchPageTextLayouts()
-
-                modalMenuService.closeModalMenu()
-
-                openSessionToolbar()
-
-            }
-
-        }
-
-        private lateinit var layouts : Map<Int, PageTextLayout>
-
-        private suspend fun fetchPageTextLayouts() {
-            val layouts = buildMap {
-                for (page in 0 until reader.pageCount) {
-                    val layout = reader.pageTextLayout(page)
-                    if (layout == null) {
-                        logger.d(TAG, "No Layout for page $page")
-                        continue
-                    }
-                    put(page, layout)
-                }
-            }
-            this.layouts = layouts
-        }
-
-        //TODO selecting a result needs to do something.
-
-        private fun openSessionToolbar() {
-            val tag = "SearchToolbar"
-            modalMenuService.showArbitraryToolbar(tag) { knobListenerServiceModal, logger ->
-
-                val knobState = setupListener(
-                    knobListenerServiceModal,
-                    logger,
-                    tag
-                )
-
-                val state = sessionState.collectAsState(
-                    SearchSession.EmptySession
-                )
-                val searchQuery by derivedStateOf {
-                    val value = state.value
-                    if (value is SearchSession.TextEntered) {
-                        value.query
-                    } else {
-                        ""
-                    }
-                }
-                val resultCount by derivedStateOf {
-                    val value = state.value
-                    if (value is SearchSession.SearchFinished) {
-                        value.results.size
-                    } else {
-                        0
-                    }
-                }
-
-                KeyboardViews.KeyboardPane(
-                    maxHeight =  0.32F
-                ) {
-                    val theme = ThemeWrapper.ThemeHandle.current
-                    Column(
-                        Modifier
-                        ,
-                        Arrangement.Bottom
-                    ) {
-
-                        Row {
-
-                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                                MenuItem(
-                                    label = "Close",
-                                    boxModifier = Modifier,
-                                    isSmallSize = true,
-                                    isSelected = (allocatedIndex == currentIndex),
-                                    chipOrientation = ItemChipOrientation.N,
-                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        modalMenuService.closeModalMenu()
-                                    }
-                                )
-                            }
-
-                            Box(
-                                Modifier
-                                    .weight(1.22F, true)
-                                    .border(
-                                        width = if (theme.isPixelDoubled) 2.dp else 1.dp,
-                                        color = theme.colors.menuBackground
-                                    )
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            theme.centerGradientWithEdgeHighlight.backgroundGradientColorList
-                                        )
-                                    )
-                            ) {
-                                Text(
-                                    text = searchQuery,
-                                    color = theme.colors.TEXT_WHITE,
-                                    fontSize = theme.smallItem.fontSize,
-                                    modifier = Modifier.padding(
-                                        top = (theme.smallItem.chipWidth).dp.halveIfNotPixelDoubled(),
-                                        bottom = theme.smallItem.highlightWidth.dp.halveIfNotPixelDoubled(),
-                                        start = (theme.smallItem.chipWidth).dp.halveIfNotPixelDoubled(),
-                                        end = (theme.smallItem.chipWidth).dp.halveIfNotPixelDoubled(),
-                                    )
-                                )
-
-                            }
-                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                                MenuItem(
-                                    label = "✐",
-                                    boxModifier = Modifier,
-                                    isSmallSize = true,
-                                    isSelected = (allocatedIndex == currentIndex),
-                                    chipOrientation = ItemChipOrientation.N,
-                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        enterQueryText()
-                                    }
-                                )
-                            }
-                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                                MenuItem(
-                                    label = "Run Search",
-                                    boxModifier = Modifier,
-                                    isSmallSize = true,
-                                    isSelected = (allocatedIndex == currentIndex),
-                                    chipOrientation = ItemChipOrientation.N,
-                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        scope.launch {
-                                            val results = doSearch(searchQuery)
-                                            logger.d(TAG, "Query: $searchQuery, Results: $results")
-                                            logger.d(TAG, "reader: ${reader.isLoading}")
-                                            logger.d(TAG, "reader: ${reader.pageCount}")
-                                            logger.d(TAG, "reader: ${reader.error}")
-//                                            logger.d(TAG, "reader: ${reader.pageText(0)}")
-                                            sessionState.value = SearchSession.SearchFinished(
-                                                query = searchQuery,
-                                                results = results
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-
-                        Row {
-
-                            MenuItem(
-                                label = if (resultCount == 1) "$resultCount result" else "$resultCount results",
-                                boxModifier = Modifier.weight(1F, true),
-                                isSmallSize = true,
-                                isSelected = false,
-                                chipOrientation = ItemChipOrientation.NONE,
-                                onClicked = {}
-                            )
-
-                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                                MenuItem(
-                                    label = "🚫💡 ",
-                                    boxModifier = Modifier,
-                                    isSmallSize = true,
-                                    isSelected = (allocatedIndex == currentIndex),
-                                    chipOrientation = ItemChipOrientation.S,
-                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        scope.launch { clearHighlights() }
-                                    }
-                                )
-                            }
-
-                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                                MenuItem(
-                                    label = "💡 Current Page",
-                                    boxModifier = Modifier,
-                                    isSmallSize = true,
-                                    isSelected = (allocatedIndex == currentIndex),
-                                    chipOrientation = ItemChipOrientation.S,
-                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        scope.launch {
-                                            highlightResultsCurrentPage()
-                                        }
-                                    }
-                                )
-                            }
-
-                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                                MenuItem(
-                                    label = "💡 All Pages",
-                                    boxModifier = Modifier,
-                                    isSmallSize = true,
-                                    isSelected = (allocatedIndex == currentIndex),
-                                    chipOrientation = ItemChipOrientation.S,
-                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        scope.launch {
-                                            highlightResultsAllPages()
-                                        }
-                                    }
-                                )
-                            }
-
-                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                                MenuItem(
-                                    label = "Explore 💡...",
-                                    boxModifier = Modifier,
-                                    isSmallSize = true,
-                                    isSelected = (allocatedIndex == currentIndex),
-                                    chipOrientation = ItemChipOrientation.S,
-                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                        scope.launch {
-                                            showExploreResultsPane()
-                                        }
-                                    }
-                                )
-                            }
-
-
-                            //TODO buttons for "Draw selector box on current page"
-                            //TODO button for "Draw selector box on all pages"
-
-                            //TODO explore results -> open side menu.
-                        }
-                    }
-                }
-            }
-        }
-
-        private fun enterQueryText() {
-            //Called from an onClick handler in openSessionToolbar
-
-            modalMenuService.closeModalMenu()
-            modalMenuService.showKeyboard(
-                Keyboard.KeyboardType.FULL,
-                prefilled = if (sessionState is SearchSession.TextEntered) {
-                    sessionState.query
-                } else { "" },
-                onCloseWithoutEntry = {
-                    scope.launch { openSessionToolbar() }
-                },
-                onTextEntered = { new ->
-                    scope.launch {
-                        sessionState.value = if (new.isBlank()) {
-                            SearchSession.EmptySession
-                        } else {
-                            SearchSession.TextEntered(query = new)
-                        }
-                        openSessionToolbar()
-                    }
-                }
-            )
-        }
-
-        private fun highlightResultsAllPages() {
-
-        }
-
-        private fun highlightResultsCurrentPage() {
-
-        }
-
-        private fun clearHighlights() {
-
-        }
-
-        private fun showExploreResultsPane() {
-
-        }
-
-
-
-    }
-
-
 
 
 }

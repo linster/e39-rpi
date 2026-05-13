@@ -328,6 +328,25 @@ class ModalMenuService @Inject constructor(
             darkenBackground = darkenBackground
         )
     }
+    fun showSidePaneOverlayWithKnobListener(
+        darkenBackground : Boolean = false,
+        contents : @Composable (knobListenerServiceModal : KnobListenerService) -> Unit
+    ) {
+        _sidePaneOverlay.value = SidePaneOverlay(
+            ui = @Composable {
+                LaunchedEffect(Unit) {
+                    knobListenerServiceMain.disableListener()
+                }
+                DisposableEffect(Unit) {
+                    onDispose {
+                        knobListenerServiceMain.enableListener()
+                    }
+                }
+                contents(knobListenerServiceModal)
+            },
+            darkenBackground = darkenBackground
+        )
+    }
 
     fun closeSidePaneOverlay(clearDarkening : Boolean = false) {
         _sidePaneOverlay.value = _sidePaneOverlay.value.copy(
