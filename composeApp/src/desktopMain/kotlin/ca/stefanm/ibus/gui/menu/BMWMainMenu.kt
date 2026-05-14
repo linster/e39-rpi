@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
 import ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
@@ -116,13 +117,21 @@ class BMWMainMenu @Inject constructor(
             val scope = rememberCoroutineScope()
             val seItems = listOf(
                 TextMenuItem(
-                    title = "Screen Off",
+                    title = "Video Player",
                     onClicked = {
-                        scope.launch {
-                            screenPowerWriter.turnScreenOff()
-                        }
+                        navigationNodeTraverser.navigateToNode(
+                            VideoPlayerAppHomeScreen::class.java
+                        )
                     }
                 ),
+//                TextMenuItem(
+//                    title = "Screen Off",
+//                    onClicked = {
+//                        scope.launch {
+//                            screenPowerWriter.turnScreenOff()
+//                        }
+//                    }
+//                ),
                 TextMenuItem(
                     title = "Back to BMW",
                     onClicked = {

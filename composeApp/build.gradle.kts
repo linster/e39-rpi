@@ -145,6 +145,17 @@ kotlin {
 
             //PDF
             implementation("dev.nucleusframework:pdfium:149.0.7802.0b")
+
+            //FileKit for filemanager, picker
+            val fileKitversion = "0.14.1"
+            implementation("io.github.vinceglb:filekit-core:${fileKitversion}")
+            implementation("io.github.vinceglb:filekit-dialogs:${fileKitversion}")
+            implementation("io.github.vinceglb:filekit-dialogs-compose:${fileKitversion}")
+            implementation("io.github.vinceglb:filekit-coil:${fileKitversion}")
+
+            // Media player
+            implementation("io.github.kdroidfilter:composemediaplayer:0.10.0")
+
         }
     }
 }

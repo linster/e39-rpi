@@ -1,12 +1,21 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
 
+import androidx.compose.runtime.Composable
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
+import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.lib.logging.Logger
+import io.github.vinceglb.filekit.dialogs.FileKitType
 import java.io.File
 import javax.inject.Inject
 
+@AutoDiscover
 class FilePickerScreen @Inject constructor(
-
-) {
+    private val modalMenuService: ModalMenuService,
+    private val logger: Logger
+) : NavigationNode<FilePickerScreen.Companion.FilePickerResult>{
 
     companion object {
         sealed interface FilePickerResult {
@@ -14,18 +23,51 @@ class FilePickerScreen @Inject constructor(
             data class FileChosen(val file : File) : FilePickerResult
         }
 
-        sealed interface FilerPickerParameters
+        data class FilerPickerParameters(
+            val rootDirectory : File,
+            val allowNavigateUpFromRoot : Boolean = false,
+            val allowNavigateIntoChildFolders : Boolean = true,
 
-        fun showFilePickerMRUSelect(
+            val filter : Filter,
+
+            val allowRenameFiles : Boolean = true,
+            val allowMakeDirectory : Boolean = true,
+        ) {
+            sealed interface Filter {
+                object AllFilesAndFolders : Filter
+                object AllFilesOnly : Filter
+                data class MatchingFileTypes(
+                    val types : List<FileKitType>
+                )
+            }
+        }
+
+        fun showFilePickerMRUSelectPane(
             navigationNodeTraverser: NavigationNodeTraverser,
             parameters: FilerPickerParameters,
             onQuickFileSelect : (FilePickerResult) -> Unit) {
 
 
         }
+
+        fun showFilePickerScreen(
+            navigationNodeTraverser: NavigationNodeTraverser,
+            parameters: FilerPickerParameters,
+        ) {
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                FilePickerScreen::class.java,
+                parameters
+            )
+        }
     }
 
+    override val thisClass: Class<out NavigationNode<FilePickerResult>>
+        get() = FilePickerScreen::class.java
 
     //TODO the file picker should first allow the user to open a sidebar to select a file. That sidebar should have
     // TODO a most recently used list per filetype, then the user could optionally pick that file, or open th efull blown screen.
+
+    override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
+
+    }
 }

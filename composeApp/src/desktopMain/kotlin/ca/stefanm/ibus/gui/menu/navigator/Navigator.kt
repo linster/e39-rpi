@@ -1,8 +1,11 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.PromptSecretScreen
 import ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
 import ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
@@ -168,7 +171,10 @@ class NavigationModule {
         promptSecretScreen: PromptSecretScreen,
         pdfViewerScreen: PdfViewerScreen,
         smoothGridScrollTest: SmoothGridScrollTest,
-        pdfPageSelectorScreen: PdfPageSelectorScreen
+        pdfPageSelectorScreen: PdfPageSelectorScreen,
+        filePickerScreen: FilePickerScreen,
+        videoPlayerScreen: VideoPlayerScreen,
+        videoPlayerAppHomeScreen: VideoPlayerAppHomeScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -245,7 +251,10 @@ class NavigationModule {
         promptSecretScreen,
         pdfViewerScreen,
         smoothGridScrollTest,
-        pdfPageSelectorScreen
+        pdfPageSelectorScreen,
+        filePickerScreen,
+        videoPlayerScreen,
+        videoPlayerAppHomeScreen
     )
 }
 
