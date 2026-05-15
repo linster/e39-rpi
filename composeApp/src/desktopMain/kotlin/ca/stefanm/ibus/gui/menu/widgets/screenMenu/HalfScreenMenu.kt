@@ -23,11 +23,12 @@ object HalfScreenMenu {
      */
     @Composable
     fun BottomHalfTwoColumn(
+        modifier: Modifier = Modifier,
         leftItems: List<MenuItem>,
         rightItems: List<MenuItem>
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(align = Alignment.Bottom)
         ) {

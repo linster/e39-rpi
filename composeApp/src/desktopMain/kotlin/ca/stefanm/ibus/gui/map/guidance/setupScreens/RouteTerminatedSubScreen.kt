@@ -107,7 +107,7 @@ class RouteTerminatedSubScreen @Inject constructor(
 
 
             HalfScreenMenu.BottomHalfTwoColumn(
-                listOf(
+                leftItems = listOf(
                     TextMenuItem(
                         title = "Go Back",
                         onClicked = { navigationNodeTraverser
@@ -116,7 +116,7 @@ class RouteTerminatedSubScreen @Inject constructor(
                         }
                     )
                 ),
-                listOf(
+                rightItems = listOf(
                     TextMenuItem(
                         title = "Start New Route...",
                         onClicked = {

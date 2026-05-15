@@ -2,6 +2,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ class VideoPlayerAppHomeScreen @Inject constructor(
             BmwSingleLineHeader("Video Player")
 
             HalfScreenMenu.BottomHalfTwoColumn(
+                modifier = Modifier.fillMaxHeight(),
                 leftItems = listOf(
                     TextMenuItem(
                         "Go Back",

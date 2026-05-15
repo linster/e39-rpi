@@ -830,7 +830,8 @@ class ModalMenuService @Inject constructor(
         step : Float,
         precision : Int = 1000,
         onCurrentValueChanged : (Float) -> Unit,
-        hintText : String? = null
+        hintText : String? = null,
+        onClose : () -> Unit = {}
     ) {
         showIntSlider(
             initialValue = (initialValue * precision).toInt(),
@@ -838,14 +839,36 @@ class ModalMenuService @Inject constructor(
             onCurrentValueChanged = { newInt ->
                 onCurrentValueChanged(newInt.div(precision.toFloat()))
             },
-            hintText = hintText
+            hintText = hintText,
+            onClose = onClose
+        )
+    }
+
+    fun showDoubleSlider(
+        initialValue: Double,
+        validItems : ClosedRange<Double>,
+        step : Double,
+        precision : Int = 1000,
+        onCurrentValueChanged : (Double) -> Unit,
+        hintText : String? = null,
+        onClose : () -> Unit = {}
+    ) {
+        showIntSlider(
+            initialValue = (initialValue * precision).toInt(),
+            validItems = ((validItems.start * precision).toInt()) .. ((validItems.endInclusive * precision).toInt()) step ((step * precision).toInt()),
+            onCurrentValueChanged = { newInt ->
+                onCurrentValueChanged(newInt.div(precision.toDouble()))
+            },
+            hintText = hintText,
+            onClose = onClose
         )
     }
     fun showIntSlider(
         initialValue : Int,
         validItems : IntProgression,
         onCurrentValueChanged : (Int) -> Unit,
-        hintText : String? = null
+        hintText : String? = null,
+        onClose : () -> Unit = {}
     ) {
         isKeyboardShowing.value = true
         _modalMenuOverlay.value = @Composable {
@@ -858,6 +881,7 @@ class ModalMenuService @Inject constructor(
                 onDispose {
                     logger.d("IntSlider", "Re-enabling main listener.")
                     knobListenerServiceMain.enableListener()
+                    onClose()
                 }
             }
 
