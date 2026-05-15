@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -56,6 +57,8 @@ class VideoPlayerScreen @Inject constructor(
 
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerService: KnobListenerService,
+
+    private val bottomBarController: BottomBarController
 
 ) : NavigationNode<VideoPlayerScreen.VideoPlayerScreenResult> {
 
@@ -123,6 +126,8 @@ class VideoPlayerScreen @Inject constructor(
             )
             return@contents
         }
+
+        bottomBarController.HideBottomPanelWhileInComposition()
 
         //https://github.com/kdroidFilter/ComposeMediaPlayer
 

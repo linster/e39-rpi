@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -42,7 +43,6 @@ class MenuWindow @Inject constructor(
     private val navigator: Navigator,
     private val logger: Logger,
     private val notificationHub: NotificationHub,
-    private val bottomBarClock: BottomBarClock,
     private val modalMenuService: ModalMenuService,
 
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
@@ -54,6 +54,8 @@ class MenuWindow @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val themeConfigurationStorage: ThemeConfigurationStorage,
     @Named(ApplicationModule.INPUT_EVENTS_WRITER) val inputEventsWriter : MutableSharedFlow<ca.stefanm.ibus.car.bordmonitor.input.InputEvent>,
+
+    private val bottomBarController: BottomBarController
 ) : WindowManager.E39Window {
 
     companion object {
@@ -103,15 +105,7 @@ class MenuWindow @Inject constructor(
                 darkenBackgroundOnSideSplitDisplay = modalMenuService.sidePaneOverlay.collectAsState().value.darkenBackground,
                 sideSplitVisible = modalMenuService.sidePaneOverlay.collectAsState().value.ui != null,
                 bottomPanel = {
-                    val scope = rememberCoroutineScope()
-                    scope.launch {
-                        bottomBarClock.updateValues()
-                    }
-
-                    BmwFullScreenBottomBar(
-                        date = bottomBarClock.dateFlow.collectAsState().value,
-                        time = bottomBarClock.timeFlow.collectAsState().value,
-                    )
+                    bottomBarController.BottomPanelView()
                 },
                 topPopIn = {
                     notificationHub.currentNotification.collectAsState().value?.toView()
