@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.di
 
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FilePickerMruPane
 import ca.stefanm.ibus.gui.chat.service.MatrixChatModule
 import ca.stefanm.ibus.gui.map.MapDatabaseModule
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
@@ -82,6 +83,8 @@ interface ApplicationComponent {
 
     @Named(ApplicationModule.KNOB_LISTENER_MODAL)
     fun knobListenerServiceModal() : KnobListenerService
+
+    fun filePickerMruPane() : FilePickerMruPane
 
     fun modalMenuService() : ModalMenuService
     fun notificationHub() : NotificationHub

@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -250,7 +251,8 @@ class VideoPlayerScreen @Inject constructor(
                         Overlay(
                             inputParams,
                             playerState,
-                            onRequestOverlayClose = { overlayEnabled = false }
+                            onRequestOverlayClose = { overlayEnabled = false },
+                            onRequestOverlayOpen = { overlayEnabled = true }
                         )
                     }
                 }
@@ -263,10 +265,13 @@ class VideoPlayerScreen @Inject constructor(
     fun BoxScope.Overlay(
         params: VideoPlayerScreenParams,
         playerState: VideoPlayerState,
-        onRequestOverlayClose : () -> Unit
+        onRequestOverlayClose : () -> Unit,
+        onRequestOverlayOpen : () -> Unit
     ) {
         //VideoPlayerSurface makes this a full size box.
 
+
+        val scope = rememberCoroutineScope()
         val knobState = setupListener(
             knobListenerService,
             logger,
@@ -361,9 +366,9 @@ class VideoPlayerScreen @Inject constructor(
                         isSelected = (allocatedIndex == currentIndex),
                         chipOrientation = ItemChipOrientation.S,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            onRequestOverlayClose()
                             playerState.pause()
-                            GlobalScope.launch {
-                                onRequestOverlayClose()
+                            scope.launch {
                                 modalMenuService.showIntSlider(
                                     hintText = "Seek",
                                     initialValue = playerState.sliderPos.toInt(),
@@ -378,6 +383,7 @@ class VideoPlayerScreen @Inject constructor(
                                             playerState.play()
                                             delay(5)
                                             playerState.pause()
+                                            onRequestOverlayOpen()
                                         }
 
                                     }

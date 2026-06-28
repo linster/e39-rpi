@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerParameterProvider
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -14,12 +16,16 @@ import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.lib.logging.Logger
 import java.io.File
 import javax.inject.Inject
 
 @AutoDiscover
 class VideoPlayerAppHomeScreen @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val filePickerParameterProvider: FilePickerParameterProvider,
+    private val logger : Logger,
+    private val filePickerScreen: FilePickerScreen
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = VideoPlayerAppHomeScreen::class.java
@@ -56,7 +62,14 @@ class VideoPlayerAppHomeScreen @Inject constructor(
                     ),
                     TextMenuItem(
                         "Open File Picker",
-                        onClicked = {}
+                        onClicked = {
+                            filePickerScreen.showFilePickerMRUSelectPane(
+                                filePickerParameterProvider.getVideoPlayerParameters(),
+                                onQuickFileSelect = {
+                                    logger.d("VideoPlayerScreen", "selected file $it")
+                                }
+                            )
+                        }
                     )
                 )
             )
