@@ -1,6 +1,7 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
 
 import androidx.compose.runtime.Composable
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters.Filter
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FilePickerMruPane
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -40,6 +41,9 @@ class FilePickerScreen @Inject constructor(
             sealed interface Filter {
                 object AllFilesAndFolders : Filter
                 object AllFilesOnly : Filter
+                object Videos : Filter
+                object Pictures : Filter
+                object Pdf : Filter
                 data class MatchingFileTypes(
                     val types : List<FileType>
                 ) : Filter
@@ -87,9 +91,7 @@ class FilePickerParameterProvider @Inject constructor(
             rootDirectory = File("/home/stefan/Videos"),
             allowNavigateUpFromRoot = false,
             allowNavigateIntoChildFolders = true,
-            filter = FilePickerScreen.Companion.FilerPickerParameters.Filter.MatchingFileTypes(
-                listOf(FileType.Movie)
-            ),
+            filter = Filter.Videos,
             allowRenameFiles = false,
             allowMakeDirectory = false
         )

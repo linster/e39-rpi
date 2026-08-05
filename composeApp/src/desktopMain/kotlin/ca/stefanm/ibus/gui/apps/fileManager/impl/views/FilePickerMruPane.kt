@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilePickerResult
@@ -105,7 +107,7 @@ class FilePickerMruPane @Inject constructor(
                         })
                         add(@Composable { allocatedIndex, currentIndex ->
                             MenuItem(
-                                label = "Clear Recents for file type",
+                                label = "Clear Recent ${parameters.filter.toString().toUpperCase(Locale.current)}",
                                 chipOrientation = ItemChipOrientation.W,
                                 isSelected = allocatedIndex == currentIndex,
                                 onClicked = CallWhen(currentIndexIs = allocatedIndex) {

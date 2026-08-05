@@ -33,39 +33,22 @@ import javax.inject.Inject
 
 class MostRecentlyUsedRepo @Inject constructor(
     private val logger : Logger,
-    private val configurationStorage: ConfigurationStorage
 ) {
 
     companion object {
         const val TAG = "MostRecentlyUsedRepo"
     }
 
-    private val repoFile = File(e39BaseFolder, "fileManagerMru.conf")
-
-    val repo = Config { addSpec(FileManagerMru) }
-        .from.hocon.file(repoFile, optional = true)
-
-    init {
-        if (!repoFile.exists()) {
-            repo.toHocon.toFile(repoFile)
-        }
-        repo.afterSet { item, value ->
-            logger.d(TAG, "Setting ${item.name} to $value")
-            repo.toHocon.toFile(repoFile)
-        }
-    }
 
     data class RecentEntry(
-        val file : File,
+        val absolutePath : File,
         val type: FileType
     ) {
 
     }
 
     fun addFileToMru(file: File, type: FileType) {
-        repo[FileManagerMru.entries] = repo[FileManagerMru.entries].toMutableSet().let {  it.add(
-            MostRecentlyUsedRepo.RecentEntry(file, type)
-        ) ; it}
+        //TODO call the interface
     }
 
     fun getEntriesForType(filter: FilePickerScreen.Companion.FilerPickerParameters.Filter) : Flow<List<RecentEntry>> {
@@ -75,24 +58,12 @@ class MostRecentlyUsedRepo @Inject constructor(
     }
 
     fun clearAll() {
-        repo[FileManagerMru.entries] = emptySet()
+
     }
 
     fun clearType(filter : FilePickerScreen.Companion.FilerPickerParameters.Filter) {
-        if (filter is FilePickerScreen.Companion.FilerPickerParameters.Filter.MatchingFileTypes) {
-            repo[FileManagerMru.entries] = repo[FileManagerMru.entries].filterNot { it.type in filter.types }.toSet()
-        } else {
-            clearAll()
-        }
+
     }
 
 }
-
-private object FileManagerMru : ConfigSpec() {
-
-    val entries by optional(
-        emptySet<MostRecentlyUsedRepo.RecentEntry>(), "entries", "mru list entries"
-    )
-}
-
 
