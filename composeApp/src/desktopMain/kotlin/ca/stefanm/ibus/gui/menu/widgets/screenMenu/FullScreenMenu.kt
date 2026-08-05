@@ -13,10 +13,23 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
+import ca.stefanm.ibus.gui.generalSettings.AboutScreen
+import ca.stefanm.ibus.gui.generalSettings.BrightnessCompensationScreen
+import ca.stefanm.ibus.gui.generalSettings.CarPlatformConfigScreen
+import ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
+import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ibus.gui.menu.MenuWindow
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
+import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
+import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
+import ca.stefanm.ibus.lib.logging.Logger
 import java.awt.Menu
 import kotlin.math.E
 
@@ -32,6 +45,41 @@ object FullScreenMenu {
             .fillMaxSize()
         ) {
             HalfScreenMenu.OneColumn(items, fullWidth = true)
+        }
+    }
+
+    @Composable
+    fun OneColumnSmoothScreen(
+        header : String = "",
+        knobListenerService : KnobListenerService,
+        logger: Logger,
+        navigationNodeTraverser : NavigationNodeTraverser,
+        logTag : String,
+        prependGoBackEntry : Boolean = true,
+        items : List<Pair<String, NavigationNodeTraverser.() -> Unit>>
+    ) {
+        Column(Modifier
+            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+            .fillMaxSize()
+        ) {
+            if (header.isNotBlank()) {
+                BmwSingleLineHeader(header)
+            }
+
+            SmoothScroll.SmoothScroll(
+                modifier = Modifier,
+                knobListenerService = knobListenerService,
+                tag = logTag,
+                logger = logger,
+                prependGoBackEntry = prependGoBackEntry,
+                navigationNodeTraverser = navigationNodeTraverser,
+                items = items.map {
+                    TextMenuItem(
+                        title = it.first,
+                        onClicked = { it.second(navigationNodeTraverser) }
+                    )
+                }.toDynamicLambdas()
+            )
         }
     }
 

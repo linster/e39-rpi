@@ -11,6 +11,7 @@ import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiRoot
 import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
@@ -18,9 +19,12 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
+import javax.inject.Named
 
 @ScreenDoc(
     screenName = "SettingsRootMenu",
@@ -40,90 +44,35 @@ import javax.inject.Inject
 
 @AutoDiscover
 class SettingsRootMenu @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerServiceMain: KnobListenerService,
+    private val logger: Logger
+
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = SettingsRootMenu::class.java
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-        Column(Modifier.fillMaxSize()) {
-            BmwSingleLineHeader("Settings")
 
-            FullScreenMenu.OneColumn(
-                listOf(
-                    TextMenuItem(
-                        title = "Go Back",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToRoot()
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Bluetooth",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                BluetoothPairingMenu::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Map Settings",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                MapSettingsMainScreen::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Car Platform Config",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                CarPlatformConfigScreen::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Theme",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                ThemeSelectorScreen::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Network Info",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                NetworkInfoScreen::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Brightness",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                BrightnessCompensationScreen::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Griffin Powermate Sensitivity",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                GriffinPowermateConfigScreen::class.java
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "About",
-                        onClicked = {
-                            navigationNodeTraverser.navigateToNode(
-                                AboutScreen::class.java
-                            )
-                        }
-                    )
-                )
+        FullScreenMenu.OneColumnSmoothScreen(
+            header = "Settings",
+            knobListenerService = knobListenerServiceMain,
+            logger = logger,
+            navigationNodeTraverser = navigationNodeTraverser,
+            logTag = "SettingsRootMenu",
+            prependGoBackEntry = true,
+            items = listOf(
+                "Bluetooth"     to  { navigateToNode(BluetoothPairingMenu::class.java) },
+                "Map Settings"  to { navigateToNode(MapSettingsMainScreen::class.java) },
+                "Car Platform Config" to  { navigateToNode(CarPlatformConfigScreen::class.java) },
+                "Theme"         to  { navigateToNode(ThemeSelectorScreen::class.java) },
+                "Network Info"  to  { navigateToNode(NetworkInfoScreen::class.java) },
+                "Brightness"    to  { navigateToNode(BrightnessCompensationScreen::class.java) },
+                "Griffin Powermate Sensitivity" to  { navigateToNode(GriffinPowermateConfigScreen::class.java) },
+                "About" to  { navigateToNode(AboutScreen::class.java) }
             )
-        }
+        )
     }
 }
