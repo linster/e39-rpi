@@ -36,6 +36,32 @@ import kotlin.math.abs
 object SmoothScroll {
 //https://medium.com/@david.debre/my-experience-with-subcomposelayout-71406b079305
 //https://medium.com/@olivervicente/subcomposition-in-jetpack-compose-how-to-use-measurement-phase-data-in-other-children-3965d700af8b
+
+    interface SmoothScrollContext {
+        fun knobListenerService(): KnobListenerService
+        fun tag() : String?
+        fun logger() : Logger
+        fun navigationNodeTraverser(): NavigationNodeTraverser
+    }
+
+    @Composable
+    fun SmoothScrollContext.SmoothScroll(
+        modifier: Modifier,
+        prependGoBackEntry : Boolean = false,
+        tag : String? = null,
+        items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
+    ) {
+        SmoothScroll(
+            modifier = modifier,
+            knobListenerService = knobListenerService(),
+            tag = tag ?: tag(),
+            logger = logger(),
+            prependGoBackEntry = prependGoBackEntry,
+            navigationNodeTraverser = navigationNodeTraverser(),
+            items = items
+        )
+    }
+
     @Composable
     fun SmoothScroll(
         modifier: Modifier,

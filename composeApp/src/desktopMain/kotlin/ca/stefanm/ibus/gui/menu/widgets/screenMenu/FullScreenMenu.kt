@@ -26,6 +26,7 @@ import ca.stefanm.ibus.gui.menu.widgets.ChipItemColors
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
@@ -58,6 +59,54 @@ object FullScreenMenu {
         prependGoBackEntry : Boolean = true,
         items : List<Pair<String, NavigationNodeTraverser.() -> Unit>>
     ) {
+
+        val context = object : SmoothScroll.SmoothScrollContext {
+            override fun knobListenerService() = knobListenerService
+            override fun tag() = logTag
+            override fun logger() = logger
+            override fun navigationNodeTraverser() = navigationNodeTraverser
+        }
+
+        with(context) {
+            OneColumnSmoothScreen(
+                header = header,
+                logTag = logTag,
+                prependGoBackEntry = prependGoBackEntry,
+                itemsProvider = {
+                    items.map {
+                        TextMenuItem(
+                            title = it.first,
+                            onClicked = { it.second(navigationNodeTraverser) }
+                        )
+                    }.toDynamicLambdas()
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
+        header : String = "",
+        logTag : String,
+        prependGoBackEntry : Boolean = true,
+        items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
+    ) {
+        OneColumnSmoothScreen(
+            header = header,
+            logTag = logTag,
+            prependGoBackEntry = prependGoBackEntry,
+            itemsProvider = { items }
+        )
+    }
+
+    @Composable
+    private fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
+        header : String = "",
+        logTag : String,
+        prependGoBackEntry : Boolean = true,
+        itemsProvider : () -> List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
+    ) {
+        val context = this
         Column(Modifier
             .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
             .fillMaxSize()
@@ -68,19 +117,15 @@ object FullScreenMenu {
 
             SmoothScroll.SmoothScroll(
                 modifier = Modifier,
-                knobListenerService = knobListenerService,
+                knobListenerService = context.knobListenerService(),
                 tag = logTag,
-                logger = logger,
+                logger = context.logger(),
                 prependGoBackEntry = prependGoBackEntry,
-                navigationNodeTraverser = navigationNodeTraverser,
-                items = items.map {
-                    TextMenuItem(
-                        title = it.first,
-                        onClicked = { it.second(navigationNodeTraverser) }
-                    )
-                }.toDynamicLambdas()
+                navigationNodeTraverser = context.navigationNodeTraverser(),
+                items = itemsProvider()
             )
         }
+
     }
 
     @Composable
