@@ -84,6 +84,30 @@ object FullScreenMenu {
         }
     }
 
+    @JvmName("OneColumnSmoothScreenListStringNavigationNodeTraverserExt")
+    @Composable
+    fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
+        header : String = "",
+        logTag : String? = this.tag(),
+        prependGoBackEntry : Boolean = true,
+        items : List<Pair<String, NavigationNodeTraverser.() -> Unit>>
+    ) {
+        OneColumnSmoothScreen(
+            header = header,
+            logTag = logTag,
+            prependGoBackEntry = prependGoBackEntry,
+            itemsProvider = {
+                items.map {
+                    TextMenuItem(
+                        title = it.first,
+                        onClicked = { it.second(navigationNodeTraverser()) }
+                    )
+                }.toDynamicLambdas()
+            }
+        )
+    }
+
+
     @Composable
     fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
         header : String = "",
