@@ -87,7 +87,7 @@ object FullScreenMenu {
     @Composable
     fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
         header : String = "",
-        logTag : String,
+        logTag : String? = this.tag(),
         prependGoBackEntry : Boolean = true,
         items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
     ) {
@@ -99,10 +99,26 @@ object FullScreenMenu {
         )
     }
 
+    @JvmName("OneColumnSmoothScreenListTextMenuItem")
+    @Composable
+    fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
+        header : String = "",
+        logTag : String? = this.tag(),
+        prependGoBackEntry : Boolean = true,
+        items : List<TextMenuItem>
+    ) {
+        OneColumnSmoothScreen(
+            header = header,
+            logTag = logTag,
+            prependGoBackEntry = prependGoBackEntry,
+            itemsProvider = { items.toDynamicLambdas() }
+        )
+    }
+
     @Composable
     private fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
         header : String = "",
-        logTag : String,
+        logTag : String? = this.tag(),
         prependGoBackEntry : Boolean = true,
         itemsProvider : () -> List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
     ) {

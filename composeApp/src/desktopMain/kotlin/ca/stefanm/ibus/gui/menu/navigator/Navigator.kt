@@ -409,6 +409,7 @@ interface NavigationNode<Result> {
     fun provideMainContent() : @Composable (incomingResult : Navigator.IncomingResult?) -> Unit
 }
 
+@ApplicationScope
 class NavigationNodeTraverser @Inject constructor(
     private val navigator: Provider<Navigator>,
     @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,

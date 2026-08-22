@@ -16,6 +16,7 @@ import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
@@ -55,11 +56,15 @@ class MenuWindow @Inject constructor(
     private val themeConfigurationStorage: ThemeConfigurationStorage,
     @Named(ApplicationModule.INPUT_EVENTS_WRITER) val inputEventsWriter : MutableSharedFlow<ca.stefanm.ibus.car.bordmonitor.input.InputEvent>,
 
-    private val bottomBarController: BottomBarController
+    private val bottomBarController: BottomBarController,
+
+    private val navigationNodeTraverser: NavigationNodeTraverser
 ) : WindowManager.E39Window {
 
     companion object {
         val MenuWindowKnobListener = compositionLocalOf { DaggerApplicationComponent.create().knobListenerServiceMain() }
+        val MenuWindowLogger = compositionLocalOf { DaggerApplicationComponent.create().logger() }
+        val MenuWindowNavigationNodeTraverser = compositionLocalOf { DaggerApplicationComponent.create().navigationNodeTraverser() }
     }
 
     override val title: String
@@ -74,11 +79,11 @@ class MenuWindow @Inject constructor(
 
     override fun content(): @Composable WindowScope.() -> Unit = {
         CompositionLocalProvider(KeyboardWindowProvider.Window provides window) {
-
-            val isKeyboardShowingState = modalMenuService.isKeyboardShowing.collectAsState(false)
-
-
-            rootContent()
+            CompositionLocalProvider(MenuWindowKnobListener provides knobListenerServiceMain) {
+                CompositionLocalProvider(MenuWindowNavigationNodeTraverser provides navigationNodeTraverser) {
+                    rootContent()
+                }
+            }
         }
     }
 

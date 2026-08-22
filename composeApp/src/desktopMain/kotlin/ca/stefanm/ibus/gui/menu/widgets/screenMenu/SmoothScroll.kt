@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
@@ -42,6 +43,22 @@ object SmoothScroll {
         fun tag() : String?
         fun logger() : Logger
         fun navigationNodeTraverser(): NavigationNodeTraverser
+    }
+
+    @Composable
+    fun MenuWindowSmoothScrollContext(
+        tag : String? = null
+    ) : SmoothScrollContext {
+        val knobListenerServiceMain = MenuWindow.MenuWindowKnobListener.current
+        val logger = MenuWindow.MenuWindowLogger.current
+        val navigationNodeTraverser = MenuWindow.MenuWindowNavigationNodeTraverser.current
+        
+        return object : SmoothScrollContext {
+            override fun knobListenerService() = knobListenerServiceMain
+            override fun tag() = tag
+            override fun logger() = logger
+            override fun navigationNodeTraverser() = navigationNodeTraverser
+        }
     }
 
     @Composable

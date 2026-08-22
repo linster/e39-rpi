@@ -125,7 +125,7 @@ class FilePickerMruPane @Inject constructor(
                                     isSmallSize = true,
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                         modalMenuService.closeSidePaneOverlay(true)
-                                        onQuickFileSelect(FilePickerResult.FileChosen(entry.file))
+                                        onQuickFileSelect(FilePickerResult.FileChosen(entry.absolutePath))
                                     }
                                 ) {
                                     Column {
@@ -133,13 +133,13 @@ class FilePickerMruPane @Inject constructor(
                                         val fontSize = if (ThemeWrapper.ThemeHandle.current.isPixelDoubled) 18.sp else 9.sp
 
                                         Text(
-                                            text = entry.file.name,
+                                            text = entry.absolutePath.name,
                                             color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                                             fontSize = fontSize,
                                             fontWeight = FontWeight.Normal
                                         )
                                         Text(
-                                            text = entry.file.canonicalPath,
+                                            text = entry.absolutePath.canonicalPath,
                                             color = ThemeWrapper.ThemeHandle.current.colors.textMenuColorAccent,
                                             fontSize = fontSize,
                                             fontWeight = FontWeight.Normal
