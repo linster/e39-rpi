@@ -10,10 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
@@ -24,8 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilePickerResult
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.MostRecentlyUsedRepo
-import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.recent.MostRecentlyUsedRepo
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
@@ -36,10 +31,6 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
-import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
 class FilePickerMruPane @Inject constructor(

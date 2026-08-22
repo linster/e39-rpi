@@ -11,19 +11,28 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatformServiceRunStatusViewer
 import ca.stefanm.ibus.car.platform.PlatformService
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoothScreen
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoothScreenCustomViews
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.asFlow
 import javax.inject.Inject
+import javax.inject.Named
+import kotlin.collections.listOf
 
 @ScreenDoc(
     screenName = "CarServiceConfigScreen",
@@ -37,30 +46,33 @@ class CarServiceConfigScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val configurablePlatform: ConfigurablePlatform,
     private val configurationStorage: ConfigurationStorage,
-    private val notificationHub: NotificationHub
+    private val notificationHub: NotificationHub,
+
+    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
+    private val knobListenerService: KnobListenerService,
+
+
+    @Named(ApplicationModule.KNOB_LISTENER_MODAL)
+    private val knobListenerServiceModal: KnobListenerService,
+    private val logger: Logger
 ) : NavigationNode<Nothing> {
+
+    companion object {
+        const val TAG = "CarServiceConfigScreen"
+    }
 
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = CarServiceConfigScreen::class.java
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-        Column {
-            BmwSingleLineHeader("Car Service Configuration")
+        val entries = configurablePlatform.servicesRunning.collectAsState()
 
-            val entries = configurablePlatform.servicesRunning.collectAsState()
+        val context = SmoothScroll.MenuWindowSmoothScrollContext(tag = TAG)
 
-            ScrollMenu.OneColumnScroll(
-                displayOptions = ScrollMenu.ScrollListOptions(
-                    exitListItemLabel = "Go Back",
-                    isPageCountItemVisible = false,
-                    isExitItemOnEveryPage = false,
-                    showSpacerRow = false,
-                    itemsPerPage = 5
-                ),
-                onScrollListExitSelected = {
-                    modalMenuService.closeSidePaneOverlay(true)
-                    navigationNodeTraverser.goBack()
-                },
+        with(context) {
+            OneColumnSmoothScreen(
+                header = "Car Service Configuration",
+                prependGoBackEntry = true,
                 items = entries.value.map { group ->
                     val groupItem = TextMenuItem(
                         title = "${group.name} Group",
@@ -71,7 +83,7 @@ class CarServiceConfigScreen @Inject constructor(
 
                     val groupChildren = group.children.map { service ->
                         TextMenuItem(
-                            title = "${service.name} ${service.runStatus.collectAsState(PlatformService.RunStatus.STOPPED).value.name}",
+                            title = "    ${service.name} ${service.runStatus.collectAsState(PlatformService.RunStatus.STOPPED).value.name}",
                             onClicked = {
                                 modalMenuService.showSidePaneOverlay(true, serviceInfo(service))
                             }
@@ -79,6 +91,7 @@ class CarServiceConfigScreen @Inject constructor(
                     }
                     listOf(groupItem, *groupChildren.toTypedArray())
                 }.flatten()
+
             )
         }
     }

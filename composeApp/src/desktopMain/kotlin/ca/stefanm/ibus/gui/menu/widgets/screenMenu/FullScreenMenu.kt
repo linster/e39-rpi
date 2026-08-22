@@ -109,7 +109,7 @@ object FullScreenMenu {
 
 
     @Composable
-    fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreen(
+    fun SmoothScroll.SmoothScrollContext.OneColumnSmoothScreenCustomViews(
         header : String = "",
         logTag : String? = this.tag(),
         prependGoBackEntry : Boolean = true,
