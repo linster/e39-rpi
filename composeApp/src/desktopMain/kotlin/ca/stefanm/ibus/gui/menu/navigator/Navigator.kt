@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
@@ -174,7 +175,8 @@ class NavigationModule {
         pdfPageSelectorScreen: PdfPageSelectorScreen,
         filePickerScreen: FilePickerScreen,
         videoPlayerScreen: VideoPlayerScreen,
-        videoPlayerAppHomeScreen: VideoPlayerAppHomeScreen
+        videoPlayerAppHomeScreen: VideoPlayerAppHomeScreen,
+        fileManagerScreen: FileManagerScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -254,7 +256,8 @@ class NavigationModule {
         pdfPageSelectorScreen,
         filePickerScreen,
         videoPlayerScreen,
-        videoPlayerAppHomeScreen
+        videoPlayerAppHomeScreen,
+        fileManagerScreen
     )
 }
 
