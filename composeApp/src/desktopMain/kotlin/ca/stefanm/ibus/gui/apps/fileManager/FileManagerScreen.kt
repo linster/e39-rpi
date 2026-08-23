@@ -1,7 +1,14 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INavigationButtonVisibleProvider
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INewButtonVisibleProvider
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.ToolbarViews
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -50,13 +57,53 @@ class FileManagerScreen @Inject constructor(
             TAG
         )
 
-        val viewState = FileManagerViewState()
+        val viewState = remember { FileManagerViewState() }
 
-        ToolbarViews.Toolbar(
-            knobState = knobStateMain,
-            modalMenuService = modalMenuService,
-            viewState = viewState,
-            onViewStateChanged = {}
-        )
+        Column {
+
+            ToolbarViews.Toolbar(
+                knobState = knobStateMain,
+                modalMenuService = modalMenuService,
+                viewState = viewState,
+                navigationButtonVisibleProvider = object : INavigationButtonVisibleProvider {
+                    override fun backVisible(): Boolean = true
+                    override fun forwardVisible(): Boolean = true
+                    override fun upVisible(): Boolean = true
+                },
+                newButtonVisibleProvider = object : INewButtonVisibleProvider {
+                    override fun isNewFileVisible() = true
+                    override fun isNewFolderVisible() = true
+                },
+                directoryNavigatorReader = object : IDirectoryNavigatorReader {
+                    override fun canGoBack() = true
+                    override fun canGoForward() = true
+                    override fun canGoUp() = true
+                },
+                directoryStateRequestor = object : IDirectoryStateRequestor {
+                    override fun requestNavigateBack() {}
+                    override fun requestNavigateUp() {}
+                    override fun requestNavigateForward() {}
+                },
+                onNewFileClicked = { },
+                onNewFolderClicked = { },
+                exitButtonText = "Cancel",
+                onExitButtonClicked = { }
+            )
+        }
+    }
+
+    @Composable
+    fun ListView() {
+        Text("List View")
+    }
+
+    @Composable
+    fun GridView() {
+        Text("Grid View")
+    }
+
+    @Composable
+    fun ListViewWithPreviews() {
+        Text("List view with previews")
     }
 }

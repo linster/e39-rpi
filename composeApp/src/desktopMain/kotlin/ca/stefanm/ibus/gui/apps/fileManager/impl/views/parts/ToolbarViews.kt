@@ -2,7 +2,6 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +12,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INavigationButtonVisibleProvider
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INewButtonVisibleProvider
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
@@ -40,10 +43,40 @@ object ToolbarViews {
         knobState : KnobObserverBuilderState,
         modalMenuService: ModalMenuService,
         viewState: FileManagerViewState,
-        onViewStateChanged : (new : FileManagerViewState) -> Unit
+        navigationButtonVisibleProvider: INavigationButtonVisibleProvider,
+        newButtonVisibleProvider : INewButtonVisibleProvider,
+        directoryNavigatorReader : IDirectoryNavigatorReader,
+        directoryStateRequestor : IDirectoryStateRequestor,
+        onNewFileClicked : () -> Unit,
+        onNewFolderClicked : () -> Unit,
+        exitButtonText: String,
+        onExitButtonClicked: () -> Unit
     ) {
-        ToolbarView(knobState, modalMenuService)
 
+        ToolbarView(
+            knobState = knobState,
+            modalMenuService = modalMenuService,
+            isFolderBackVisible = navigationButtonVisibleProvider.backVisible(),
+            isFolderBackSelectable = directoryNavigatorReader.canGoBack(),
+            isFolderForwardVisible = navigationButtonVisibleProvider.forwardVisible(),
+            isFolderForwardSelectable = directoryNavigatorReader.canGoForward(),
+            isFolderUpVisible = navigationButtonVisibleProvider.upVisible(),
+            isFolderUpSelectable = directoryNavigatorReader.canGoUp(),
+            onNewViewMode = { viewState.itemStyle = it },
+            previewsEnabled = viewState.showPreview,
+            onNewPreviewsEnabled = { viewState.showPreview = it },
+            previewZoomDp = viewState.previewItemHeightPx,
+            onNewPreviewZoom = { viewState.previewItemHeightPx = it},
+            onFolderBackClicked = { directoryStateRequestor.requestNavigateBack() },
+            onFolderForwardClicked = { directoryStateRequestor.requestNavigateForward() },
+            onFolderUpClicked = { directoryStateRequestor.requestNavigateUp() },
+            isNewFileVisible = newButtonVisibleProvider.isNewFileVisible(),
+            isNewFolderVisible = newButtonVisibleProvider.isNewFolderVisible(),
+            onNewFileClicked = { onNewFileClicked() },
+            onNewFolderClicked = { onNewFolderClicked() },
+            exitButtonText = exitButtonText,
+            onExitButtonClicked = onExitButtonClicked
+        )
     }
 
     @Composable
@@ -64,17 +97,23 @@ object ToolbarViews {
         isFolderUpVisible : Boolean = true,
         isFolderUpSelectable : Boolean = true,
 
-        onNewViewMode : (FileManagerViewState.ViewMode) -> Unit = {},
+        onNewViewMode : (FileManagerViewState.ItemStyle) -> Unit = {},
 
         previewsEnabled : Boolean = true,
         onNewPreviewsEnabled : (Boolean) -> Unit = {},
 
-        previewZoomDp : Int = 100,
+        previewZoomDp : Int = 500,
         onNewPreviewZoom : (Int) -> Unit = {},
 
         onFolderBackClicked : () -> Unit = {},
         onFolderForwardClicked : () -> Unit = {},
         onFolderUpClicked : () -> Unit = {},
+
+
+        isNewFileVisible : Boolean = true,
+        isNewFolderVisible : Boolean = true,
+        onNewFileClicked : () -> Unit = {},
+        onNewFolderClicked : () -> Unit = {},
 
         exitButtonText : String = "Close",
         onExitButtonClicked : () -> Unit = {},
@@ -102,7 +141,7 @@ object ToolbarViews {
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
                         boxModifier = Modifier,
-                        label = "⭠",
+                        label = "⭠ ",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = isFolderBackSelectable && (currentIndex == allocatedIndex),
@@ -118,7 +157,7 @@ object ToolbarViews {
                 KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                     MenuItem(
                         boxModifier = Modifier,
-                        label = "⭢",
+                        label = "⭢ ",
                         isSmallSize = true,
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = isFolderForwardSelectable && (currentIndex == allocatedIndex),
@@ -164,12 +203,12 @@ object ToolbarViews {
                                 chipOrientation = ItemChipOrientation.W,
                                 items = listOf(
                                     ModalMenu.ModalMenuItem(
-                                        title = FileManagerViewState.ViewMode.List.label,
-                                        onClicked = { onNewViewMode(FileManagerViewState.ViewMode.List)}
+                                        title = FileManagerViewState.ItemStyle.List.label,
+                                        onClicked = { onNewViewMode(FileManagerViewState.ItemStyle.List)}
                                     ),
                                     ModalMenu.ModalMenuItem(
-                                        title = FileManagerViewState.ViewMode.Grid.label,
-                                        onClicked = { onNewViewMode(FileManagerViewState.ViewMode.Grid)}
+                                        title = FileManagerViewState.ItemStyle.Grid.label,
+                                        onClicked = { onNewViewMode(FileManagerViewState.ItemStyle.Grid)}
                                     )
                                 )
                             )
@@ -180,7 +219,7 @@ object ToolbarViews {
             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                 MenuItem(
                     boxModifier = Modifier,
-                    label = (if (previewsEnabled) "\uD83D\uDDF9" else "❍") + " Previews",
+                    label = (if (previewsEnabled) "\uD83D\uDDF9" else "❍") + " Preview",
                     isSmallSize = true,
                     chipOrientation = ItemChipOrientation.N,
                     isSelected = currentIndex == allocatedIndex,
@@ -203,10 +242,83 @@ object ToolbarViews {
                                 initialValue = previewZoomDp,
                                 validItems = 10 .. 100 step 5,
                                 onCurrentValueChanged = { onNewPreviewZoom(it)},
-                                hintText = "Preview height"
+                                hintText = "Zoom"
                             )
                         }
                     )
+                }
+            }
+
+            val newVisibles = listOf(isNewFileVisible, isNewFolderVisible)
+            val multipleNewVisible = newVisibles.filter { it }.size > 1
+
+            if (multipleNewVisible) {
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier,
+                        label = "New...",
+                        isSmallSize = true,
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            modalMenuService.showModalMenu(
+                                dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
+                                    menuTopLeft = IntOffset(700, 50),
+                                    menuWidth = 350
+                                ).toNormalModalMenuDimensions(),
+                                menuData = ModalMenu(
+                                    chipOrientation = ItemChipOrientation.W,
+                                    items = listOf(
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Cancel",
+                                            onClicked = { modalMenuService.closeModalMenu() }
+                                        ),
+                                        ModalMenu.ModalMenuItem(
+                                            title = "New \uD83D\uDCC4...",
+                                            onClicked = { onNewFileClicked()}
+                                        ),
+                                        ModalMenu.ModalMenuItem(
+                                            title = "New \uD83D\uDCC1...",
+                                            onClicked = { onNewFolderClicked() }
+                                        )
+                                    )
+                                )
+                            )
+
+                        }
+                    )
+                }
+
+            } else {
+                if (isNewFileVisible) {
+                    KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                        MenuItem(
+                            boxModifier = Modifier,
+                            label = "New \uD83D\uDCC4...",
+                            isSmallSize = true,
+                            chipOrientation = ItemChipOrientation.S,
+                            isSelected = currentIndex == allocatedIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                onNewFileClicked()
+                            }
+                        )
+                    }
+
+                }
+
+                if (isNewFolderVisible) {
+                    KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                        MenuItem(
+                            boxModifier = Modifier,
+                            label = "New \uD83D\uDCC1...",
+                            isSmallSize = true,
+                            chipOrientation = ItemChipOrientation.S,
+                            isSelected = currentIndex == allocatedIndex,
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                onNewFolderClicked()
+                            }
+                        )
+                    }
                 }
             }
 
@@ -227,5 +339,4 @@ object ToolbarViews {
 
         }
     }
-
 }
