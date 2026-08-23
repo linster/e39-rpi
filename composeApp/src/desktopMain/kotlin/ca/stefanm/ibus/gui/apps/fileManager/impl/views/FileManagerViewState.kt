@@ -16,6 +16,19 @@ class FileManagerViewState {
 
     //Are previews enabled
     var showPreview by mutableStateOf(false)
+        private set
+
+    @JvmName("setShowPreviewFun")
+    fun setShowPreview(new : Boolean) {
+        showPreview = new
+        if (itemStyle == ItemStyle.List || itemStyle == ItemStyle.ListWithPreviews) {
+            itemStyle = if (new) {
+                ItemStyle.ListWithPreviews
+            } else {
+                ItemStyle.List
+            }
+        }
+    }
 
 
     enum class ItemStyle(val label : String) {
@@ -29,16 +42,24 @@ class FileManagerViewState {
         ListWithPreviews(label = "List with Previews")
     }
 
-    var itemStyle : ItemStyle = ItemStyle.List
-        set(value) {
-            field = if (value == ItemStyle.List && showPreview) {
-                ItemStyle.ListWithPreviews
-            } else {
-                value
-            }
+    var itemStyle : ItemStyle by mutableStateOf(ItemStyle.List)
+        private set
+
+    @JvmName("setItemStyleFun")
+    fun setItemStyle(itemStyle: ItemStyle) {
+        this.itemStyle = if (itemStyle == ItemStyle.List && showPreview) {
+            ItemStyle.ListWithPreviews
+        } else {
+            itemStyle
         }
+    }
 
     // Item height (if not List viewMode)
     var previewItemHeightPx : Int = 100
+        private set
+
+    fun setPreviewItemHeightPx(height : Int) {
+        this.previewItemHeightPx = height
+    }
 
 }

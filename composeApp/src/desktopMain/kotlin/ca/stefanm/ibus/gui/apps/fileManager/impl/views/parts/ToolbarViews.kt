@@ -28,14 +28,12 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 object ToolbarViews {
 
     @Composable
-    fun HeaderBar(
-        viewState : FileManagerViewState
-    ) {
+    fun HeaderBar() {
 
         //TODO don't forget we can use the same window to select a destination for
-        //TODO "Copy to.." and "Move to.." operations, and that should be refelected
+        //TODO "Copy to.." and "Move to.." operations, and that should be reflected
         //TODO in the title bar.
-        BmwSingleLineHeader()
+        BmwSingleLineHeader("File Manager : /home/stefan")
     }
 
     @Composable
@@ -62,11 +60,11 @@ object ToolbarViews {
             isFolderForwardSelectable = directoryNavigatorReader.canGoForward(),
             isFolderUpVisible = navigationButtonVisibleProvider.upVisible(),
             isFolderUpSelectable = directoryNavigatorReader.canGoUp(),
-            onNewViewMode = { viewState.itemStyle = it },
+            onNewViewMode = { viewState.setItemStyle(it) },
             previewsEnabled = viewState.showPreview,
-            onNewPreviewsEnabled = { viewState.showPreview = it },
+            onNewPreviewsEnabled = { viewState.setShowPreview(it) },
             previewZoomDp = viewState.previewItemHeightPx,
-            onNewPreviewZoom = { viewState.previewItemHeightPx = it},
+            onNewPreviewZoom = { viewState.setPreviewItemHeightPx(it) },
             onFolderBackClicked = { directoryStateRequestor.requestNavigateBack() },
             onFolderForwardClicked = { directoryStateRequestor.requestNavigateForward() },
             onFolderUpClicked = { directoryStateRequestor.requestNavigateUp() },

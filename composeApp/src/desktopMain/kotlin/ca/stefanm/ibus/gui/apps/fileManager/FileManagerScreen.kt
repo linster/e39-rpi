@@ -61,6 +61,8 @@ class FileManagerScreen @Inject constructor(
 
         Column {
 
+            ToolbarViews.HeaderBar()
+
             ToolbarViews.Toolbar(
                 knobState = knobStateMain,
                 modalMenuService = modalMenuService,
@@ -89,6 +91,11 @@ class FileManagerScreen @Inject constructor(
                 exitButtonText = "Cancel",
                 onExitButtonClicked = { }
             )
+            when (viewState.itemStyle) {
+                FileManagerViewState.ItemStyle.List -> ListView()
+                FileManagerViewState.ItemStyle.Grid -> GridView()
+                FileManagerViewState.ItemStyle.ListWithPreviews -> ListViewWithPreviews()
+            }
         }
     }
 
