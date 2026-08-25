@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
@@ -42,12 +43,13 @@ class FileManagerScreen @Inject constructor(
     private val notificationHub: NotificationHub,
 ) : NavigationNode<Nothing> {
 
-    companion object {
+    companion object : FileManagerScreenOpener {
         const val TAG = "FileManagerScreen"
     }
 
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = FileManagerScreen::class.java
+
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = {
 

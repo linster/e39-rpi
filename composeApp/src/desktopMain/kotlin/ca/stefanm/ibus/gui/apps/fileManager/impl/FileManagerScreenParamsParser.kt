@@ -1,9 +1,12 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
 
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters.Filter
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import java.io.File
+import javax.inject.Inject
 
 //Declare browsing mode, selection modes, etc.
 
@@ -29,7 +32,12 @@ enum class OpenMode {
 
 data class FileManagerScreenOpenParameters(
     val openMode: OpenMode,
-    val baseDirectory : File = File("/home/stefan")
+    val baseDirectory : File = File("/home/stefan"),
+
+    val fileFilter : Filter = Filter.AllFilesAndFolders,
+
+    /** Should the view show a "Select this folder" dummy entry? */
+    val showSelectThisFolderEntries : Boolean = false
 )
 
 /** Heavily use the screen back-stack to re-open the same Screen, but with a different
@@ -69,15 +77,28 @@ interface FileManagerScreenOpener {
             )
         )
     }
+    fun openForFileSelection(navigationNodeTraverser: NavigationNodeTraverser,
+                             baseDirectory: File,
+                             filter : Filter = Filter.AllFilesAndFolders
+    ) {
+        navigationNodeTraverser.navigateToNodeWithParameters(
+            FileManagerScreen::class.java,
+            FileManagerScreenOpenParameters(
+                openMode = OpenMode.SELECT_FILE,
+                baseDirectory = baseDirectory,
+                fileFilter = filter
+            )
+        )
+    }
 }
 
 /** For use in VideoPlayer, PDF Reader, other apps to they don't have to re-write
  *  the same parsing logic repeatedly while still preserving their own result parsing
  *  logic
  */
-class FileManagerScreenFileSelectionResultHelper {
-    fun parseSelectedFile(incomingResult: Navigator.IncomingResult) : File? {
-        return if (incomingResult.result is FileManagerScreenResult.FileManagerScreenResultForSelectFile.FileSelected) {
+class FileManagerScreenFileSelectionResultHelper @Inject constructor(){
+    fun parseSelectedFile(incomingResult: Navigator.IncomingResult?) : File? {
+        return if (incomingResult?.result is FileManagerScreenResult.FileManagerScreenResultForSelectFile.FileSelected) {
             incomingResult.result.file
         } else {
             null

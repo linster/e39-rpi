@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerParameterProvider
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters.Filter
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFileSelectionResultHelper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -25,13 +28,25 @@ class VideoPlayerAppHomeScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val filePickerParameterProvider: FilePickerParameterProvider,
     private val logger : Logger,
-    private val filePickerScreen: FilePickerScreen
+    private val filePickerScreen: FilePickerScreen,
+    private val fileSelectionResultHelper: FileManagerScreenFileSelectionResultHelper
 ) : NavigationNode<Nothing> {
+
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = VideoPlayerAppHomeScreen::class.java
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
 
+        val selectedFile = fileSelectionResultHelper.parseSelectedFile(params)
+
+        if (selectedFile != null) {
+            VideoPlayerScreen.openWithFile(
+                navigationNodeTraverser,
+                VideoPlayerScreen.VideoPlayerScreenParams(
+                    file = selectedFile
+                )
+            )
+        }
 
         Column(
             Modifier.fillMaxSize()
@@ -61,7 +76,7 @@ class VideoPlayerAppHomeScreen @Inject constructor(
                         }
                     ),
                     TextMenuItem(
-                        "Open File Picker",
+                        "Open File Picker (MRU)",
                         onClicked = {
                             filePickerScreen.showFilePickerMRUSelectPane(
                                 filePickerParameterProvider.getVideoPlayerParameters(),
@@ -70,7 +85,18 @@ class VideoPlayerAppHomeScreen @Inject constructor(
                                 }
                             )
                         }
+                    ),
+                    TextMenuItem(
+                        "Open File Picker",
+                        onClicked = {
+                            FileManagerScreen.openForFileSelection(
+                                navigationNodeTraverser,
+                                baseDirectory = File("/home/stefan/Videos"),
+                                filter = Filter.Videos
+                            )
+                        }
                     )
+
                 )
             )
         }

@@ -14,7 +14,7 @@ interface Logger {
     fun i(tag : String, msg : String)
     fun w(tag : String, msg : String)
     fun e(tag : String, msg : String)
-    fun e(tag : String, msg : String, e : Throwable)
+    fun e(tag : String, msg : String, e : Throwable?)
 }
 
 @ApplicationScope
@@ -39,8 +39,12 @@ class StdOutLogger @Inject constructor() : Logger {
         println("ERROR : $tag / $msg")
     }
 
-    override fun e(tag: String, msg: String, e: Throwable) {
-        e(tag, "$msg exception: {${e.toString()}} ${e.message} ${e.printStackTrace()}")
+    override fun e(tag: String, msg: String, e: Throwable?) {
+        if (e != null) {
+            e(tag, "$msg exception: {${e.toString()}} ${e.message} ${e.printStackTrace()}")
+        } else {
+            e(tag, msg)
+        }
     }
 }
 
@@ -61,7 +65,7 @@ class CompositeLogger(private vararg var loggers : Logger) : Logger {
     override fun e(tag: String, msg: String) =
         loggers.forEach { it.e(tag, msg) }
 
-    override fun e(tag: String, msg: String, e: Throwable) =
+    override fun e(tag: String, msg: String, e: Throwable?) =
         loggers.forEach { it.e(tag, msg, e) }
 }
 
@@ -121,7 +125,7 @@ class LogDistributionHub @Inject constructor() : Logger {
     override fun e(tag: String, msg: String) {
         LogEvent(LogEvent.Level.E, tag, msg, null).notifyObservers()
     }
-    override fun e(tag: String, msg: String, e: Throwable) {
+    override fun e(tag: String, msg: String, e: Throwable?) {
         LogEvent(LogEvent.Level.E, tag, msg, e).notifyObservers()
     }
 }
