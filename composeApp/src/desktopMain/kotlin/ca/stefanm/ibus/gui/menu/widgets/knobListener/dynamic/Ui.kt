@@ -36,19 +36,32 @@ fun KnobObserverBuilder(
 // Who even names this stuff?
 fun List<TextMenuItem>.toDynamicLambdas(
 ) : List<@Composable KnobObserverBuilderScope.(Int, Int) -> Unit> {
-    return this.map {
-        { allocatedIndex, currentIndex ->
-            MenuItem(
-                label = it.title,
-                chipOrientation = ItemChipOrientation.W,
-                isSelected = allocatedIndex == currentIndex,
-                onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                    it.onClicked()
-                }
-            )
-        }
+    return this.map { it.toDynamicLambda()
+//        { allocatedIndex, currentIndex ->
+//            MenuItem(
+//                label = it.title,
+//                chipOrientation = ItemChipOrientation.W,
+//                isSelected = allocatedIndex == currentIndex,
+//                onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+//                    it.onClicked()
+//                }
+//            )
+//        }
     }
 }
+fun TextMenuItem.toDynamicLambda(
+) : @Composable KnobObserverBuilderScope.(Int, Int) -> Unit =
+    { allocatedIndex, currentIndex ->
+        MenuItem(
+            label = title,
+            chipOrientation = ItemChipOrientation.W,
+            isSelected = allocatedIndex == currentIndex,
+            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                onClicked()
+            }
+        )
+    }
+
 
 
 interface KnobObserverBuilderScope {
