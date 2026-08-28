@@ -19,12 +19,22 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambda
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.DateTimeFormat
+import kotlinx.datetime.toLocalDateTime
+import org.apache.commons.io.FileUtils
 import java.io.File
+import java.nio.file.Files
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.io.path.Path
+import kotlin.time.Instant
 
 class FileSidebar @Inject constructor(
     @Named(ApplicationModule.KNOB_LISTENER_MODAL)
@@ -41,7 +51,17 @@ class FileSidebar @Inject constructor(
     }
     fun openSidebarForFile(
         file : File,
-        allowModify : Boolean = false
+        allowModify : Boolean = false,
+        allowOpen : Boolean = false,
+        allowSelect : Boolean = false,
+        allowCopy : Boolean = false,
+        onCopyToSelected : (File) -> Unit = {},
+        onMoveToSelected : (File) -> Unit = {},
+        onPermissionsActivityRequested : (File) -> Unit = {},
+        onRenameSelected : (File) -> Unit = {},
+        onOpenSelected : (File) -> Unit = {},
+        onSelectFile : (File) -> Unit = {},
+        onDeleteSelected : (File) -> Unit = {}
     ) {
         if (!file.isFile) {
             logger.w(TAG, "File $file is not a file.")
@@ -61,72 +81,144 @@ class FileSidebar @Inject constructor(
                     logger = logger,
                     prependGoBackEntry = false,
                     navigationNodeTraverser = navigationNodeTraverser,
-                    items = listOf(
-                        TextMenuItem(
-                            title = "Go Back",
-                            onClicked = {}
-                        ).toDynamicLambda(),
-                        { allocatedIndex, currentIndex ->
+                    items = buildList {
+                        add(
+                            TextMenuItem(
+                                title = "Go Back",
+                                onClicked = {
+                                    modalMenuService.closeSidePaneOverlay(true)
+                                }).toDynamicLambda()
+                        )
+                        add { allocatedIndex, currentIndex ->
                             ArbitraryContentsMenuItem(onClicked = {}) {
-                                Column (
+                                Column(
                                     Modifier
                                         .fillMaxWidth()
                                         .height(130.dp.halveIfNotPixelDoubled()),
                                     horizontalAlignment = Alignment.CenterHorizontally
-                                ){
+                                ) {
                                     Box(
                                         Modifier
                                             .aspectRatio(1F)
                                             .background(Color.Black)
                                     ) {}
-                                }                            }
-                        },
-                        TextMenuItem(
-                            title = "Open...",
-                            onClicked = {}
-                        ).toDynamicLambda(),
-                        TextMenuItem(
-                            title = "Copy To...",
-                            onClicked = {}
-                        ).toDynamicLambda(),
-                        TextMenuItem(
-                            title = "Move To...",
-                            onClicked = {}
-                        ).toDynamicLambda(),
-                        TextMenuItem(
-                            title = "Rename",
-                            onClicked = {}
-                        ).toDynamicLambda(),
-                        TextMenuItem(
-                            title = "Delete",
-                            onClicked = {}
-                        ).toDynamicLambda(),
+                                }
+                            }
+                        }
+                        if (allowOpen) {
+                            add(
+                                TextMenuItem(
+                                title = "Open...",
+                                onClicked = {
+                                    modalMenuService.closeSidePaneOverlay(true)
+                                    onOpenSelected(file)
+                                }
+                            ).toDynamicLambda())
+                        }
+                        if (allowSelect) {
+                            add(
+                                TextMenuItem(
+                                    title = "Select this file",
+                                    onClicked = {
+                                        modalMenuService.closeSidePaneOverlay(true)
+                                        onSelectFile(file)
+                                    }
+                                ).toDynamicLambda())
+                        }
+
+                        if (allowCopy) {
+                            add(
+                                TextMenuItem(
+                                    title = "Copy To...",
+                                    onClicked = {
+                                        modalMenuService.closeSidePaneOverlay(true)
+                                        onCopyToSelected(file)
+                                    }
+                                ).toDynamicLambda())
+                            if (allowModify) {
+                                add(
+                                    TextMenuItem(
+                                        title = "Move To...",
+                                        onClicked = {
+                                            modalMenuService.closeSidePaneOverlay(true)
+                                            onMoveToSelected(file)
+                                        }
+                                    ).toDynamicLambda())
+                            }
+                        }
+                        if (allowModify) {
+                            add(
+                                TextMenuItem(
+                                    title = "Rename",
+                                    onClicked = {
+                                        modalMenuService.closeSidePaneOverlay(true)
+                                        onRenameSelected(file)
+                                    }
+                                ).toDynamicLambda())
+                            add(
+                                TextMenuItem(
+                                    title = "Delete",
+                                    onClicked = {
+                                        modalMenuService.closeSidePaneOverlay(true)
+                                        onDeleteSelected(file)
+                                    }
+                                ).toDynamicLambda())
+                        }
+
                         //Readable,
+                        add(CheckBoxMenuItem(
+                            title = "Readable?",
+                            isSelectable = false,
+                            isChecked = file.canRead(),
+                            onClicked = { }
+                        ).toDynamicLambda())
                         //Writable,
+                        add(CheckBoxMenuItem(
+                            title = "Writable?",
+                            isSelectable = false,
+                            isChecked = file.canWrite(),
+                            onClicked = { }
+                        ).toDynamicLambda())
                         //Executable?
+                        add(CheckBoxMenuItem(
+                            title = "Executable?",
+                            isSelectable = false,
+                            isChecked = file.canExecute(),
+                            onClicked = { }
+                        ).toDynamicLambda())
                         //File size
-                        //Modified date
-                        TextMenuItem(
-                            title = "Change Permissions...",
+                        add(TextMenuItem(
+                            title = "Size: ${
+                                FileUtils.byteCountToDisplaySize(Files.size(Path(file.path)))
+                            }",
+                            isSelectable = false,
                             onClicked = {}
-                        ).toDynamicLambda()
-                    )
+                        ).toDynamicLambda())
+                        //Modified date
+                        add(TextMenuItem(
+                            title = "Modified: ${file.lastModified().let { 
+                                Instant
+                                    .fromEpochMilliseconds(it)
+                                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                                    .format(LocalDateTime.Formats.ISO)
+                            }}",
+                            isSelectable = false,
+                            onClicked = {}
+                        ).toDynamicLambda())
+                        if (allowModify) {
+                            add(
+                                TextMenuItem(
+                                    title = "Change Permissions...",
+                                    onClicked = {
+                                        modalMenuService.closeSidePaneOverlay(true)
+                                        //TODO maybe have the permission grid be in this class?
+                                        onPermissionsActivityRequested(file)
+                                    }
+                                ).toDynamicLambda())
+                        }
+                    }
                 )
+                }
             }
-            //TODO go to SearchState.showExploreResultsPane() for inspo.
-
-            //Go back
-            // A big square preview
-            // Open...
-            // Copy To...
-            // Move To...
-            // Rename
-            // Delete
-            // Permission grid
-            // Owner
-            // Chmod...
-            // Chown...
-
         }
-    }
 }

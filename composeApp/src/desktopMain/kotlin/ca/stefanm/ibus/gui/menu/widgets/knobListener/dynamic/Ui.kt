@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 
@@ -62,6 +63,19 @@ fun TextMenuItem.toDynamicLambda(
         )
     }
 
+fun CheckBoxMenuItem.toDynamicLambda(
+
+): @Composable KnobObserverBuilderScope.(Int, Int) -> Unit =
+    { allocatedIndex, currentIndex ->
+        MenuItem(
+            label = getLabel(),
+            chipOrientation = ItemChipOrientation.W,
+            isSelected = allocatedIndex == currentIndex,
+            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                onClicked()
+            }
+        )
+    }
 
 
 interface KnobObserverBuilderScope {

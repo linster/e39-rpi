@@ -99,10 +99,13 @@ data class CheckBoxMenuItem(
     override val isSelected : Boolean = false,
     override val onClicked : () -> Unit
 ) : MenuItem {
+    fun getLabel() : String {
+        return " ${if (isChecked) "[X]" else "[ ]"} $title"
+    }
     override fun toView(boxModifier: Modifier, chipOrientation: ItemChipOrientation): @Composable () -> Unit = {
         MenuItem(
             boxModifier = boxModifier,
-            label = " ${if (isChecked) "[X]" else "[ ]"} $title",
+            label = getLabel(),
             chipOrientation = chipOrientation,
             labelColor = labelColor ?: ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
             isSelected = isSelected,
