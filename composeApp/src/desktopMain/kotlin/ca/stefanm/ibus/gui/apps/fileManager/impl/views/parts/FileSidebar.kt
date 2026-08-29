@@ -48,7 +48,9 @@ class FileSidebar @Inject constructor(
 
     private val navigationNodeTraverser: NavigationNodeTraverser,
 
-    private val mimeTools: MimeTools
+    private val mimeTools: MimeTools,
+
+    private val sidebarPreviewProvider: SidebarPreviewProvider
 ) {
 
     companion object {
@@ -79,8 +81,15 @@ class FileSidebar @Inject constructor(
         modalMenuService.showSidePaneOverlayWithKnobListener(darkenBackground = true) { knobListenerServiceModal ->
 
             SidePanelMenu.SidePanelMenu(
-                title = file.absolutePath
+                //TODO just put the filename in the header, and
+                // the full path in the list.
+                title = file.name
             ) {
+
+                //TODO this might be expensive.
+                val metaData = mimeTools
+                    .getFileTypeAndMetaDataForFile(file, allData = false)
+
                 SmoothScroll.SmoothScroll(
                     modifier = Modifier.fillMaxWidth(),
                     knobListenerService = knobListenerServiceModal,
@@ -98,18 +107,11 @@ class FileSidebar @Inject constructor(
                         )
                         add { allocatedIndex, currentIndex ->
                             ArbitraryContentsMenuItem(onClicked = {}) {
-                                Column(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(130.dp.halveIfNotPixelDoubled()),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Box(
-                                        Modifier
-                                            .aspectRatio(1F)
-                                            .background(Color.Black)
-                                    ) {}
-                                }
+                                sidebarPreviewProvider.FilePreview(
+                                    file = file,
+                                    type = metaData.first
+                                )
+
                             }
                         }
                         if (allowOpen) {
@@ -224,9 +226,6 @@ class FileSidebar @Inject constructor(
                                 ).toDynamicLambda())
                         }
 
-                        //TODO this might be expensive.
-                        val metaData = mimeTools
-                            .getFileTypeAndMetaDataForFile(file, allData = false)
                         if (metaData.second.isNotEmpty()) {
                             add(
                                 TextMenuItem(

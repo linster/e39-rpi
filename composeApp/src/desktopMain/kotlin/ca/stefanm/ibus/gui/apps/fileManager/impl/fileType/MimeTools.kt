@@ -200,6 +200,9 @@ class MimeTools @Inject constructor(
         if (mimeString?.startsWith("video/") == true) {
             return FileType.Movie to false
         }
+        if (mimeString?.startsWith("text/plain") == true) {
+            return FileType.TextFile to false
+        }
         return FileType.Other to false
     }
 
