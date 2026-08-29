@@ -63,6 +63,7 @@ class FilePaneDebugScreen @Inject constructor(
                     File("/home/stefan/Downloads/win95_ico/Windows 95 ALL ICONS v1.1/All [Without duplicates]/3D computer.ico"),
                     File("/home/stefan/Documents/camera manual.pdf"),
                     File("/home/stefan/Documents/bmw_navigation.png"),
+                    File("/home/stefan/Pictures/Sep12025CanonCardBackup/IMG_6821.JPG"),
                     File("/home/stefan/Videos/Remington Steele 1982 Season 3 Complete TVRip x264 [i_c]/Remington Steele S03E03 Maltese Steele.mkv"),
                     File("/home/stefan/websites/compaw/remember.the-aero.org/speaker/speaker.txt"),
                     File("/home/stefan/Pictures/2025 Volvo Boroscope")

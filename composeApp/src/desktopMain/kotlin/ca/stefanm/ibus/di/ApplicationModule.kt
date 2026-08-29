@@ -39,6 +39,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import org.overviewproject.mime_types.MimeTypeDetector
 import java.util.*
 import javax.inject.Named
 import javax.inject.Scope
@@ -228,5 +229,11 @@ class ApplicationModule {
         logger: Logger
     ) : KnobListenerService {
         return KnobListenerService(inputEvents, identifier, logger)
+    }
+
+    @Provides
+    @ApplicationScope
+    fun provideMimeTypeDetector() : MimeTypeDetector {
+        return MimeTypeDetector()
     }
 }

@@ -155,7 +155,16 @@ kotlin {
 
             // Media player
             implementation("io.github.kdroidfilter:composemediaplayer:0.10.0")
+// TODO update to Kotlin 2.4 eventually.
+//            implementation("io.github.kdroidfilter:composemediaplayer:0.11.4")
 
+            //Mime tools
+            //https://github.com/overview/mime-types
+            implementation("org.overviewproject:mime-types:2.0.0")
+            // This is more for getting exif data, etc, after we know
+            // the mime-type
+            //https://github.com/drewnoakes/metadata-extractor
+            implementation("com.drewnoakes:metadata-extractor:2.19.0")
         }
     }
 }

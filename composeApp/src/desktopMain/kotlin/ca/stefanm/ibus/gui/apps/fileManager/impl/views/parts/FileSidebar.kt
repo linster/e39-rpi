@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem
@@ -43,12 +46,16 @@ class FileSidebar @Inject constructor(
     private val logger: Logger,
     private val modalMenuService: ModalMenuService,
 
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+
+    private val mimeTools: MimeTools
 ) {
 
     companion object {
         const val TAG = "FileSidebar"
     }
+    //TODO show some extra non-selectable options (video length, etc)
+    //TODO depending on file type.
     fun openSidebarForFile(
         file : File,
         allowModify : Boolean = false,
@@ -215,6 +222,36 @@ class FileSidebar @Inject constructor(
                                         onPermissionsActivityRequested(file)
                                     }
                                 ).toDynamicLambda())
+                        }
+
+                        //TODO this might be expensive.
+                        val metaData = mimeTools
+                            .getFileTypeAndMetaDataForFile(file, allData = false)
+                        if (metaData.second.isNotEmpty()) {
+                            add(
+                                TextMenuItem(
+                                title = "Metadata",
+                                isSelectable = false,
+                                onClicked = {}
+                            ).toDynamicLambda())
+                            metaData
+                                .second
+                                .forEach { (name, value) ->
+                                    add(
+                                        TextMenuItem(
+                                            title = name,
+                                            isSelectable = false,
+                                            onClicked = {}
+                                        ).toDynamicLambda()
+                                    )
+                                    add(
+                                        TextMenuItem(
+                                            title = "  $value",
+                                            isSelectable = false,
+                                            onClicked = {}
+                                        ).toDynamicLambda()
+                                    )
+                                }
                         }
                     }
                 )
