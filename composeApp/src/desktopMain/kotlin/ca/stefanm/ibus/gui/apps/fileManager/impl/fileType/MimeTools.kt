@@ -11,8 +11,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.toLocalDateTime
+import org.apache.commons.io.FileUtils
 import org.overviewproject.mime_types.MimeTypeDetector
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import javax.inject.Inject
 import kotlin.time.toKotlinInstant
@@ -72,7 +75,16 @@ class MimeTools @Inject constructor(
         // If it's a file that Drew Noakes' library knows about, the bool in the pair
         // is true. Early return for picture, PDF, or video, since we'll know based on his
         // short list of supported types.
-        val drewGuess : Pair<FileType, Boolean>? = file.inputStream().use {
+        // Read the contents of the file into a buffer, but only if it's small-ish
+        // so that Drew's lib can get an input stream on it that supports mark/reset
+        val fileSize = FileUtils.sizeOf(file)
+        val inputStream = if (fileSize > 0 && fileSize < (25 * 1024 * 1024)) {
+            ByteArrayInputStream(file.readBytes())
+        } else {
+            // The file is too big, just guess.
+            return guessMimeString(mimeString)
+        }
+        val drewGuess : Pair<FileType, Boolean>? = inputStream.use {
             val drewFileType : DrewFileType? = try {
                 com.drew.imaging.FileTypeDetector.detectFileType(it)
             } catch (e : IOException) {
@@ -177,12 +189,15 @@ class MimeTools @Inject constructor(
 
         // https://gstreamer.freedesktop.org/documentation/plugin-development/advanced/media-types.html?gi-language=c#list-of-defined-types
 
+        return guessMimeString(mimeString)
+    }
 
+    private fun guessMimeString(mimeString: String?) : Pair<FileType, Boolean> {
         // Or, what if we just guessed.
-        if (mimeString.startsWith("audio/")) {
+        if (mimeString?.startsWith("audio/") == true) {
             return FileType.Audio to false
         }
-        if (mimeString.startsWith("video/")) {
+        if (mimeString?.startsWith("video/") == true) {
             return FileType.Movie to false
         }
         return FileType.Other to false
@@ -212,6 +227,7 @@ class MimeTools @Inject constructor(
 
             val directory : ExifSubIFDDirectory? = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
             if (directory == null) {
+                logger.w(TAG, "ExifSubIFDDirectory for $file was null.")
                 return emptyMap()
             }
 
@@ -227,11 +243,11 @@ class MimeTools @Inject constructor(
             val descriptor = ExifSubIFDDescriptor(directory)
 
             with (descriptor) {
-                returnedMap["exposureTime"] = exposureTimeDescription
-                returnedMap["apertureValue"] = apertureValueDescription
+                returnedMap["Shutter spd"] = shutterSpeedDescription
+                returnedMap["Aperture"] = apertureValueDescription
                 returnedMap["exposureMode"] = exposureModeDescription
-                returnedMap["whiteBalanceMode"] = whiteBalanceModeDescription
-                returnedMap["whiteBalance"] = whiteBalanceDescription
+                returnedMap["WB Mode"] = whiteBalanceModeDescription
+                returnedMap["WB"] = whiteBalanceDescription
                 returnedMap["meteringMode"] = meteringModeDescription
                 returnedMap["get35mmFilmEquivFocalLength"] = get35mmFilmEquivFocalLengthDescription()
                 returnedMap["digitalZoomRatio"] = digitalZoomRatioDescription
@@ -249,6 +265,13 @@ class MimeTools @Inject constructor(
             //https://github.com/drewnoakes/metadata-extractor/blob/main/Source/com/drew/metadata/exif/GpsDescriptor.java
 
 
+            return returnedMap
+                .filterValues {
+                    // Drew's lib puts nulls into the map and it's not caught above
+                    // because JVM interop?
+                    it != null
+                }
+                .filterValues { it.isNotEmpty() && it.isNotEmpty() && it != "null" }
         }
 
         if (fileType is FileType.Movie) {
