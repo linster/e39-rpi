@@ -75,6 +75,12 @@ class LoaderUtils @Inject constructor(
     }
 
     @Composable
+    fun loadPdfNoThrobber(reader: PdfReaderState, file : File) {
+        val scope = rememberCoroutineScope()
+        scope.launch { reader.open(file.readBytes()) }
+    }
+
+    @Composable
     fun loadPdf(reader : PdfReaderState, fileBytes : ByteArray) {
 
         val scope = rememberCoroutineScope()

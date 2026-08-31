@@ -205,6 +205,9 @@ class MimeTools @Inject constructor(
         if (mimeString?.startsWith("text/plain") == true) {
             return FileType.TextFile to false
         }
+        if (mimeString?.startsWith("application/pdf") == true) {
+            return FileType.PDF to false
+        }
         return FileType.Other to false
     }
 

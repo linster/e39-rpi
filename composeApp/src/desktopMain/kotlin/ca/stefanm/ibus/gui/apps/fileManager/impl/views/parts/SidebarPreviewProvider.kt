@@ -11,21 +11,41 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
+import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
+import ca.stefanm.ibus.lib.logging.Logger
 import coil3.compose.AsyncImage
+import com.ginsberg.cirkle.circular
+import dev.nucleusframework.pdfium.PdfPage
+import dev.nucleusframework.pdfium.PdfReaderState
+import dev.nucleusframework.pdfium.rememberPdfReaderState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 //A class that helps draw icons for panes to show what the file is.
 class SidebarPreviewProvider @Inject constructor(
+    private val loaderUtils : LoaderUtils,
+    private val logger : Logger
 ){
     //For a PDF show a PDF page
     //For an image, draw it
@@ -85,9 +105,40 @@ class SidebarPreviewProvider @Inject constructor(
         //Draw a placeholder icon
         Box(
             Modifier
-                .aspectRatio(1F)
-                .background(Color.Black)
-        ) {}
+                .aspectRatio(1F),
+            contentAlignment = Alignment.TopCenter
+        ) {
+
+            val reader = rememberPdfReaderState()
+            loaderUtils.loadPdfNoThrobber(reader, file)
+            if (reader.pageCount > 0) {
+                var previewPage by remember { mutableStateOf(1) }
+                var previewIndex by remember { mutableStateOf(1) }
+                val pages = remember { (1 .. reader.pageCount).toList().circular() }
+                LaunchedEffect(Unit) {
+                    while(true) {
+                        delay(1.seconds)
+                        previewPage = pages[previewIndex]
+                        previewIndex += 1
+                    }
+                }
+                LaunchedEffect(previewPage) {
+                    logger.d("PdfFilePreview", "Current preview page for ${file.name} is $previewPage ; total pages is ${reader.pageCount}")
+                }
+                key(previewPage) {
+                    PdfPage(
+                        state = reader,
+                        pageIndex = previewPage,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                    )
+                }
+            } else {
+                LaunchedEffect(reader.pageCount) {
+                    logger.w("PdfFilePreview", "Reader for $file had zero pages")
+                }
+            }
+        }
     }
 
     @Composable
