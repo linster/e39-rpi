@@ -6,6 +6,8 @@ import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.Metadata
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
+import com.drew.metadata.exif.makernotes.CanonMakernoteDescriptor
+import com.drew.metadata.exif.makernotes.CanonMakernoteDirectory
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -248,6 +250,8 @@ class MimeTools @Inject constructor(
             with (descriptor) {
                 returnedMap["Shutter spd"] = shutterSpeedDescription
                 returnedMap["Aperture"] = apertureValueDescription
+                returnedMap["iso"] = isoEquivalentDescription
+                returnedMap["focalLength"] = focalLengthDescription
                 returnedMap["exposureMode"] = exposureModeDescription
                 returnedMap["WB Mode"] = whiteBalanceModeDescription
                 returnedMap["WB"] = whiteBalanceDescription
@@ -263,6 +267,23 @@ class MimeTools @Inject constructor(
             // I shoot Canon, so that's what we're supporting :D
             //https://github.com/drewnoakes/metadata-extractor/blob/main/Source/com/drew/metadata/exif/makernotes/CanonMakernoteDescriptor.java
 
+            val canonDirectory = metadata.getFirstDirectoryOfType(CanonMakernoteDirectory::class.java)
+            if (directory != null) {
+                val canonMakernoteDescriptor = CanonMakernoteDescriptor(canonDirectory)
+                with(canonMakernoteDescriptor) {
+                    returnedMap["(Canon) imageSize"] = imageSizeDescription
+                    returnedMap["(Canon) flashBias"] = flashBiasDescription
+                    returnedMap["(Canon) flashMode"] = flashModeDescription
+                    returnedMap["(Canon) whiteBalance"] = whiteBalanceDescription
+                    returnedMap["(Canon) exposureMode"] = exposureModeDescription
+
+
+                    returnedMap["(Canon) lensType"] = lensTypeDescription
+
+                    returnedMap["(Canon) focusMode1"] = focusMode1Description
+                    returnedMap["(Canon) quality"] = qualityDescription
+                }
+            }
 
             // Add GPS if we got it. TODO would be cool if the picture viewer can open the map!
             //https://github.com/drewnoakes/metadata-extractor/blob/main/Source/com/drew/metadata/exif/GpsDescriptor.java
