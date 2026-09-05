@@ -1,10 +1,11 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlin.io.path.Path
 
 
 //Think about how observable this will be with Compose?
@@ -54,12 +55,29 @@ class FileManagerViewState {
         }
     }
 
-    // Item height (if not List viewMode)
-    var previewItemHeightPx : Int = 100
+    var previewItemRowHeightFractionGridView : Float by mutableStateOf(0.5F)
+        private set
+    var previewItemRowHeightFractionListView : Float by mutableStateOf(0.5F)
         private set
 
-    fun setPreviewItemHeightPx(height : Int) {
-        this.previewItemHeightPx = height
+
+    @Composable
+    fun getPreviewItemRowHeightFraction() : Float {
+        return remember(itemStyle) {
+            when (itemStyle) {
+                ItemStyle.List,
+                ItemStyle.ListWithPreviews -> previewItemRowHeightFractionListView
+                ItemStyle.Grid -> previewItemRowHeightFractionGridView
+            }
+        }
+    }
+
+    fun setPreviewItemHeightRowHeightFraction(ratio : Float) {
+        when (this.itemStyle) {
+            ItemStyle.List,
+            ItemStyle.ListWithPreviews -> previewItemRowHeightFractionListView = ratio
+            ItemStyle.Grid -> previewItemRowHeightFractionGridView = ratio
+        }
     }
 
 }

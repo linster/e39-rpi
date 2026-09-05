@@ -9,6 +9,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpenParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
@@ -118,14 +120,25 @@ class FileManagerScreen @Inject constructor(
             ) {
                 when (viewState.itemStyle) {
                     FileManagerViewState.ItemStyle.List -> ListView(entries.value) {}
-                    FileManagerViewState.ItemStyle.Grid -> GridView(entries.value) {}
-                    FileManagerViewState.ItemStyle.ListWithPreviews -> ListViewWithPreviews(entries.value) {}
+                    FileManagerViewState.ItemStyle.Grid -> GridView(
+                        rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
+                        entries = entries.value,
+                        onEntrySelected = { entry -> onDirectoryEntrySelected(params, entry)}
+                    )
+                    FileManagerViewState.ItemStyle.ListWithPreviews -> ListViewWithPreviews(
+                        rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
+                        entries = entries.value,
+                        onEntrySelected = { entry -> onDirectoryEntrySelected(params, entry)}
+                    )
                 }
             }
         }
     }
 
-    fun onDirectoryEntrySelected(entry : DirectoryRepo.DirectoryEntry) {
+    fun onDirectoryEntrySelected(
+        params : FileManagerScreenOpenParameters,
+        entry : DirectoryRepo.DirectoryEntry
+    ) {
         //TODO this needs the open mode from the composable to know what entries to enable.
     }
 
@@ -148,12 +161,46 @@ class FileManagerScreen @Inject constructor(
     }
 
     @Composable
-    fun GridView(entries : List<DirectoryRepo.DirectoryEntry>, onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit) {
-        Text("Grid View")
+    fun GridView(
+        rowHeightFraction : Float,
+        entries : List<DirectoryRepo.DirectoryEntry>,
+        onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit
+    ) {
+        SmoothScroll.GridScroll(
+            modifier = Modifier,
+            knobListenerService = knobListenerServiceMain,
+            tag = TAG,
+            logger = logger,
+            prependGoBackEntry = false,
+            navigationNodeTraverser = navigationNodeTraverser,
+            rowHeightFraction = rowHeightFraction,
+            desiredItemAspectRatio = 1F,
+            items = listOf()
+        )
     }
 
     @Composable
-    fun ListViewWithPreviews(entries : List<DirectoryRepo.DirectoryEntry>, onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit) {
-        Text("List view with previews")
+    fun ListViewWithPreviews(
+        rowHeightFraction : Float,
+        entries : List<DirectoryRepo.DirectoryEntry>,
+        onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit
+    ) {
+
+
+        SmoothScroll.SmoothScroll(
+            modifier = Modifier,
+            knobListenerService = knobListenerServiceMain,
+            tag = TAG,
+            logger = logger,
+            prependGoBackEntry = false,
+            navigationNodeTraverser = navigationNodeTraverser,
+            items = entries.map {
+                TextMenuItem(
+                    title = it.path.name,
+                    onClicked = { onEntrySelected(it) }
+                )
+            }.toDynamicLambdas()
+        )
+
     }
 }

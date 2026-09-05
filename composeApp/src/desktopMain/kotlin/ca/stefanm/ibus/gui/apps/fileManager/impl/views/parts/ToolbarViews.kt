@@ -24,7 +24,6 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
-import java.io.File
 
 object ToolbarViews {
 
@@ -64,8 +63,8 @@ object ToolbarViews {
             onNewViewMode = { viewState.setItemStyle(it) },
             previewsEnabled = viewState.showPreview,
             onNewPreviewsEnabled = { viewState.setShowPreview(it) },
-            previewZoomDp = viewState.previewItemHeightPx,
-            onNewPreviewZoom = { viewState.setPreviewItemHeightPx(it) },
+            previewZoomRowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
+            onNewPreviewZoom = { viewState.setPreviewItemHeightRowHeightFraction(it) },
             onFolderBackClicked = { directoryStateRequestor.requestNavigateBack() },
             onFolderForwardClicked = { directoryStateRequestor.requestNavigateForward() },
             onFolderUpClicked = { directoryStateRequestor.requestNavigateUp() },
@@ -101,8 +100,8 @@ object ToolbarViews {
         previewsEnabled : Boolean = true,
         onNewPreviewsEnabled : (Boolean) -> Unit = {},
 
-        previewZoomDp : Int = 500,
-        onNewPreviewZoom : (Int) -> Unit = {},
+        previewZoomRowHeightFraction : Float = 0.5F,
+        onNewPreviewZoom : (Float) -> Unit = {},
 
         onFolderBackClicked : () -> Unit = {},
         onFolderForwardClicked : () -> Unit = {},
@@ -237,9 +236,10 @@ object ToolbarViews {
                         chipOrientation = ItemChipOrientation.N,
                         isSelected = currentIndex == allocatedIndex,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                            modalMenuService.showIntSlider(
-                                initialValue = previewZoomDp,
-                                validItems = 10 .. 100 step 5,
+                            modalMenuService.showFloatSlider(
+                                initialValue = previewZoomRowHeightFraction,
+                                validItems = 0.3F .. 1.1F,
+                                step = 0.1F,
                                 onCurrentValueChanged = { onNewPreviewZoom(it)},
                                 hintText = "Zoom"
                             )
