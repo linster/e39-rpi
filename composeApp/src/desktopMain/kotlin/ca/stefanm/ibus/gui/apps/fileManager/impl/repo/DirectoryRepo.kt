@@ -116,6 +116,8 @@ class DirectoryRepo @Inject constructor(
         //Calculate filters here
         //FileFilter, DirFilter.
 
+        //TODO the dir filter needs to just get directories that are the child of this folder, not every single folder
+        // in the sub-tree.
         return kfsWatcherFlow(currentDirectory.value).flatMapLatest {
             callbackFlow {
                 val iterator = FileUtils.iterateFiles(
