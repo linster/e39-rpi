@@ -153,6 +153,7 @@ class GriffinPowermateReader @Inject constructor(
                 .collect { send(it) }
             // No need to awaitClose for the watcher, it'll self close
             // when producerScope is closed.
+            //TODO but does it exhaust the amount of watched directories (capped at 64?)
         }.onEach {
             if (shouldLog) {
                 logger.d(TAG, "Event: $it")

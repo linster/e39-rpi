@@ -111,7 +111,6 @@ class FileSidebar @Inject constructor(
                                     file = file,
                                     type = metaData.first
                                 )
-
                             }
                         }
                         if (allowOpen) {

@@ -90,6 +90,10 @@ object SmoothScroll {
         items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
     ) {
 
+        if (items.isEmpty()) {
+            return
+        }
+
         val knobState = KnobObserverBuilderState.setupListener(
             knobListenerService = knobListenerService,
             logger,

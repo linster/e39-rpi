@@ -24,16 +24,17 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import java.io.File
 
 object ToolbarViews {
 
     @Composable
-    fun HeaderBar() {
+    fun HeaderBar(currentDirectory : String) {
 
         //TODO don't forget we can use the same window to select a destination for
         //TODO "Copy to.." and "Move to.." operations, and that should be reflected
         //TODO in the title bar.
-        BmwSingleLineHeader("File Manager : /home/stefan")
+        BmwSingleLineHeader("File Manager : $currentDirectory")
     }
 
     @Composable

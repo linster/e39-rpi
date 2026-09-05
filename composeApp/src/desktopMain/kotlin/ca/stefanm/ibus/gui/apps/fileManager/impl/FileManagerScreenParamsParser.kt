@@ -31,7 +31,7 @@ enum class OpenMode {
 }
 
 data class FileManagerScreenOpenParameters(
-    val openMode: OpenMode,
+    val openMode: OpenMode = OpenMode.BROWSE,
     val baseDirectory : File = File("/home/stefan"),
 
     val fileFilter : Filter = Filter.AllFilesAndFolders,
@@ -108,3 +108,13 @@ class FileManagerScreenFileSelectionResultHelper @Inject constructor(){
 
 
 //Parse the navigator input params here
+class FileManagerScreenParamsParser @Inject constructor() {
+    fun parse(incomingResult : Navigator.IncomingResult?) : FileManagerScreenOpenParameters {
+        return if (incomingResult == null) {
+            FileManagerScreenOpenParameters()
+        } else {
+            val params : FileManagerScreenOpenParameters? = incomingResult.requestParameters as? FileManagerScreenOpenParameters
+            params ?: FileManagerScreenOpenParameters()
+        }
+    }
+}
