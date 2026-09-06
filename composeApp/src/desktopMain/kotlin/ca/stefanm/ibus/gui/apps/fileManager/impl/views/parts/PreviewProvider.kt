@@ -1,13 +1,9 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,24 +27,28 @@ import ca.stefanm.ibus.lib.logging.Logger
 import coil3.compose.AsyncImage
 import com.ginsberg.cirkle.circular
 import dev.nucleusframework.pdfium.PdfPage
-import dev.nucleusframework.pdfium.PdfReaderState
 import dev.nucleusframework.pdfium.rememberPdfReaderState
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 //A class that helps draw icons for panes to show what the file is.
-class SidebarPreviewProvider @Inject constructor(
+class PreviewProvider @Inject constructor(
     private val loaderUtils : LoaderUtils,
-    private val logger : Logger
+    private val logger : Logger,
+    private val mimeTools: MimeTools
 ){
     //For a PDF show a PDF page
     //For an image, draw it
     //For a movie, grab a picture of it
+
+
+    @Composable
+    fun FilePreview(file: File) {
+        FilePreview(file, mimeTools.getFileTypeForFile(file))
+    }
 
     @Composable
     fun FilePreview(file: File, type : FileType) {
@@ -68,19 +67,11 @@ class SidebarPreviewProvider @Inject constructor(
         )) {
             NoFilePreview()
         } else {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .height(130.dp.halveIfNotPixelDoubled()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                when (type) {
-                    FileType.PDF -> PdfFilePreview(file)
-                    FileType.Picture -> PicturePreview(file)
-                    FileType.TextFile -> TextPreview(file)
-                    else -> {}
-                }
+            when (type) {
+                FileType.PDF -> PdfFilePreview(file)
+                FileType.Picture -> PicturePreview(file)
+                FileType.TextFile -> TextPreview(file)
+                else -> {}
             }
         }
     }

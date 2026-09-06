@@ -1,17 +1,11 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.key
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
 import ca.stefanm.ibus.di.ApplicationModule
@@ -29,7 +23,6 @@ import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
-import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.toLocalDateTime
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -50,7 +43,7 @@ class FileSidebar @Inject constructor(
 
     private val mimeTools: MimeTools,
 
-    private val sidebarPreviewProvider: SidebarPreviewProvider
+    private val previewProvider: PreviewProvider
 ) {
 
     companion object {
@@ -107,10 +100,18 @@ class FileSidebar @Inject constructor(
                         )
                         add { allocatedIndex, currentIndex ->
                             ArbitraryContentsMenuItem(onClicked = {}) {
-                                sidebarPreviewProvider.FilePreview(
-                                    file = file,
-                                    type = metaData.first
-                                )
+                                Column(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(130.dp.halveIfNotPixelDoubled()),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    previewProvider.FilePreview(
+                                        file = file,
+                                        type = metaData.first
+                                    )
+                                }
                             }
                         }
                         if (allowOpen) {

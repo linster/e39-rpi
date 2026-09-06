@@ -23,14 +23,21 @@ class FolderSidebar @Inject constructor(
     fun openSidebarForFolder(
         folder : File,
         allowModify : Boolean = false,
-        allowSelect : Boolean = false,
         allowCopy : Boolean = false,
         onCopyToSelected : (File) -> Unit = {},
         onMoveToSelected : (File) -> Unit = {},
         onPermissionsActivityRequested : (File) -> Unit = {},
         onRenameSelected : (File) -> Unit = {},
+
+        //TODO probably don't need this if relying on fake directory entries.
+        allowSelect : Boolean = false,
         onSelectFolder : (File) -> Unit = {},
-        onDeleteSelected : (File) -> Unit = {}
+        //TODO probably don't need this if relying on fake directory entries.
+
+
+        onDeleteSelected : (File) -> Unit = {},
+
+        onOpenSelected : (File) -> Unit = {}, //Opening the folder changes the directory navigation
     ) {
         if (!folder.isDirectory) {
             logger.w(TAG, "File $folder is not a directory.")

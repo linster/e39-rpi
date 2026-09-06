@@ -1,24 +1,45 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpenParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.MultiStepOperationBuilder
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.RenameFileScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INavigationButtonVisibleProvider
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INewButtonVisibleProvider
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FolderSidebar
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.IconProvider
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.PreviewProvider
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.ToolbarViews
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -27,7 +48,11 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
@@ -35,6 +60,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -55,7 +81,12 @@ class FileManagerScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val notificationHub: NotificationHub,
     private val directoryRepo: DirectoryRepo,
-    private val fileManagerScreenParameterParser: FileManagerScreenParamsParser
+    private val fileManagerScreenParameterParser: FileManagerScreenParamsParser,
+    private val previewProvider: PreviewProvider,
+    private val iconProvider: IconProvider,
+    private val fileSidebar: FileSidebar,
+    private val folderSidebar: FolderSidebar,
+    private val multiStepOperationBuilder: MultiStepOperationBuilder
 ) : NavigationNode<Nothing> {
 
     companion object : FileManagerScreenOpener {
@@ -121,6 +152,7 @@ class FileManagerScreen @Inject constructor(
                 when (viewState.itemStyle) {
                     FileManagerViewState.ItemStyle.List -> ListView(entries.value) {}
                     FileManagerViewState.ItemStyle.Grid -> GridView(
+                        havePreview = viewState.showPreview,
                         rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
                         entries = entries.value,
                         onEntrySelected = { entry -> onDirectoryEntrySelected(params, entry)}
@@ -135,11 +167,100 @@ class FileManagerScreen @Inject constructor(
         }
     }
 
+    fun allowModify() : Boolean = false //TODO grab this from a repo.
+
+    fun openFile(file : File) {
+        //TODO action router
+    }
+
     fun onDirectoryEntrySelected(
         params : FileManagerScreenOpenParameters,
         entry : DirectoryRepo.DirectoryEntry
     ) {
-        //TODO this needs the open mode from the composable to know what entries to enable.
+        when (entry) {
+            is DirectoryRepo.DirectoryEntry.Directory -> {
+                if (params.openMode in listOf(OpenMode.SELECT_COPY_TO_FOLDER, OpenMode.SELECT_MOVE_TO_FOLDER)) {
+                    //Don't open the sidebar for a folder, expect the user to pick the folder with the "Select this folder" entry
+                    return
+                }
+                folderSidebar.openSidebarForFolder(
+                    folder = entry.path,
+                    allowModify = allowModify(),
+
+                    allowCopy = params.openMode == OpenMode.BROWSE,
+                    onCopyToSelected = {
+                        multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.COPY_FOLDER_TO_FOLDER)
+                        multiStepOperationBuilder.setSource(it)
+                    },
+                    onMoveToSelected = {
+                        multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.MOVE_FOLDER_TO_FOLDER)
+                        multiStepOperationBuilder.setSource(it)
+                    },
+                    onPermissionsActivityRequested = TODO(),
+                    onRenameSelected = {
+                        RenameFileScreen.renameFile(navigationNodeTraverser, it)
+                    },
+                    onDeleteSelected = {
+                        DeleteFileScreen.deleteFile(navigationNodeTraverser, it)
+                    },
+                    onOpenSelected = {
+                        directoryRepo.requestNavigateToDirectory(it)
+                    }
+                )
+            }
+            is DirectoryRepo.DirectoryEntry.DirectoryFile -> {
+                fileSidebar.openSidebarForFile(
+                    file = entry.file,
+                    allowModify = allowModify(),
+                    allowOpen = params.openMode == OpenMode.BROWSE,
+                    allowSelect = params.openMode == OpenMode.SELECT_FILE,
+                    allowCopy = params.openMode == OpenMode.BROWSE,
+                    onCopyToSelected = {
+                        multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.COPY_FILE_TO_FOLDER)
+                        multiStepOperationBuilder.setSource(it)
+                    },
+                    onMoveToSelected = {
+                        multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.MOVE_FILE_TO_FOLDER)
+                        multiStepOperationBuilder.setSource(it)
+                    },
+                    onPermissionsActivityRequested = TODO(),
+                    onRenameSelected = {
+                        RenameFileScreen.renameFile(navigationNodeTraverser, it)
+                    },
+                    onOpenSelected = {
+                        //Cleanup descendants of file manager, then take the file and type and throw it at the ActionRouter.
+                        navigationNodeTraverser.cleanupBackStackDescendentsOf(
+                            thisClass
+                        )
+                        openFile(it)
+                    },
+                    onSelectFile = {
+                        if (params.openMode != OpenMode.SELECT_FILE) {
+                            logger.w(TAG, "The user selected 'Select this file' for $entry when the open mode was ${params.openMode}. Params were $params")
+                            return@openSidebarForFile
+                        }
+                        navigationNodeTraverser.setResultAndGoBack(
+                            thisClass,
+                            FileManagerScreenResult.FileManagerScreenResultForSelectFile.FileSelected(it)
+                        )
+                    },
+                    onDeleteSelected = {
+                        DeleteFileScreen.deleteFile(navigationNodeTraverser, it)
+                    }
+                )
+            }
+            is DirectoryRepo.DirectoryEntry.SelectThisDirectory -> {
+                //Check the open mode was correct for selection before making a result and returning it.
+                if (params.openMode !in listOf(OpenMode.SELECT_COPY_TO_FOLDER, OpenMode.SELECT_MOVE_TO_FOLDER)) {
+                    logger.w(TAG, "The user selected 'Select this entry' for $entry when the open mode was ${params.openMode}. Params were $params")
+                    return
+                }
+                navigationNodeTraverser.setResultAndGoBack(
+                    thisClass,
+                    FileManagerScreenResult.FileManagerScreenResultForSelectFolder.FolderSelected(directory = entry.path)
+                )
+            }
+        }
     }
 
     @Composable
@@ -162,10 +283,40 @@ class FileManagerScreen @Inject constructor(
 
     @Composable
     fun GridView(
+        havePreview : Boolean,
         rowHeightFraction : Float,
         entries : List<DirectoryRepo.DirectoryEntry>,
         onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit
     ) {
+
+        val items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit> = entries.map { entry ->
+            { allocatedIndex, currentIndex ->
+                ArbitraryContentsMenuItem(
+                    chipOrientation = ItemChipOrientation.S,
+                    isSelected = allocatedIndex == currentIndex,
+                    onClicked = { onEntrySelected(entry) }) {
+
+                    Column(
+                        Modifier.aspectRatio(1F, matchHeightConstraintsFirst = true),
+                    ) {
+                        if (!havePreview) {
+                            iconProvider.IconForEntry(entry)
+                        } else {
+                            previewProvider.FilePreview(entry.path)
+                        }
+                        //Label
+                        val measurements = ThemeWrapper.ThemeHandle.current.bigItem
+                        Text(
+                            text = entry.path.name,
+                            color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                            fontSize = measurements.fontSize,
+                            modifier = Modifier.clickable { onEntrySelected(entry) }
+                        )
+                    }
+                }
+            }
+        }
+
         SmoothScroll.GridScroll(
             modifier = Modifier,
             knobListenerService = knobListenerServiceMain,
@@ -175,7 +326,7 @@ class FileManagerScreen @Inject constructor(
             navigationNodeTraverser = navigationNodeTraverser,
             rowHeightFraction = rowHeightFraction,
             desiredItemAspectRatio = 1F,
-            items = listOf()
+            items = items
         )
     }
 
@@ -185,22 +336,55 @@ class FileManagerScreen @Inject constructor(
         entries : List<DirectoryRepo.DirectoryEntry>,
         onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit
     ) {
+        BoxWithConstraints {
+            val viewPortHeight = maxHeight
+            val items: List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit> =
+                entries.map { entry ->
+                    { allocatedIndex, currentIndex ->
+                        ArbitraryContentsMenuItem(
+                            chipOrientation = ItemChipOrientation.W,
+                            isSelected = allocatedIndex == currentIndex,
+                            onClicked = {
+                                onEntrySelected(entry)
+                            }) {
 
+                            Row(
+                                Modifier.wrapContentHeight(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                //Preview
+                                Box(
+                                    Modifier
+                                        .align(Alignment.CenterVertically)
+                                        .height(viewPortHeight * rowHeightFraction)
+                                        .aspectRatio(1F, true)
+                                ) {
+                                    previewProvider.FilePreview(entry.path)
+                                }
+                                //Label
+                                val measurements = ThemeWrapper.ThemeHandle.current.bigItem
+                                Text(
+                                    text = entry.path.name,
+                                    color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                                    fontSize = measurements.fontSize,
+                                    modifier = Modifier.clickable { onEntrySelected(entry) }
+                                )
 
-        SmoothScroll.SmoothScroll(
-            modifier = Modifier,
-            knobListenerService = knobListenerServiceMain,
-            tag = TAG,
-            logger = logger,
-            prependGoBackEntry = false,
-            navigationNodeTraverser = navigationNodeTraverser,
-            items = entries.map {
-                TextMenuItem(
-                    title = it.path.name,
-                    onClicked = { onEntrySelected(it) }
-                )
-            }.toDynamicLambdas()
-        )
+                            }
+                        }
+                    }
+                }
+
+            SmoothScroll.SmoothScroll(
+                modifier = Modifier,
+                knobListenerService = knobListenerServiceMain,
+                tag = TAG,
+                logger = logger,
+                prependGoBackEntry = false,
+                navigationNodeTraverser = navigationNodeTraverser,
+                items = items
+            )
+        }
 
     }
 }
