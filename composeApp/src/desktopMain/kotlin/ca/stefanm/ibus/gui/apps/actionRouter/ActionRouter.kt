@@ -4,6 +4,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
+import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import java.io.File
@@ -16,7 +17,9 @@ class ActionRouter @Inject constructor(
 ) {
 
     fun handleFileAction(file : File, action: FileAction) {
-
+        if (action == FileAction.VIEW) {
+            viewFile(file, mimeTools.getFileTypeForFile(file))
+        }
     }
 
     private fun viewFile(file: File, fileType: FileType) {
@@ -32,7 +35,10 @@ class ActionRouter @Inject constructor(
         }
     }
     private fun notifyActionUnsupported() {
-
+        notificationHub.postNotificationBackground(Notification(
+            Notification.NotificationImage.ALERT_TRIANGLE,
+            "Action unsupported for filetype."
+        ))
     }
     private fun viewPdf(file: File) {
         PdfViewerScreen.openWithFilename(navigationNodeTraverser, filename = file)

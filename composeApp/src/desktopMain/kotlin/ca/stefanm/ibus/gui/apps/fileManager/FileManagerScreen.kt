@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
+import ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter.FileAction
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpenParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
@@ -196,7 +197,7 @@ class FileManagerScreen @Inject constructor(
     fun allowModify() : Boolean = false //TODO grab this from a repo.
 
     fun openFile(file : File) {
-        //TODO action router
+        actionRouter.handleFileAction(file, FileAction.VIEW)
     }
 
     fun onDirectoryEntrySelected(
@@ -259,10 +260,6 @@ class FileManagerScreen @Inject constructor(
                         RenameFileScreen.renameFile(navigationNodeTraverser, it)
                     },
                     onOpenSelected = {
-                        //Cleanup descendants of file manager, then take the file and type and throw it at the ActionRouter.
-                        navigationNodeTraverser.cleanupBackStackDescendentsOf(
-                            thisClass
-                        )
                         openFile(it)
                     },
                     onSelectFile = {
@@ -356,7 +353,7 @@ class FileManagerScreen @Inject constructor(
             prependGoBackEntry = false,
             navigationNodeTraverser = navigationNodeTraverser,
             rowHeightFraction = rowHeightFraction,
-            desiredItemAspectRatio = 1F,
+            desiredItemAspectRatio = 1.5F,
             items = items
         )
     }
