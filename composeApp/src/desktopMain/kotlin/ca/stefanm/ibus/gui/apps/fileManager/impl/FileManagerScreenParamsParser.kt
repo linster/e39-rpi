@@ -1,8 +1,7 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
 
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters.Filter
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverrides
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -83,7 +82,7 @@ interface FileManagerScreenOpener {
         )
     }
     fun openForFileSelection(navigationNodeTraverser: NavigationNodeTraverser,
-                             baseDirectory: File,
+                             baseDirectory: File = FileManagerSettingsOverrides.Default.defaultBrowseFolder,
                              filter : Filter = Filter.AllFilesAndFolders
     ) {
         navigationNodeTraverser.navigateToNodeWithParameters(

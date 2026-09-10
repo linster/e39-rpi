@@ -19,7 +19,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilePickerResult
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.recent.MostRecentlyUsedRepo
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem

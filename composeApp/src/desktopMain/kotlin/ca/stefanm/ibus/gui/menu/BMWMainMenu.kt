@@ -81,12 +81,7 @@ class BMWMainMenu @Inject constructor(
                 TextMenuItem(
                     title = "PdfViewer",
                     onClicked = {
-//                        navigationNodeTraverser.navigateToNode(
-//                            PdfViewerScreen::class.java
-//                        )
-                        PdfViewerScreen.openWithFilename(navigationNodeTraverser,
-                            File("/home/stefan/Downloads/Quiz1_assignment.pdf")
-                            )
+                        navigationNodeTraverser.navigateToNode(PdfViewerScreen::class.java)
                     }
                 ),
                 TextMenuItem(

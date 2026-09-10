@@ -4,6 +4,10 @@ import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens.FilePaneDebugScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationProgressScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.PermissionsModifierScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.RenameFileScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
@@ -178,7 +182,11 @@ class NavigationModule {
         videoPlayerScreen: VideoPlayerScreen,
         videoPlayerAppHomeScreen: VideoPlayerAppHomeScreen,
         fileManagerScreen: FileManagerScreen,
-        filePaneDebugScreen: FilePaneDebugScreen
+        filePaneDebugScreen: FilePaneDebugScreen,
+        deleteFileScreen: DeleteFileScreen,
+        multiStepOperationProgressScreen: MultiStepOperationProgressScreen,
+        permissionsModifierScreen: PermissionsModifierScreen,
+        renameFileScreen: RenameFileScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -260,7 +268,11 @@ class NavigationModule {
         videoPlayerScreen,
         videoPlayerAppHomeScreen,
         fileManagerScreen,
-        filePaneDebugScreen
+        filePaneDebugScreen,
+        deleteFileScreen,
+        multiStepOperationProgressScreen,
+        permissionsModifierScreen,
+        renameFileScreen
     )
 }
 

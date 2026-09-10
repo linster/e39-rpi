@@ -13,10 +13,9 @@ class MultiStepOperationProgressScreen @Inject constructor(
 
 ) : NavigationNode<Nothing> {
 
-    //TODO hope that Navigator.cleanupBackstackDescendents works
-    //TODO yes it does
+
     override val thisClass: Class<out NavigationNode<Nothing>>
-        get() = TODO("Not yet implemented")
+        get() = MultiStepOperationProgressScreen::class.java
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = {
 

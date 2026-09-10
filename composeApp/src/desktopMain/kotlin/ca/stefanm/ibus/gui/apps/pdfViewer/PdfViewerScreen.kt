@@ -44,7 +44,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen.PageSelectorResult
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
 import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen
@@ -63,8 +66,13 @@ import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoothScreen
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import dev.nucleusframework.pdfium.PageSize
@@ -140,16 +148,15 @@ class PdfViewerScreen @Inject constructor(
 
         if (params == null) {
             logger.d(TAG, "params were null")
-            InstructionalPage()
+            PromptToSelectFile()
             return@content
         }
 
 
         val fileName =
-            if (params.resultFrom == FilePickerScreen::class.java && params.result is FilePickerScreen.Companion.FilePickerResult) {
+            if (params.resultFrom == FileManagerScreen::class.java && params.result is FileManagerScreenResult.FileManagerScreenResultForSelectFile) {
                 when (val incoming = params.result) {
-                    is FilePickerScreen.Companion.FilePickerResult.FileChosen -> incoming.file
-                    FilePickerScreen.Companion.FilePickerResult.NoFileChosen -> null
+                    is FileManagerScreenResult.FileManagerScreenResultForSelectFile.FileSelected -> incoming.file
                     else -> null
                 }
             } else if (params.resultFrom == PdfPageSelectorScreen::class.java && params.result is PageSelectorResult) {
@@ -171,7 +178,7 @@ class PdfViewerScreen @Inject constructor(
         }
 
         if (fileName == null && bytesFromParameters == null) {
-            InstructionalPage()
+            PromptToSelectFile()
             return@content
         }
 
@@ -205,24 +212,27 @@ class PdfViewerScreen @Inject constructor(
     }
 
     @Composable
-    fun InstructionalPage() {
-        Column(
-            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                .fillMaxSize()
-        ){
-            BmwSingleLineHeader("PDF Viewer -- Instructions")
-
-        }
-    }
-
-    @Composable
     fun PromptToSelectFile() {
-        Column(
-            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                .fillMaxSize()
-        ) {
-            BmwSingleLineHeader("PDF Viewer -- Instructions")
-
+        val context = object : SmoothScroll.SmoothScrollContext {
+            override fun knobListenerService() = knobListenerServiceMain
+            override fun tag() = TAG
+            override fun logger() = logger
+            override fun navigationNodeTraverser() = navigationNodeTraverser
+        }
+        with (context) {
+            OneColumnSmoothScreen(
+                header = "PDF Viewer",
+                logTag = TAG,
+                prependGoBackEntry = true,
+                items = listOf(
+                    TextMenuItem(
+                        title = "Open File...",
+                        onClicked = {
+                            FileManagerScreen.openForFileSelection(navigationNodeTraverser, filter = Filter.Pdf)
+                        }
+                    )
+                )
+            )
         }
     }
 
@@ -522,8 +532,20 @@ class PdfViewerScreen @Inject constructor(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                val truncatedFilename = if (fileName == null) "null" else {
+                    val length = 50
+                    with (fileName!!) {
+                        if (absolutePath.length <= length) {
+                            absolutePath
+                        } else if (name.length <= length) {
+                            name
+                        } else {
+                            name.takeLast(length)
+                        }
+                    }
+                }
                 Text(
-                    text = "PDF Viewer : ${fileName?.absolutePath}".uppercase(),
+                    text = "$truncatedFilename".uppercase(),
                     fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                     fontWeight = FontWeight.Bold,
                     color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor

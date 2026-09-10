@@ -1,6 +1,6 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.recent
 
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +28,7 @@ class MostRecentlyUsedRepo @Inject constructor(
         //TODO call the interface
     }
 
-    fun getEntriesForType(filter: FilePickerScreen.Companion.FilerPickerParameters.Filter) : Flow<List<RecentEntry>> {
+    fun getEntriesForType(filter: FilerPickerParameters.Filter) : Flow<List<RecentEntry>> {
 
         return flowOf()
         //return flowOf(repo[FileManagerMru.entries].filter { it.type == type })
@@ -38,7 +38,7 @@ class MostRecentlyUsedRepo @Inject constructor(
 
     }
 
-    fun clearType(filter : FilePickerScreen.Companion.FilerPickerParameters.Filter) {
+    fun clearType(filter : FilerPickerParameters.Filter) {
 
     }
 

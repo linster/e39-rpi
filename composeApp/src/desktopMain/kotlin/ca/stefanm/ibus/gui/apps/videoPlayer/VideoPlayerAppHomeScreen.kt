@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerParameterProvider
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters.Filter
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFileSelectionResultHelper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -76,22 +76,11 @@ class VideoPlayerAppHomeScreen @Inject constructor(
                         }
                     ),
                     TextMenuItem(
-                        "Open File Picker (MRU)",
-                        onClicked = {
-                            filePickerScreen.showFilePickerMRUSelectPane(
-                                filePickerParameterProvider.getVideoPlayerParameters(),
-                                onQuickFileSelect = {
-                                    logger.d("VideoPlayerScreen", "selected file $it")
-                                }
-                            )
-                        }
-                    ),
-                    TextMenuItem(
                         "Open File Picker",
                         onClicked = {
                             FileManagerScreen.openForFileSelection(
                                 navigationNodeTraverser,
-                                baseDirectory = File("/home/stefan/Videos"),
+                                baseDirectory = File("/home/stefan/BMW/fileManTest/"),
                                 filter = Filter.Videos
                             )
                         }

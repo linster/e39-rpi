@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpenParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
@@ -80,7 +81,8 @@ class FileManagerScreen @Inject constructor(
     private val iconProvider: IconProvider,
     private val fileSidebar: FileSidebar,
     private val folderSidebar: FolderSidebar,
-    private val multiStepOperationBuilder: MultiStepOperationBuilder
+    private val multiStepOperationBuilder: MultiStepOperationBuilder,
+    private val actionRouter: ActionRouter
 ) : NavigationNode<Nothing> {
 
     companion object : FileManagerScreenOpener, FileManagerScreenSelfOpener {
@@ -203,9 +205,8 @@ class FileManagerScreen @Inject constructor(
     ) {
         when (entry) {
             is DirectoryRepo.DirectoryEntry.Directory -> {
-                if (params.openMode in listOf(OpenMode.SELECT_COPY_TO_FOLDER, OpenMode.SELECT_MOVE_TO_FOLDER)) {
-                    //Don't open the sidebar for a folder, expect the user to pick the folder with the "Select this folder" entry
-                    //TODO though we would also like to cause navigation......
+                if (params.openMode in listOf(OpenMode.SELECT_COPY_TO_FOLDER, OpenMode.SELECT_MOVE_TO_FOLDER, OpenMode.SELECT_FILE)) {
+                    //Only browse lets the user faff around with folders.
                     directoryRepo.requestNavigateToDirectory(entry.path)
                     return
                 }

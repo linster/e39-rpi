@@ -35,10 +35,14 @@ class RenameFileScreen @Inject constructor(
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = RenameFileScreen::class.java
 
-    override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
+    override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = content@ { params ->
 
         val file : File? = params?.requestParameters as? File
 
+        if (file == null) {
+            navigationNodeTraverser.goBack()
+            return@content
+        }
 
     }
 

@@ -1,8 +1,7 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
 
 import androidx.compose.runtime.Composable
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters.Filter
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FilePickerMruPane
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -11,7 +10,6 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.Logger
-import io.github.vinceglb.filekit.dialogs.FileKitType
 import java.io.File
 import javax.inject.Inject
 
@@ -26,29 +24,6 @@ class FilePickerScreen @Inject constructor(
         sealed interface FilePickerResult {
             object NoFileChosen : FilePickerResult
             data class FileChosen(val file : File) : FilePickerResult
-        }
-
-        data class FilerPickerParameters(
-            val rootDirectory : File,
-            val allowNavigateUpFromRoot : Boolean = false,
-            val allowNavigateIntoChildFolders : Boolean = true,
-
-            val filter : Filter,
-
-            val allowRenameFiles : Boolean = true,
-            val allowMakeDirectory : Boolean = true,
-        ) {
-            sealed interface Filter {
-                object AllFilesAndFolders : Filter
-                object FoldersOnly : Filter
-                object AllFilesOnly : Filter
-                object Videos : Filter
-                object Pictures : Filter
-                object Pdf : Filter
-                data class MatchingFileTypes(
-                    val types : List<FileType>
-                ) : Filter
-            }
         }
 
         fun showFilePickerScreen(
@@ -87,8 +62,8 @@ class FilePickerParameterProvider @Inject constructor(
     private val configurationStorage: ConfigurationStorage
 ) {
 
-    fun getVideoPlayerParameters() : FilePickerScreen.Companion.FilerPickerParameters {
-        return FilePickerScreen.Companion.FilerPickerParameters(
+    fun getVideoPlayerParameters() : FilerPickerParameters {
+        return FilerPickerParameters(
             rootDirectory = File("/home/stefan/Videos"),
             allowNavigateUpFromRoot = false,
             allowNavigateIntoChildFolders = true,

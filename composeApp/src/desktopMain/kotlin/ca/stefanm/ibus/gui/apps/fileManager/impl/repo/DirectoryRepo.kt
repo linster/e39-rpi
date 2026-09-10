@@ -1,11 +1,9 @@
 package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo
 
 
-import androidx.compose.runtime.mutableStateOf
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverrides
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
@@ -14,23 +12,13 @@ import io.github.irgaly.kfswatch.KfsDirectoryWatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.filefilter.DirectoryFileFilter
-import org.apache.commons.io.filefilter.FalseFileFilter
-import org.apache.commons.io.filefilter.FileFilterUtils
-import org.apache.commons.io.filefilter.HiddenFileFilter
-import org.apache.commons.io.filefilter.IOFileFilter
-import org.apache.commons.io.filefilter.TrueFileFilter
-import org.eclipse.jgit.treewalk.filter.TreeFilter
 import java.io.File
-import java.io.FileFilter
 import javax.inject.Inject
 
 // A class that gives a flow for a directory of all the files in it.
@@ -114,7 +102,7 @@ class DirectoryRepo @Inject constructor(
 
     fun getDirectoryFlow(
         showFakeSelectThisDirectoryEntry : Boolean = false,
-        filter: FilePickerScreen.Companion.FilerPickerParameters.Filter,
+        filter: FilerPickerParameters.Filter,
         showHiddenFiles : Boolean = false,
         showHiddenFolders : Boolean = false,
     ) : Flow<List<DirectoryEntry>> {
@@ -131,15 +119,15 @@ class DirectoryRepo @Inject constructor(
 
                 val fileList = currentDirectory.value.listFiles { file ->
                     when (filter) {
-                        FilePickerScreen.Companion.FilerPickerParameters.Filter.AllFilesAndFolders -> true
-                        FilePickerScreen.Companion.FilerPickerParameters.Filter.AllFilesOnly -> file.isFile
-                        FilePickerScreen.Companion.FilerPickerParameters.Filter.FoldersOnly -> file.isDirectory
-                        is FilePickerScreen.Companion.FilerPickerParameters.Filter.MatchingFileTypes -> {
-                            mimeTools.getFileTypeForFile(file) in filter.types
+                        FilerPickerParameters.Filter.AllFilesAndFolders -> true
+                        FilerPickerParameters.Filter.AllFilesOnly -> file.isFile
+                        FilerPickerParameters.Filter.FoldersOnly -> file.isDirectory
+                        is FilerPickerParameters.Filter.MatchingFileTypes -> {
+                            (mimeTools.getFileTypeForFile(file) in filter.types) || file.isDirectory
                         }
-                        FilePickerScreen.Companion.FilerPickerParameters.Filter.Pdf -> mimeTools.getFileTypeForFile(file) == FileType.PDF
-                        FilePickerScreen.Companion.FilerPickerParameters.Filter.Pictures -> mimeTools.getFileTypeForFile(file) == FileType.Picture
-                        FilePickerScreen.Companion.FilerPickerParameters.Filter.Videos -> mimeTools.getFileTypeForFile(file) == FileType.Movie
+                        FilerPickerParameters.Filter.Pdf -> (mimeTools.getFileTypeForFile(file) == FileType.PDF) || file.isDirectory
+                        FilerPickerParameters.Filter.Pictures -> (mimeTools.getFileTypeForFile(file) == FileType.Picture) || file.isDirectory
+                        FilerPickerParameters.Filter.Videos -> (mimeTools.getFileTypeForFile(file) == FileType.Movie) || file.isDirectory
                     }
 
                 }
