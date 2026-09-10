@@ -3,6 +3,8 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo
 
 import androidx.compose.runtime.mutableStateOf
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverrides
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
@@ -34,7 +36,8 @@ import javax.inject.Inject
 // A class that gives a flow for a directory of all the files in it.
 class DirectoryRepo @Inject constructor(
     private val logger: Logger,
-    private val backStackManager: CurrentDirectoryBackStackManager
+    private val backStackManager: CurrentDirectoryBackStackManager,
+    private val mimeTools: MimeTools
 ) : IDirectoryNavigatorReader, IDirectoryStateRequestor {
 
     companion object {
@@ -126,17 +129,20 @@ class DirectoryRepo @Inject constructor(
         return kfsWatcherFlow(currentDirectory.value).flatMapLatest {
             callbackFlow {
 
-                val iterator = FileUtils.iterateFiles(
-                    currentDirectory.value,
-                    if (showHiddenFiles) {
-                        HiddenFileFilter.VISIBLE
-                    } else {
-                        TrueFileFilter.TRUE
-                    },
-//                    DirectoryFileFilter.DIRECTORY
-                    DirectoryFileFilter.INSTANCE
-                )
-                val fileList: List<File> = listOf(*iterator.asSequence().toList().toTypedArray())
+                val fileList = currentDirectory.value.listFiles { file ->
+                    when (filter) {
+                        FilePickerScreen.Companion.FilerPickerParameters.Filter.AllFilesAndFolders -> true
+                        FilePickerScreen.Companion.FilerPickerParameters.Filter.AllFilesOnly -> file.isFile
+                        FilePickerScreen.Companion.FilerPickerParameters.Filter.FoldersOnly -> file.isDirectory
+                        is FilePickerScreen.Companion.FilerPickerParameters.Filter.MatchingFileTypes -> {
+                            mimeTools.getFileTypeForFile(file) in filter.types
+                        }
+                        FilePickerScreen.Companion.FilerPickerParameters.Filter.Pdf -> mimeTools.getFileTypeForFile(file) == FileType.PDF
+                        FilePickerScreen.Companion.FilerPickerParameters.Filter.Pictures -> mimeTools.getFileTypeForFile(file) == FileType.Picture
+                        FilePickerScreen.Companion.FilerPickerParameters.Filter.Videos -> mimeTools.getFileTypeForFile(file) == FileType.Movie
+                    }
+
+                }
                 send(fileList)
                 awaitClose {}
             }.map { upstream ->

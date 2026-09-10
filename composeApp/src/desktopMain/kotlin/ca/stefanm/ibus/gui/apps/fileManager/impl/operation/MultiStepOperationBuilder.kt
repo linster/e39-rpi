@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
+package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
