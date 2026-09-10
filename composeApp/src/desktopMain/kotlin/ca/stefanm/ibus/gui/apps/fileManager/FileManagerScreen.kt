@@ -26,9 +26,11 @@ import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpe
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenSelfOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.MultiStepOperationBuilder
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.PermissionsModifierScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.RenameFileScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
@@ -89,7 +91,7 @@ class FileManagerScreen @Inject constructor(
     private val multiStepOperationBuilder: MultiStepOperationBuilder
 ) : NavigationNode<Nothing> {
 
-    companion object : FileManagerScreenOpener {
+    companion object : FileManagerScreenOpener, FileManagerScreenSelfOpener {
         const val TAG = "FileManagerScreen"
     }
 
@@ -100,6 +102,8 @@ class FileManagerScreen @Inject constructor(
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
 
         val params = fileManagerScreenParameterParser.parse(params)
+
+        //TODO see if we have a result and if the operation builder is complete. If so, go to the MultiStepOperationProgressScreen.
 
         val knobStateMain = KnobObserverBuilderState.setupListener(
             knobListenerService = knobListenerServiceMain,
@@ -112,7 +116,7 @@ class FileManagerScreen @Inject constructor(
 
         LaunchedEffect(params) {
             directoryRepo.setBaseDirectory(params.baseDirectory)
-            directoryRepo.requestNavigateToDirectory(params.baseDirectory)
+            directoryRepo.requestNavigateToDirectory(params.openDirectory)
         }
 
         Column {
@@ -136,8 +140,33 @@ class FileManagerScreen @Inject constructor(
                 directoryStateRequestor = directoryRepo,
                 onNewFileClicked = { },
                 onNewFolderClicked = { },
-                exitButtonText = "Cancel",
-                onExitButtonClicked = { }
+                exitButtonText = when (params.openMode) {
+                    OpenMode.BROWSE -> "Close"
+                    OpenMode.SELECT_FILE -> "Cancel Select"
+                    OpenMode.SELECT_COPY_TO_FOLDER -> "Cancel Copy"
+                    OpenMode.SELECT_MOVE_TO_FOLDER -> "Cancel Move"
+                },
+                onExitButtonClicked = {
+                    when (params.openMode) {
+                        OpenMode.BROWSE -> {
+                            navigationNodeTraverser.navigateToRoot()
+                        }
+                        OpenMode.SELECT_FILE -> {
+                            navigationNodeTraverser.setResultAndGoBack(
+                                FileManagerScreen::class.java,
+                                FileManagerScreenResult.FileManagerScreenResultForSelectFile.NoFileSelected
+                            )
+                        }
+                        OpenMode.SELECT_COPY_TO_FOLDER,
+                        OpenMode.SELECT_MOVE_TO_FOLDER -> {
+                            multiStepOperationBuilder.clear()
+                            navigationNodeTraverser.setResultAndGoBack(
+                                FileManagerScreen::class.java,
+                                FileManagerScreenResult.FileManagerScreenResultForSelectFolder.NoFolderSelected
+                            )
+                        }
+                    }
+                }
             )
 
             val entries = directoryRepo.getDirectoryFlow(
@@ -150,7 +179,7 @@ class FileManagerScreen @Inject constructor(
                 .fillMaxSize()
             ) {
                 when (viewState.itemStyle) {
-                    FileManagerViewState.ItemStyle.List -> ListView(entries.value) {}
+                    FileManagerViewState.ItemStyle.List -> ListView(entries.value) { entry -> onDirectoryEntrySelected(params, entry)}
                     FileManagerViewState.ItemStyle.Grid -> GridView(
                         havePreview = viewState.showPreview,
                         rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
@@ -181,6 +210,8 @@ class FileManagerScreen @Inject constructor(
             is DirectoryRepo.DirectoryEntry.Directory -> {
                 if (params.openMode in listOf(OpenMode.SELECT_COPY_TO_FOLDER, OpenMode.SELECT_MOVE_TO_FOLDER)) {
                     //Don't open the sidebar for a folder, expect the user to pick the folder with the "Select this folder" entry
+                    //TODO though we would also like to cause navigation......
+                    directoryRepo.requestNavigateToDirectory(entry.path)
                     return
                 }
                 folderSidebar.openSidebarForFolder(
@@ -191,12 +222,14 @@ class FileManagerScreen @Inject constructor(
                     onCopyToSelected = {
                         multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.COPY_FOLDER_TO_FOLDER)
                         multiStepOperationBuilder.setSource(it)
+                        openForCopyTo(navigationNodeTraverser, baseDirectory = params.baseDirectory, currentDirectory = it)
                     },
                     onMoveToSelected = {
                         multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.MOVE_FOLDER_TO_FOLDER)
                         multiStepOperationBuilder.setSource(it)
+                        openForMoveTo(navigationNodeTraverser, baseDirectory = params.baseDirectory, currentDirectory = it)
                     },
-                    onPermissionsActivityRequested = TODO(),
+                    onPermissionsActivityRequested = { PermissionsModifierScreen.changePermissions(navigationNodeTraverser, it) },
                     onRenameSelected = {
                         RenameFileScreen.renameFile(navigationNodeTraverser, it)
                     },
@@ -218,12 +251,14 @@ class FileManagerScreen @Inject constructor(
                     onCopyToSelected = {
                         multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.COPY_FILE_TO_FOLDER)
                         multiStepOperationBuilder.setSource(it)
+                        openForCopyTo(navigationNodeTraverser, baseDirectory = params.baseDirectory, currentDirectory = it.parentFile)
                     },
                     onMoveToSelected = {
                         multiStepOperationBuilder.setOperation(MultiStepOperationBuilder.Operation.MOVE_FILE_TO_FOLDER)
                         multiStepOperationBuilder.setSource(it)
+                        openForMoveTo(navigationNodeTraverser, baseDirectory = params.baseDirectory, currentDirectory = it.parentFile)
                     },
-                    onPermissionsActivityRequested = TODO(),
+                    onPermissionsActivityRequested = { PermissionsModifierScreen.changePermissions(navigationNodeTraverser, it) },
                     onRenameSelected = {
                         RenameFileScreen.renameFile(navigationNodeTraverser, it)
                     },

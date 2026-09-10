@@ -92,9 +92,7 @@ class BMWMainMenu @Inject constructor(
                 TextMenuItem(
                     title = "File manager",
                     onClicked = {
-                        navigationNodeTraverser.navigateToNode(
-                            FileManagerScreen::class.java
-                        )
+                        FileManagerScreen.openForBrowsing(navigationNodeTraverser)
                     }
                 )
             )

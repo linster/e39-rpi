@@ -3,6 +3,7 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilerPickerParameters.Filter
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverrides
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import java.io.File
@@ -32,7 +33,11 @@ enum class OpenMode {
 
 data class FileManagerScreenOpenParameters(
     val openMode: OpenMode = OpenMode.BROWSE,
-    val baseDirectory : File = File("/home/stefan"),
+
+    /** What's the directory the user cannot go up out of? */
+    val baseDirectory : File = FileManagerSettingsOverrides.Default.defaultBrowseFolder,
+    /** What directory does the file manager open to? */
+    val openDirectory : File = FileManagerSettingsOverrides.Default.defaultBrowseFolder,
 
     val fileFilter : Filter = Filter.AllFilesAndFolders,
 
@@ -89,6 +94,44 @@ interface FileManagerScreenOpener {
                 fileFilter = filter
             )
         )
+    }
+
+
+}
+
+internal interface FileManagerScreenSelfOpener {
+    fun openForCopyTo(
+        navigationNodeTraverser: NavigationNodeTraverser,
+        baseDirectory: File,
+        currentDirectory: File
+    ) {
+        navigationNodeTraverser.navigateToNodeWithParameters(
+            FileManagerScreen::class.java,
+            FileManagerScreenOpenParameters(
+                openMode = OpenMode.SELECT_COPY_TO_FOLDER,
+                baseDirectory = baseDirectory,
+                openDirectory = currentDirectory,
+                fileFilter = Filter.FoldersOnly,
+                showSelectThisFolderEntries = true
+            )
+        )
+    }
+    fun openForMoveTo(
+        navigationNodeTraverser: NavigationNodeTraverser,
+        baseDirectory: File,
+        currentDirectory: File
+    ) {
+        navigationNodeTraverser.navigateToNodeWithParameters(
+            FileManagerScreen::class.java,
+            FileManagerScreenOpenParameters(
+                openMode = OpenMode.SELECT_MOVE_TO_FOLDER,
+                baseDirectory = baseDirectory,
+                openDirectory = currentDirectory,
+                fileFilter = Filter.FoldersOnly,
+                showSelectThisFolderEntries = true
+            )
+        )
+
     }
 }
 

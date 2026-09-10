@@ -7,6 +7,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import java.io.File
 import javax.inject.Inject
 
+
 class DeleteFileScreen @Inject constructor(
 
 ) : NavigationNode<Nothing> {

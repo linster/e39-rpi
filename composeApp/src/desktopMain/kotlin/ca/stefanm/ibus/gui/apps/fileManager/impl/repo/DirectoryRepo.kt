@@ -3,6 +3,8 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo
 
 import androidx.compose.runtime.mutableStateOf
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverrides
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
 import ca.stefanm.ibus.lib.logging.Logger
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.filefilter.DirectoryFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.apache.commons.io.filefilter.FileFilterUtils
 import org.apache.commons.io.filefilter.HiddenFileFilter
@@ -49,7 +52,7 @@ class DirectoryRepo @Inject constructor(
         data class SelectThisDirectory(override val path : File) : DirectoryEntry(path)
     }
 
-    private var baseDirectory : File = FileUtils.getUserDirectory()
+    private var baseDirectory : File = FileManagerSettingsOverrides.Default.defaultBrowseFolder
 
     /** Set the base director for the file manager that no operation can travel up fro */
     fun setBaseDirectory(file : File) {
@@ -113,13 +116,16 @@ class DirectoryRepo @Inject constructor(
         showHiddenFolders : Boolean = false,
     ) : Flow<List<DirectoryEntry>> {
 
+
         //Calculate filters here
         //FileFilter, DirFilter.
+
 
         //TODO the dir filter needs to just get directories that are the child of this folder, not every single folder
         // in the sub-tree.
         return kfsWatcherFlow(currentDirectory.value).flatMapLatest {
             callbackFlow {
+
                 val iterator = FileUtils.iterateFiles(
                     currentDirectory.value,
                     if (showHiddenFiles) {
@@ -127,7 +133,8 @@ class DirectoryRepo @Inject constructor(
                     } else {
                         TrueFileFilter.TRUE
                     },
-                    FalseFileFilter.FALSE
+//                    DirectoryFileFilter.DIRECTORY
+                    DirectoryFileFilter.INSTANCE
                 )
                 val fileList: List<File> = listOf(*iterator.asSequence().toList().toTypedArray())
                 send(fileList)

@@ -40,6 +40,7 @@ class FilePickerScreen @Inject constructor(
         ) {
             sealed interface Filter {
                 object AllFilesAndFolders : Filter
+                object FoldersOnly : Filter
                 object AllFilesOnly : Filter
                 object Videos : Filter
                 object Pictures : Filter

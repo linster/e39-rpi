@@ -29,9 +29,11 @@ import com.ginsberg.cirkle.circular
 import dev.nucleusframework.pdfium.PdfPage
 import dev.nucleusframework.pdfium.rememberPdfReaderState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
+import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
 //A class that helps draw icons for panes to show what the file is.
@@ -103,27 +105,27 @@ class PreviewProvider @Inject constructor(
             val reader = rememberPdfReaderState()
             loaderUtils.loadPdfNoThrobber(reader, file)
             if (reader.pageCount > 0) {
-                var previewPage by remember { mutableStateOf(1) }
-                var previewIndex by remember { mutableStateOf(1) }
-                val pages = remember { (1 .. reader.pageCount).toList().circular() }
-                LaunchedEffect(Unit) {
-                    while(true) {
-                        delay(1.seconds)
-                        previewPage = pages[previewIndex]
-                        previewIndex += 1
-                    }
-                }
-                LaunchedEffect(previewPage) {
-                    logger.d("PdfFilePreview", "Current preview page for ${file.name} is $previewPage ; total pages is ${reader.pageCount}")
-                }
-                key(previewPage) {
+//                var previewPage by remember { mutableStateOf(1) }
+//                var previewIndex by remember { mutableStateOf(1) }
+//                val pages = remember { (1 until min(reader.pageCount, 5)).toList().circular() }
+//                LaunchedEffect(Unit) {
+//                    while(isActive) {
+//                        delay(3.seconds)
+//                        previewPage = pages[previewIndex]
+//                        previewIndex += 1
+//                    }
+//                }
+//                LaunchedEffect(previewPage) {
+//                    logger.d("PdfFilePreview", "Current preview page for ${file.name} is $previewPage ; total pages is ${reader.pageCount}")
+//                }
+//                key(previewPage) {
                     PdfPage(
                         state = reader,
-                        pageIndex = previewPage,
+                        pageIndex = 1,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
                     )
-                }
+//                }
             } else {
                 LaunchedEffect(reader.pageCount) {
                     logger.w("PdfFilePreview", "Reader for $file had zero pages")
