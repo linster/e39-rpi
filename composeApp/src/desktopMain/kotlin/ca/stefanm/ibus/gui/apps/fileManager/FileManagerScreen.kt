@@ -113,7 +113,10 @@ class FileManagerScreen @Inject constructor(
 
         Column {
 
-            ToolbarViews.HeaderBar(directoryRepo.getCurrentDirectoryPath().collectAsState("?").value)
+            ToolbarViews.HeaderBar(
+                params.openMode,
+                directoryRepo.getCurrentDirectoryPath().collectAsState("?").value
+            )
 
             ToolbarViews.Toolbar(
                 knobState = knobStateMain,

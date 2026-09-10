@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
@@ -28,12 +29,16 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 object ToolbarViews {
 
     @Composable
-    fun HeaderBar(currentDirectory : String) {
-
-        //TODO don't forget we can use the same window to select a destination for
-        //TODO "Copy to.." and "Move to.." operations, and that should be reflected
-        //TODO in the title bar.
-        BmwSingleLineHeader("File Manager : $currentDirectory")
+    fun HeaderBar(
+        openMode: OpenMode,
+        currentDirectory : String
+    ) {
+        when (openMode) {
+            OpenMode.BROWSE -> BmwSingleLineHeader("Browse : $currentDirectory")
+            OpenMode.SELECT_FILE -> BmwSingleLineHeader("Select file : $currentDirectory")
+            OpenMode.SELECT_COPY_TO_FOLDER -> BmwSingleLineHeader("Copy to : $currentDirectory")
+            OpenMode.SELECT_MOVE_TO_FOLDER -> BmwSingleLineHeader("Move to : $currentDirectory")
+        }
     }
 
     @Composable
