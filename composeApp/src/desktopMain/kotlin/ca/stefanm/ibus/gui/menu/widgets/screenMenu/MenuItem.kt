@@ -95,9 +95,10 @@ data class CheckBoxMenuItem(
     val title: String,
     val isChecked : Boolean,
     val labelColor: Color? = null,
+    val onCheckChanged : (Boolean) -> Unit,
     override val isSelectable : Boolean = true,
     override val isSelected : Boolean = false,
-    override val onClicked : () -> Unit
+    override val onClicked : () -> Unit = { onCheckChanged(!isChecked) },
 ) : MenuItem {
     fun getLabel() : String {
         return " ${if (isChecked) "[X]" else "[ ]"} $title"

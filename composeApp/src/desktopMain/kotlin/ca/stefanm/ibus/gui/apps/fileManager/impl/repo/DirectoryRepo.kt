@@ -4,7 +4,8 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverrides
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
 import ca.stefanm.ibus.lib.logging.Logger
@@ -43,7 +44,7 @@ class DirectoryRepo @Inject constructor(
         data class SelectThisDirectory(override val path : File) : DirectoryEntry(path)
     }
 
-    private var baseDirectory : File = FileManagerSettingsOverrides.Default.defaultBrowseFolder
+    private var baseDirectory : File = File(FileManagerSettingsOverridesRepo.config[FileManagerSettings.defaultBrowseFolder])
 
     /** Set the base director for the file manager that no operation can travel up fro */
     fun setBaseDirectory(file : File) {

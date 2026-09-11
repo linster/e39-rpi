@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.menu.navigator
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens.FilePaneDebugScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationProgressScreen
@@ -186,7 +187,8 @@ class NavigationModule {
         deleteFileScreen: DeleteFileScreen,
         multiStepOperationProgressScreen: MultiStepOperationProgressScreen,
         permissionsModifierScreen: PermissionsModifierScreen,
-        renameFileScreen: RenameFileScreen
+        renameFileScreen: RenameFileScreen,
+        fileManagerSettingsScreen: FileManagerSettingsScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -272,7 +274,8 @@ class NavigationModule {
         deleteFileScreen,
         multiStepOperationProgressScreen,
         permissionsModifierScreen,
-        renameFileScreen
+        renameFileScreen,
+        fileManagerSettingsScreen
     )
 }
 

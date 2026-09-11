@@ -2,7 +2,8 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
 
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverrides
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import java.io.File
@@ -19,6 +20,11 @@ enum class OpenMode {
      */
     SELECT_FILE,
 
+    /** Open the file manager screen to prompt the use to select
+     *  a folder location.
+     */
+    SELECT_FOLDER_LOCATION,
+
     /** Open the file manager screen to prompt the user to select
      *  a folder to copy a file into.
      */
@@ -34,9 +40,9 @@ data class FileManagerScreenOpenParameters(
     val openMode: OpenMode = OpenMode.BROWSE,
 
     /** What's the directory the user cannot go up out of? */
-    val baseDirectory : File = FileManagerSettingsOverrides.Default.defaultBrowseFolder,
+    val baseDirectory : File = File(FileManagerSettingsOverridesRepo.config[FileManagerSettings.defaultBrowseFolder]),
     /** What directory does the file manager open to? */
-    val openDirectory : File = FileManagerSettingsOverrides.Default.defaultBrowseFolder,
+    val openDirectory : File = File(FileManagerSettingsOverridesRepo.config[FileManagerSettings.defaultBrowseFolder]),
 
     val fileFilter : Filter = Filter.AllFilesAndFolders,
 
@@ -82,7 +88,7 @@ interface FileManagerScreenOpener {
         )
     }
     fun openForFileSelection(navigationNodeTraverser: NavigationNodeTraverser,
-                             baseDirectory: File = FileManagerSettingsOverrides.Default.defaultBrowseFolder,
+                             baseDirectory: File = File(FileManagerSettingsOverridesRepo.config[FileManagerSettings.defaultBrowseFolder]),
                              filter : Filter = Filter.AllFilesAndFolders
     ) {
         navigationNodeTraverser.navigateToNodeWithParameters(

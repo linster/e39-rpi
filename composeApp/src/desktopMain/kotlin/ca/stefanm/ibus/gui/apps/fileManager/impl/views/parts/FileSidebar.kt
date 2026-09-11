@@ -179,21 +179,21 @@ class FileSidebar @Inject constructor(
                             title = "Readable?",
                             isSelectable = false,
                             isChecked = file.canRead(),
-                            onClicked = { }
+                            onCheckChanged = { }
                         ).toDynamicLambda())
                         //Writable,
                         add(CheckBoxMenuItem(
                             title = "Writable?",
                             isSelectable = false,
                             isChecked = file.canWrite(),
-                            onClicked = { }
+                            onCheckChanged = { }
                         ).toDynamicLambda())
                         //Executable?
                         add(CheckBoxMenuItem(
                             title = "Executable?",
                             isSelectable = false,
                             isChecked = file.canExecute(),
-                            onClicked = { }
+                            onCheckChanged = { }
                         ).toDynamicLambda())
                         //File size
                         add(TextMenuItem(
@@ -220,7 +220,6 @@ class FileSidebar @Inject constructor(
                                     title = "Change Permissions...",
                                     onClicked = {
                                         modalMenuService.closeSidePaneOverlay(true)
-                                        //TODO maybe have the permission grid be in this class?
                                         onPermissionsActivityRequested(file)
                                     }
                                 ).toDynamicLambda())

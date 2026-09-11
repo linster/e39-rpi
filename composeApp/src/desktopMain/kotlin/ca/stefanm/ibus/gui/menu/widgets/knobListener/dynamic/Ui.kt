@@ -50,6 +50,15 @@ fun List<TextMenuItem>.toDynamicLambdas(
 //        }
     }
 }
+
+fun MenuItem.toDynamicLambda(
+) : @Composable KnobObserverBuilderScope.(Int, Int) -> Unit =
+    when (this) {
+        is TextMenuItem -> this.toDynamicLambda()
+        is CheckBoxMenuItem -> this.toDynamicLambda()
+        else -> TODO()
+    }
+
 fun TextMenuItem.toDynamicLambda(
 ) : @Composable KnobObserverBuilderScope.(Int, Int) -> Unit =
     { allocatedIndex, currentIndex ->
@@ -64,7 +73,6 @@ fun TextMenuItem.toDynamicLambda(
     }
 
 fun CheckBoxMenuItem.toDynamicLambda(
-
 ): @Composable KnobObserverBuilderScope.(Int, Int) -> Unit =
     { allocatedIndex, currentIndex ->
         MenuItem(

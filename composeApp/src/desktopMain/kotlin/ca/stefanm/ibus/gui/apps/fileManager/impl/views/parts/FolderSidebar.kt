@@ -29,12 +29,6 @@ class FolderSidebar @Inject constructor(
         onPermissionsActivityRequested : (File) -> Unit = {},
         onRenameSelected : (File) -> Unit = {},
 
-        //TODO probably don't need this if relying on fake directory entries.
-        allowSelect : Boolean = false,
-        onSelectFolder : (File) -> Unit = {},
-        //TODO probably don't need this if relying on fake directory entries.
-
-
         onDeleteSelected : (File) -> Unit = {},
 
         onOpenSelected : (File) -> Unit = {}, //Opening the folder changes the directory navigation

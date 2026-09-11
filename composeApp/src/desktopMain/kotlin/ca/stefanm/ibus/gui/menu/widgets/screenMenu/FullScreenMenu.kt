@@ -27,6 +27,7 @@ import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambda
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambdas
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
@@ -129,13 +130,13 @@ object FullScreenMenu {
         header : String = "",
         logTag : String? = this.tag(),
         prependGoBackEntry : Boolean = true,
-        items : List<TextMenuItem>
+        items : List<MenuItem>
     ) {
         OneColumnSmoothScreen(
             header = header,
             logTag = logTag,
             prependGoBackEntry = prependGoBackEntry,
-            itemsProvider = { items.toDynamicLambdas() }
+            itemsProvider = { items.map { it.toDynamicLambda() } }
         )
     }
 
