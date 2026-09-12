@@ -96,7 +96,7 @@ class FileManagerScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
 
-        val params = fileManagerScreenParameterParser.parse(params)
+        val params = fileManagerScreenParameterParser.parseOpenParameters(params)
 
         //TODO see if we have a result and if the operation builder is complete. If so, go to the MultiStepOperationProgressScreen.
 
@@ -126,7 +126,7 @@ class FileManagerScreen @Inject constructor(
                 modalMenuService = modalMenuService,
                 viewState = viewState,
                 navigationButtonVisibleProvider = object : INavigationButtonVisibleProvider {
-                    override fun backVisible(): Boolean = true
+                    override fun backVisible(): Boolean = false
                     override fun forwardVisible(): Boolean = false
                     override fun upVisible(): Boolean = true
                 },
@@ -140,7 +140,8 @@ class FileManagerScreen @Inject constructor(
                 onNewFolderClicked = { },
                 exitButtonText = when (params.openMode) {
                     OpenMode.BROWSE -> "Close"
-                    OpenMode.SELECT_FILE -> "Cancel Select"
+                    OpenMode.SELECT_FILE,
+                    OpenMode.SELECT_FOLDER_LOCATION-> "Cancel Select"
                     OpenMode.SELECT_COPY_TO_FOLDER -> "Cancel Copy"
                     OpenMode.SELECT_MOVE_TO_FOLDER -> "Cancel Move"
                 },
@@ -153,6 +154,12 @@ class FileManagerScreen @Inject constructor(
                             navigationNodeTraverser.setResultAndGoBack(
                                 FileManagerScreen::class.java,
                                 FileManagerScreenResult.FileManagerScreenResultForSelectFile.NoFileSelected
+                            )
+                        }
+                        OpenMode.SELECT_FOLDER_LOCATION -> {
+                            navigationNodeTraverser.setResultAndGoBack(
+                                FileManagerScreen::class.java,
+                                FileManagerScreenResult.FileManagerScreenResultForSelectFolder.NoFolderSelected
                             )
                         }
                         OpenMode.SELECT_COPY_TO_FOLDER,
@@ -279,7 +286,11 @@ class FileManagerScreen @Inject constructor(
             }
             is DirectoryRepo.DirectoryEntry.SelectThisDirectory -> {
                 //Check the open mode was correct for selection before making a result and returning it.
-                if (params.openMode !in listOf(OpenMode.SELECT_COPY_TO_FOLDER, OpenMode.SELECT_MOVE_TO_FOLDER)) {
+                if (params.openMode !in listOf(
+                        OpenMode.SELECT_COPY_TO_FOLDER,
+                        OpenMode.SELECT_MOVE_TO_FOLDER,
+                        OpenMode.SELECT_FOLDER_LOCATION
+                    )) {
                     logger.w(TAG, "The user selected 'Select this entry' for $entry when the open mode was ${params.openMode}. Params were $params")
                     return
                 }

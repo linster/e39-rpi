@@ -36,6 +36,7 @@ object ToolbarViews {
         when (openMode) {
             OpenMode.BROWSE -> BmwSingleLineHeader("Browse : $currentDirectory")
             OpenMode.SELECT_FILE -> BmwSingleLineHeader("Select file : $currentDirectory")
+            OpenMode.SELECT_FOLDER_LOCATION -> BmwSingleLineHeader("Select folder : $currentDirectory")
             OpenMode.SELECT_COPY_TO_FOLDER -> BmwSingleLineHeader("Copy to : $currentDirectory")
             OpenMode.SELECT_MOVE_TO_FOLDER -> BmwSingleLineHeader("Move to : $currentDirectory")
         }

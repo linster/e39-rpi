@@ -100,6 +100,20 @@ interface FileManagerScreenOpener {
             )
         )
     }
+    fun openForFolderSelection(
+        navigationNodeTraverser: NavigationNodeTraverser,
+        baseDirectory: File = File(FileManagerSettingsOverridesRepo.config[FileManagerSettings.defaultBrowseFolder]),
+        filter : Filter = Filter.FoldersOnly
+    ) {
+        navigationNodeTraverser.navigateToNodeWithParameters(
+            FileManagerScreen::class.java,
+            FileManagerScreenOpenParameters(
+                openMode = OpenMode.SELECT_FOLDER_LOCATION,
+                baseDirectory = baseDirectory,
+                fileFilter = filter
+            )
+        )
+    }
 
 
 }
@@ -154,10 +168,20 @@ class FileManagerScreenFileSelectionResultHelper @Inject constructor(){
     }
 }
 
+class FileManagerScreenFolderSelectionResultHelper @Inject constructor() {
+    fun parseSelectedFolder(incomingResult: Navigator.IncomingResult?) : File? {
+        return if (incomingResult?.result is FileManagerScreenResult.FileManagerScreenResultForSelectFolder.FolderSelected) {
+            incomingResult.result.directory
+        } else {
+            null
+        }
+    }
+}
+
 
 //Parse the navigator input params here
 class FileManagerScreenParamsParser @Inject constructor() {
-    fun parse(incomingResult : Navigator.IncomingResult?) : FileManagerScreenOpenParameters {
+    fun parseOpenParameters(incomingResult : Navigator.IncomingResult?) : FileManagerScreenOpenParameters {
         return if (incomingResult == null) {
             FileManagerScreenOpenParameters()
         } else {

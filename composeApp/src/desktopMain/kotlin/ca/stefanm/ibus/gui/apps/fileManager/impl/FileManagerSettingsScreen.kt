@@ -7,6 +7,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -46,6 +47,7 @@ class FileManagerSettingsScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val notificationHub: NotificationHub,
+    private val folderSelectionResultHelper: FileManagerScreenFolderSelectionResultHelper
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -82,7 +84,16 @@ class FileManagerSettingsScreen @Inject constructor(
         return configTimeStamp
     }
 
-    override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = {
+    override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
+
+        val defaultBrowseFolderSelection : File? = folderSelectionResultHelper.parseSelectedFolder(params)
+
+        if (defaultBrowseFolderSelection != null) {
+            logger.i(TAG, "Setting default browse folder: ${defaultBrowseFolderSelection.absolutePath}")
+            FileManagerSettingsOverridesRepo.config[FileManagerSettings.defaultBrowseFolder] = defaultBrowseFolderSelection.absolutePath
+        } else {
+            logger.i(TAG, "No change to default browse folder")
+        }
 
         val configState = subscribeConfig(FileManagerSettingsOverridesRepo.config)
 
@@ -107,7 +118,7 @@ class FileManagerSettingsScreen @Inject constructor(
                             }
                         ),
                         TextMenuItem(
-                            title = "Set Default Browse folder",
+                            title = "Set Default Browse folder (text)",
                             onClicked = {
                                 //TODO keyboard should allow scrolling in the input box and overflow.
                                 modalMenuService.showKeyboard(
@@ -127,6 +138,15 @@ class FileManagerSettingsScreen @Inject constructor(
                                         }
                                         FileManagerSettingsOverridesRepo.config[FileManagerSettings.defaultBrowseFolder] = new
                                     }
+                                )
+                            }
+                        ),
+                        TextMenuItem(
+                            title = "Select default browse folder (interactive)",
+                            onClicked = {
+                                FileManagerScreen.openForFolderSelection(
+                                    navigationNodeTraverser,
+                                    baseDirectory = File("/")
                                 )
                             }
                         )
