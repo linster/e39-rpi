@@ -312,8 +312,13 @@ class FileManagerScreen @Inject constructor(
             prependGoBackEntry = false,
             navigationNodeTraverser = navigationNodeTraverser,
             items = entries.map {
+                val name = when (it) {
+                    is DirectoryRepo.DirectoryEntry.Directory -> "🖿 ${it.path.name}"
+                    is DirectoryRepo.DirectoryEntry.SelectThisDirectory -> "🖿 Select this folder: ${it.path.name}"
+                    is DirectoryRepo.DirectoryEntry.DirectoryFile -> it.path.name
+                }
                 TextMenuItem(
-                    title = it.path.name,
+                    title = name,
                     onClicked = { onEntrySelected(it) }
                 )
             }.toDynamicLambdas()

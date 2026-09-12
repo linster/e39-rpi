@@ -46,9 +46,18 @@ data class FileManagerScreenOpenParameters(
 
     val fileFilter : Filter = Filter.AllFilesAndFolders,
 
+
+) {
     /** Should the view show a "Select this folder" dummy entry? */
-    val showSelectThisFolderEntries : Boolean = false
-)
+    val showSelectThisFolderEntries : Boolean
+        get () = when (openMode) {
+            OpenMode.BROWSE -> false
+            OpenMode.SELECT_FILE,
+            OpenMode.SELECT_FOLDER_LOCATION,
+            OpenMode.SELECT_COPY_TO_FOLDER,
+            OpenMode.SELECT_MOVE_TO_FOLDER -> true
+        }
+}
 
 /** Heavily use the screen back-stack to re-open the same Screen, but with a different
  *  opening mode, to allow a builder object to build-up an operation.
@@ -131,7 +140,6 @@ internal interface FileManagerScreenSelfOpener {
                 baseDirectory = baseDirectory,
                 openDirectory = currentDirectory,
                 fileFilter = Filter.FoldersOnly,
-                showSelectThisFolderEntries = true
             )
         )
     }
@@ -147,7 +155,6 @@ internal interface FileManagerScreenSelfOpener {
                 baseDirectory = baseDirectory,
                 openDirectory = currentDirectory,
                 fileFilter = Filter.FoldersOnly,
-                showSelectThisFolderEntries = true
             )
         )
 
