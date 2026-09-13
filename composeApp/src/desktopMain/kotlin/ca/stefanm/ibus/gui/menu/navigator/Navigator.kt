@@ -188,7 +188,8 @@ class NavigationModule {
         multiStepOperationProgressScreen: MultiStepOperationProgressScreen,
         permissionsModifierScreen: PermissionsModifierScreen,
         renameFileScreen: RenameFileScreen,
-        fileManagerSettingsScreen: FileManagerSettingsScreen
+        fileManagerSettingsScreen: FileManagerSettingsScreen,
+        snootPhoneMainMenu: SnootPhoneMainMenu
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -275,7 +276,8 @@ class NavigationModule {
         multiStepOperationProgressScreen,
         permissionsModifierScreen,
         renameFileScreen,
-        fileManagerSettingsScreen
+        fileManagerSettingsScreen,
+        snootPhoneMainMenu
     )
 }
 

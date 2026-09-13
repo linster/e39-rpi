@@ -10,6 +10,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.lib.logging.Logger
+import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
@@ -56,6 +57,8 @@ class PermissionsModifierScreen @Inject constructor(
             prependGoBackEntry = true,
             items = listOf(),
         )
+
+
     }
 
 }

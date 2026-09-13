@@ -65,17 +65,6 @@ class VideoPlayerAppHomeScreen @Inject constructor(
                 ),
                 rightItems = listOf(
                     TextMenuItem(
-                        "Remington Steele S03E09",
-                        onClicked = {
-                            VideoPlayerScreen.openWithFile(
-                                navigationNodeTraverser,
-                                VideoPlayerScreen.VideoPlayerScreenParams(
-                                    File("/home/stefan/Videos/Remington Steele 1982 Season 3 Complete TVRip x264 [i_c]/Remington Steele S03E09 Cast in Steele.mkv")
-                                )
-                            )
-                        }
-                    ),
-                    TextMenuItem(
                         "Open File Picker",
                         onClicked = {
                             FileManagerScreen.openForFileSelection(
