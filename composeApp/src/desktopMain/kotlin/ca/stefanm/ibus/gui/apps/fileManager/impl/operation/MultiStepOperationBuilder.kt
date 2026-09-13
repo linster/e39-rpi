@@ -37,6 +37,12 @@ class MultiStepOperationBuilder @Inject constructor(
         source = file
     }
 
+    fun operationBuildingStarted() : Boolean = this.source != null && operation != Operation.NONE
+
+    fun operationBuilt() : Boolean {
+        return this.source != null && this.destinationFolder != null && operation != Operation.NONE
+    }
+
     fun setDestinationFolder(folder : File) {
         if (folder.isDirectory) {
             logger.d(TAG,"Setting destination folder ${folder.absolutePath}")
@@ -46,6 +52,8 @@ class MultiStepOperationBuilder @Inject constructor(
         }
     }
 
+    //TODO maybe split out the doing of the operation into a runner of sorts.
+    //
     /** Perform the operation that was built-up. Do not overwrite anything.
      * @return true if successful
      */

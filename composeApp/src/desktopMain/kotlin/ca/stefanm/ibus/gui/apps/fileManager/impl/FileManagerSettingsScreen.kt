@@ -59,7 +59,6 @@ class FileManagerSettingsScreen @Inject constructor(
         override fun tag() = TAG
         override fun logger() = logger
         override fun navigationNodeTraverser() = navigationNodeTraverser
-
     }
 
     // TODO Open with xdg-open for unrecognized file types? (no on pi)

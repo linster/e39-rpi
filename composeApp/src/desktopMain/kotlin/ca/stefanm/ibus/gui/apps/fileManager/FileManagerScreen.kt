@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
 import ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter.FileAction
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFolderSelectionResultHelper
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpenParameters
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
@@ -27,6 +28,7 @@ import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenSel
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
+import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationProgressScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.PermissionsModifierScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.RenameFileScreen
 import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
@@ -78,6 +80,7 @@ class FileManagerScreen @Inject constructor(
     private val notificationHub: NotificationHub,
     private val directoryRepo: DirectoryRepo,
     private val fileManagerScreenParameterParser: FileManagerScreenParamsParser,
+    private val folderSelectionResultHelper: FileManagerScreenFolderSelectionResultHelper,
     private val previewProvider: PreviewProvider,
     private val iconProvider: IconProvider,
     private val fileSidebar: FileSidebar,
@@ -96,9 +99,16 @@ class FileManagerScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
 
-        val params = fileManagerScreenParameterParser.parseOpenParameters(params)
+        val openParams = fileManagerScreenParameterParser.parseOpenParameters(params)
 
-        //TODO see if we have a result and if the operation builder is complete. If so, go to the MultiStepOperationProgressScreen.
+        val folderSelection = folderSelectionResultHelper.parseSelectedFolder(params)
+        if (folderSelection != null && multiStepOperationBuilder.operationBuildingStarted()) {
+            multiStepOperationBuilder.setDestinationFolder(folderSelection)
+        }
+
+        if (multiStepOperationBuilder.operationBuilt()) {
+            navigationNodeTraverser.navigateToNode(MultiStepOperationProgressScreen::class.java)
+        }
 
         val knobStateMain = KnobObserverBuilderState.setupListener(
             knobListenerService = knobListenerServiceMain,
@@ -109,15 +119,15 @@ class FileManagerScreen @Inject constructor(
         val viewState = remember { FileManagerViewState() }
         val directoryRepo = remember { directoryRepo }
 
-        LaunchedEffect(params) {
-            directoryRepo.setBaseDirectory(params.baseDirectory)
-            directoryRepo.requestNavigateToDirectory(params.openDirectory)
+        LaunchedEffect(openParams) {
+            directoryRepo.setBaseDirectory(openParams.baseDirectory)
+            directoryRepo.requestNavigateToDirectory(openParams.openDirectory)
         }
 
         Column {
 
             ToolbarViews.HeaderBar(
-                params.openMode,
+                openParams.openMode,
                 directoryRepo.getCurrentDirectoryPath().collectAsState("?").value
             )
 
@@ -138,7 +148,7 @@ class FileManagerScreen @Inject constructor(
                 directoryStateRequestor = directoryRepo,
                 onNewFileClicked = { },
                 onNewFolderClicked = { },
-                exitButtonText = when (params.openMode) {
+                exitButtonText = when (openParams.openMode) {
                     OpenMode.BROWSE -> "Close"
                     OpenMode.SELECT_FILE,
                     OpenMode.SELECT_FOLDER_LOCATION-> "Cancel Select"
@@ -146,7 +156,7 @@ class FileManagerScreen @Inject constructor(
                     OpenMode.SELECT_MOVE_TO_FOLDER -> "Cancel Move"
                 },
                 onExitButtonClicked = {
-                    when (params.openMode) {
+                    when (openParams.openMode) {
                         OpenMode.BROWSE -> {
                             navigationNodeTraverser.navigateToRoot()
                         }
@@ -175,8 +185,8 @@ class FileManagerScreen @Inject constructor(
             )
 
             val entries = directoryRepo.getDirectoryFlow(
-                showFakeSelectThisDirectoryEntry = params.showSelectThisFolderEntries,
-                filter = params.fileFilter
+                showFakeSelectThisDirectoryEntry = openParams.showSelectThisFolderEntries,
+                filter = openParams.fileFilter
             ).collectAsState(emptyList())
 
             Column(Modifier
@@ -184,17 +194,17 @@ class FileManagerScreen @Inject constructor(
                 .fillMaxSize()
             ) {
                 when (viewState.itemStyle) {
-                    FileManagerViewState.ItemStyle.List -> ListView(entries.value) { entry -> onDirectoryEntrySelected(params, entry)}
+                    FileManagerViewState.ItemStyle.List -> ListView(entries.value) { entry -> onDirectoryEntrySelected(openParams, entry)}
                     FileManagerViewState.ItemStyle.Grid -> GridView(
                         havePreview = viewState.showPreview,
                         rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
                         entries = entries.value,
-                        onEntrySelected = { entry -> onDirectoryEntrySelected(params, entry)}
+                        onEntrySelected = { entry -> onDirectoryEntrySelected(openParams, entry)}
                     )
                     FileManagerViewState.ItemStyle.ListWithPreviews -> ListViewWithPreviews(
                         rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
                         entries = entries.value,
-                        onEntrySelected = { entry -> onDirectoryEntrySelected(params, entry)}
+                        onEntrySelected = { entry -> onDirectoryEntrySelected(openParams, entry)}
                     )
                 }
             }
