@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings
+package ca.stefanm.ibus.gui.apps.fileManager.impl.settings
 
 import ca.stefanm.ibus.configuration.ConfigurationStorage.Companion.e39BaseFolder
 import ca.stefanm.ibus.configuration.HmiVersion

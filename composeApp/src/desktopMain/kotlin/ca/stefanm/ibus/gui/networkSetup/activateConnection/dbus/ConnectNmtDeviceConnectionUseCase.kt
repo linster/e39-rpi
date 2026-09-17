@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMActiveConnectionState
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMActiveConnectionState
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService

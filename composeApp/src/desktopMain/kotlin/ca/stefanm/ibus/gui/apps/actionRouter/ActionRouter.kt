@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter
+package ca.stefanm.ibus.gui.apps.actionRouter
 
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
+import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
+import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub

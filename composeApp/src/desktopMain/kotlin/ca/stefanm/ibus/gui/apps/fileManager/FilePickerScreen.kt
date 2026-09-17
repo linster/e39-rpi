@@ -1,8 +1,8 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
+package ca.stefanm.ibus.gui.apps.fileManager
 
 import androidx.compose.runtime.Composable
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FilePickerMruPane
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.FilePickerMruPane
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode

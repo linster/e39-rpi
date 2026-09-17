@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer
+package ca.stefanm.ibus.gui.apps.videoPlayer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
-import ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.volume.VolumePaneService
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.volume.VolumePaneService
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule

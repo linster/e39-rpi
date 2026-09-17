@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation
+package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 
 import androidx.compose.runtime.Composable
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.Notification

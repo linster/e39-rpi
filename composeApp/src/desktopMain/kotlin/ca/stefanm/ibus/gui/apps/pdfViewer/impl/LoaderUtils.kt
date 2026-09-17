@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl
+package ca.stefanm.ibus.gui.apps.pdfViewer.impl
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,7 +9,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
+import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub

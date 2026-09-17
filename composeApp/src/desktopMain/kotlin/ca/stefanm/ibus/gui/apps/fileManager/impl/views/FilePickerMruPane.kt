@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views
+package ca.stefanm.ibus.gui.apps.fileManager.impl.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,9 +18,9 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilePickerResult
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.recent.MostRecentlyUsedRepo
+import ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen.Companion.FilePickerResult
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
+import ca.stefanm.ibus.gui.apps.fileManager.impl.repo.recent.MostRecentlyUsedRepo
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight

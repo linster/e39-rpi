@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
+import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
 import ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
+package ca.stefanm.ibus.gui.apps.fileManager.impl
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -7,9 +7,9 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.Notification

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views
+package ca.stefanm.ibus.gui.apps.fileManager.impl.views
 
 
 

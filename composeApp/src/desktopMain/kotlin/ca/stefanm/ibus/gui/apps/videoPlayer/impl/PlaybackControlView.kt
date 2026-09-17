@@ -1,2 +1,2 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.impl
+package ca.stefanm.ibus.gui.apps.videoPlayer.impl
 

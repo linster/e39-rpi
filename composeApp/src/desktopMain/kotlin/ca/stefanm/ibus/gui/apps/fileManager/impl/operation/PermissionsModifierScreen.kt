@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation
+package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 
 import androidx.compose.runtime.Composable
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc

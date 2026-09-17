@@ -1,8 +1,8 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens
+package ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens
 
 import androidx.compose.runtime.Composable
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FolderSidebar
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FolderSidebar
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule

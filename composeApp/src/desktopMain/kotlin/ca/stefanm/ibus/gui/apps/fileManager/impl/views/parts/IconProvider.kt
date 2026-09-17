@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
+package ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
+import ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.resources.Res
 import ca.stefanm.ibus.resources.folder_blue

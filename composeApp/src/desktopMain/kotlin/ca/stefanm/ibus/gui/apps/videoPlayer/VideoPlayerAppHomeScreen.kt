@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer
+package ca.stefanm.ibus.gui.apps.videoPlayer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerParameterProvider
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFileSelectionResultHelper
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FilePickerParameterProvider
+import ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFileSelectionResultHelper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
+package ca.stefanm.ibus.gui.apps.fileManager.impl
 
 class NewFileScreen {
 

@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
+package ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INavigationButtonVisibleProvider
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INewButtonVisibleProvider
+import ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.INavigationButtonVisibleProvider
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.INewButtonVisibleProvider
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem

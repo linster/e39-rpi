@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
+package ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ArbitraryContentsMenuItem

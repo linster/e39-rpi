@@ -3,7 +3,7 @@ package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus
 import androidx.compose.runtime.collectAsState
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.populate.MarkActiveConnectionsUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.populate.MarkActiveConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetActiveConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.SortDevicesUseCase

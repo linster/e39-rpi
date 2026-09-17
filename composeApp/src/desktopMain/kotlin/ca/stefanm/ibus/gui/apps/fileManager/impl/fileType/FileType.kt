@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType
+package ca.stefanm.ibus.gui.apps.fileManager.impl.fileType
 
 
 //maybe we need an action router, and an annotation for it that can go on a method

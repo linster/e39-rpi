@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
+package ca.stefanm.ibus.gui.apps.fileManager
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,32 +17,34 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
-import ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter.FileAction
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFolderSelectionResultHelper
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpenParameters
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenSelfOpener
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationProgressScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.PermissionsModifierScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.RenameFileScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INavigationButtonVisibleProvider
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.INewButtonVisibleProvider
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FolderSidebar
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.IconProvider
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.PreviewProvider
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.ToolbarViews
+import ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
+import ca.stefanm.ibus.gui.apps.actionRouter.FileAction
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFolderSelectionResultHelper
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpenParameters
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenOpener
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenSelfOpener
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder
+import ca.stefanm.ibus.gui.apps.fileManager.impl.OpenMode
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationProgressScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.PermissionsModifierScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.RenameFileScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.repo.DirectoryRepo
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.FileManagerViewState
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.INavigationButtonVisibleProvider
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.INewButtonVisibleProvider
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FolderSidebar
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.IconProvider
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.PreviewProvider
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.ToolbarViews
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -117,7 +119,6 @@ class FileManagerScreen @Inject constructor(
         )
 
         val viewState = remember { FileManagerViewState() }
-        val directoryRepo = remember { directoryRepo }
 
         LaunchedEffect(openParams) {
             directoryRepo.setBaseDirectory(openParams.baseDirectory)
@@ -211,7 +212,8 @@ class FileManagerScreen @Inject constructor(
         }
     }
 
-    fun allowModify() : Boolean = false //TODO grab this from a repo.
+    fun allowModify() : Boolean =
+        FileManagerSettingsOverridesRepo.config[FileManagerSettings.allowFilesystemModification]
 
     fun openFile(file : File) {
         actionRouter.handleFileAction(file, FileAction.VIEW)
@@ -348,7 +350,7 @@ class FileManagerScreen @Inject constructor(
                 ArbitraryContentsMenuItem(
                     chipOrientation = ItemChipOrientation.S,
                     isSelected = allocatedIndex == currentIndex,
-                    onClicked = { onEntrySelected(entry) }) {
+                    onClicked = CallWhen(currentIndexIs = allocatedIndex) { onEntrySelected(entry) }) {
 
                     Column(
                         Modifier.aspectRatio(1F, matchHeightConstraintsFirst = true),
@@ -398,7 +400,7 @@ class FileManagerScreen @Inject constructor(
                         ArbitraryContentsMenuItem(
                             chipOrientation = ItemChipOrientation.W,
                             isSelected = allocatedIndex == currentIndex,
-                            onClicked = {
+                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                 onEntrySelected(entry)
                             }) {
 

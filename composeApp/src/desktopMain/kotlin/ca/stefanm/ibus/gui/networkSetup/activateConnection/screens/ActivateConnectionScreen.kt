@@ -8,7 +8,7 @@ import androidx.compose.foundation.onClick
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert.ConvertDeviceToWirelessUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert.ConvertDeviceToWirelessUseCase
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.ConnectNmtDeviceConnectionUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DisconnectNmtDeviceConnectionUseCase

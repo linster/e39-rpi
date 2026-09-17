@@ -1,11 +1,11 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
+package ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar.Companion.TAG
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar.Companion.TAG
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub

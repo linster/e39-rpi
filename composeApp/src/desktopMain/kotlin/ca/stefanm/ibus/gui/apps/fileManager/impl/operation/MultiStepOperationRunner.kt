@@ -1,8 +1,8 @@
 package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder.Companion.TAG
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder.Operation
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder.Companion.TAG
+import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder.Operation
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 

@@ -1,11 +1,11 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation
+package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
@@ -53,17 +53,36 @@ class RenameFileScreen @Inject constructor(
         fun renameFile(navigationNodeTraverser: NavigationNodeTraverser, file : File) {
             navigationNodeTraverser.navigateToNodeWithParameters(
                 RenameFileScreen::class.java,
-                file
+                RenameFileScreenParameters(
+                    file = file,
+                    isSilentMode = false
+                )
+            )
+        }
+        fun silentRename(navigationNodeTraverser: NavigationNodeTraverser, file : File, newName : String) {
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                RenameFileScreen::class.java,
+                RenameFileScreenParameters(
+                    file = file,
+                    isSilentMode = true,
+                    silentModeName = newName
+                )
             )
         }
     }
+
+    data class RenameFileScreenParameters(
+        val file : File,
+        val isSilentMode : Boolean = false,
+        val silentModeName : String? = null
+    )
 
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = RenameFileScreen::class.java
 
     private val context = object : SmoothScroll.SmoothScrollContext {
         override fun knobListenerService() = knobListenerServiceMain
-        override fun tag() = FileManagerSettingsScreen.TAG
+        override fun tag() = TAG
         override fun logger() = logger
         override fun navigationNodeTraverser() = navigationNodeTraverser
     }
@@ -80,7 +99,13 @@ class RenameFileScreen @Inject constructor(
             navigationNodeTraverser.goBack()
         }
 
-        val file : File? = params?.requestParameters as? File
+        val file : File? = (params?.requestParameters as? RenameFileScreenParameters)?.file
+        params?.requestParameters as RenameFileScreenParameters
+        if (file != null && params?.requestParameters?.isSilentMode == true) {
+            params?.requestParameters?.silentModeName?.let { doRename(file, it) }
+            navigationNodeTraverser.goBack()
+            return@content
+        }
 
         if (file == null) {
             navigationNodeTraverser.goBack()
@@ -128,6 +153,7 @@ class RenameFileScreen @Inject constructor(
                             isSelected = allocatedIndex == currentIndex,
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                 doRename(file, proposedRename.value)
+                                navigationNodeTraverser.goBack()
                             }
                         )
                     }

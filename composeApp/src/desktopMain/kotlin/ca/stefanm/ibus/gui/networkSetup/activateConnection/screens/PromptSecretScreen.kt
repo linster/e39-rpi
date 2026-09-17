@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.screens
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.screens
 
 import androidx.compose.runtime.Composable
 import ca.stefanm.ibus.autoDiscover.AutoDiscover

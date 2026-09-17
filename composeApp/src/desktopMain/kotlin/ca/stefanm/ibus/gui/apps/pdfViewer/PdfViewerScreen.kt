@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer
+package ca.stefanm.ibus.gui.apps.pdfViewer
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.HorizontalScrollbar
@@ -44,15 +44,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen.PageSelectorResult
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.ReaderUiState
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl.SearchState
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
+import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
+import ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen.PageSelectorResult
+import ca.stefanm.ibus.gui.apps.pdfViewer.impl.LoaderUtils
+import ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen
+import ca.stefanm.ibus.gui.apps.pdfViewer.impl.ReaderUiState
+import ca.stefanm.ibus.gui.apps.pdfViewer.impl.SearchState
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode

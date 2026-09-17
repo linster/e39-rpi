@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert
 
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.networkmanager.Device

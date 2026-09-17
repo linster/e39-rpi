@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl
+package ca.stefanm.ibus.gui.apps.pdfViewer.impl
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

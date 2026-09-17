@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.operation
+package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -31,7 +31,25 @@ class MultiStepOperationBuilder @Inject constructor(
     }
 
     private var source : File? = null
+
+    fun getSource() : File? {
+        return source
+    }
+
     private var destinationFolder : File? = null
+
+    fun sourceAndDestInSameFolder() : Boolean {
+        if (source == null || destinationFolder == null) return false
+
+        if (source?.isFile == true) {
+            return source?.parentFile?.absolutePath == destinationFolder?.absolutePath
+        }
+
+        if (source?.isDirectory == true) {
+            return source?.absolutePath == destinationFolder?.absolutePath
+        }
+        return false
+    }
 
     fun setSource(file : File) {
         logger.d(TAG, "Setting source file: ${file.absolutePath}")
@@ -52,6 +70,11 @@ class MultiStepOperationBuilder @Inject constructor(
             logger.w(TAG, "Selected a destination folder ${folder.absolutePath} that is not a directory.")
         }
     }
+
+    fun getDestinationFolder() : File? {
+        return destinationFolder
+    }
+
     fun clear() {
         operation = Operation.NONE
         source = null

@@ -1,6 +1,6 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager
+package ca.stefanm.ibus.gui.apps.fileManager
 
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import java.io.File
 
 data class FilerPickerParameters(

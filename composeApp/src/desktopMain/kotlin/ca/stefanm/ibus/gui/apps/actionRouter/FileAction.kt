@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.actionRouter
+package ca.stefanm.ibus.gui.apps.actionRouter
 
 enum class FileAction {
 

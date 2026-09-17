@@ -1,13 +1,13 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo
+package ca.stefanm.ibus.gui.apps.fileManager.impl.repo
 
 
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryNavigatorReader
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.IDirectoryStateRequestor
 import ca.stefanm.ibus.lib.logging.Logger
 import io.github.irgaly.kfswatch.KfsDirectoryWatcher
 import kotlinx.coroutines.GlobalScope
@@ -86,11 +86,12 @@ class DirectoryRepo @Inject constructor(
     }
 
     fun requestNavigateToDirectory(file : File) {
+        logger.d(TAG, "requestNavigateToDirectory ${this.hashCode()} ; ${file.absolutePath}")
         if (!file.isDirectory) {
             logger.w(TAG, "Asked to set a current directory $file which is not a directory")
             return
         }
-        if (!FileUtils.directoryContains(baseDirectory, file) || baseDirectory == file) {
+        if (!FileUtils.directoryContains(baseDirectory, file) && baseDirectory != file) {
             logger.w(TAG, "Base directory does not contain new current")
             return
         }
@@ -213,7 +214,8 @@ class CurrentDirectoryBackStackManager @Inject constructor(
     }
 
     private fun candidateWithinBase(candidate : File, base : File) : Boolean {
-        return FileUtils.directoryContains(base, candidate)
+        //TODO also check if this is actually the base
+        return (candidate.absolutePath == base.absolutePath) || FileUtils.directoryContains(base, candidate)
     }
 
 }

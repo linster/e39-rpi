@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.menu.widgets.modalMenu.volume
+package ca.stefanm.ibus.gui.menu.widgets.modalMenu.volume
 
 import javax.inject.Inject
 

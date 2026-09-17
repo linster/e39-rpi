@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType
+package ca.stefanm.ibus.gui.apps.fileManager.impl.fileType
 
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.logging.Logger

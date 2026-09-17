@@ -1,9 +1,9 @@
 package ca.stefanm.ibus.gui.menu
 
 import androidx.compose.runtime.Composable
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
+import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule

@@ -1,8 +1,8 @@
-package ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.populate
+package ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.populate
 
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert.ConvertDeviceToWirelessUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.get.all.GetDeviceFromDevicePathUseCase
-import ca.stefanm.ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMActiveConnectionState
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.convert.ConvertDeviceToWirelessUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.get.all.GetDeviceFromDevicePathUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMActiveConnectionState
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.DevicePath
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetActiveConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt

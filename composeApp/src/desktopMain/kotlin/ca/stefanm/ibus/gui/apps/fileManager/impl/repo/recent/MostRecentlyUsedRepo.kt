@@ -1,7 +1,7 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.repo.recent
+package ca.stefanm.ibus.gui.apps.fileManager.impl.repo.recent
 
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

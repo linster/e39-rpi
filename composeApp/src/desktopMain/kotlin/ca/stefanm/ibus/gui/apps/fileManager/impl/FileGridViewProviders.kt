@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
+package ca.stefanm.ibus.gui.apps.fileManager.impl
 
 // Make Composables that can be used in a SmoothGrid
 // for a particular file

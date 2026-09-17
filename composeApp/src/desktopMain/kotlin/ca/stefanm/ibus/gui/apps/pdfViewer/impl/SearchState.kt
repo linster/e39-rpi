@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.impl
+package ca.stefanm.ibus.gui.apps.pdfViewer.impl
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ca.stefanm.ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
+import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation

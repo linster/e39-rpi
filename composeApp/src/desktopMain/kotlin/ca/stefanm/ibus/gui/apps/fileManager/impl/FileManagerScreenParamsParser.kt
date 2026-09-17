@@ -1,9 +1,9 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl
+package ca.stefanm.ibus.gui.apps.fileManager.impl
 
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
-import ca.stefanm.ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettings
+import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOverridesRepo
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import java.io.File
@@ -51,8 +51,8 @@ data class FileManagerScreenOpenParameters(
     /** Should the view show a "Select this folder" dummy entry? */
     val showSelectThisFolderEntries : Boolean
         get () = when (openMode) {
-            OpenMode.BROWSE -> false
-            OpenMode.SELECT_FILE,
+            OpenMode.BROWSE,
+            OpenMode.SELECT_FILE -> false
             OpenMode.SELECT_FOLDER_LOCATION,
             OpenMode.SELECT_COPY_TO_FOLDER,
             OpenMode.SELECT_MOVE_TO_FOLDER -> true
