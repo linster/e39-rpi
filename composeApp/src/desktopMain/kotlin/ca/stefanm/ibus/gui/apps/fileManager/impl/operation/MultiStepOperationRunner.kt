@@ -1,9 +1,12 @@
 package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 
+import androidx.annotation.VisibleForTesting
 import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder
 import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder.Companion.TAG
 import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationBuilder.Operation
 import ca.stefanm.ibus.lib.logging.Logger
+import org.apache.commons.io.FileUtils
+import java.io.File
 import javax.inject.Inject
 
 class MultiStepOperationRunner @Inject constructor(
@@ -14,13 +17,19 @@ class MultiStepOperationRunner @Inject constructor(
     //ConsumeAsState(), or SideEffect? to add into the entries list? .... those guys need TextMenuItems
     // with lambdas in them for the buttons.... maybe?
 
-    fun doOperation(builder: MultiStepOperationBuilder) : Boolean {
+    suspend fun doOperation(builder: MultiStepOperationBuilder) : Boolean {
+        if (!builder.operationBuilt()) {
+            //There's a check in the GUI before showing the "Do Operation" button,
+            //so no need to do another graphical callback from here.
+            logger.w(TAG, "Trying to run an incomplete operation")
+            return false
+        }
         return when (builder.getOperation()) {
             Operation.NONE -> { logger.w(TAG, "Selected operation was NONE.") ; false }
-            Operation.COPY_FILE_TO_FOLDER -> TODO()
-            Operation.MOVE_FILE_TO_FOLDER -> TODO()
-            Operation.COPY_FOLDER_TO_FOLDER -> TODO()
-            Operation.MOVE_FOLDER_TO_FOLDER -> TODO()
+            Operation.COPY_FILE_TO_FOLDER -> copyFileToFolder(builder)
+            Operation.MOVE_FILE_TO_FOLDER -> moveFileToFolder(builder)
+            Operation.COPY_FOLDER_TO_FOLDER -> copyFolderToFolder(builder)
+            Operation.MOVE_FOLDER_TO_FOLDER -> moveFolderToFolder(builder)
         }
     }
 
@@ -30,6 +39,164 @@ class MultiStepOperationRunner @Inject constructor(
     // TODO which get updated then re-added to the mutable state.
 
     // TODO the ARF prompts could work similarly.
+
+    @VisibleForTesting
+    suspend fun copyFileToFolder(builder: MultiStepOperationBuilder) : Boolean {
+        val source = builder.getSource()!!
+        val destination = builder.getDestinationFolder()!!
+
+        if (!source.isFile) {
+            return false
+        }
+
+        //Check if dest file already exists
+        val preEmptiveDestFile = File(destination, source.getName())
+        if (preEmptiveDestFile.exists()) {
+            val shouldOverwrite = promptUserForYesNo(listOf(
+                "Should overwrite file?",
+                "  Dest path: ${destination.absolutePath}",
+                "  File already exists: ${preEmptiveDestFile.lastModified()}")
+            )
+            if (!shouldOverwrite) {
+                logger.d(TAG, "User decided not to overwrite ${preEmptiveDestFile.absolutePath}")
+                return false
+            }
+        }
+
+        //Will overwrite
+        return runCatching { FileUtils.copyFileToDirectory(source, destination) }.fold(
+            onSuccess = {
+                notifyUserPrompts(listOf("Copy complete."))
+                true
+            },
+            onFailure = {
+                logger.e(TAG, "Failed to copy file", it)
+                notifyUserPrompts(listOf(
+                    "Failed to copy file.",
+                    " Source: ${source.absolutePath}",
+                    " Dest: ${destination.absolutePath}",
+                    " Reason: ${it.toString()}"
+                ))
+                false
+            }
+        )
+    }
+
+    @VisibleForTesting
+    suspend fun moveFileToFolder(builder: MultiStepOperationBuilder) : Boolean {
+        val source = builder.getSource()!!
+        val destination = builder.getDestinationFolder()!!
+
+        if (!source.isFile) {
+            return false
+        }
+
+        //Check if file already exists in directory. If it does, prompt the user if it would like to overwrite
+        //by deleting the destination first.
+        val preEmptiveDestFile = File(destination, source.getName())
+        if (preEmptiveDestFile.exists()) {
+            val shouldOverwrite = promptUserForYesNo(listOf(
+                "Should overwrite file?",
+                "Dest file will be deleted!!",
+                "  Dest path: ${destination.absolutePath}",
+                "  File already exists: ${preEmptiveDestFile.lastModified()}")
+            )
+            if (!shouldOverwrite) {
+                logger.d(TAG, "User decided not to overwrite ${preEmptiveDestFile.absolutePath}")
+                return false
+            }
+            val deleteSuccess = preEmptiveDestFile.delete()
+            if (!deleteSuccess) {
+                notifyUserPrompts(listOf("Elected to overwrite ${preEmptiveDestFile.absolutePath} but could not delete it.",
+                    "Move file operation failed.")
+                )
+                return false
+            }
+        }
+
+        return runCatching { FileUtils.moveFileToDirectory(source, destination, true) }.fold(
+            onSuccess = {
+                notifyUserPrompts(listOf("Move succeeded."))
+                true
+            },
+            onFailure = {
+                logger.e(TAG, "Failed to move file", it)
+                notifyUserPrompts(listOf(
+                    "Failed to move file.",
+                    " Source: ${source.absolutePath}",
+                    " Dest: ${destination.absolutePath}",
+                    " Reason: ${it.toString()}"
+                ))
+                false
+            }
+        )
+    }
+
+    @VisibleForTesting
+    suspend fun copyFolderToFolder(builder: MultiStepOperationBuilder) : Boolean {
+        val source = builder.getSource()!!
+        val destination = builder.getDestinationFolder()!!
+
+        if (!source.isDirectory) {
+            return false
+        }
+
+        return runCatching { FileUtils.copyDirectoryToDirectory(source, destination) }.fold(
+            onSuccess = {
+                notifyUserPrompts(listOf("Copy complete."))
+                true
+            },
+            onFailure = {
+                notifyUserPrompts(listOf(
+                    "Failed to copy directory.",
+                    " Source: ${source.absolutePath}",
+                    " Dest: ${destination.absolutePath}",
+                    " Reason: ${it.toString()}"
+                ))
+                false
+            }
+        )
+    }
+
+    @VisibleForTesting
+    suspend fun moveFolderToFolder(builder: MultiStepOperationBuilder) : Boolean {
+        val source = builder.getSource()!!
+        val destination = builder.getDestinationFolder()!!
+
+        if (!source.isDirectory) {
+            return false
+        }
+
+        return runCatching { FileUtils.moveDirectoryToDirectory(source, destination, true) }.fold(
+            onSuccess = {
+                notifyUserPrompts(listOf("Move complete."))
+                true
+            },
+            onFailure = {
+                notifyUserPrompts(listOf(
+                    "Failed to move directory.",
+                    " Source: ${source.absolutePath}",
+                    " Dest: ${destination.absolutePath}",
+                    " Reason: ${it.toString()}"
+                ))
+                false
+            }
+        )
+    }
+
+
+    @VisibleForTesting
+    suspend fun promptUserForYesNo(prompt : List<String>) : Boolean {
+
+    }
+
+    @VisibleForTesting
+    suspend fun notifyUserPrompts(messages : List<String>) {
+
+    }
+
+
+
 
 //
 //    sealed interface CopyFileResult {
