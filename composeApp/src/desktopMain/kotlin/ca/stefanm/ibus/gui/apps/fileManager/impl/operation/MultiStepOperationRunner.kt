@@ -7,7 +7,6 @@ import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
 class MultiStepOperationRunner @Inject constructor(
-    private val builder: MultiStepOperationBuilder,
     private val logger: Logger
 ) {
 
@@ -15,20 +14,23 @@ class MultiStepOperationRunner @Inject constructor(
     //ConsumeAsState(), or SideEffect? to add into the entries list? .... those guys need TextMenuItems
     // with lambdas in them for the buttons.... maybe?
 
-    //TODO maybe split out the doing of the operation into a runner of sorts.
-    //
-    /** Perform the operation that was built-up. Do not overwrite anything.
-     * @return true if successful
-     */
-//    fun doOperation() : Boolean {
-//        return when (operation) {
-//            Operation.NONE -> { logger.w(TAG, "Selected operation was NONE.") ; false }
-//            Operation.COPY_FILE_TO_FOLDER -> TODO()
-//            Operation.MOVE_FILE_TO_FOLDER -> TODO()
-//            Operation.COPY_FOLDER_TO_FOLDER -> TODO()
-//            Operation.MOVE_FOLDER_TO_FOLDER -> TODO()
-//        }
-//    }
+    fun doOperation(builder: MultiStepOperationBuilder) : Boolean {
+        return when (builder.getOperation()) {
+            Operation.NONE -> { logger.w(TAG, "Selected operation was NONE.") ; false }
+            Operation.COPY_FILE_TO_FOLDER -> TODO()
+            Operation.MOVE_FILE_TO_FOLDER -> TODO()
+            Operation.COPY_FOLDER_TO_FOLDER -> TODO()
+            Operation.MOVE_FOLDER_TO_FOLDER -> TODO()
+        }
+    }
+
+    // TODO the arf prompts could just be a MutableState<List<TextMenuItem>> here that is subscribed to.
+    // TODO from the progress screen (and given a tag there for Runner + Runner_ARF). Then, as we run here, we can update
+    // TODO the progress here by having one item (or group of items) represent progress (Files # / total, Folder # / total, Megabytes / total)
+    // TODO which get updated then re-added to the mutable state.
+
+    // TODO the ARF prompts could work similarly.
+
 //
 //    sealed interface CopyFileResult {
 //        object Success : CopyFileResult

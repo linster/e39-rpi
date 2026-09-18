@@ -229,16 +229,16 @@ class MultiStepOperationProgressScreen @Inject constructor(
         RUNNING,
         RUNNING_ARF
     }
+}
 
-    enum class ListEntrySource {
-        // Entries added as part of the "Check Parameters" phase
-        CHECKING_PARAMETERS,
-        // Action buttons added as part of the "Check Parameters"
-        CHECKING_PARAMETERS_ACTION_BUTTONS,
-        // Action buttons added as part of the running operation
-        RUNNING,
-        // Action buttons added as part of an Abort, Retry, Fail prompt
-        RUNNING_ARF
+enum class ListEntrySource {
+    // Entries added as part of the "Check Parameters" phase
+    CHECKING_PARAMETERS,
+    // Action buttons added as part of the "Check Parameters"
+    CHECKING_PARAMETERS_ACTION_BUTTONS,
+    // Action buttons added as part of the running operation
+    RUNNING,
+    // Action buttons added as part of an Abort, Retry, Fail prompt
+    RUNNING_ARF
 
-    }
 }
