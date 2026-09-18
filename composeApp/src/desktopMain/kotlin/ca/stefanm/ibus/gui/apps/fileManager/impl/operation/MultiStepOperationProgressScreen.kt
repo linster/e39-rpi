@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoothScreenCustomViews
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.MultiStepOperationRunner
@@ -32,6 +33,9 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SnapshotPair
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import javax.inject.Inject
@@ -121,8 +125,11 @@ class MultiStepOperationProgressScreen @Inject constructor(
                     Notification.NotificationImage.ALERT_CIRCLE,
                     "Source and destination are the same folder"
                 ))
-                navigationNodeTraverser.goBack()
-                return@content
+                GlobalScope.launch {
+                    delay(10L)
+                    navigationNodeTraverser.goBack()
+                }
+                //return@content
             }
         }
 
@@ -135,8 +142,6 @@ class MultiStepOperationProgressScreen @Inject constructor(
         val isRunning = remember { mutableStateOf(false)}
         val runningState = remember { mutableStateOf(RunningState.CHECKING)}
         val entries = remember {
-            // TODO our old friend SnapshotStateList?
-            // TODO SNAPSHOT DOUBLE
             mutableStateListOf<SnapshotPair<ListEntrySource, TextMenuItem>>()
         }
 
@@ -146,12 +151,36 @@ class MultiStepOperationProgressScreen @Inject constructor(
                 entries.addAll(getCheckerEntries().map { SnapshotPair(ListEntrySource.CHECKING_PARAMETERS, it) })
             }
             //Append the action buttons for the checker. The filter will remove them when the
+            entries.add(
+                SnapshotPair(ListEntrySource.CHECKING_PARAMETERS_ACTION_BUTTONS, TextMenuItem(
+                    title = "Go Back",
+                    onClicked = {
+                        navigationNodeTraverser.cleanupBackStackDescendentsOf(FileManagerScreen::class.java)
+                        navigationNodeTraverser.cleanupBackStackDescendentsOf(MultiStepOperationProgressScreen::class.java)
+                        FileManagerScreen.openForBrowsing(navigationNodeTraverser)
+                    }
+                ))
+            )
+            if (builder.operationBuilt()) {
+                entries.add(
+                    SnapshotPair(
+                        ListEntrySource.CHECKING_PARAMETERS_ACTION_BUTTONS, TextMenuItem(
+                        title = "Do operation",
+                        onClicked = {
+
+                        }
+                    ))
+                )
+            }
             //runningState changes.
         }
 
         with(context) {
             OneColumnSmoothScreenCustomViews(
-                header  = "",
+                header  = when (runningState.value) {
+                    RunningState.CHECKING -> "Check Operation Before Beginning"
+                    else -> "Operation Progress"
+                },
                 prependGoBackEntry = false,
                 items = entries.filter {
                     return@filter when (runningState.value) {
@@ -179,6 +208,8 @@ class MultiStepOperationProgressScreen @Inject constructor(
             returnedList.add("Source")
             returnedList.add("   ${source.name}")
             returnedList.add("   ${source.absolutePath}")
+
+            returnedList.add("Operation: $operation")
 
             returnedList.add("Destination")
             returnedList.add("   ${destination.name}")

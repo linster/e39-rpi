@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.lib.logging.Logger
+import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
 
@@ -46,7 +47,8 @@ class MultiStepOperationBuilder @Inject constructor(
         }
 
         if (source?.isDirectory == true) {
-            return source?.absolutePath == destinationFolder?.absolutePath
+            return (source?.absolutePath == destinationFolder?.absolutePath) ||
+                    FileUtils.directoryContains(destinationFolder!!, source!!)
         }
         return false
     }

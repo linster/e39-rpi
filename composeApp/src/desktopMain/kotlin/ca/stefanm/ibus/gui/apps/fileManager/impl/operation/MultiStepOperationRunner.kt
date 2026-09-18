@@ -11,6 +11,10 @@ class MultiStepOperationRunner @Inject constructor(
     private val logger: Logger
 ) {
 
+    //This guy probably has to emit a flow of doo-dads, which end up getting consumed by
+    //ConsumeAsState(), or SideEffect? to add into the entries list? .... those guys need TextMenuItems
+    // with lambdas in them for the buttons.... maybe?
+
     //TODO maybe split out the doing of the operation into a runner of sorts.
     //
     /** Perform the operation that was built-up. Do not overwrite anything.
