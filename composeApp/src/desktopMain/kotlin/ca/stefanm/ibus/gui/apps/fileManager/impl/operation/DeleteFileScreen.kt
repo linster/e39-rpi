@@ -90,6 +90,7 @@ class DeleteFileScreen @Inject constructor(
                         title = "Run delete...",
                         onClicked = {
                             runDelete(file)
+                            navigationNodeTraverser.goBack()
                         }
                     ).toDynamicLambda()
                 )

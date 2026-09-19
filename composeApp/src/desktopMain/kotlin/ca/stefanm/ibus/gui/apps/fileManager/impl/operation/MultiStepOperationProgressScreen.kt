@@ -3,11 +3,13 @@ package ca.stefanm.ibus.gui.apps.fileManager.impl.operation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
@@ -47,7 +49,7 @@ import kotlin.time.Instant
 //After the multi step operation is built up with the builder,
 //Navigate here to see it's progress
 @AutoDiscover
-class MultiStepOperationProgressScreen @Inject constructor(
+class MultiStepOperationProgressScreen @Inject internal constructor(
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerServiceMain: KnobListenerService,
 
@@ -167,7 +169,10 @@ class MultiStepOperationProgressScreen @Inject constructor(
                         ListEntrySource.CHECKING_PARAMETERS_ACTION_BUTTONS, TextMenuItem(
                         title = "Do operation",
                         onClicked = {
-
+                            runningState.value = RunningState.RUNNING
+                            scope.launch {
+                                runner.doOperation(entries)
+                            }
                         }
                     ))
                 )
@@ -189,7 +194,7 @@ class MultiStepOperationProgressScreen @Inject constructor(
                             ListEntrySource.CHECKING_PARAMETERS_ACTION_BUTTONS
                         )
                         RunningState.RUNNING -> it.first == ListEntrySource.RUNNING
-                        RunningState.RUNNING_ARF -> it.first == ListEntrySource.RUNNING_ARF
+                                || it.first == ListEntrySource.RUNNING_ARF
                     }
                 }.map { it.second }.toDynamicLambdas()
             )
@@ -226,8 +231,7 @@ class MultiStepOperationProgressScreen @Inject constructor(
 
     enum class RunningState {
         CHECKING,
-        RUNNING,
-        RUNNING_ARF
+        RUNNING
     }
 }
 
