@@ -286,8 +286,6 @@ internal class MultiStepOperationRunner @Inject constructor(
                 TextMenuItem(
                     title = "Go Back",
                     onClicked = {
-//                        navigationNodeTraverser.cleanupBackStackDescendentsOf(FileManagerScreen::class.java)
-//                        navigationNodeTraverser.cleanupBackStackDescendentsOf(MultiStepOperationProgressScreen::class.java)
                         builder.clear()
                         navigationNodeTraverser.navigateToRoot()
                         FileManagerScreen.openForBrowsing(navigationNodeTraverser)

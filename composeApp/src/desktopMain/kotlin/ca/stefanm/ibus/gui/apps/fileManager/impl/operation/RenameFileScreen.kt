@@ -9,6 +9,7 @@ import ca.stefanm.ibus.gui.apps.fileManager.impl.settings.FileManagerSettingsOve
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -122,12 +123,12 @@ class RenameFileScreen @Inject constructor(
                         title = "Current file name: ${file.name}",
                         isSelectable = false,
                         onClicked = {}
-                    ).toDynamicLambda(),
+                    ).toDynamicLambda(noChipWhenNotSelectable = true),
                     TextMenuItem(
                         title = file.absolutePath,
                         isSelectable = false,
                         onClicked = {}
-                    ).toDynamicLambda(),
+                    ).toDynamicLambda(noChipWhenNotSelectable = true),
                     { allocatedIndex, currentIndex ->
                         MenuItem(
                             label = "Proposed name: ${proposedRename.value}",
@@ -153,7 +154,8 @@ class RenameFileScreen @Inject constructor(
                             isSelected = allocatedIndex == currentIndex,
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                 doRename(file, proposedRename.value)
-                                navigationNodeTraverser.goBack()
+                                navigationNodeTraverser.navigateToRoot()
+                                FileManagerScreen.openForBrowsing(navigationNodeTraverser)
                             }
                         )
                     }

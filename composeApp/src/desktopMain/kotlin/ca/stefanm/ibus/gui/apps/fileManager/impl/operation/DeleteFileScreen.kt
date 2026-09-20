@@ -80,12 +80,12 @@ class DeleteFileScreen @Inject constructor(
                         title = "File name: ${file.name}",
                         isSelectable = false,
                         onClicked = {}
-                    ).toDynamicLambda(),
+                    ).toDynamicLambda(noChipWhenNotSelectable = true),
                     TextMenuItem(
                         title = file.absolutePath,
                         isSelectable = false,
                         onClicked = {}
-                    ).toDynamicLambda(),
+                    ).toDynamicLambda(noChipWhenNotSelectable = true),
                     TextMenuItem(
                         title = "Run delete...",
                         onClicked = {

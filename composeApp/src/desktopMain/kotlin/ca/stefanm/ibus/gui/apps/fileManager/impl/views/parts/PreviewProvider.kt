@@ -46,7 +46,8 @@ class PreviewProvider @Inject constructor(
     //For an image, draw it
     //For a movie, grab a picture of it
 
-
+//TODO these should get Modifier passed in all the way through so that
+//TODO they look right on the GridView and the FileSidePane.
     @Composable
     fun FilePreview(file: File) {
         FilePreview(file, mimeTools.getFileTypeForFile(file))

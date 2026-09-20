@@ -60,11 +60,14 @@ fun MenuItem.toDynamicLambda(
     }
 
 fun TextMenuItem.toDynamicLambda(
+    /** If true, set ItemChipOrientation to NONE if isSelectable is false */
+    noChipWhenNotSelectable : Boolean = false
 ) : @Composable KnobObserverBuilderScope.(Int, Int) -> Unit =
     { allocatedIndex, currentIndex ->
         MenuItem(
             label = title,
-            chipOrientation = ItemChipOrientation.W,
+            chipOrientation =
+                if (noChipWhenNotSelectable && !isSelectable) ItemChipOrientation.NONE else ItemChipOrientation.W,
             isSelected = allocatedIndex == currentIndex,
             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                 onClicked()
