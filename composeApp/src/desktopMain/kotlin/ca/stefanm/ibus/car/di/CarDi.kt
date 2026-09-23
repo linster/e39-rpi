@@ -14,6 +14,7 @@ import ca.stefanm.ibus.car.bordmonitor.input.IBusInputMessageParser
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.Mk4NavTextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TextLengthConstraints
 import ca.stefanm.ibus.car.bordmonitor.menu.painter.TvModuleTextLengthConstraints
+import ca.stefanm.ibus.car.desktop.gui.slideshow.SlideshowService
 import ca.stefanm.ibus.car.platform.PlatformServiceList
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.*
 import ca.stefanm.ibus.car.platform.*
@@ -79,6 +80,7 @@ interface ConfiguredCarComponent {
     fun discoveredServicePicoHeartbeatResponseParser() : HeartbeatResponseParser
 
     fun discoveredServiceGriffinPowermateListener() : GriffinPowermateReader
+    fun discoveredServiceSlideshowService() : SlideshowService
 }
 
 @Module

@@ -52,6 +52,8 @@ import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
 import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
 import ca.stefanm.ibus.di.*
+import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
+import ca.stefanm.ibus.gui.apps.gallery.SlideShowAppHomeScreen
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.chat.screens.chat.*
@@ -189,7 +191,9 @@ class NavigationModule {
         permissionsModifierScreen: PermissionsModifierScreen,
         renameFileScreen: RenameFileScreen,
         fileManagerSettingsScreen: FileManagerSettingsScreen,
-        snootPhoneMainMenu: SnootPhoneMainMenu
+        snootPhoneMainMenu: SnootPhoneMainMenu,
+        imageViewerScreen: ImageViewerScreen,
+        slideShowAppHomeScreen: SlideShowAppHomeScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -277,7 +281,9 @@ class NavigationModule {
         permissionsModifierScreen,
         renameFileScreen,
         fileManagerSettingsScreen,
-        snootPhoneMainMenu
+        snootPhoneMainMenu,
+        imageViewerScreen,
+        slideShowAppHomeScreen
     )
 }
 

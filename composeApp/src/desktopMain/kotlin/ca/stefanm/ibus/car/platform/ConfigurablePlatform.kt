@@ -104,6 +104,11 @@ class ConfigurablePlatform @Inject constructor(
             runStatusViewer!!.records.collect { _servicesRunning.value = it }
         }
     }
+
+    fun findServiceByName(name : String) : PlatformService? {
+        return _configurablePlatformServiceRunner?.findService(name)
+    }
+
 }
 
 @ConfiguredCarScope
@@ -142,7 +147,7 @@ class ConfigurablePlatformServiceRunner @Inject constructor(
         findService(serviceName).onCreate()
     }
 
-    private fun findService(name: String) : PlatformService {
+    fun findService(name: String) : PlatformService {
         return list.list.map { it.children }.flatten().first { it.name == name }
     }
 }

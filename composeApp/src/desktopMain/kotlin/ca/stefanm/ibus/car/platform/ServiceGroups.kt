@@ -84,3 +84,9 @@ annotation class PicoToPiParserGroup
     description = "Services that are run to subscribe to devices and services that exist on desktop installations of e39-rpi"
 )
 annotation class PeripheralsDesktopGroup
+
+@PlatformServiceGroup(
+    name = "LongRunningGuiServices",
+    description = "Services that are exist in the GUI for 'frilly' things like Slideshows"
+)
+annotation class LongRunningGuiServices

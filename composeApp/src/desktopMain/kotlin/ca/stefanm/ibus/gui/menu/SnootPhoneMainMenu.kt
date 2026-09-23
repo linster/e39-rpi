@@ -7,6 +7,8 @@ import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
+import ca.stefanm.ibus.gui.apps.gallery.SlideShowAppHomeScreen
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
@@ -54,8 +56,8 @@ class SnootPhoneMainMenu @Inject constructor(
                 "File Manager" to { FileManagerScreen.openForBrowsing(navigationNodeTraverser) },
                 "Video Player" to { navigateToNode(VideoPlayerAppHomeScreen::class.java) },
 
-                "Slide Show" to {},
-                "Image Viwer" to {},
+                "Slideshow" to { navigateToNode(SlideShowAppHomeScreen::class.java)},
+                "Image Viewer" to { navigateToNode(ImageViewerScreen::class.java) },
                 "Weather" to {},
 
                 "Settings" to { navigateToNode(SettingsRootMenu::class.java) }
