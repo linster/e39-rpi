@@ -21,7 +21,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 fun BmwFullScreenBottomBar(
     date : String = "--/--/--",
     time : String = "00:00",
-    centerContent : @Composable () -> Unit = { Text("") }
+    centerContent : @Composable () -> Unit = { Text("Hallo") }
 ) {
     CenterGradientWithEdgeHighlight(highlightAlignment = Alignment.TopCenter) {
         Row(

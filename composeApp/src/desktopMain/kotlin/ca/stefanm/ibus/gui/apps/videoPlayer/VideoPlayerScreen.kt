@@ -102,7 +102,7 @@ class VideoPlayerScreen @Inject constructor(
 
     data class VideoPlayerScreenParams(
         val file : File,
-        val goBackOnPlaybackEnd : Boolean = false,
+        val callOnPlaybackEnd : () -> Unit = {}, //TODO is this unused??
         val playOnOpen : Boolean = true,
         val pauseOnOpenAfterSeconds : Int = 0,
         val seekToTimeOnOpen : Duration = Duration.ZERO,
@@ -156,6 +156,8 @@ class VideoPlayerScreen @Inject constructor(
         //https://github.com/kdroidFilter/ComposeMediaPlayer
 
         val playerState = rememberVideoPlayerState()
+
+        playerState.onPlaybackEnded = inputParams.callOnPlaybackEnd
 
         LaunchedEffect(inputParams.loopPlaybackByDefault) {
             playerState.loop = inputParams.loopPlaybackByDefault
@@ -214,6 +216,8 @@ class VideoPlayerScreen @Inject constructor(
                 logger.e(TAG, "Player error: $error")
             }
         }
+
+
 
         var overlayEnabled by remember { mutableStateOf(false) }
 
@@ -475,6 +479,7 @@ class VideoPlayerScreen @Inject constructor(
                         chipOrientation = ItemChipOrientation.S,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                             playerState.stop()
+                            playerState.onPlaybackEnded?.invoke()
                             navigationNodeTraverser.setResultAndGoBack(
                                 this@VideoPlayerScreen,
                                 calculateResultFromState(playerState)
