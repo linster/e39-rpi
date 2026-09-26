@@ -108,6 +108,12 @@ class ConfigurablePlatform @Inject constructor(
     fun findServiceByName(name : String) : PlatformService? {
         return _configurablePlatformServiceRunner?.findService(name)
     }
+    fun stopServiceByName(name : String) {
+        _configurablePlatformServiceRunner?.stopByName(name)
+    }
+    fun startServiceByName(name : String) {
+        _configurablePlatformServiceRunner?.startByName(name)
+    }
 
 }
 

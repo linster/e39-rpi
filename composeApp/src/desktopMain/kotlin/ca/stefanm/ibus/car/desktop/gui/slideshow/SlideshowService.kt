@@ -1,29 +1,40 @@
 package ca.stefanm.ibus.car.desktop.gui.slideshow
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntOffset
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.moleculeFlow
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.LongRunningGuiServices
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.Service
 import ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
+import ca.stefanm.ibus.gui.apps.gallery.SlideShowAppHomeScreen
 import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SnapshotPair
 import ca.stefanm.ibus.lib.logging.Logger
+import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.properties.Delegates
 import kotlin.time.Duration
 
 @PlatformServiceInfo(
@@ -38,7 +49,8 @@ class SlideshowService @Inject constructor(
     @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher,
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val actionRouter: ActionRouter,
-    private val modalMenuService: ModalMenuService
+    private val modalMenuService: ModalMenuService,
+    private val configurablePlatform: ConfigurablePlatform
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
     companion object {
@@ -47,7 +59,8 @@ class SlideshowService @Inject constructor(
 
     data class SlideShowOptions(
         val fileList : List<Pair<File, FileType>>,
-        val delayBetweenPictures : Duration
+        /** No auto-advance is encoded as Duration.Infinite */
+        val delayBetweenPictures : Duration,
     )
 
     override suspend fun doWork() {
@@ -57,22 +70,46 @@ class SlideshowService @Inject constructor(
             return
         }
 
+            //TODO I just realized I could use the navigation back stack and pop screens rather than maintain a list.
 
-        startedOptions.fileList.forEachIndexed { index, (file, type) ->
+        val fileList = startedOptions.fileList.circular()
+        val currentIndex = MutableStateFlow(fileList.indices.first)
 
+        //TODO is today the day we finally learn how the hell molecule works?
+
+        moleculeFlow(RecompositionMode.Immediate) {
+            val index by currentIndex.collectAsState(currentIndex.value)
+            //TODO need a compose stable data type for the entry record.
+
+            //TODO for auto advance I should should manipulate the state flow in a coroutine .
+            fileList[index]
+        }.collect { item ->
+            when (val action = showFile(item)) {
+                SlideshowItemNavigationEvent.Forward -> currentIndex.value += 1
+                SlideshowItemNavigationEvent.Backward -> currentIndex.value -= 1
+                SlideshowItemNavigationEvent.EndShow -> {
+                    SlideShowAppHomeScreen.openAfterSlideShowEnds(navigationNodeTraverser)
+                    configurablePlatform.stopServiceByName("SlideshowService")
+                }
+                null -> { /** Noop, showFile logs the type was wrong */ }
+            }
         }
-
     }
 
     var options : SlideShowOptions? = null
 
+    @Stable
+    data class ComposeStableFileListItem() : SnapshotPair
 
 
     enum class SlideshowItemNavigationEvent {
         Forward,
         Backward,
-        Close,
         EndShow
+    }
+
+    private suspend fun showFile(item : Pair<File, FileType>) : SlideshowItemNavigationEvent? {
+        return showFile(item.first, item.second)
     }
 
     private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {
@@ -82,6 +119,7 @@ class SlideshowService @Inject constructor(
         if (type == FileType.Movie) {
             return showMovie(file)
         }
+        logger.d(TAG, "An invalid $file, $type was asked to be opened, no action returned.")
         return null
     }
 
@@ -94,7 +132,6 @@ class SlideshowService @Inject constructor(
                 image = file,
                 onImageNavigateForward = { continuation.resume(SlideshowItemNavigationEvent.Forward) },
                 onImageNavigateBackward = { continuation.resume(SlideshowItemNavigationEvent.Backward) },
-                onImageNavigateClosed = { continuation.resume(SlideshowItemNavigationEvent.Close) },
                 onEndSlideshowRequested = { continuation.resume(SlideshowItemNavigationEvent.EndShow) }
             )
         )

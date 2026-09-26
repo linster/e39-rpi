@@ -57,7 +57,6 @@ class ImageViewerScreen @Inject constructor(
             val image : File,
             val onImageNavigateForward : () -> Unit = {},
             val onImageNavigateBackward : () -> Unit = {},
-            val onImageNavigateClosed : () -> Unit = {},
             val onEndSlideshowRequested : () -> Unit = {}
         ) : ImageViewerScreenOpenParameters
     }

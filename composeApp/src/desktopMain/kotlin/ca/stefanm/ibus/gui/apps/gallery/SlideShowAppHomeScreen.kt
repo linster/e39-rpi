@@ -56,6 +56,15 @@ class SlideShowAppHomeScreen @Inject constructor(
 
     companion object {
         const val TAG = "SlideShowAppHomeScreen"
+
+        fun openAfterSlideShowEnds(
+            navigationNodeTraverser: NavigationNodeTraverser
+        ) {
+            //Just in case we need to re-set or reset some parameters?
+            navigationNodeTraverser.navigateToRoot()
+            navigationNodeTraverser.navigateToNode(SlideShowAppHomeScreen::class.java)
+
+        }
     }
 
     override val thisClass: Class<out NavigationNode<Nothing>>
