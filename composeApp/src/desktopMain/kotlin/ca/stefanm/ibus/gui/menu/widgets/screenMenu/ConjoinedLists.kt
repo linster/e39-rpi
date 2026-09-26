@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.StateObject
 import androidx.compose.runtime.snapshots.StateRecord
 
-internal data class SnapshotPair<A, B>(
+open class SnapshotPair<A, B>(
     val first : A,
     val second : B
 ) : StateObject {
@@ -17,9 +17,15 @@ internal data class SnapshotPair<A, B>(
     override fun prependStateRecord(value: StateRecord) {
         backingList.prependStateRecord(value)
     }
+
+    operator fun component1() : A = first
+    operator fun component2() : B = second
+    override fun toString(): String {
+        return "SnapshotPair(first=$first, second=$second)"
+    }
 }
 
-internal open class SnapshotTriple<A, B, C>(
+open class SnapshotTriple<A, B, C>(
     val first : A,
     val second : B,
     val third : C

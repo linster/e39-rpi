@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.apps.gallery
 
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
@@ -65,6 +66,7 @@ class ImageViewerScreen @Inject constructor(
         get() = ImageViewerScreen::class.java
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
-
+        //TODO parse params
+        Text("SOP")
     }
 }

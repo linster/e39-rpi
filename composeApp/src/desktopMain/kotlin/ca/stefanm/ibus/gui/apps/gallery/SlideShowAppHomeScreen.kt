@@ -10,8 +10,11 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.PlatformService
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
+import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFolderSelectionResultHelper
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
+import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -34,9 +37,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 @AutoDiscover
@@ -51,7 +56,8 @@ class SlideShowAppHomeScreen @Inject constructor(
 
     private val folderSelectionResultHelper: FileManagerScreenFolderSelectionResultHelper,
 
-    private val configurablePlatform: ConfigurablePlatform
+    private val configurablePlatform: ConfigurablePlatform,
+    private val mimeTools: MimeTools
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -94,35 +100,50 @@ class SlideShowAppHomeScreen @Inject constructor(
     }
 
     fun getSlideShowServiceIsRunning() : Flow<Boolean> {
-        return flowOf(false)
+        //TODO this will crash if the platform isn't running.
+        //TODO the whole CarComponent thing needs a rework in Metro.
+        return slideShowServicePlatformService()!!.runStatusFlow.map { it == PlatformService.RunStatus.RUNNING }
     }
 
     fun prepareSlideShowOptions(
         folderSelected : File,
         autoAdvance : Boolean,
+        startIndex : Int,
         advanceTimeMs : Int
     ) : SlideshowService.SlideShowOptions {
-TODO()
-        //TODO make the list of all the files to show.
+
+        //TODO so many mimetools lookups :(
+
+        val fileList : List<File> = folderSelected.listFiles {
+            if (it.isDirectory) return@listFiles false
+            val type = mimeTools.getFileTypeForFile(it)
+            type == FileType.Movie || type == FileType.Picture
+        }.toList()
+
+        return SlideshowService.SlideShowOptions(
+            fileList = fileList.map { it to mimeTools.getFileTypeForFile(it) },
+            startAtIndex = startIndex.coerceIn(0, fileList.lastIndex),
+            delayBetweenPictures = if (autoAdvance) Duration.INFINITE else advanceTimeMs.milliseconds
+        )
     }
 
-    //Todo might have to extract these...
     fun startSlideshow(options : SlideshowService.SlideShowOptions) {
-
+        getSlideshowService()?.options = options
+        configurablePlatform.startServiceByName("SlideshowService")
     }
 
     fun stopSlideShow() {
-
+        configurablePlatform.stopServiceByName("SlideshowService")
     }
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
 
         val slideShowIsRunning = getSlideShowServiceIsRunning().collectAsState(false)
 
-        //TODO might have to curry these params like crazy?
         val folderSelected : File? = folderSelectionResultHelper.parseSelectedFolder(params)
 
         val autoAdvance = remember { mutableStateOf(false) }
+        val startIndex = remember { mutableStateOf(0) }
         val advanceTimeMs = remember { mutableStateOf(5)}
 
         with(context) {
@@ -143,7 +164,8 @@ TODO()
                             "Select Folder",
                             onClicked = {
                                 FileManagerScreen.openForFolderSelection(
-                                    navigationNodeTraverser
+                                    navigationNodeTraverser,
+                                    filter = Filter.Pictures
                                 )
                             }).toDynamicLambda(noChipWhenNotSelectable = true)
                         )
@@ -187,6 +209,24 @@ TODO()
                                     )
                                 }
                             }
+                            add { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    label = "Set startIndex: (${startIndex.value})...",
+                                    chipOrientation = ItemChipOrientation.W,
+                                    isSelected = allocatedIndex == currentIndex,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        modalMenuService.showKeyboard(
+                                            Keyboard.KeyboardType.NUMERIC,
+                                            prefilled = advanceTimeMs.value.toString(),
+                                            onTextEntered = { new ->
+                                                new.toIntOrNull()?.let {
+                                                    startIndex.value = it
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                            }
                             add(
                                 TextMenuItem(
                                 title = "Start slideshow",
@@ -195,6 +235,7 @@ TODO()
                                         prepareSlideShowOptions(
                                             folderSelected = folderSelected!!,
                                             autoAdvance = autoAdvance.value,
+                                            startIndex = startIndex.value,
                                             advanceTimeMs = advanceTimeMs.value
                                         )
                                     )

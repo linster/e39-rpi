@@ -45,7 +45,7 @@ class ActionRouter @Inject constructor(
     }
     private fun viewMovie(file: File) {
         VideoPlayerScreen.openWithFile(navigationNodeTraverser, VideoPlayerScreen.VideoPlayerScreenParams(
-            file, goBackOnPlaybackEnd = true
+            file, callOnPlaybackEnd = { navigationNodeTraverser.goBack() }
         ))
     }
 }

@@ -239,13 +239,13 @@ class MimeTools @Inject constructor(
                 return emptyMap()
             }
 
-            returnedMap["Date Taken"] = directory.dateOriginal.toInstant().toKotlinInstant()
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-                .format(LocalDateTime.Formats.ISO)
+            directory.dateOriginal?.toInstant()?.toKotlinInstant()
+                ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                ?.format(LocalDateTime.Formats.ISO)?.let { returnedMap["Date Taken"] = it }
 
-            returnedMap["Date Modified"] = directory.dateModified.toInstant().toKotlinInstant()
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-                .format(LocalDateTime.Formats.ISO)
+            directory.dateModified?.toInstant()?.toKotlinInstant()
+                ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                ?.format(LocalDateTime.Formats.ISO)?.let { returnedMap["Date Modified"] = it }
 
 
             val descriptor = ExifSubIFDDescriptor(directory)

@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.car.desktop.gui.slideshow
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,6 +30,7 @@ import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
@@ -59,6 +61,8 @@ class SlideshowService @Inject constructor(
 
     data class SlideShowOptions(
         val fileList : List<Pair<File, FileType>>,
+        /** Start at index 0 of the fileList */
+        val startAtIndex : Int = 0,
         /** No auto-advance is encoded as Duration.Infinite */
         val delayBetweenPictures : Duration,
     )
@@ -70,21 +74,23 @@ class SlideshowService @Inject constructor(
             return
         }
 
-            //TODO I just realized I could use the navigation back stack and pop screens rather than maintain a list.
-
         val fileList = startedOptions.fileList.circular()
-        val currentIndex = MutableStateFlow(fileList.indices.first)
+        val currentIndex = MutableStateFlow(startedOptions.startAtIndex)
 
         //TODO is today the day we finally learn how the hell molecule works?
 
+        if (startedOptions.delayBetweenPictures.isFinite()) {
+//            coroutineScope.launch {
+//
+//            }
+        }
+
         moleculeFlow(RecompositionMode.Immediate) {
             val index by currentIndex.collectAsState(currentIndex.value)
-            //TODO need a compose stable data type for the entry record.
-
-            //TODO for auto advance I should should manipulate the state flow in a coroutine .
-            fileList[index]
+            ComposeStableFileListItem(fileList[index])
         }.collect { item ->
-            when (val action = showFile(item)) {
+            logger.d(TAG, "Showing $item")
+            when (val action = showFile(item.file, item.type)) {
                 SlideshowItemNavigationEvent.Forward -> currentIndex.value += 1
                 SlideshowItemNavigationEvent.Backward -> currentIndex.value -= 1
                 SlideshowItemNavigationEvent.EndShow -> {
@@ -98,18 +104,19 @@ class SlideshowService @Inject constructor(
 
     var options : SlideShowOptions? = null
 
-    @Stable
-    data class ComposeStableFileListItem() : SnapshotPair
+
+    class ComposeStableFileListItem(
+        val file: File,
+        val type : FileType
+    ) : SnapshotPair<String, FileType>(file.absolutePath, type) {
+        constructor(pair : Pair<File, FileType>) : this(pair.first, pair.second)
+    }
 
 
     enum class SlideshowItemNavigationEvent {
         Forward,
         Backward,
         EndShow
-    }
-
-    private suspend fun showFile(item : Pair<File, FileType>) : SlideshowItemNavigationEvent? {
-        return showFile(item.first, item.second)
     }
 
     private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {

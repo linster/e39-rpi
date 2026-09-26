@@ -372,7 +372,11 @@ class FileManagerScreen @Inject constructor(
                         //Label
                         val measurements = ThemeWrapper.ThemeHandle.current.bigItem
                         Text(
-                            text = entry.path.name,
+                            text = when (entry) {
+                                is DirectoryRepo.DirectoryEntry.Directory -> "🖿 ${entry.path.name}"
+                                is DirectoryRepo.DirectoryEntry.SelectThisDirectory -> "🖿 Select this folder: ${entry.path.name}"
+                                is DirectoryRepo.DirectoryEntry.DirectoryFile -> entry.path.name
+                            },
                             color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                             fontSize = measurements.fontSize,
                             modifier = Modifier
@@ -431,7 +435,11 @@ class FileManagerScreen @Inject constructor(
                                 //Label
                                 val measurements = ThemeWrapper.ThemeHandle.current.bigItem
                                 Text(
-                                    text = entry.path.name,
+                                    text = when (entry) {
+                                        is DirectoryRepo.DirectoryEntry.Directory -> "🖿 ${entry.path.name}"
+                                        is DirectoryRepo.DirectoryEntry.SelectThisDirectory -> "🖿 Select this folder: ${entry.path.name}"
+                                        is DirectoryRepo.DirectoryEntry.DirectoryFile -> entry.path.name
+                                    },
                                     color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
                                     fontSize = measurements.fontSize,
                                     modifier = Modifier.clickable { onEntrySelected(entry) }
