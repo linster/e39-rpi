@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.apps.actionRouter
 
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
+import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
 import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ibus.gui.menu.Notification
@@ -29,7 +30,7 @@ class ActionRouter @Inject constructor(
             FileType.Movie -> viewMovie(file)
             FileType.Other -> notifyActionUnsupported()
             FileType.PDF -> viewPdf(file)
-            FileType.Picture -> notifyActionUnsupported()
+            FileType.Picture -> viewPicture(file)
             FileType.TextFile -> notifyActionUnsupported()
             FileType.Unknown -> notifyActionUnsupported()
         }
@@ -47,5 +48,9 @@ class ActionRouter @Inject constructor(
         VideoPlayerScreen.openWithFile(navigationNodeTraverser, VideoPlayerScreen.VideoPlayerScreenParams(
             file, callOnPlaybackEnd = { navigationNodeTraverser.goBack() }
         ))
+    }
+
+    private fun viewPicture(file: File) {
+        ImageViewerScreen.openForBrowse(navigationNodeTraverser, file)
     }
 }

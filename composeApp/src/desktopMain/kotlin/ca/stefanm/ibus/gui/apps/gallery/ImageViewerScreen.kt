@@ -35,6 +35,17 @@ class ImageViewerScreen @Inject constructor(
     companion object {
         const val TAG = "ImageViewerScreen"
 
+        fun openForBrowse(
+            navigationNodeTraverser: NavigationNodeTraverser,
+            file: File
+        ) {
+            navigationNodeTraverser.navigateToNodeWithParameters(
+                ImageViewerScreen::class.java,
+                ImageViewerScreenOpenParameters.SingleFile(
+                    image = file
+                )
+            )
+        }
         fun openForImageInSlideShow(
             navigationNodeTraverser: NavigationNodeTraverser,
             parameters : ImageViewerScreenOpenParameters.SlideShow
@@ -91,6 +102,18 @@ class ImageViewerScreen @Inject constructor(
             return@content
         }
 
+        if (openParameters is ImageViewerScreenOpenParameters.SlideShow && false) {
+            GrossSlideshowViewerStub(openParameters)
+        }
+
+
+
+
+    }
+
+    //This was just for prototyping the slideshow service.
+    @Composable
+    fun GrossSlideshowViewerStub(openParameters: ImageViewerScreenOpenParameters) {
         if (openParameters is ImageViewerScreenOpenParameters.SlideShow) {
             //Quick and dirty draw some buttons
             FullScreenMenu.OneColumn(
@@ -127,10 +150,6 @@ class ImageViewerScreen @Inject constructor(
                 )
             )
         }
-
-        //TODO parse params
-        Text("SOP d00dz")
-
 
     }
 }

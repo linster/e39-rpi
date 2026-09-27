@@ -82,6 +82,8 @@ class DirectoryRepo @Inject constructor(
         if (canGoUp()) {
             currentDirectory.value = currentDirectory.value.parentFile
             backStackManager.pushDirectory(currentDirectory.value)
+        } else {
+            logger.d(TAG, "Can't go up.")
         }
     }
 
