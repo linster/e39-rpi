@@ -1,10 +1,7 @@
 package ca.stefanm.ibus.car.desktop.gui.slideshow
 
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntOffset
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
@@ -14,8 +11,6 @@ import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.LongRunningGuiServices
 import ca.stefanm.ibus.car.platform.LongRunningService
-import ca.stefanm.ibus.car.platform.Service
-import ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
 import ca.stefanm.ibus.gui.apps.gallery.SlideShowAppHomeScreen
@@ -34,16 +29,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.yield
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.properties.Delegates
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @PlatformServiceInfo(
     name = "SlideshowService",
@@ -86,6 +81,9 @@ class SlideshowService @Inject constructor(
         }
 
         val fileList = startedOptions.fileList.circular()
+
+        logger.d(TAG, "File List: ${fileList.map { it.first.absolutePath }}")
+
         val currentIndex = MutableStateFlow(startedOptions.startAtIndex)
 
         //TODO is today the day we finally learn how the hell molecule works?
@@ -98,11 +96,17 @@ class SlideshowService @Inject constructor(
         }
 
         if (startedOptions.delayBetweenPictures.isFinite()) {
+            autoAdvanceCanRun = true
             coroutineScope.launch {
-                while (isRunning) {
-                    delay(startedOptions.delayBetweenPictures)
-                    currentIndex.value += 1
-                    logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
+                while (serviceIsRunning) {
+                    if (autoAdvanceCanRun) {
+                        delay(startedOptions.delayBetweenPictures)
+                        currentIndex.value += 1
+                        logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
+                    } else {
+                        delay(startedOptions.delayBetweenPictures)
+                        yield()
+                    }
                 }
             }
         }
@@ -123,29 +127,47 @@ class SlideshowService @Inject constructor(
                 SlideshowItemNavigationEvent.Backward -> currentIndex.value -= 1
                 SlideshowItemNavigationEvent.EndShow -> {
                     GlobalScope.launch {
-                        SlideShowAppHomeScreen.openAfterSlideShowEnds(navigationNodeTraverser)
                         configurablePlatform.stopServiceByName("SlideshowService")
                     }
+                }
+                SlideshowItemNavigationEvent.PauseAutoAdvance -> {
+                    autoAdvanceCanRun = false
+                }
+                SlideshowItemNavigationEvent.ResumeAutoAdvance -> {
+                    autoAdvanceCanRun = true
                 }
                 null -> { /** Noop, showFile logs the type was wrong */ }
             }
         }
     }
 
-    private var isRunning = false
+    private var serviceIsRunning = false
+    private var autoAdvanceCanRun = false
+        set(value) {
+            field = value
+            updateBottomBarViewState {
+                it.copy(autoAdvanceRunning = value)
+            }
+        }
     override fun onCreate() {
-        isRunning = true
+        serviceIsRunning = true
+        autoAdvanceCanRun = true
         super.onCreate()
         initializeBottomBarViewState()
     }
     override fun onShutdown() {
-        isRunning = false
+        serviceIsRunning = false
+        autoAdvanceCanRun = false
         bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.DateTime
+        GlobalScope.launch {
+            delay(1)
+            SlideShowAppHomeScreen.openAfterSlideShowEnds(navigationNodeTraverser)
+        }
         super.onShutdown()
     }
 
     private val slideshowInfo = MutableStateFlow(BottomBarController.BottomBarViewState.SlideShow.SlideShowInfo(
-        "No file", 0, 0
+        "No file", 0, 0, false
     ))
 
     private fun initializeBottomBarViewState() {
@@ -187,10 +209,9 @@ class SlideshowService @Inject constructor(
     enum class SlideshowItemNavigationEvent {
         Forward,
         Backward,
-        EndShow
-
-        //TODO STOP Advance
-        //TODO ResumeAdvance
+        EndShow,
+        PauseAutoAdvance,
+        ResumeAutoAdvance
     }
 
     private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {
@@ -230,6 +251,17 @@ class SlideshowService @Inject constructor(
                 onEndSlideshowRequested = {
                     if (continuation.isActive) {
                         continuation.resume(SlideshowItemNavigationEvent.EndShow)
+                    }
+                },
+                wasStartedWithAutoAdvance = options?.delayBetweenPictures?.isFinite() == true,
+                onPauseAutoAdvanceRequested = {
+                    if (continuation.isActive) {
+                        continuation.resume(SlideshowItemNavigationEvent.PauseAutoAdvance)
+                    }
+                },
+                onResumeAutoAdvanceRequested = {
+                    if (continuation.isActive) {
+                        continuation.resume(SlideshowItemNavigationEvent.ResumeAutoAdvance)
                     }
                 }
             )

@@ -20,6 +20,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.time.Instant
 import kotlin.time.toKotlinInstant
 
 
@@ -251,20 +252,20 @@ class MimeTools @Inject constructor(
             val descriptor = ExifSubIFDDescriptor(directory)
 
             with (descriptor) {
-                returnedMap["Shutter spd"] = shutterSpeedDescription
-                returnedMap["Aperture"] = apertureValueDescription
-                returnedMap["iso"] = isoEquivalentDescription
-                returnedMap["focalLength"] = focalLengthDescription
-                returnedMap["exposureMode"] = exposureModeDescription
-                returnedMap["WB Mode"] = whiteBalanceModeDescription
-                returnedMap["WB"] = whiteBalanceDescription
-                returnedMap["meteringMode"] = meteringModeDescription
-                returnedMap["get35mmFilmEquivFocalLength"] = get35mmFilmEquivFocalLengthDescription()
-                returnedMap["digitalZoomRatio"] = digitalZoomRatioDescription
-                returnedMap["flash"] = flashDescription
-                returnedMap["imageHeight"] = imageHeightDescription
-                returnedMap["imageWidth"] = imageWidthDescription
-                returnedMap.put("userComment" , userCommentDescription)
+                returnedMap["Shutter spd"] = shutterSpeedDescription ?: "null"
+                returnedMap["Aperture"] = apertureValueDescription ?: "null"
+                returnedMap["iso"] = isoEquivalentDescription ?: "null"
+                returnedMap["focalLength"] = focalLengthDescription ?: "null"
+                returnedMap["exposureMode"] = exposureModeDescription ?: "null"
+                returnedMap["WB Mode"] = whiteBalanceModeDescription ?: "null"
+                returnedMap["WB"] = whiteBalanceDescription ?: "null"
+                returnedMap["meteringMode"] = meteringModeDescription ?: "null"
+                returnedMap["get35mmFilmEquivFocalLength"] = get35mmFilmEquivFocalLengthDescription() ?: "null"
+                returnedMap["digitalZoomRatio"] = digitalZoomRatioDescription ?: "null"
+                returnedMap["flash"] = flashDescription ?: "null"
+                returnedMap["imageHeight"] = imageHeightDescription ?: "null"
+                returnedMap["imageWidth"] = imageWidthDescription ?: "null"
+                returnedMap.put("userComment" , userCommentDescription ?: "null")
             }
 
             // I shoot Canon, so that's what we're supporting :D
@@ -274,17 +275,17 @@ class MimeTools @Inject constructor(
             if (directory != null) {
                 val canonMakernoteDescriptor = CanonMakernoteDescriptor(canonDirectory)
                 with(canonMakernoteDescriptor) {
-                    returnedMap["(Canon) imageSize"] = imageSizeDescription
-                    returnedMap["(Canon) flashBias"] = flashBiasDescription
-                    returnedMap["(Canon) flashMode"] = flashModeDescription
-                    returnedMap["(Canon) whiteBalance"] = whiteBalanceDescription
-                    returnedMap["(Canon) exposureMode"] = exposureModeDescription
+                    returnedMap["(Canon) imageSize"] = imageSizeDescription ?: "null"
+                    returnedMap["(Canon) flashBias"] = flashBiasDescription ?: "null"
+                    returnedMap["(Canon) flashMode"] = flashModeDescription ?: "null"
+                    returnedMap["(Canon) whiteBalance"] = whiteBalanceDescription ?: "null"
+                    returnedMap["(Canon) exposureMode"] = exposureModeDescription ?: "null"
 
 
-                    returnedMap["(Canon) lensType"] = lensTypeDescription
+                    returnedMap["(Canon) lensType"] = lensTypeDescription ?: "null"
 
-                    returnedMap["(Canon) focusMode1"] = focusMode1Description
-                    returnedMap["(Canon) quality"] = qualityDescription
+                    returnedMap["(Canon) focusMode1"] = focusMode1Description ?: "null"
+                    returnedMap["(Canon) quality"] = qualityDescription ?: "null"
                 }
             }
 
@@ -306,6 +307,32 @@ class MimeTools @Inject constructor(
         }
         return emptyMap()
 
+    }
+
+    fun getDateForSortation(file : File) : Instant {
+        //Fallback to modified time if no exif data.
+
+        val type = getFileTypeForFile(file)
+
+        if (type is FileType.Movie) {
+            return Instant.fromEpochMilliseconds(file.lastModified())
+        }
+
+        if (type is FileType.Picture) {
+            val metaDataResult = runCatching {
+                ImageMetadataReader.readMetadata(file)
+            }
+            if (metaDataResult.isFailure) {
+                logger.e(TAG, "Could not read metadata for $file", metaDataResult.exceptionOrNull())
+            }
+            val metadata = metaDataResult.getOrNull()
+            val directory : ExifSubIFDDirectory? = metadata?.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
+
+            return directory?.dateOriginal?.toInstant()?.toKotlinInstant()
+                ?: directory?.dateModified?.toInstant()?.toKotlinInstant()
+                ?: Instant.fromEpochMilliseconds(file.lastModified())
+        }
+        return Instant.fromEpochMilliseconds(file.lastModified())
     }
 
 }

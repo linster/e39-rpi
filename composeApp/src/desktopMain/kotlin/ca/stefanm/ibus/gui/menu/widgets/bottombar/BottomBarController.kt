@@ -34,7 +34,8 @@ class BottomBarController @Inject constructor(
             data class SlideShowInfo(
                 val currentFileName : String,
                 val currentFileNumber : Int,
-                val totalFiles : Int
+                val totalFiles : Int,
+                val autoAdvanceRunning : Boolean
             )
         }
     }
@@ -69,17 +70,16 @@ class BottomBarController @Inject constructor(
                 date = bottomBarClock.dateFlow.collectAsState().value,
                 time = bottomBarClock.timeFlow.collectAsState().value,
             ) {
-                logger.d(TAG, "bottomBarViewState: ${state}")
                 when (state) {
                     BottomBarViewState.DateTime -> {}
                     is BottomBarViewState.SlideShow -> {
                         val slideShowInfo = (state as BottomBarViewState.SlideShow).slideShowInfo.collectAsState(
-                            BottomBarViewState.SlideShow.SlideShowInfo("", 0,0 )
+                            BottomBarViewState.SlideShow.SlideShowInfo("", 0,0, false )
                         )
                         Text(
-                            text = "Slideshow Running (${slideShowInfo.value.let {
+                            text = "Slideshow Running ${slideShowInfo.value.let {
                                 "${it.currentFileName.takeLast(20)} : (${it.currentFileNumber}/${it.totalFiles})"
-                            }})",
+                            }} Auto: ${slideShowInfo.value.autoAdvanceRunning.let { if (it) " ⏵ " else " ⏸ " }}",
                             fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                             fontWeight = FontWeight.Bold,
                             color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor

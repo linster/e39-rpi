@@ -1,9 +1,16 @@
 package ca.stefanm.ibus.gui.apps.gallery
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.desktop.gui.slideshow.SlideshowService
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
@@ -15,6 +22,7 @@ import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFolderSelectio
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
+import ca.stefanm.ibus.gui.apps.fileManager.impl.views.parts.FileSidebar
 import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -24,10 +32,12 @@ import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambda
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
@@ -113,6 +123,7 @@ class SlideShowAppHomeScreen @Inject constructor(
 
     fun prepareSlideShowOptions(
         folderSelected : File,
+        sortMode: SortMode,
         autoAdvance : Boolean,
         startIndex : Int,
         advanceTimeSeconds : Int
@@ -124,7 +135,7 @@ class SlideShowAppHomeScreen @Inject constructor(
             if (it.isDirectory) return@listFiles false
             val type = mimeTools.getFileTypeForFile(it)
             type == FileType.Movie || type == FileType.Picture
-        }.toList()
+        }.toList().sortBySortMode(sortMode)
 
         return SlideshowService.SlideShowOptions(
             fileList = fileList.map { it to mimeTools.getFileTypeForFile(it) },
@@ -145,6 +156,37 @@ class SlideShowAppHomeScreen @Inject constructor(
         configurablePlatform.stopServiceByName("SlideshowService")
     }
 
+    enum class SortMode(val desc : String) {
+        NO_SORT("File system entries remain in naive sortation order."),
+        ALPHABETIC("Sort the entries by file name alphabetically."),
+        ALPHABETIC_INV("Alphabetic, reversed"),
+        MODIFIED_DATE("Sort Files by modified date"),
+        MODIFIED_DATE_INV("Sort files by modified date, reversed"),
+        DATE_TAKEN("Sort files by Exif taken date, falling back to modified date."),
+        DATE_TAKEN_INV("Sort files by Exif taken date, falling back to modified date, reversed.")
+    }
+
+    fun List<File>.sortBySortMode(mode : SortMode) : List<File> {
+        if (mode == SortMode.NO_SORT) return this
+        return this.sortedBy {
+            when (mode) {
+                SortMode.ALPHABETIC,
+                SortMode.ALPHABETIC_INV -> it.name
+                SortMode.MODIFIED_DATE,
+                SortMode.MODIFIED_DATE_INV -> it.lastModified().toString()
+                SortMode.DATE_TAKEN,
+                SortMode.DATE_TAKEN_INV -> mimeTools.getDateForSortation(it).epochSeconds.toString()
+                else -> it.name
+            }
+        }.let {
+            if (mode in listOf(SortMode.DATE_TAKEN_INV, SortMode.MODIFIED_DATE_INV, SortMode.ALPHABETIC_INV)) {
+                it.reversed()
+            } else {
+                it
+            }
+        }
+    }
+
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = { params ->
 
         val slideShowIsRunning = getSlideShowServiceIsRunning().collectAsState(false)
@@ -154,6 +196,8 @@ class SlideShowAppHomeScreen @Inject constructor(
         val autoAdvance = remember { mutableStateOf(false) }
         val startIndex = remember { mutableStateOf(0) }
         val advanceTimeSeconds = remember { mutableStateOf(5)}
+
+        val sortMode = remember { mutableStateOf(SortMode.ALPHABETIC) }
 
         with(context) {
             OneColumnSmoothScreenCustomViews(
@@ -192,6 +236,56 @@ class SlideShowAppHomeScreen @Inject constructor(
                                 isSelectable = false,
                                 onClicked = {}
                             ).toDynamicLambda(noChipWhenNotSelectable = true))
+                            add { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    label = "SortMode: ${sortMode.value.name}...",
+                                    chipOrientation = ItemChipOrientation.W,
+                                    isSelected = allocatedIndex == currentIndex,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        modalMenuService.showSidePaneOverlayWithKnobListener(darkenBackground = true) { knobListenerServiceModal ->
+                                            SidePanelMenu.SidePanelMenu("Set Sort Mode") {
+
+                                                val highLightedMode = remember { mutableStateOf(SortMode.values().first()) }
+                                                Column(Modifier.padding(horizontal = 10.dp.halveIfNotPixelDoubled())) {
+                                                    SidePanelMenu.InfoLabel("Mode details:", FontWeight.Bold)
+                                                    SidePanelMenu.InfoLabel(highLightedMode.value.desc)
+                                                }
+
+                                                SmoothScroll.SmoothScroll(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    knobListenerService = knobListenerServiceModal,
+                                                    tag = TAG,
+                                                    logger = logger,
+                                                    prependGoBackEntry = false,
+                                                    navigationNodeTraverser = navigationNodeTraverser,
+                                                    items = buildList {
+                                                        for (mode in SortMode.values()) {
+                                                            add { allocatedIndex, currentIndex ->
+                                                                LaunchedEffect(allocatedIndex, currentIndex) {
+                                                                    if (allocatedIndex == currentIndex) {
+                                                                        highLightedMode.value = mode
+                                                                    }
+                                                                }
+                                                                MenuItem(
+                                                                    label = mode.name,
+                                                                    chipOrientation = ItemChipOrientation.E,
+                                                                    isSelected = allocatedIndex == currentIndex,
+                                                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                                                        sortMode.value = mode
+                                                                        modalMenuService.closeSidePaneOverlay(true)
+                                                                    }
+                                                                )
+
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
                             add(
                                 CheckBoxMenuItem(
                                 title = "Auto advance?",
@@ -247,6 +341,7 @@ class SlideShowAppHomeScreen @Inject constructor(
                                             folderSelected = folderSelected!!,
                                             autoAdvance = autoAdvance.value,
                                             startIndex = startIndex.value,
+                                            sortMode = sortMode.value,
                                             advanceTimeSeconds = advanceTimeSeconds.value
                                         )
                                     )

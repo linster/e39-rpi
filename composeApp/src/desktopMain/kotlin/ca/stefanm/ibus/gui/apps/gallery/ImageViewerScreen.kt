@@ -61,7 +61,11 @@ class ImageViewerScreen @Inject constructor(
             val image : File,
             val onImageNavigateForward : () -> Unit = {},
             val onImageNavigateBackward : () -> Unit = {},
-            val onEndSlideshowRequested : () -> Unit = {}
+            val onEndSlideshowRequested : () -> Unit = {},
+            /** Don't allow a slideshow that wasn't started with a slide duration to resume auto advance */
+            val wasStartedWithAutoAdvance : Boolean,
+            val onPauseAutoAdvanceRequested : () -> Unit = {},
+            val onResumeAutoAdvanceRequested : () -> Unit = {}
         ) : ImageViewerScreenOpenParameters
     }
 
@@ -111,6 +115,14 @@ class ImageViewerScreen @Inject constructor(
                     TextMenuItem(
                         "End Slideshow",
                         onClicked = { openParameters.onEndSlideshowRequested() }
+                    ),
+                    TextMenuItem(
+                        "Pause Auto Advance",
+                        onClicked = { openParameters.onPauseAutoAdvanceRequested() }
+                    ),
+                    TextMenuItem(
+                        "Resume Auto Advance",
+                        onClicked = { openParameters.onResumeAutoAdvanceRequested() }
                     )
                 )
             )
