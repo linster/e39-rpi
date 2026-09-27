@@ -79,6 +79,8 @@ object SmoothScroll {
         )
     }
 
+    /// Don't use this if you have Toolbar and a smooth scroll, pass in the knobState used for both parts
+    /// so that knob input isn't duplicated.
     @Composable
     fun SmoothScroll(
         modifier: Modifier,
@@ -89,16 +91,36 @@ object SmoothScroll {
         navigationNodeTraverser: NavigationNodeTraverser? = null,
         items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
     ) {
+        val knobState = KnobObserverBuilderState.setupListener(
+            knobListenerService = knobListenerService,
+            logger,
+            "${(tag ?: "")} SmoothScroll"
+        )
+        SmoothScroll(
+            modifier = modifier,
+            knobState = knobState,
+            tag = tag,
+            logger = logger,
+            prependGoBackEntry = prependGoBackEntry,
+            navigationNodeTraverser = navigationNodeTraverser,
+            items = items
+        )
+    }
+
+    @Composable
+    fun SmoothScroll(
+        modifier: Modifier,
+        knobState: KnobObserverBuilderState,
+        tag : String? = null,
+        logger: Logger,
+        prependGoBackEntry : Boolean = false,
+        navigationNodeTraverser: NavigationNodeTraverser? = null,
+        items : List<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>
+    ) {
 
         if (items.isEmpty()) {
             return
         }
-
-        val knobState = KnobObserverBuilderState.setupListener(
-            knobListenerService = knobListenerService,
-            logger,
-             "${(tag ?: "")} SmoothScroll"
-        )
 
         val scrollState = rememberScrollState(0)
         val childIndexToPixelsFromTop = mutableMapOf<Int, Int>()

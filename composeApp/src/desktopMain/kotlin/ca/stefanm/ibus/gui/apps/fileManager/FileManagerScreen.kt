@@ -200,14 +200,20 @@ class FileManagerScreen @Inject constructor(
                 .fillMaxSize()
             ) {
                 when (viewState.itemStyle) {
-                    FileManagerViewState.ItemStyle.List -> ListView(entries.value) { entry -> onDirectoryEntrySelected(openParams, entry)}
+                    FileManagerViewState.ItemStyle.List -> ListView(
+                        knobObserverBuilderState = knobStateMain,
+                        entries = entries.value,
+                        onEntrySelected = { entry -> onDirectoryEntrySelected(openParams, entry)}
+                    )
                     FileManagerViewState.ItemStyle.Grid -> GridView(
+                        knobObserverBuilderState = knobStateMain,
                         havePreview = viewState.showPreview,
                         rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
                         entries = entries.value,
                         onEntrySelected = { entry -> onDirectoryEntrySelected(openParams, entry)}
                     )
                     FileManagerViewState.ItemStyle.ListWithPreviews -> ListViewWithPreviews(
+                        knobObserverBuilderState = knobStateMain,
                         rowHeightFraction = viewState.getPreviewItemRowHeightFraction(),
                         entries = entries.value,
                         onEntrySelected = { entry -> onDirectoryEntrySelected(openParams, entry)}
@@ -217,8 +223,9 @@ class FileManagerScreen @Inject constructor(
         }
     }
 
-    fun allowModify() : Boolean =
-        FileManagerSettingsOverridesRepo.config[FileManagerSettings.allowFilesystemModification]
+    fun allowModify(params : FileManagerScreenOpenParameters) : Boolean =
+        FileManagerSettingsOverridesRepo.config[FileManagerSettings.allowFilesystemModification] &&
+                (params.openMode !in listOf(OpenMode.SELECT_FILE, OpenMode.SELECT_FOLDER_LOCATION))
 
     fun openFile(file : File) {
         actionRouter.handleFileAction(file, FileAction.VIEW)
@@ -237,7 +244,7 @@ class FileManagerScreen @Inject constructor(
                 }
                 folderSidebar.openSidebarForFolder(
                     folder = entry.path,
-                    allowModify = allowModify(),
+                    allowModify = allowModify(params),
 
                     allowCopy = params.openMode == OpenMode.BROWSE,
                     onCopyToSelected = {
@@ -265,7 +272,7 @@ class FileManagerScreen @Inject constructor(
             is DirectoryRepo.DirectoryEntry.DirectoryFile -> {
                 fileSidebar.openSidebarForFile(
                     file = entry.file,
-                    allowModify = allowModify(),
+                    allowModify = allowModify(params),
                     allowOpen = params.openMode == OpenMode.BROWSE,
                     allowSelect = params.openMode == OpenMode.SELECT_FILE,
                     allowCopy = params.openMode == OpenMode.BROWSE,
@@ -320,10 +327,14 @@ class FileManagerScreen @Inject constructor(
     }
 
     @Composable
-    fun ListView(entries : List<DirectoryRepo.DirectoryEntry>, onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit) {
+    fun ListView(
+        knobObserverBuilderState: KnobObserverBuilderState,
+        entries : List<DirectoryRepo.DirectoryEntry>,
+        onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit
+    ) {
         SmoothScroll.SmoothScroll(
             modifier = Modifier,
-            knobListenerService = knobListenerServiceMain,
+            knobState = knobObserverBuilderState,
             tag = TAG,
             logger = logger,
             prependGoBackEntry = false,
@@ -344,6 +355,7 @@ class FileManagerScreen @Inject constructor(
 
     @Composable
     fun GridView(
+        knobObserverBuilderState: KnobObserverBuilderState,
         havePreview : Boolean,
         rowHeightFraction : Float,
         entries : List<DirectoryRepo.DirectoryEntry>,
@@ -367,6 +379,7 @@ class FileManagerScreen @Inject constructor(
                         if (!havePreview) {
                             iconProvider.IconForEntry(Modifier.fillMaxHeight(0.5F), entry)
                         } else {
+                            //Folde icons?
                             previewProvider.FilePreview(entry.path)
                         }
                         //Label
@@ -390,7 +403,7 @@ class FileManagerScreen @Inject constructor(
 
         SmoothScroll.GridScroll(
             modifier = Modifier,
-            knobListenerService = knobListenerServiceMain,
+            knobState = knobObserverBuilderState,
             tag = TAG,
             logger = logger,
             prependGoBackEntry = false,
@@ -403,6 +416,7 @@ class FileManagerScreen @Inject constructor(
 
     @Composable
     fun ListViewWithPreviews(
+        knobObserverBuilderState: KnobObserverBuilderState,
         rowHeightFraction : Float,
         entries : List<DirectoryRepo.DirectoryEntry>,
         onEntrySelected : (DirectoryRepo.DirectoryEntry) -> Unit
@@ -452,7 +466,7 @@ class FileManagerScreen @Inject constructor(
 
             SmoothScroll.SmoothScroll(
                 modifier = Modifier,
-                knobListenerService = knobListenerServiceMain,
+                knobState = knobObserverBuilderState,
                 tag = TAG,
                 logger = logger,
                 prependGoBackEntry = false,

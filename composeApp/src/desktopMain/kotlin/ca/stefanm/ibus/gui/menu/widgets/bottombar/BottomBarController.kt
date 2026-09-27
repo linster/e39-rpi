@@ -78,7 +78,7 @@ class BottomBarController @Inject constructor(
                         )
                         Text(
                             text = "Slideshow Running (${slideShowInfo.value.let {
-                                "${it.currentFileName} : (${it.currentFileNumber}/${it.totalFiles})"
+                                "${it.currentFileName.takeLast(20)} : (${it.currentFileNumber}/${it.totalFiles})"
                             }})",
                             fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                             fontWeight = FontWeight.Bold,
