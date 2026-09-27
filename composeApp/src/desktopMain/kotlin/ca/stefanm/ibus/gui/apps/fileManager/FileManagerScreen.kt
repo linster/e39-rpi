@@ -237,7 +237,11 @@ class FileManagerScreen @Inject constructor(
     ) {
         when (entry) {
             is DirectoryRepo.DirectoryEntry.Directory -> {
-                if (params.openMode in listOf(OpenMode.SELECT_COPY_TO_FOLDER, OpenMode.SELECT_MOVE_TO_FOLDER, OpenMode.SELECT_FILE)) {
+                if (params.openMode in listOf(
+                        OpenMode.SELECT_COPY_TO_FOLDER,
+                        OpenMode.SELECT_MOVE_TO_FOLDER,
+                        OpenMode.SELECT_FILE,
+                        OpenMode.SELECT_FOLDER_LOCATION)) {
                     //Only browse lets the user faff around with folders.
                     directoryRepo.requestNavigateToDirectory(entry.path)
                     return

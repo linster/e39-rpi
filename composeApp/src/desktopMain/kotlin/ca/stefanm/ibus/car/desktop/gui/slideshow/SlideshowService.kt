@@ -178,6 +178,7 @@ class SlideshowService @Inject constructor(
 
     private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {
         navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
+        navigationNodeTraverser.navigateToNode(SlideShowAppHomeScreen::class.java)
         if (type == FileType.Picture) {
             return showImage(file)
         }
@@ -212,7 +213,7 @@ class SlideshowService @Inject constructor(
                 callOnPlaybackEnd = {
                     modalMenuService.showModalMenu(
                         dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
-                            IntOffset(50, 50),
+                            IntOffset(50, 120),
                             410
                         ).toNormalModalMenuDimensions(),
                         ModalMenu(

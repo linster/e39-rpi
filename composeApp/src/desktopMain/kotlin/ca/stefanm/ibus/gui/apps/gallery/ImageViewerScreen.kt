@@ -92,6 +92,10 @@ class ImageViewerScreen @Inject constructor(
             FullScreenMenu.OneColumn(
                 listOf(
                     TextMenuItem(
+                        "Empty item", //Hack because legacy menus break if the first item isn't clickable
+                        onClicked = {}
+                    ),
+                    TextMenuItem(
                         "Filename: ${openParameters.image}",
                         isSelectable = false,
                         onClicked = {}

@@ -17,6 +17,7 @@ import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.fold
 
 @PlatformServiceInfo(
     name = "FlowDbusConnector",
@@ -83,11 +84,20 @@ class FlowDbusConnector @Inject constructor(
     }
 
     private fun DeviceManager.getDevice(macAddress: List<Int>) : BluetoothDevice? {
-        return this.getDevices(true)
+        return runCatching {
+            this.getDevices(true)
                 .filter { it.isConnected }
-                .firstOrNull { it.address == macAddress
-                    .joinToString(separator = ":") { it.toString(16) }.uppercase()
+                .firstOrNull {
+                    it.address == macAddress
+                        .joinToString(separator = ":") { it.toString(16) }.uppercase()
                 }
+        }.fold(
+            onSuccess = { it },
+            onFailure = {
+                logger.e("FlowDbusConnector", "Weird startup error was caught", e = it)
+                null
+            }
+        )
     }
 
     private fun Flow<BluetoothDevice?>.getPlayer() : Flow<MediaPlayer1?> {
