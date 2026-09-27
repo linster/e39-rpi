@@ -30,8 +30,13 @@ import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
@@ -93,15 +98,19 @@ class SlideshowService @Inject constructor(
         }
 
         if (startedOptions.delayBetweenPictures.isFinite()) {
-//            coroutineScope.launch {
-//
-//            }
+            coroutineScope.launch {
+                while (isRunning) {
+                    delay(startedOptions.delayBetweenPictures)
+                    currentIndex.value += 1
+                    logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
+                }
+            }
         }
 
         moleculeFlow(RecompositionMode.Immediate) {
             val index by currentIndex.collectAsState(currentIndex.value)
             ComposeStableFileListItem(fileList[index])
-        }.collect { item ->
+        }.collectLatest { item ->
             logger.d(TAG, "Showing $item")
             updateBottomBarViewState {
                 it.copy(
@@ -109,23 +118,28 @@ class SlideshowService @Inject constructor(
                     currentFileNumber = fileList.indexOf(item.file to item.type) + 1
                 )
             }
-            when (val action = showFile(item.file, item.type)) {
+            when (showFile(item.file, item.type)) {
                 SlideshowItemNavigationEvent.Forward -> currentIndex.value += 1
                 SlideshowItemNavigationEvent.Backward -> currentIndex.value -= 1
                 SlideshowItemNavigationEvent.EndShow -> {
-                    SlideShowAppHomeScreen.openAfterSlideShowEnds(navigationNodeTraverser)
-                    configurablePlatform.stopServiceByName("SlideshowService")
+                    GlobalScope.launch {
+                        SlideShowAppHomeScreen.openAfterSlideShowEnds(navigationNodeTraverser)
+                        configurablePlatform.stopServiceByName("SlideshowService")
+                    }
                 }
                 null -> { /** Noop, showFile logs the type was wrong */ }
             }
         }
     }
 
+    private var isRunning = false
     override fun onCreate() {
+        isRunning = true
         super.onCreate()
         initializeBottomBarViewState()
     }
     override fun onShutdown() {
+        isRunning = false
         bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.DateTime
         super.onShutdown()
     }
@@ -174,6 +188,9 @@ class SlideshowService @Inject constructor(
         Forward,
         Backward,
         EndShow
+
+        //TODO STOP Advance
+        //TODO ResumeAdvance
     }
 
     private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {
@@ -191,18 +208,35 @@ class SlideshowService @Inject constructor(
 
     private suspend fun showImage(
         file : File
-    ) : SlideshowItemNavigationEvent = suspendCoroutine { continuation ->
+    ) : SlideshowItemNavigationEvent = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation {
+            //Maybe cleanup the backstack if we auto-advance??
+            //navigationNodeTraverser.cleanupBackStackDescendentsOf(ImageViewerScreen::class.java)
+        }
         ImageViewerScreen.openForImageInSlideShow(
             navigationNodeTraverser,
             ImageViewerScreen.ImageViewerScreenOpenParameters.SlideShow(
                 image = file,
-                onImageNavigateForward = { continuation.resume(SlideshowItemNavigationEvent.Forward) },
-                onImageNavigateBackward = { continuation.resume(SlideshowItemNavigationEvent.Backward) },
-                onEndSlideshowRequested = { continuation.resume(SlideshowItemNavigationEvent.EndShow) }
+                onImageNavigateForward = {
+                    if (continuation.isActive) {
+                        continuation.resume(SlideshowItemNavigationEvent.Forward)
+                    }
+                },
+                onImageNavigateBackward = {
+                    if (continuation.isActive) {
+                        continuation.resume(SlideshowItemNavigationEvent.Backward)
+                    }
+                },
+                onEndSlideshowRequested = {
+                    if (continuation.isActive) {
+                        continuation.resume(SlideshowItemNavigationEvent.EndShow)
+                    }
+                }
             )
         )
     }
 
+    //Movies are not auto-advanced through, just pictures.
     private suspend fun showMovie(
         file: File
     ) : SlideshowItemNavigationEvent = suspendCoroutine { continuation ->
@@ -214,7 +248,7 @@ class SlideshowService @Inject constructor(
                     modalMenuService.showModalMenu(
                         dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                             IntOffset(50, 120),
-                            410
+                            610
                         ).toNormalModalMenuDimensions(),
                         ModalMenu(
                             items = listOf(

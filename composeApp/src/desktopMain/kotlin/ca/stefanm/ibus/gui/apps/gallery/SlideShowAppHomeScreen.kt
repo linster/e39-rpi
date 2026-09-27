@@ -15,6 +15,7 @@ import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFolderSelectio
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenParamsParser
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.MimeTools
+import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -44,6 +45,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @AutoDiscover
 class SlideShowAppHomeScreen @Inject constructor(
@@ -70,6 +72,8 @@ class SlideShowAppHomeScreen @Inject constructor(
         ) {
             //Just in case we need to re-set or reset some parameters?
             navigationNodeTraverser.navigateToRoot()
+            navigationNodeTraverser.cleanupBackStackDescendentsOf(ImageViewerScreen::class.java)
+            navigationNodeTraverser.cleanupBackStackDescendentsOf(VideoPlayerScreen::class.java)
             navigationNodeTraverser.navigateToNode(SlideShowAppHomeScreen::class.java)
 
         }
@@ -111,7 +115,7 @@ class SlideShowAppHomeScreen @Inject constructor(
         folderSelected : File,
         autoAdvance : Boolean,
         startIndex : Int,
-        advanceTimeMs : Int
+        advanceTimeSeconds : Int
     ) : SlideshowService.SlideShowOptions {
 
         //TODO so many mimetools lookups :(
@@ -125,7 +129,7 @@ class SlideShowAppHomeScreen @Inject constructor(
         return SlideshowService.SlideShowOptions(
             fileList = fileList.map { it to mimeTools.getFileTypeForFile(it) },
             startAtIndex = startIndex.coerceIn(0, fileList.lastIndex),
-            delayBetweenPictures = if (autoAdvance) Duration.INFINITE else advanceTimeMs.milliseconds,
+            delayBetweenPictures = if (autoAdvance) advanceTimeSeconds.seconds else Duration.INFINITE,
             modalMenuService = modalMenuService,
             navigationNodeTraverser = navigationNodeTraverser,
             bottomBarController = bottomBarController
@@ -149,7 +153,7 @@ class SlideShowAppHomeScreen @Inject constructor(
 
         val autoAdvance = remember { mutableStateOf(false) }
         val startIndex = remember { mutableStateOf(0) }
-        val advanceTimeMs = remember { mutableStateOf(5)}
+        val advanceTimeSeconds = remember { mutableStateOf(5)}
 
         with(context) {
             OneColumnSmoothScreenCustomViews(
@@ -161,7 +165,7 @@ class SlideShowAppHomeScreen @Inject constructor(
                         add(TextMenuItem(
                             "Go Back",
                             onClicked = {
-                                navigationNodeTraverser.goBack()
+                                navigationNodeTraverser.navigateToRoot()
                             }
                         ).toDynamicLambda())
                         add(
@@ -197,16 +201,16 @@ class SlideShowAppHomeScreen @Inject constructor(
                             if (autoAdvance.value) {
                                 add { allocatedIndex, currentIndex ->
                                     MenuItem(
-                                        label = "Set advance time: ${advanceTimeMs.value} ms...",
+                                        label = "Set advance time: ${advanceTimeSeconds.value} s...",
                                         chipOrientation = ItemChipOrientation.W,
                                         isSelected = allocatedIndex == currentIndex,
                                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                             modalMenuService.showKeyboard(
                                                 Keyboard.KeyboardType.NUMERIC,
-                                                prefilled = advanceTimeMs.value.toString(),
+                                                prefilled = advanceTimeSeconds.value.toString(),
                                                 onTextEntered = { new ->
                                                     new.toIntOrNull()?.let {
-                                                        advanceTimeMs.value = it
+                                                        advanceTimeSeconds.value = it
                                                     }
                                                 }
                                             )
@@ -222,7 +226,7 @@ class SlideShowAppHomeScreen @Inject constructor(
                                     onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                                         modalMenuService.showKeyboard(
                                             Keyboard.KeyboardType.NUMERIC,
-                                            prefilled = advanceTimeMs.value.toString(),
+                                            prefilled = advanceTimeSeconds.value.toString(),
                                             onTextEntered = { new ->
                                                 new.toIntOrNull()?.let {
                                                     startIndex.value = it
@@ -243,7 +247,7 @@ class SlideShowAppHomeScreen @Inject constructor(
                                             folderSelected = folderSelected!!,
                                             autoAdvance = autoAdvance.value,
                                             startIndex = startIndex.value,
-                                            advanceTimeMs = advanceTimeMs.value
+                                            advanceTimeSeconds = advanceTimeSeconds.value
                                         )
                                     )
                                 }
