@@ -4,6 +4,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.font.FontWeight
 import ca.stefanm.ibus.di.ApplicationScope
@@ -60,24 +61,23 @@ class BottomBarController @Inject constructor(
         val isShowing = bottomBarIsShowing.collectAsState(true)
         if (isShowing.value) {
             val scope = rememberCoroutineScope()
-
-            when (val state = bottomBarViewState.value) {
-                BottomBarViewState.DateTime -> {
-                    scope.launch {
-                        bottomBarClock.updateValues()
-                    }
-                    BmwFullScreenBottomBar(
-                        date = bottomBarClock.dateFlow.collectAsState().value,
-                        time = bottomBarClock.timeFlow.collectAsState().value,
-                    )
-                }
-                is BottomBarViewState.SlideShow -> {
-                    BmwFullScreenBottomBar {
-                        val slideShowInfo = state.slideShowInfo.collectAsState(
+            scope.launch {
+                bottomBarClock.updateValues()
+            }
+            val state by bottomBarViewState.collectAsState(BottomBarViewState.DateTime)
+            BmwFullScreenBottomBar(
+                date = bottomBarClock.dateFlow.collectAsState().value,
+                time = bottomBarClock.timeFlow.collectAsState().value,
+            ) {
+                logger.d(TAG, "bottomBarViewState: ${state}")
+                when (state) {
+                    BottomBarViewState.DateTime -> {}
+                    is BottomBarViewState.SlideShow -> {
+                        val slideShowInfo = (state as BottomBarViewState.SlideShow).slideShowInfo.collectAsState(
                             BottomBarViewState.SlideShow.SlideShowInfo("", 0,0 )
                         )
                         Text(
-                            text = "Slideshow Running (${slideShowInfo.value.let { 
+                            text = "Slideshow Running (${slideShowInfo.value.let {
                                 "${it.currentFileName} : (${it.currentFileNumber}/${it.totalFiles})"
                             }})",
                             fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,

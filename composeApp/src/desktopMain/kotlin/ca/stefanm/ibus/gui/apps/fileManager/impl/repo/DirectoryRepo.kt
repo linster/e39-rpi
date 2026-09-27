@@ -130,6 +130,9 @@ class DirectoryRepo @Inject constructor(
                         FilerPickerParameters.Filter.Pdf -> (mimeTools.getFileTypeForFile(file) == FileType.PDF) || file.isDirectory
                         FilerPickerParameters.Filter.Pictures -> (mimeTools.getFileTypeForFile(file) == FileType.Picture) || file.isDirectory
                         FilerPickerParameters.Filter.Videos -> (mimeTools.getFileTypeForFile(file) == FileType.Movie) || file.isDirectory
+                        FilerPickerParameters.Filter.PicturesAndVideos -> {
+                            file.isDirectory || (mimeTools.getFileTypeForFile(file) == FileType.Picture) || (mimeTools.getFileTypeForFile(file) == FileType.Movie)
+                        }
                     }
 
                 }

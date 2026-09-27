@@ -22,6 +22,7 @@ import ca.stefanm.ibus.gui.apps.gallery.SlideShowAppHomeScreen
 import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SnapshotPair
@@ -68,7 +69,8 @@ class SlideshowService @Inject constructor(
         //TODO want to one day migrate to KSP + Metro. I don't want to play
         //TODO with Dagger more than I have to for this project.
         val modalMenuService: ModalMenuService,
-        val navigationNodeTraverser: NavigationNodeTraverser
+        val navigationNodeTraverser: NavigationNodeTraverser,
+        val bottomBarController: BottomBarController
     )
 
     override suspend fun doWork() {
@@ -83,6 +85,13 @@ class SlideshowService @Inject constructor(
 
         //TODO is today the day we finally learn how the hell molecule works?
 
+        updateBottomBarViewState {
+            it.copy(
+                currentFileNumber = currentIndex.value,
+                totalFiles = fileList.size
+            )
+        }
+
         if (startedOptions.delayBetweenPictures.isFinite()) {
 //            coroutineScope.launch {
 //
@@ -94,6 +103,12 @@ class SlideshowService @Inject constructor(
             ComposeStableFileListItem(fileList[index])
         }.collect { item ->
             logger.d(TAG, "Showing $item")
+            updateBottomBarViewState {
+                it.copy(
+                    currentFileName = item.file.name,
+                    currentFileNumber = fileList.indexOf(item.file to item.type) + 1
+                )
+            }
             when (val action = showFile(item.file, item.type)) {
                 SlideshowItemNavigationEvent.Forward -> currentIndex.value += 1
                 SlideshowItemNavigationEvent.Backward -> currentIndex.value -= 1
@@ -106,12 +121,46 @@ class SlideshowService @Inject constructor(
         }
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        initializeBottomBarViewState()
+    }
+    override fun onShutdown() {
+        bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.DateTime
+        super.onShutdown()
+    }
+
+    private val slideshowInfo = MutableStateFlow(BottomBarController.BottomBarViewState.SlideShow.SlideShowInfo(
+        "No file", 0, 0
+    ))
+
+    private fun initializeBottomBarViewState() {
+        if (bottomBarController.bottomBarViewState.value is BottomBarController.BottomBarViewState.SlideShow) {
+            return
+        }
+        bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.SlideShow(
+            slideShowInfo = slideshowInfo
+        )
+    }
+
+    private fun updateBottomBarViewState(
+        updater : (BottomBarController.BottomBarViewState.SlideShow.SlideShowInfo) -> BottomBarController.BottomBarViewState.SlideShow.SlideShowInfo
+    ) {
+        initializeBottomBarViewState()
+        val current = bottomBarController.bottomBarViewState.value
+        if (current is BottomBarController.BottomBarViewState.SlideShow) {
+            slideshowInfo.value = updater(slideshowInfo.value)
+        }
+    }
+
     var options : SlideShowOptions? = null
 
     private val navigationNodeTraverser: NavigationNodeTraverser
         get() = options!!.navigationNodeTraverser
     private val modalMenuService: ModalMenuService
         get() = options!!.modalMenuService
+    private val bottomBarController : BottomBarController
+        get() = options!!.bottomBarController
 
     class ComposeStableFileListItem(
         val file: File,
@@ -128,6 +177,7 @@ class SlideshowService @Inject constructor(
     }
 
     private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {
+        navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
         if (type == FileType.Picture) {
             return showImage(file)
         }
@@ -163,7 +213,7 @@ class SlideshowService @Inject constructor(
                     modalMenuService.showModalMenu(
                         dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                             IntOffset(50, 50),
-                            210
+                            410
                         ).toNormalModalMenuDimensions(),
                         ModalMenu(
                             items = listOf(
@@ -174,10 +224,6 @@ class SlideshowService @Inject constructor(
                                 ModalMenu.ModalMenuItem(
                                     "Previous Slideshow Item",
                                     onClicked = { continuation.resume(SlideshowItemNavigationEvent.Backward) }
-                                ),
-                                ModalMenu.ModalMenuItem(
-                                    "Return to Movie (Close Menu)",
-                                    onClicked = { modalMenuService.closeModalMenu()}
                                 ),
                                 ModalMenu.ModalMenuItem(
                                     "End Slideshow",

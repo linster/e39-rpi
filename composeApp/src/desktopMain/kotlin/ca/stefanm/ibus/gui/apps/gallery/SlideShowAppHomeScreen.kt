@@ -22,6 +22,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambda
@@ -57,7 +58,8 @@ class SlideShowAppHomeScreen @Inject constructor(
     private val folderSelectionResultHelper: FileManagerScreenFolderSelectionResultHelper,
 
     private val configurablePlatform: ConfigurablePlatform,
-    private val mimeTools: MimeTools
+    private val mimeTools: MimeTools,
+    private val bottomBarController: BottomBarController
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -125,7 +127,8 @@ class SlideShowAppHomeScreen @Inject constructor(
             startAtIndex = startIndex.coerceIn(0, fileList.lastIndex),
             delayBetweenPictures = if (autoAdvance) Duration.INFINITE else advanceTimeMs.milliseconds,
             modalMenuService = modalMenuService,
-            navigationNodeTraverser = navigationNodeTraverser
+            navigationNodeTraverser = navigationNodeTraverser,
+            bottomBarController = bottomBarController
         )
     }
 
@@ -167,7 +170,7 @@ class SlideShowAppHomeScreen @Inject constructor(
                             onClicked = {
                                 FileManagerScreen.openForFolderSelection(
                                     navigationNodeTraverser,
-                                    filter = Filter.Pictures
+                                    filter = Filter.PicturesAndVideos //TODO allow Compound Filters, because I want to show Pictures AND movies.
                                 )
                             }).toDynamicLambda(noChipWhenNotSelectable = true)
                         )
@@ -229,6 +232,8 @@ class SlideShowAppHomeScreen @Inject constructor(
                                     }
                                 )
                             }
+                            //TODO sort by filename, or sort by date taken? or sort by file system time?
+                            //TODO set this in a sidepane explaining the options.
                             add(
                                 TextMenuItem(
                                 title = "Start slideshow",

@@ -19,6 +19,7 @@ data class FilerPickerParameters(
         object AllFilesOnly : Filter
         object Videos : Filter
         object Pictures : Filter
+        object PicturesAndVideos : Filter
         object Pdf : Filter
         data class MatchingFileTypes(
             val types : List<FileType>
