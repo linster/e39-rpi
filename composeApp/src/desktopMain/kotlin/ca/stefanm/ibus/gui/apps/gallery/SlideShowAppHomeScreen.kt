@@ -123,7 +123,9 @@ class SlideShowAppHomeScreen @Inject constructor(
         return SlideshowService.SlideShowOptions(
             fileList = fileList.map { it to mimeTools.getFileTypeForFile(it) },
             startAtIndex = startIndex.coerceIn(0, fileList.lastIndex),
-            delayBetweenPictures = if (autoAdvance) Duration.INFINITE else advanceTimeMs.milliseconds
+            delayBetweenPictures = if (autoAdvance) Duration.INFINITE else advanceTimeMs.milliseconds,
+            modalMenuService = modalMenuService,
+            navigationNodeTraverser = navigationNodeTraverser
         )
     }
 

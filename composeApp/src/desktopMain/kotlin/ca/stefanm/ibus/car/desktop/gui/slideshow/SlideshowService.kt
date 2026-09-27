@@ -49,9 +49,6 @@ class SlideshowService @Inject constructor(
     private val logger: Logger,
     @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
     @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) parsingDispatcher: CoroutineDispatcher,
-    private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val actionRouter: ActionRouter,
-    private val modalMenuService: ModalMenuService,
     private val configurablePlatform: ConfigurablePlatform
 ) : LongRunningService(coroutineScope, parsingDispatcher) {
 
@@ -65,6 +62,13 @@ class SlideshowService @Inject constructor(
         val startAtIndex : Int = 0,
         /** No auto-advance is encoded as Duration.Infinite */
         val delayBetweenPictures : Duration,
+
+        //TODO This breaks the architecture a bit and I really should
+        //TODO one day make "Gui Services", but that's not today, and I
+        //TODO want to one day migrate to KSP + Metro. I don't want to play
+        //TODO with Dagger more than I have to for this project.
+        val modalMenuService: ModalMenuService,
+        val navigationNodeTraverser: NavigationNodeTraverser
     )
 
     override suspend fun doWork() {
@@ -104,6 +108,10 @@ class SlideshowService @Inject constructor(
 
     var options : SlideShowOptions? = null
 
+    private val navigationNodeTraverser: NavigationNodeTraverser
+        get() = options!!.navigationNodeTraverser
+    private val modalMenuService: ModalMenuService
+        get() = options!!.modalMenuService
 
     class ComposeStableFileListItem(
         val file: File,
