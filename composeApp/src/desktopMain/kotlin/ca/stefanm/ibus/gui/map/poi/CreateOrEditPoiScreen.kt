@@ -31,10 +31,11 @@ import com.javadocmd.simplelatlng.LatLng
 import org.jetbrains.compose.resources.painterResource
 import javax.inject.Inject
 import ca.stefanm.ibus.resources.*
+import javax.inject.Singleton
 
 
 @AutoDiscover
-@ApplicationScope
+@Singleton
 class CreateOrEditPoiScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,

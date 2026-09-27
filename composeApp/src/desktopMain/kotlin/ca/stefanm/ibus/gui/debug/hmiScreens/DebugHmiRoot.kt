@@ -20,8 +20,9 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 @Stable
 @AutoDiscover
 class DebugHmiRoot @Inject constructor(

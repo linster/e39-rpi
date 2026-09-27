@@ -24,7 +24,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 class MatrixService @Inject constructor(
     private val logger : Logger,
     private val notificationHub: NotificationHub

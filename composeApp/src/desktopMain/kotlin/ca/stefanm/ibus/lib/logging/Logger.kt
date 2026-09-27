@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
+import javax.inject.Singleton
 
 interface Logger {
     fun v(tag : String, msg : String)
@@ -17,7 +18,7 @@ interface Logger {
     fun e(tag : String, msg : String, e : Throwable?)
 }
 
-@ApplicationScope
+@Singleton
 class StdOutLogger @Inject constructor() : Logger {
     override fun v(tag: String, msg: String) {
         println("VERBOSE : $tag / $msg")
@@ -48,7 +49,7 @@ class StdOutLogger @Inject constructor() : Logger {
     }
 }
 
-@ApplicationScope
+@Singleton
 class CompositeLogger(private vararg var loggers : Logger) : Logger {
     override fun v(tag: String, msg: String) =
         loggers.forEach { it.v(tag, msg) }
@@ -69,7 +70,7 @@ class CompositeLogger(private vararg var loggers : Logger) : Logger {
         loggers.forEach { it.e(tag, msg, e) }
 }
 
-@ApplicationScope
+@Singleton
 class LogDistributionHub @Inject constructor() : Logger {
 
     //This is a hack. I don't know why Dagger gave everyone a separate

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
 class GuiModule {
@@ -21,12 +22,12 @@ class GuiModule {
 
     @Provides
     @Named(NOTIFICATION_HUB_WRITER)
-    @ApplicationScope
+    @Singleton
     fun provideNotificationHubWriterStateFlow() : MutableSharedFlow<Notification> = MutableSharedFlow()
 
     @Provides
     @Named(NOTIFICATION_HUB_COLLECTOR)
-    @ApplicationScope
+    @Singleton
     @JvmSuppressWildcards(suppress = false) //Magic.
     fun provideNotificationHubStateFlow(
         @Named(NOTIFICATION_HUB_WRITER) hotFlow : MutableSharedFlow<Notification>

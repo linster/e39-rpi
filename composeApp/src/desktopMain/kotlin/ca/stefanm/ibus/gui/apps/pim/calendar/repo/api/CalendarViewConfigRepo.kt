@@ -4,6 +4,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
 enum class CalendarView {
     MonthCalendar,
@@ -13,7 +14,7 @@ enum class CalendarView {
     TodoList
 }
 
-@ApplicationScope
+@Singleton
 class CalendarViewConfigRepo @Inject constructor() {
 
     val screenView = MutableStateFlow<CalendarView>(CalendarView.OneWeekCalendar)

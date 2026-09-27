@@ -57,12 +57,12 @@ annotation class ApplicationScope
     MatrixChatModule::class,
     MapModule::class
 ])
-@ApplicationScope
+@Singleton
 interface ApplicationComponent {
 
     fun configuredCarComponent(configuredCarModule: ConfiguredCarModule) : ConfiguredCarComponent
 
-    @ApplicationScope
+    @Singleton
     fun logger() : Logger
 
 
@@ -72,7 +72,7 @@ interface ApplicationComponent {
     fun tileFetcher() : TileFetcher
     fun tileCacheClearer() : TileServerImageCacheClearer
 
-    @ApplicationScope
+    @Singleton
     fun debugKnobService() : DebugKnobService
 
     fun windowManager() : WindowManager
@@ -103,7 +103,7 @@ class ApplicationModule {
 
     @Named(INITIAL_CONFIGURATION)
     @Provides
-    @ApplicationScope
+    @Singleton
     fun provideInitialConfiguration() : CarPlatformConfiguration = LaptopDeviceConfiguration()
 
 
@@ -138,13 +138,13 @@ class ApplicationModule {
 
     @Provides
     @Named(INPUT_EVENTS_WRITER)
-    @ApplicationScope
+    @Singleton
     @JvmSuppressWildcards(suppress = false) //Magic.
     fun provideInputEventWriteStateFlow() : MutableSharedFlow<InputEvent> = inputEventsWriter // MutableSharedFlow()
 
     @Provides
     @Named(INPUT_EVENTS)
-    @ApplicationScope
+    @Singleton
     @JvmSuppressWildcards(suppress = false) //Magic.
     fun provideInputEventsStateFlow(
         @Named(INPUT_EVENTS_WRITER) hotFlow : MutableSharedFlow<InputEvent>
@@ -154,19 +154,19 @@ class ApplicationModule {
 
     @Provides
     @Named(IBUS_MESSAGE_INGRESS)
-    @ApplicationScope
+    @Singleton
     fun provideIbusIngressChannel() : MutableSharedFlow<IBusMessage> = ibusIngress
 
     @Provides
     @Named(IBUS_MESSAGE_OUTPUT_CHANNEL)
-    @ApplicationScope
+    @Singleton
     fun provideIbusOuptutChannel() : Channel<IBusMessage> = ibusOutputChannel
 
 
 
     @Provides
     @Named(IBUS_COMMS_DEBUG_CHANNEL)
-    @ApplicationScope
+    @Singleton
     @JvmSuppressWildcards(suppress = false)
     fun provideIbusCommsDebugChannel() : MutableSharedFlow<IbusCommsDebugMessage> = ibusCommsDebugChannel
 
@@ -175,15 +175,15 @@ class ApplicationModule {
 
 
     @Provides
-    @ApplicationScope
+    @Singleton
     fun provideCoroutineScope() : CoroutineScope = GlobalScope
 
     @Provides
-    @ApplicationScope
+    @Singleton
     fun provideCoroutineDispatcher() : CoroutineDispatcher = Dispatchers.IO
 
     @Provides
-    @ApplicationScope
+    @Singleton
     fun provideLogger(
         stdOutLogger: StdOutLogger,
         logDistributionHub: LogDistributionHub
@@ -195,11 +195,11 @@ class ApplicationModule {
     }
 
     @Provides
-    @ApplicationScope
+    @Singleton
     fun provideNotificationHub() : NotificationHub = notificationHub
 
     @Provides
-    @ApplicationScope
+    @Singleton
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     fun provideKnobListenerServiceMain(
         @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>,
@@ -210,7 +210,7 @@ class ApplicationModule {
     }
 
     @Provides
-    @ApplicationScope
+    @Singleton
     @Named(ApplicationModule.KNOB_LISTENER_MAIN_AUX)
     fun provideKnobListenerServiceMainAux(
         @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>,
@@ -221,7 +221,7 @@ class ApplicationModule {
     }
 
     @Provides
-    @ApplicationScope
+    @Singleton
     @Named(ApplicationModule.KNOB_LISTENER_MODAL)
     fun provideKnobListenerServiceModal(
         @Named(ApplicationModule.INPUT_EVENTS) inputEvents : SharedFlow<InputEvent>,
@@ -232,7 +232,7 @@ class ApplicationModule {
     }
 
     @Provides
-    @ApplicationScope
+    @Singleton
     fun provideMimeTypeDetector() : MimeTypeDetector {
         return MimeTypeDetector()
     }

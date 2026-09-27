@@ -19,8 +19,9 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 @AutoDiscover
 class ComposeDebugMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

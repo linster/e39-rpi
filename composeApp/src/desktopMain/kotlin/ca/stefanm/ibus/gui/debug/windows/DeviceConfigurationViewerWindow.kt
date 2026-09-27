@@ -17,8 +17,9 @@ import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 class DeviceConfigurationViewerWindow @Inject constructor(
     private val configurablePlatform: ConfigurablePlatform
 ) : WindowManager.E39Window {

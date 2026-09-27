@@ -6,8 +6,9 @@ import com.github.hypfvieh.bluetooth.DeviceManager
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 class DBusConnectionOwner @Inject constructor() : DBusConnectionOwningComponent {
 
 

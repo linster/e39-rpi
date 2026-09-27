@@ -19,11 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import javax.inject.Singleton
 
 
 //Silly, but a way for the knob listener service to know
 //which one (of three) it is at run time
-@ApplicationScope
+@Singleton
 class KnobListenerServiceIdentifier @Inject constructor(
     @Named(KNOB_LISTENER_MAIN) private val main : Provider<KnobListenerService>,
     @Named(KNOB_LISTENER_MAIN_AUX) private val mainAux : Provider<KnobListenerService>,
@@ -47,7 +48,7 @@ class KnobListenerServiceIdentifier @Inject constructor(
 
 /** Inject this into any control that needs to listen to scroll wheel state. */
 @ExperimentalCoroutinesApi
-@ApplicationScope
+@Singleton
 @Stable
 class KnobListenerService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
@@ -189,7 +190,7 @@ class KnobListenerService @Inject constructor(
 
 }
 
-@ApplicationScope
+@Singleton
 class DebugKnobService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS_WRITER) private val inputEventsWriter : MutableSharedFlow<InputEvent>,
     private val logger: Logger

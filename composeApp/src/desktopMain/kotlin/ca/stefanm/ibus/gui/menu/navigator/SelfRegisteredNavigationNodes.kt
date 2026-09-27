@@ -2,8 +2,9 @@ package ca.stefanm.ibus.gui.menu.navigator
 
 import ca.stefanm.ibus.di.ApplicationScope
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 class SelfRegisteredNavigationNodesHolder @Inject constructor() {
     private val _registeredNodes = mutableSetOf<NavigationNode<*>>()
 

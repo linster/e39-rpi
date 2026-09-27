@@ -10,9 +10,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.time.Duration
 
-@ApplicationScope
+@Singleton
 class NotificationHub @Inject constructor() {
 
     private val _currentNotification = MutableStateFlow<Notification?>(null)

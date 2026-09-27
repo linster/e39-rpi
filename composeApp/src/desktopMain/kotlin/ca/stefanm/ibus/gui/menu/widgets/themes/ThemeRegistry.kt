@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
 //We need a composition local provider for each thing in the theme.
@@ -47,7 +48,7 @@ object ThemeWrapper {
 
 //TODO We need a way to serialize a theme, and deserialize to Konf
 //TODO for now, just store some preset themes instead of all the params
-@ApplicationScope
+@Singleton
 class ThemeConfigurationStorage @Inject constructor(
     private val configurationStorage: ConfigurationStorage
 ) {

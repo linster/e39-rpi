@@ -15,6 +15,7 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.car.platform.LongRunningGuiServices
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.car.platform.Service
+import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.apps.actionRouter.ActionRouter
 import ca.stefanm.ibus.gui.apps.fileManager.impl.fileType.FileType
 import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
@@ -90,6 +91,7 @@ class SlideshowService @Inject constructor(
             ComposeStableFileListItem(fileList[index])
         }.collect { item ->
             logger.d(TAG, "Showing $item")
+            //Also don't forget to notify the bottom bar controller we're in a slideshow...
             when (val action = showFile(item.file, item.type)) {
                 SlideshowItemNavigationEvent.Forward -> currentIndex.value += 1
                 SlideshowItemNavigationEvent.Backward -> currentIndex.value -= 1
@@ -133,6 +135,7 @@ class SlideshowService @Inject constructor(
     private suspend fun showImage(
         file : File
     ) : SlideshowItemNavigationEvent = suspendCoroutine { continuation ->
+        logger.d(TAG, "navigationNodeTraverser: ${navigationNodeTraverser.hashCode()}")
         ImageViewerScreen.openForImageInSlideShow(
             navigationNodeTraverser,
             ImageViewerScreen.ImageViewerScreenOpenParameters.SlideShow(

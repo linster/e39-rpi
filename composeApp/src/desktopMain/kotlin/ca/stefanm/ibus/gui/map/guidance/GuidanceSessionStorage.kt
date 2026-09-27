@@ -14,9 +14,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @ExperimentalCoroutinesApi
-@ApplicationScope
+@Singleton
 class GuidanceSessionStorage @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val logger: Logger
@@ -64,7 +65,7 @@ class GuidanceSessionStorage @Inject constructor(
     }
 }
 
-@ApplicationScope
+@Singleton
 class BrowsableRouteStorage @Inject constructor() {
 
     fun suggestRouteName() : String = ""

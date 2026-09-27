@@ -33,8 +33,9 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.apache.commons.io.FileUtils.byteCountToDisplaySize
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 @AutoDiscover
 class MapTileDownloaderScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

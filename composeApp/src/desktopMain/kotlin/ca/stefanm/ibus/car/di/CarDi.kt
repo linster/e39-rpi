@@ -19,6 +19,7 @@ import ca.stefanm.ibus.car.platform.PlatformServiceList
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.*
 import ca.stefanm.ibus.car.platform.*
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
+import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.lib.hardwareDrivers.CliRelayReaderWriter
 import ca.stefanm.ibus.lib.hardwareDrivers.CoolingFanController
 import ca.stefanm.ibus.lib.hardwareDrivers.RelayReaderWriter
@@ -31,6 +32,7 @@ import dagger.*
 import kotlinx.coroutines.*
 import javax.inject.Named
 import javax.inject.Scope
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Scope
@@ -40,6 +42,11 @@ annotation class ConfiguredCarScope
 @ConfiguredCarScope
 @Subcomponent(modules = [ConfiguredCarModule::class])
 interface ConfiguredCarComponent {
+
+//    @Subcomponent.Factory
+//    interface Factory {
+//        fun create(module: ConfiguredCarModule) : ConfiguredCarComponent
+//    }
 
     fun inject(configurablePlatform: ConfigurablePlatform)
     fun platformServiceList(): PlatformServiceList

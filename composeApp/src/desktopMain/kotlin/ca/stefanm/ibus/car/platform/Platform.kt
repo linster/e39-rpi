@@ -65,7 +65,7 @@ class PlatformServiceRunner @Inject constructor(
     }
 }
 
-@ApplicationScope
+@Singleton
 class ForegroundPlatform @Inject constructor(
     @Named(ApplicationModule.INITIAL_CONFIGURATION) private val deviceConfiguration: CarPlatformConfiguration,
     private val logger: Logger
@@ -98,7 +98,7 @@ class ForegroundPlatform @Inject constructor(
     }
 }
 
-@ApplicationScope
+@Singleton
 class BackgroundPlatform @Inject constructor(
     private val coroutineScope: CoroutineScope,
     private val logger: Logger

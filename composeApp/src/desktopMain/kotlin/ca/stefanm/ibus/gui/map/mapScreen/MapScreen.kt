@@ -42,10 +42,11 @@ import kotlinx.coroutines.launch
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 
 @AutoDiscover
-@ApplicationScope
+@Singleton
 class MapScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,

@@ -19,9 +19,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 import javax.inject.Provider
+import javax.inject.Singleton
 
 
-@ApplicationScope
+@Singleton
 class WindowManager @Inject constructor(
     private val loadingWindow: Provider<LoadingWindow>,
     private val hmiWindow : MenuWindow,

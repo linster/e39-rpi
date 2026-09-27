@@ -28,6 +28,7 @@ import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.E
 
 @ScreenDoc(
@@ -36,7 +37,7 @@ import kotlin.math.E
 )
 @CarPlatformScreenDocPartition
 @AutoDiscover
-@ApplicationScope
+@Singleton
 class HmiLogViewerScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val logDistributionHub: LogDistributionHub,

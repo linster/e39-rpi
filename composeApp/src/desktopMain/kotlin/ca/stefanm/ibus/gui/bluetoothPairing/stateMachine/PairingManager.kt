@@ -29,12 +29,13 @@ import org.freedesktop.dbus.interfaces.DBus
 import org.freedesktop.dbus.types.UInt16
 import org.freedesktop.dbus.types.UInt32
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
 typealias Passkey = UInt32
 typealias Entered = UInt16
 
-@ApplicationScope
+@Singleton
 class PairingManager @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val dBusConnectionOwningComponent: DBusConnectionOwner,

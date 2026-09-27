@@ -15,10 +15,11 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
+import javax.inject.Singleton
 
 //https://github.com/russhwolf/multiplatform-settings
 
-@ApplicationScope
+@Singleton
 class ConfigurationStorage @Inject constructor(
     private val configurablePlatform: ConfigurablePlatform,
     private val logger : Logger

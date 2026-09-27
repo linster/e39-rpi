@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 class BottomBarController @Inject constructor(
     private val bottomBarClock: BottomBarClock,
     private val logger: Logger

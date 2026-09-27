@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @ScreenDoc(
     screenName = "RelayToggleScreen",
@@ -42,7 +43,7 @@ import javax.inject.Inject
 )
 @ScreenDoc.AllowsGoBack
 @CarPlatformScreenDocPartition
-@ApplicationScope
+@Singleton
 @AutoDiscover
 class RelayToggleScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,

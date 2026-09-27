@@ -83,6 +83,7 @@ import java.time.format.TextStyle
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.time.Clock
 import kotlin.time.Duration
 
@@ -186,7 +187,7 @@ object SidePanelMenu {
 
 /** Inject this anywhere you want to show a modal menu */
 @ExperimentalCoroutinesApi
-@ApplicationScope
+@Singleton
 class ModalMenuService @Inject constructor(
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerServiceMain: KnobListenerService,

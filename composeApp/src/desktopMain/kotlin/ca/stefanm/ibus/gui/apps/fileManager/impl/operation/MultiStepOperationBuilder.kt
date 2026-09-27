@@ -6,8 +6,9 @@ import ca.stefanm.ibus.lib.logging.Logger
 import org.apache.commons.io.FileUtils
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 class MultiStepOperationBuilder @Inject constructor(
     private val logger: Logger
 ) {

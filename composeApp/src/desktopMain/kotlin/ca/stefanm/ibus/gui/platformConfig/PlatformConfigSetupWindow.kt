@@ -27,9 +27,10 @@ import javax.inject.Inject
 import ca.stefanm.ibus.car.platform.DiscoveredServiceGroups
 import ca.stefanm.ibus.gui.debug.windows.ServiceStatusViewer
 import kotlinx.coroutines.GlobalScope
+import javax.inject.Singleton
 
 
-@ApplicationScope
+@Singleton
 class PlatformConfigSetupWindow @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val configurablePlatform: ConfigurablePlatform

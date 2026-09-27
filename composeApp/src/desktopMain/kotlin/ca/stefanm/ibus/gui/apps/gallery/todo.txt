@@ -1,0 +1,16 @@
+
+
+Building a gallery app is easy.
+
+Have a home screen with:
+- Select Folder
+- Timer (seconds)
+
+then after selected, start the GalleryViewer screen.
+That thing then shows an image or video, depending on file type.
+
+When showing an image, use a built-in imageViewer screen (sent through
+the action router)
+
+When showing a video, send to the video player screen, with parameters
+to close on video completion.

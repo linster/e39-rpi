@@ -20,11 +20,12 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.time.toKotlinInstant
 
 
 typealias DrewFileType = com.drew.imaging.FileType
-@ApplicationScope
+@Singleton
 class MimeTools @Inject constructor(
     private val logger: Logger,
     private val mimeTypeDetector: MimeTypeDetector

@@ -36,9 +36,10 @@ import java.awt.event.*
 import java.awt.event.KeyEvent.*
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 
-@ApplicationScope
+@Singleton
 @Stable
 class MenuWindow @Inject constructor(
     private val navigator: Navigator,

@@ -16,9 +16,10 @@ import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import javax.inject.Singleton
 
 @ExperimentalCoroutinesApi
-@ApplicationScope
+@Singleton
 class ConfigurablePlatform @Inject constructor(
     private val configurationStorage: Provider<ConfigurationStorage>
 ) {

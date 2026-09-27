@@ -27,7 +27,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ApplicationScope
+@Singleton
 class PoiRepository @Inject constructor(
     private val logger : Logger
 ){

@@ -82,6 +82,7 @@ import kotlinx.coroutines.yield
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import javax.inject.Singleton
 import kotlin.collections.ArrayDeque
 
 
@@ -298,7 +299,8 @@ class NavigationModule {
 
 
 @Stable
-@ApplicationScope
+//@ApplicationScope
+@Singleton
 class Navigator @Inject constructor(
     @Named(ROOT_NODE) private val rootNode : NavigationNode<*>,
     private val logger: Logger
@@ -438,7 +440,7 @@ interface NavigationNode<Result> {
     fun provideMainContent() : @Composable (incomingResult : Navigator.IncomingResult?) -> Unit
 }
 
-@ApplicationScope
+@Singleton
 class NavigationNodeTraverser @Inject constructor(
     private val navigator: Provider<Navigator>,
     @Named(ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,

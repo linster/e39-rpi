@@ -11,11 +11,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.map
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import javax.inject.Singleton
 
 //Responsible for contacting HERE, getting waypoints between destinations,
 //emitting directions UI (to side-pane) -- if enabled.
 @OptIn(ExperimentalCoroutinesApi::class)
-@ApplicationScope
+@Singleton
 class GuidanceService @Inject constructor(
     private val guidanceSessionStorage: GuidanceSessionStorage,
     private val routeCalculator: RouteCalculator,

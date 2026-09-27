@@ -231,6 +231,7 @@ class SlideShowAppHomeScreen @Inject constructor(
                                 TextMenuItem(
                                 title = "Start slideshow",
                                 onClicked = {
+                                    logger.d(TAG, "navigationNodeTraverser: ${navigationNodeTraverser.hashCode()}")
                                     startSlideshow(
                                         prepareSlideShowOptions(
                                             folderSelected = folderSelected!!,
