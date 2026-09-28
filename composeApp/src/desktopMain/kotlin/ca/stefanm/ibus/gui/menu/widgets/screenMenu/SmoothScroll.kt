@@ -157,12 +157,21 @@ object SmoothScroll {
                     } else {
                         it
                     }
-                }.flatMapIndexed { index, item ->
+                }.flatMapIndexed { index, item -> //TODO this only works because when there's no toolbar, the allocatedIndex and the index here start at the same number.
                     subcompose(slotId = index) {
                         KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                             item(allocatedIndex, currentIndex)
                             LaunchedEffect(allocatedIndex, currentIndex) {
+
                                 if (allocatedIndex == currentIndex) {
+                                    logger.d("WATSCROLL", "allocatedIndex: $allocatedIndex, currentIndex: $currentIndex")
+                                    logger.d("WATSCROLL", "previousPage: $previousPage")
+                                    //TODO getting warmer. Suspiciously absent values...
+                                    logger.d("WATSCROLL", "childIndexToPage[currentIndex]: ${childIndexToPage[currentIndex]}")
+
+                                    //TODO might need to do childIndex = max(allocated_before_flatmap) - something??
+                                    //TODO these calculations treat childIndex (index above) the same as allocated index, but that breaks if there's
+                                    //TODO a toolbar already....
                                     if (
                                         childIndexToPage[currentIndex] != previousPage /* We've moved a page */
                                         && childIndexToPixelsFromTop.containsKey(currentIndex)
@@ -359,6 +368,8 @@ object SmoothScroll {
                             KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                                 item(allocatedIndex, currentIndex)
                                 LaunchedEffect(allocatedIndex, currentIndex) {
+                                    //TODO Same thing here this is broken when there's a toolbar before the grid, but
+                                    //TODO its less noticable because there's more per page on the grid. 
                                     if (allocatedIndex == currentIndex) {
                                         if (
                                             childIndexToPage[currentIndex] != previousPage /* We've moved a page */
