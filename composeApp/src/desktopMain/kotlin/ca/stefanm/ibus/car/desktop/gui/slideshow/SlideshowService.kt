@@ -1,7 +1,10 @@
 package ca.stefanm.ibus.car.desktop.gui.slideshow
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.IntOffset
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
@@ -26,15 +29,20 @@ import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.yield
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.time.Duration
@@ -46,6 +54,7 @@ import kotlin.time.Duration.Companion.seconds
 )
 @LongRunningGuiServices
 @ConfiguredCarScope
+@OptIn(ExperimentalAtomicApi::class)
 class SlideshowService @Inject constructor(
     private val logger: Logger,
     @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) private val coroutineScope: CoroutineScope,
@@ -95,27 +104,63 @@ class SlideshowService @Inject constructor(
             )
         }
 
-        if (startedOptions.delayBetweenPictures.isFinite()) {
-            autoAdvanceCanRun = true
-            coroutineScope.launch {
-                while (serviceIsRunning) {
-                    if (autoAdvanceCanRun) {
-                        delay(startedOptions.delayBetweenPictures)
-                        currentIndex.value += 1
-                        logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
-                    } else {
-                        delay(startedOptions.delayBetweenPictures)
-                        yield()
-                    }
-                }
-            }
-        }
+//        if (startedOptions.delayBetweenPictures.isFinite()) {
+//            autoAdvanceCanRun.store(true)
+//            coroutineScope.launch {
+//                while (serviceIsRunning) {
+//                    if (autoAdvanceCanRun.load()) {
+//                        delay(startedOptions.delayBetweenPictures)
+//                        currentIndex.value += 1
+//                        logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
+//                    } else {
+//                        delay(startedOptions.delayBetweenPictures)
+//                        yield()
+//                    }
+//                }
+//            }
+//        }
 
         moleculeFlow(RecompositionMode.Immediate) {
             val index by currentIndex.collectAsState(currentIndex.value)
-            ComposeStableFileListItem(fileList[index])
+
+            val autoAdvanceCanRunState by autoAdvanceCanRun.collectAsState(startedOptions.delayBetweenPictures.isFinite())
+
+            val file = ComposeStableFileListItem(fileList[index])
+
+            key (file.type) {
+                if (file.type == FileType.Movie) {
+                    autoAdvanceCanRun.value = false
+                }
+                if (file.type == FileType.Picture) {
+                    autoAdvanceCanRun.value = startedOptions.delayBetweenPictures.isFinite()
+                }
+            }
+
+            val scope = rememberCoroutineScope()
+
+            LaunchedEffect(autoAdvanceCanRunState) {
+                logger.d("WATWATWATWAT", "autoAdvanceCanRunState: ${autoAdvanceCanRunState}")
+                updateBottomBarViewState {
+                    it.copy(autoAdvanceRunning = autoAdvanceCanRunState)
+                }
+                if (autoAdvanceCanRunState) {
+                    scope.launch {
+                        while(isActive) {
+                            delay(startedOptions.delayBetweenPictures)
+                            currentIndex.value += 1
+                            logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
+                        }
+                    }
+                } else {
+                    scope.cancel()
+                }
+            }
+
+            file
         }.collectLatest { item ->
             logger.d(TAG, "Showing $item")
+            navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
+            navigationNodeTraverser.navigateToNode(SlideShowAppHomeScreen::class.java)
             updateBottomBarViewState {
                 it.copy(
                     currentFileName = item.file.name,
@@ -131,10 +176,10 @@ class SlideshowService @Inject constructor(
                     }
                 }
                 SlideshowItemNavigationEvent.PauseAutoAdvance -> {
-                    autoAdvanceCanRun = false
+                    autoAdvanceCanRun.value = false
                 }
                 SlideshowItemNavigationEvent.ResumeAutoAdvance -> {
-                    autoAdvanceCanRun = true
+                    autoAdvanceCanRun.value = true
                 }
                 null -> { /** Noop, showFile logs the type was wrong */ }
             }
@@ -142,25 +187,24 @@ class SlideshowService @Inject constructor(
     }
 
     private var serviceIsRunning = false
-    private var autoAdvanceCanRun = false
-        set(value) {
-            field = value
-            updateBottomBarViewState {
-                it.copy(autoAdvanceRunning = value)
-            }
-        }
+    private val autoAdvanceCanRun = MutableStateFlow(false)
+//        set(value) {
+//            field = value
+//            updateBottomBarViewState {
+//                it.copy(autoAdvanceRunning = value)
+//            }
+//        }
     override fun onCreate() {
         serviceIsRunning = true
-        autoAdvanceCanRun = true
+        autoAdvanceCanRun.value = true
         super.onCreate()
         initializeBottomBarViewState()
     }
     override fun onShutdown() {
         serviceIsRunning = false
-        autoAdvanceCanRun = false
         bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.DateTime
         GlobalScope.launch {
-            delay(1)
+            delay(10)
             SlideShowAppHomeScreen.openAfterSlideShowEnds(navigationNodeTraverser)
         }
         super.onShutdown()
@@ -215,8 +259,6 @@ class SlideshowService @Inject constructor(
     }
 
     private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {
-        navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
-        navigationNodeTraverser.navigateToNode(SlideShowAppHomeScreen::class.java)
         if (type == FileType.Picture) {
             return showImage(file)
         }
@@ -272,11 +314,15 @@ class SlideshowService @Inject constructor(
     private suspend fun showMovie(
         file: File
     ) : SlideshowItemNavigationEvent = suspendCoroutine { continuation ->
+//        continuation.invokeOnCancellation {
+//            logger.d(TAG, "Movie player continuation got canceled!?")
+//        }
         VideoPlayerScreen.openWithFile(
             navigationNodeTraverser,
             VideoPlayerScreen.VideoPlayerScreenParams(
                 file = file,
                 callOnPlaybackEnd = {
+                    logger.d(TAG, "Playback ended")
                     modalMenuService.showModalMenu(
                         dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                             IntOffset(50, 120),
@@ -286,15 +332,27 @@ class SlideshowService @Inject constructor(
                             items = listOf(
                                 ModalMenu.ModalMenuItem(
                                     "Next Slideshow Item",
-                                        onClicked = { continuation.resume(SlideshowItemNavigationEvent.Forward) }
+                                    onClicked = {
+//                                        if (continuation.isActive) {
+                                            continuation.resume(SlideshowItemNavigationEvent.Forward)
+//                                        }
+                                    }
                                 ),
                                 ModalMenu.ModalMenuItem(
                                     "Previous Slideshow Item",
-                                    onClicked = { continuation.resume(SlideshowItemNavigationEvent.Backward) }
+                                    onClicked = {
+//                                        if (continuation.isActive){
+                                            continuation.resume(SlideshowItemNavigationEvent.Backward)
+//                                        }
+                                    }
                                 ),
                                 ModalMenu.ModalMenuItem(
                                     "End Slideshow",
-                                    onClicked = { continuation.resume(SlideshowItemNavigationEvent.EndShow) }
+                                    onClicked = {
+//                                        if (continuation.isActive) {
+                                            continuation.resume(SlideshowItemNavigationEvent.EndShow)
+//                                        }
+                                    }
                                 )
                             ),
                             chipOrientation = ItemChipOrientation.W

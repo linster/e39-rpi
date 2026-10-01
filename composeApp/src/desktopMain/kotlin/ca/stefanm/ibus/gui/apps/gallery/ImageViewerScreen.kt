@@ -1,7 +1,14 @@
 package ca.stefanm.ibus.gui.apps.gallery
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import ca.stefanm.ca.stefanm.ibus.gui.apps.gallery.impl.ImageViewerToolbars
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.Notification
@@ -9,11 +16,14 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
+import coil3.compose.AsyncImage
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
@@ -26,7 +36,8 @@ class ImageViewerScreen @Inject constructor(
     private val logger: Logger,
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val notificationHub: NotificationHub,
-    private val modalMenuService: ModalMenuService
+    private val modalMenuService: ModalMenuService,
+    private val bottomBarController: BottomBarController
 ) : NavigationNode<Nothing> {
 
     // Just show one image with some zoom controls, information, etc.
@@ -66,7 +77,23 @@ class ImageViewerScreen @Inject constructor(
         /* Image bytes are provided in the args (no file saved) */
         data class SingleBytes(
             val bytes : ByteArray
-        ) : ImageViewerScreenOpenParameters
+        ) : ImageViewerScreenOpenParameters {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as SingleBytes
+
+                if (!bytes.contentEquals(other.bytes)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                return bytes.contentHashCode()
+            }
+        }
+
         /* Image is opened part of a slideshow */
         data class SlideShow(
             val image : File,
@@ -85,8 +112,6 @@ class ImageViewerScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = content@ { params ->
 
-        //TODO quick and dirty parameter parsing to test out slideshows
-
         if (params == null) {
             notificationHub.postNotificationBackground(Notification(
                 topText = "No image selected",
@@ -102,12 +127,43 @@ class ImageViewerScreen @Inject constructor(
             return@content
         }
 
-        if (openParameters is ImageViewerScreenOpenParameters.SlideShow && false) {
-            GrossSlideshowViewerStub(openParameters)
+        val knobState =setupListener(
+            knobListenerServiceMain,
+            logger,
+            TAG
+        )
+
+        Column(
+            Modifier.fillMaxSize().background(Color.Black)
+        ) {
+            if (openParameters is ImageViewerScreenOpenParameters.SlideShow) {
+                ImageViewerToolbars.SlideShowToolbar(
+                    knobState,
+                    openParameters
+                )
+            } else {
+                ImageViewerToolbars.SingleToolbar(
+                    knobState,
+                    onExit = {
+                        navigationNodeTraverser.goBack()
+                    }
+                )
+            }
+
+            if (openParameters !is ImageViewerScreenOpenParameters.SlideShow) {
+                bottomBarController.HideBottomPanelWhileInComposition()
+            }
+
+            AsyncImage(
+                modifier = Modifier.weight(2F, true).align(Alignment.CenterHorizontally),
+                model = when (openParameters) {
+                    is ImageViewerScreenOpenParameters.SingleBytes -> openParameters.bytes
+                    is ImageViewerScreenOpenParameters.SingleFile -> openParameters.image
+                    is ImageViewerScreenOpenParameters.SlideShow -> openParameters.image
+                },
+                contentDescription = openParameters.toString()
+            )
         }
-
-
-
 
     }
 
