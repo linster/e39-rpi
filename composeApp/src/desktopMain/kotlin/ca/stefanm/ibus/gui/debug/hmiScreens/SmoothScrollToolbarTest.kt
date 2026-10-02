@@ -57,7 +57,7 @@ class SmoothScrollToolbarTest @Inject constructor(
 
             makeTopToolbar(
                 knobState,
-                10,
+                9,
                 onExitSelected = { navigationNodeTraverser.goBack() }
             )()
 

@@ -153,7 +153,9 @@ object SmoothScroll {
             //TODO the viewPortHeight might be the whole pane in the paneManager, not the
             //TODO height the incoming modifier actually made it.... (it's breaking pagination on items right on a page)
             //TODO test this by making the toolbar tester have 9 instead of 10 buttons, and see if the maxHeight changes.
-            logger.d("WAT SMOOTH", "viewPortHeight: ${viewPortHeight}")
+            //logger.d("WAT SMOOTH", "viewPortHeight: ${viewPortHeight}")
+            // TODO with 10: DEBUG : WAT SMOOTH / viewPortHeight: 220.0.dp
+            // TODO with 9 (no wrap): DEBUG : WAT SMOOTH / viewPortHeight: 261.0.dp
             SubcomposeLayout(
                 modifier = Modifier
                     .padding(end = 24.dp)
@@ -456,7 +458,7 @@ object SmoothScroll {
                     var x = 0
                     var y = 0
 
-                    var slotId = 0
+                    var slotId = 0 //TODO look at the toolbar case.
                     placeablesByRow.forEachIndexed { rowIndex, row ->
                         var rowHeight = 0
                         row.forEachIndexed { itemIndex, item ->
