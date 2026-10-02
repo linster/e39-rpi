@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
@@ -193,7 +194,8 @@ class NavigationModule {
         fileManagerSettingsScreen: FileManagerSettingsScreen,
         snootPhoneMainMenu: SnootPhoneMainMenu,
         imageViewerScreen: ImageViewerScreen,
-        slideShowAppHomeScreen: SlideShowAppHomeScreen
+        slideShowAppHomeScreen: SlideShowAppHomeScreen,
+        smoothScrollToolbarTest: SmoothScrollToolbarTest
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -283,7 +285,8 @@ class NavigationModule {
         fileManagerSettingsScreen,
         snootPhoneMainMenu,
         imageViewerScreen,
-        slideShowAppHomeScreen
+        slideShowAppHomeScreen,
+        smoothScrollToolbarTest
     )
 }
 

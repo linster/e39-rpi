@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
 import ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens.FilePaneDebugScreen
 import ca.stefanm.ibus.car.desktop.input.griffinPowermate.NavigatorMapScreenListener
 import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
@@ -92,14 +93,15 @@ class HmiNavigatorDebugWindow @Inject constructor(
                 ) { Text("Navigate to Self (register on back stack)")}
                 NestingCard {
                     NestingCardHeader("Hot Keys")
-                    ScreenHotKey(ComposeDebugMenu::class.java as Class<NavigationNode<*>>)
-                    ScreenHotKey(BMWMainMenu::class.java as Class<NavigationNode<*>>)
-                    ScreenHotKey(DebugHmiMenuTestTwoColumn::class.java as Class<NavigationNode<*>>)
+//                    ScreenHotKey(ComposeDebugMenu::class.java as Class<NavigationNode<*>>)
+//                    ScreenHotKey(BMWMainMenu::class.java as Class<NavigationNode<*>>)
+//                    ScreenHotKey(DebugHmiMenuTestTwoColumn::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(DebugHmiKeyboard::class.java as Class<NavigationNode<*>>)
-                    ScreenHotKey(CreateOrEditPoiScreen::class.java as Class<NavigationNode<*>>)
+//                    ScreenHotKey(CreateOrEditPoiScreen::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(SmoothScrollTest::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(SmoothGridScrollTest::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(FilePaneDebugScreen::class.java as Class<NavigationNode<*>>)
+                    ScreenHotKey(SmoothScrollToolbarTest::class.java as Class<NavigationNode<*>>)
                 }
             }
 
