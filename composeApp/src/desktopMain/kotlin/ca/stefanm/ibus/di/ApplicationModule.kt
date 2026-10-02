@@ -1,8 +1,6 @@
 package ca.stefanm.ibus.di
 
-import ca.stefanm.ibus.gui.apps.fileManager.impl.views.FilePickerMruPane
 import ca.stefanm.ibus.gui.chat.service.MatrixChatModule
-import ca.stefanm.ibus.gui.map.MapDatabaseModule
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.CliMain
@@ -21,7 +19,6 @@ import ca.stefanm.ibus.gui.di.MapModule
 import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
 import ca.stefanm.ibus.gui.map.widget.tile.TileServerImageCacheClearer
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
-import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
@@ -43,7 +40,6 @@ import org.overviewproject.mime_types.MimeTypeDetector
 import java.util.*
 import javax.inject.Named
 import javax.inject.Scope
-import javax.inject.Singleton
 
 @Scope
 annotation class ApplicationScope
@@ -85,7 +81,6 @@ interface ApplicationComponent {
     @Named(ApplicationModule.KNOB_LISTENER_MODAL)
     fun knobListenerServiceModal() : KnobListenerService
 
-    fun filePickerMruPane() : FilePickerMruPane
 
     fun modalMenuService() : ModalMenuService
     fun notificationHub() : NotificationHub

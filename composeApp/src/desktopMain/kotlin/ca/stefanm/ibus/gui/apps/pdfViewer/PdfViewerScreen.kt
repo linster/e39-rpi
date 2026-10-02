@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenResult
 import ca.stefanm.ibus.gui.apps.pdfViewer.impl.PdfPageSelectorScreen.PageSelectorResult

@@ -3,7 +3,6 @@ package ca.stefanm.ibus.gui.menu.navigator
 import androidx.compose.runtime.*
 import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens.FilePaneDebugScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.operation.DeleteFileScreen
