@@ -105,6 +105,9 @@ class AllocatedIdManager @Inject constructor(
 
     fun hasAllocatedId(allocatedId: AllocatedId) : Boolean = allocatedIds.contains(allocatedId)
 
+    fun getMaxAllocatedId() : Int {
+        return allocatedIds.maxOrNull() ?: 0
+    }
 }
 
 
@@ -124,6 +127,13 @@ class KnobObserverBuilderState(
 
     fun deallocateIndex(allocatedId: Int) {
         allocatedIdManager.removeId(id = allocatedId)
+    }
+
+    /** Used in smooth scrolls when there's a toolbar above the smooth scroll
+     *  that has already allocated entries.
+     */
+    fun getMaxAllocatedIndex() : Int {
+        return allocatedIdManager.getMaxAllocatedId()
     }
 
 

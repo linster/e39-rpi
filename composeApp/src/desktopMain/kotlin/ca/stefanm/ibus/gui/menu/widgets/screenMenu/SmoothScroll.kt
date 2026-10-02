@@ -107,6 +107,26 @@ object SmoothScroll {
         )
     }
 
+    /**
+     *
+     *  Note about using this below horizontal toolbars where the toolbar contents are not fixed:
+     *
+     *  If you are placing this below a horizontal toolbar that has a lot of entries
+     *  that are being added, the scrolling may end up being broken. It's because the
+     *  call to `knobState.getMaxAllocatedIndex()` does not observe the getmaxAllocatedIndex()
+     *  as a flow when building up the SmoothScroll.
+     *
+     *  What you need to do is to have a derivedStateOf the number of entries in the toolbar,
+     *  and put a Key around this smooth scroll.
+     *
+     *  val toolbarEntires : SnapshotStateList<...> = ...
+     *  val toolbarItemCount = derivedStateof { toolbarEntries.value.size }
+     *
+     *  Toolbar(... , entries = toolbarEntries.value)
+     *  key (toolbarItemCount.value) {
+     *    SmoothScroll.SmoothScroll( ...)
+     *   }
+     */
     @Composable
     fun SmoothScroll(
         modifier: Modifier,
@@ -130,6 +150,10 @@ object SmoothScroll {
 
         BoxWithConstraints() {
             val viewPortHeight = maxHeight
+            //TODO the viewPortHeight might be the whole pane in the paneManager, not the
+            //TODO height the incoming modifier actually made it.... (it's breaking pagination on items right on a page)
+            //TODO test this by making the toolbar tester have 9 instead of 10 buttons, and see if the maxHeight changes.
+            logger.d("WAT SMOOTH", "viewPortHeight: ${viewPortHeight}")
             SubcomposeLayout(
                 modifier = Modifier
                     .padding(end = 24.dp)
@@ -139,7 +163,9 @@ object SmoothScroll {
                     )
                     .then(modifier)
             ) { constraints ->
-    //https://medium.com/@olivervicente/subcomposition-in-jetpack-compose-how-to-use-measurement-phase-data-in-other-children-3965d700af8b
+                /** The max allocated index in the knobState, which may be >0 if there's a toolbar above us */
+                val maxAllocatedIndex = knobState.getMaxAllocatedIndex()
+                //https://medium.com/@olivervicente/subcomposition-in-jetpack-compose-how-to-use-measurement-phase-data-in-other-children-3965d700af8b
                 val measurables = items.let {
                     if (prependGoBackEntry) {
                         listOf<@Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit>(
@@ -157,21 +183,13 @@ object SmoothScroll {
                     } else {
                         it
                     }
-                }.flatMapIndexed { index, item -> //TODO this only works because when there's no toolbar, the allocatedIndex and the index here start at the same number.
-                    subcompose(slotId = index) {
+                }.flatMapIndexed { index, item ->
+                    subcompose(slotId = index + maxAllocatedIndex) {
                         KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                             item(allocatedIndex, currentIndex)
                             LaunchedEffect(allocatedIndex, currentIndex) {
 
                                 if (allocatedIndex == currentIndex) {
-                                    logger.d("WATSCROLL", "allocatedIndex: $allocatedIndex, currentIndex: $currentIndex")
-                                    logger.d("WATSCROLL", "previousPage: $previousPage")
-                                    //TODO getting warmer. Suspiciously absent values...
-                                    logger.d("WATSCROLL", "childIndexToPage[currentIndex]: ${childIndexToPage[currentIndex]}")
-
-                                    //TODO might need to do childIndex = max(allocated_before_flatmap) - something??
-                                    //TODO these calculations treat childIndex (index above) the same as allocated index, but that breaks if there's
-                                    //TODO a toolbar already....
                                     if (
                                         childIndexToPage[currentIndex] != previousPage /* We've moved a page */
                                         && childIndexToPixelsFromTop.containsKey(currentIndex)
@@ -206,7 +224,11 @@ object SmoothScroll {
 
                 layout(width = layoutWidth, height = layoutHeight) {
                     var y = 0
-                    placeables.forEachIndexed { index, item ->
+                    // Offset the child index by the maxAllocatedIndex from before we lay these out
+                    // so that scrolling works when there's a toolbar above us.
+                    placeables.mapIndexed { index, placeable ->
+                        (index + maxAllocatedIndex) to placeable
+                    }.forEach { (index, item) ->
                         item.placeRelative(x = 0, y = y)
                         childIndexToPixelsFromTop[index] = y
                         childIndexToPage[index] = if (y == 0 || viewPortHeight.value.toInt() == 0) {
