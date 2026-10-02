@@ -81,11 +81,9 @@ class SlideShowAppHomeScreen @Inject constructor(
             navigationNodeTraverser: NavigationNodeTraverser
         ) {
             //Just in case we need to re-set or reset some parameters?
+            navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
             navigationNodeTraverser.navigateToRoot()
-            navigationNodeTraverser.cleanupBackStackDescendentsOf(ImageViewerScreen::class.java)
-            navigationNodeTraverser.cleanupBackStackDescendentsOf(VideoPlayerScreen::class.java)
             navigationNodeTraverser.navigateToNode(SlideShowAppHomeScreen::class.java)
-
         }
     }
 

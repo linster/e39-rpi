@@ -5,6 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,9 +30,11 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.delay
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.time.Duration
 
 @AutoDiscover
 class ImageViewerScreen @Inject constructor(
@@ -97,11 +105,15 @@ class ImageViewerScreen @Inject constructor(
         /* Image is opened part of a slideshow */
         data class SlideShow(
             val image : File,
-            val onImageNavigateForward : () -> Unit = {},
+            val hasNext : () -> Boolean,
+            val hasPrev : () -> Boolean,
+            val onImageNavigateForward : (requestFromAutoAdvance : Boolean) -> Unit = {},
             val onImageNavigateBackward : () -> Unit = {},
             val onEndSlideshowRequested : () -> Unit = {},
             /** Don't allow a slideshow that wasn't started with a slide duration to resume auto advance */
             val wasStartedWithAutoAdvance : Boolean,
+            val advanceAfterDuration : Duration,
+            // Also call these so the bottom bar is updated.
             val onPauseAutoAdvanceRequested : () -> Unit = {},
             val onResumeAutoAdvanceRequested : () -> Unit = {}
         ) : ImageViewerScreenOpenParameters
@@ -137,9 +149,27 @@ class ImageViewerScreen @Inject constructor(
             Modifier.fillMaxSize().background(Color.Black)
         ) {
             if (openParameters is ImageViewerScreenOpenParameters.SlideShow) {
+                var isSlideshowRunning by remember { mutableStateOf(openParameters.wasStartedWithAutoAdvance) }
+
+                LaunchedEffect( isSlideshowRunning) {
+                    if (isSlideshowRunning) {
+                        delay(openParameters.advanceAfterDuration)
+                        openParameters.onImageNavigateForward(true)
+                    }
+                }
+
                 ImageViewerToolbars.SlideShowToolbar(
                     knobState,
-                    openParameters
+                    openParameters.copy(
+                        onPauseAutoAdvanceRequested = {
+                            openParameters.onPauseAutoAdvanceRequested()
+                            isSlideshowRunning = false
+                        },
+                        onResumeAutoAdvanceRequested = {
+                            openParameters.onResumeAutoAdvanceRequested()
+                            isSlideshowRunning = true
+                        }
+                    )
                 )
             } else {
                 ImageViewerToolbars.SingleToolbar(
@@ -185,7 +215,7 @@ class ImageViewerScreen @Inject constructor(
                     ),
                     TextMenuItem(
                         "Navigate Forward...",
-                        onClicked = { openParameters.onImageNavigateForward() }
+                        onClicked = { openParameters.onImageNavigateForward(false) }
                     ),
                     TextMenuItem(
                         "Navigate backward...",

@@ -102,7 +102,8 @@ class VideoPlayerScreen @Inject constructor(
 
     data class VideoPlayerScreenParams(
         val file : File,
-        val callOnPlaybackEnd : () -> Unit = {}, //TODO is this unused??
+        val callOnPlaybackEnd : () -> Unit = {},
+        val endButonGoesBack : Boolean = true,
         val playOnOpen : Boolean = true,
         val pauseOnOpenAfterSeconds : Int = 0,
         val seekToTimeOnOpen : Duration = Duration.ZERO,
@@ -478,12 +479,15 @@ class VideoPlayerScreen @Inject constructor(
                         isSelected = (allocatedIndex == currentIndex),
                         chipOrientation = ItemChipOrientation.S,
                         onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            onRequestOverlayClose()
                             playerState.stop()
                             playerState.onPlaybackEnded?.invoke()
-                            navigationNodeTraverser.setResultAndGoBack(
-                                this@VideoPlayerScreen,
-                                calculateResultFromState(playerState)
-                            )
+                            if (params.endButonGoesBack) {
+                                navigationNodeTraverser.setResultAndGoBack(
+                                    this@VideoPlayerScreen,
+                                    calculateResultFromState(playerState)
+                                )
+                            }
                         }
                     )
                 }

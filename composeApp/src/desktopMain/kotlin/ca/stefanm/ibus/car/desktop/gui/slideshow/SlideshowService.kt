@@ -1,9 +1,12 @@
 package ca.stefanm.ibus.car.desktop.gui.slideshow
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.IntOffset
 import app.cash.molecule.RecompositionMode
@@ -23,7 +26,9 @@ import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SnapshotPair
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.CoroutineDispatcher
@@ -89,114 +94,25 @@ class SlideshowService @Inject constructor(
             return
         }
 
-        val fileList = startedOptions.fileList.circular()
+        fileList = FileList(startedOptions.fileList)
 
-        logger.d(TAG, "File List: ${fileList.map { it.first.absolutePath }}")
 
-        val currentIndex = MutableStateFlow(startedOptions.startAtIndex)
-
-        //TODO is today the day we finally learn how the hell molecule works?
+        logger.d(TAG, "File List: ${fileList.initial.map { it.first.absolutePath }}")
 
         updateBottomBarViewState {
             it.copy(
-                currentFileNumber = currentIndex.value,
-                totalFiles = fileList.size
+                totalFiles = fileList.getTotalItems(),
+                autoAdvanceRunning = startedOptions.delayBetweenPictures.isFinite()
             )
         }
 
-//        if (startedOptions.delayBetweenPictures.isFinite()) {
-//            autoAdvanceCanRun.store(true)
-//            coroutineScope.launch {
-//                while (serviceIsRunning) {
-//                    if (autoAdvanceCanRun.load()) {
-//                        delay(startedOptions.delayBetweenPictures)
-//                        currentIndex.value += 1
-//                        logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
-//                    } else {
-//                        delay(startedOptions.delayBetweenPictures)
-//                        yield()
-//                    }
-//                }
-//            }
-//        }
-
-        moleculeFlow(RecompositionMode.Immediate) {
-            val index by currentIndex.collectAsState(currentIndex.value)
-
-            val autoAdvanceCanRunState by autoAdvanceCanRun.collectAsState(startedOptions.delayBetweenPictures.isFinite())
-
-            val file = ComposeStableFileListItem(fileList[index])
-
-            key (file.type) {
-                if (file.type == FileType.Movie) {
-                    autoAdvanceCanRun.value = false
-                }
-                if (file.type == FileType.Picture) {
-                    autoAdvanceCanRun.value = startedOptions.delayBetweenPictures.isFinite()
-                }
-            }
-
-            val scope = rememberCoroutineScope()
-
-            LaunchedEffect(autoAdvanceCanRunState) {
-                logger.d("WATWATWATWAT", "autoAdvanceCanRunState: ${autoAdvanceCanRunState}")
-                updateBottomBarViewState {
-                    it.copy(autoAdvanceRunning = autoAdvanceCanRunState)
-                }
-                if (autoAdvanceCanRunState) {
-                    scope.launch {
-                        while(isActive) {
-                            delay(startedOptions.delayBetweenPictures)
-                            currentIndex.value += 1
-                            logger.d(TAG, "Advanced currentIndex: ${currentIndex.value}")
-                        }
-                    }
-                } else {
-                    scope.cancel()
-                }
-            }
-
-            file
-        }.collectLatest { item ->
-            logger.d(TAG, "Showing $item")
-            navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
-            navigationNodeTraverser.navigateToNode(SlideShowAppHomeScreen::class.java)
-            updateBottomBarViewState {
-                it.copy(
-                    currentFileName = item.file.name,
-                    currentFileNumber = fileList.indexOf(item.file to item.type) + 1
-                )
-            }
-            when (showFile(item.file, item.type)) {
-                SlideshowItemNavigationEvent.Forward -> currentIndex.value += 1
-                SlideshowItemNavigationEvent.Backward -> currentIndex.value -= 1
-                SlideshowItemNavigationEvent.EndShow -> {
-                    GlobalScope.launch {
-                        configurablePlatform.stopServiceByName("SlideshowService")
-                    }
-                }
-                SlideshowItemNavigationEvent.PauseAutoAdvance -> {
-                    autoAdvanceCanRun.value = false
-                }
-                SlideshowItemNavigationEvent.ResumeAutoAdvance -> {
-                    autoAdvanceCanRun.value = true
-                }
-                null -> { /** Noop, showFile logs the type was wrong */ }
-            }
-        }
+        showFile(fileList.getFirst())
     }
 
     private var serviceIsRunning = false
-    private val autoAdvanceCanRun = MutableStateFlow(false)
-//        set(value) {
-//            field = value
-//            updateBottomBarViewState {
-//                it.copy(autoAdvanceRunning = value)
-//            }
-//        }
+
     override fun onCreate() {
         serviceIsRunning = true
-        autoAdvanceCanRun.value = true
         super.onCreate()
         initializeBottomBarViewState()
     }
@@ -242,68 +158,73 @@ class SlideshowService @Inject constructor(
     private val bottomBarController : BottomBarController
         get() = options!!.bottomBarController
 
-    class ComposeStableFileListItem(
-        val file: File,
-        val type : FileType
-    ) : SnapshotPair<String, FileType>(file.absolutePath, type) {
-        constructor(pair : Pair<File, FileType>) : this(pair.first, pair.second)
-    }
 
+    lateinit var fileList: FileList
 
-    enum class SlideshowItemNavigationEvent {
-        Forward,
-        Backward,
-        EndShow,
-        PauseAutoAdvance,
-        ResumeAutoAdvance
-    }
-
-    private suspend fun showFile(file : File, type : FileType) : SlideshowItemNavigationEvent? {
+    private fun showFile(link : SlideshowLink<Pair<File, FileType>>) {
+        navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
+        val file = link.itemToShow.first
+        val type = link.itemToShow.second
+        updateBottomBarViewState {
+            it.copy(
+                currentFileName = file.name,
+                currentFileNumber = fileList.getCurrentIndex() + 1
+            )
+        }
         if (type == FileType.Picture) {
-            return showImage(file)
+            return showImage(link)
         }
         if (type == FileType.Movie) {
-            return showMovie(file)
+            return showMovie(link)
         }
         logger.d(TAG, "An invalid $file, $type was asked to be opened, no action returned.")
-        return null
     }
 
-    private suspend fun showImage(
-        file : File
-    ) : SlideshowItemNavigationEvent = suspendCancellableCoroutine { continuation ->
-        continuation.invokeOnCancellation {
-            //Maybe cleanup the backstack if we auto-advance??
-            //navigationNodeTraverser.cleanupBackStackDescendentsOf(ImageViewerScreen::class.java)
-        }
+    private fun showImage(
+        link : SlideshowLink<Pair<File, FileType>>
+    ) {
+
         ImageViewerScreen.openForImageInSlideShow(
             navigationNodeTraverser,
             ImageViewerScreen.ImageViewerScreenOpenParameters.SlideShow(
-                image = file,
-                onImageNavigateForward = {
-                    if (continuation.isActive) {
-                        continuation.resume(SlideshowItemNavigationEvent.Forward)
+                image = link.itemToShow.first,
+                hasNext = { link.hasSubsequent() },
+                onImageNavigateForward = { requestFromAutoAdvance ->
+                    if (link.hasSubsequent()) {
+                        showFile(fileList.getNext(link))
+                    } else {
+                        // If we get to the last slide by auto advance, don't just
+                        // end the show and force the user to set it up again.
+                        if (!requestFromAutoAdvance) {
+                            endShow()
+                        }
                     }
                 },
+                hasPrev = { link.hasPrecedent() },
                 onImageNavigateBackward = {
-                    if (continuation.isActive) {
-                        continuation.resume(SlideshowItemNavigationEvent.Backward)
+                    if (link.hasPrecedent()) {
+                        showFile(fileList.getPrev(link))
+                    } else {
+                        endShow()
                     }
                 },
                 onEndSlideshowRequested = {
-                    if (continuation.isActive) {
-                        continuation.resume(SlideshowItemNavigationEvent.EndShow)
-                    }
+                    endShow()
                 },
                 wasStartedWithAutoAdvance = options?.delayBetweenPictures?.isFinite() == true,
+                advanceAfterDuration = options?.delayBetweenPictures!!,
                 onPauseAutoAdvanceRequested = {
-                    if (continuation.isActive) {
-                        continuation.resume(SlideshowItemNavigationEvent.PauseAutoAdvance)
+                    updateBottomBarViewState {
+                        it.copy(
+                            autoAdvanceRunning = false
+                        )
                     }
                 },
                 onResumeAutoAdvanceRequested = {
-                    if (continuation.isActive) {
-                        continuation.resume(SlideshowItemNavigationEvent.ResumeAutoAdvance)
+                    updateBottomBarViewState {
+                        it.copy(
+                            autoAdvanceRunning = true
+                        )
                     }
                 }
             )
@@ -311,55 +232,131 @@ class SlideshowService @Inject constructor(
     }
 
     //Movies are not auto-advanced through, just pictures.
-    private suspend fun showMovie(
-        file: File
-    ) : SlideshowItemNavigationEvent = suspendCoroutine { continuation ->
-//        continuation.invokeOnCancellation {
-//            logger.d(TAG, "Movie player continuation got canceled!?")
-//        }
+    private fun showMovie(
+        link : SlideshowLink<Pair<File, FileType>>
+    ) {
         VideoPlayerScreen.openWithFile(
             navigationNodeTraverser,
             VideoPlayerScreen.VideoPlayerScreenParams(
-                file = file,
+                file = link.itemToShow.first,
+                endButonGoesBack = false,
                 callOnPlaybackEnd = {
                     logger.d(TAG, "Playback ended")
-                    modalMenuService.showModalMenu(
-                        dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
-                            IntOffset(50, 120),
-                            610
-                        ).toNormalModalMenuDimensions(),
-                        ModalMenu(
-                            items = listOf(
-                                ModalMenu.ModalMenuItem(
-                                    "Next Slideshow Item",
-                                    onClicked = {
-//                                        if (continuation.isActive) {
-                                            continuation.resume(SlideshowItemNavigationEvent.Forward)
-//                                        }
-                                    }
-                                ),
-                                ModalMenu.ModalMenuItem(
-                                    "Previous Slideshow Item",
-                                    onClicked = {
-//                                        if (continuation.isActive){
-                                            continuation.resume(SlideshowItemNavigationEvent.Backward)
-//                                        }
-                                    }
-                                ),
-                                ModalMenu.ModalMenuItem(
-                                    "End Slideshow",
-                                    onClicked = {
-//                                        if (continuation.isActive) {
-                                            continuation.resume(SlideshowItemNavigationEvent.EndShow)
-//                                        }
-                                    }
+                    // Although a modal menu would look better, we have to use a side-pane
+                    // because the loading throbber in the video player has a race condition
+                    // when you stop.
+                    modalMenuService.showSidePaneOverlay(true) {
+                        SidePanelMenu.SidePanelMenu(
+                            title = link.itemToShow.first.name,
+                            text = @Composable {
+                                SidePanelMenu.InfoLabel("Current/Total :")
+                                SidePanelMenu.InfoLabel(
+                                    "${slideshowInfo.value.currentFileNumber} / ${slideshowInfo.value.totalFiles}"
                                 )
-                            ),
-                            chipOrientation = ItemChipOrientation.W
+                            },
+                            buttons = buildList {
+                                if (link.hasSubsequent()) {
+                                    add(
+                                        TextMenuItem(
+                                            "Next Item",
+                                            onClicked = {
+                                                modalMenuService.closeSidePaneOverlay(true)
+                                                showFile(fileList.getNext(link))
+                                            }
+                                        )
+                                    )
+                                }
+                                if (link.hasPrecedent()) {
+                                    add(
+                                        TextMenuItem(
+                                            "Previous Item",
+                                            onClicked = {
+                                                modalMenuService.closeSidePaneOverlay(true)
+                                                showFile(fileList.getPrev(link))
+                                            }
+                                        )
+                                    )
+                                }
+                                add(
+                                    TextMenuItem(
+                                        "End Show",
+                                        onClicked = {
+                                            modalMenuService.closeSidePaneOverlay(true)
+                                            endShow()
+                                        }
+                                    )
+                                )
+                            }
                         )
-                    )
+                    }
                 }
             )
         )
     }
+
+    private fun endShow() {
+
+        SlideShowAppHomeScreen.openAfterSlideShowEnds(navigationNodeTraverser)
+        configurablePlatform.stopServiceByName("SlideshowService")
+    }
+
+    data class SlideshowLink<T>(
+        val itemToShow : T,
+        val precedent : T?,
+        val subsequent : T?
+    ) {
+        fun hasPrecedent() = precedent != null
+        fun hasSubsequent() = subsequent != null
+    }
+
+
+
+    class FileList(
+        val initial : List<Pair<File, FileType>>
+    ) {
+
+        private val sliced = initial.sliceForSlideshowLinks()
+        private var currentIndex = 0
+
+        fun getCurrent() : SlideshowLink<Pair<File, FileType>> {
+            return sliced[currentIndex]
+        }
+
+        fun getCurrentIndex() = currentIndex
+        fun getTotalItems() = initial.size
+
+        fun getFirst() = sliced.first()
+
+        fun getNext(item : SlideshowLink<Pair<File, FileType>>) : SlideshowLink<Pair<File, FileType>> {
+            val nextItem = sliced.find { it.itemToShow == item.subsequent }
+            currentIndex = sliced.indexOf(nextItem)
+            return nextItem!!
+        }
+
+        fun getPrev(item: SlideshowLink<Pair<File, FileType>>) : SlideshowLink<Pair<File, FileType>> {
+            val prevItem = sliced.find { it.itemToShow == item.precedent }
+            currentIndex = sliced.indexOf(prevItem)
+            return prevItem!!
+        }
+
+
+        fun <T> List<T>.sliceForSlideshowLinks() : List<SlideshowLink<T>> {
+            return this.let { it.toMutableList() }.apply {
+                addFirst(first())
+                addLast(last())
+            }.windowed(3, 1, false)
+                .map {
+                    val itemToShow = it[1]
+                    val precedent = it[0]
+                    val subsequent = it[2]
+                    SlideshowLink(
+                        itemToShow,
+                        if (precedent != itemToShow) precedent else null,
+                        if (subsequent != itemToShow) subsequent else null
+                    )
+                }
+        }
+    }
+
+
 }

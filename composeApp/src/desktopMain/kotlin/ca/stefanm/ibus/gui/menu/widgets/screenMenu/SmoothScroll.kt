@@ -369,7 +369,7 @@ object SmoothScroll {
                                 item(allocatedIndex, currentIndex)
                                 LaunchedEffect(allocatedIndex, currentIndex) {
                                     //TODO Same thing here this is broken when there's a toolbar before the grid, but
-                                    //TODO its less noticable because there's more per page on the grid. 
+                                    //TODO its less noticable because there's more per page on the grid.
                                     if (allocatedIndex == currentIndex) {
                                         if (
                                             childIndexToPage[currentIndex] != previousPage /* We've moved a page */

@@ -3,12 +3,15 @@ package ca.stefanm.ca.stefanm.ibus.gui.apps.gallery.impl
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
@@ -45,30 +48,39 @@ object ImageViewerToolbars {
                 .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
                 .fillMaxWidth()
         ) {
-            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                MenuItem(
-                    boxModifier = Modifier.weight(1F, true),
-                    label = "➡ ",
-                    chipOrientation = ItemChipOrientation.N,
-                    isSelected = currentIndex == allocatedIndex,
-                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                        params.onImageNavigateForward()
-                    }
-                )
+            if (params.hasNext()) {
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1F, true),
+                        label = "➡ ",
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            params.onImageNavigateForward(false)
+                        }
+                    )
+                }
             }
-            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                MenuItem(
-                    boxModifier = Modifier.weight(1F, true),
-                    label = " ⬅",
-                    chipOrientation = ItemChipOrientation.N,
-                    isSelected = currentIndex == allocatedIndex,
-                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                        params.onImageNavigateBackward()
-                    }
-                )
+            if (params.hasPrev()) {
+                KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                    MenuItem(
+                        boxModifier = Modifier.weight(1F, true),
+                        label = " ⬅",
+                        chipOrientation = ItemChipOrientation.N,
+                        isSelected = currentIndex == allocatedIndex,
+                        onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                            params.onImageNavigateBackward()
+                        }
+                    )
+                }
             }
+            val measurements = ThemeWrapper.ThemeHandle.current.bigItem
             MenuItem(
-                boxModifier = Modifier.weight(2F, true),
+                boxModifier = Modifier.weight(2F, true)
+                    .padding(
+                        top = measurements.chipWidth.dp.halveIfNotPixelDoubled(),
+                        bottom = measurements.highlightWidth.dp.halveIfNotPixelDoubled()
+                    ),
                 label = "Show:",
                 chipOrientation = ItemChipOrientation.NONE,
                 isSelected = false,
