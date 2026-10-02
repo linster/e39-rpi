@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
-import ca.stefanm.ibus.gui.apps.fileManager.FilePickerParameterProvider
-import ca.stefanm.ibus.gui.apps.fileManager.FilePickerScreen
 import ca.stefanm.ibus.gui.apps.fileManager.FilerPickerParameters.Filter
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerScreenFileSelectionResultHelper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
@@ -26,9 +24,7 @@ import javax.inject.Inject
 @AutoDiscover
 class VideoPlayerAppHomeScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val filePickerParameterProvider: FilePickerParameterProvider,
     private val logger : Logger,
-    private val filePickerScreen: FilePickerScreen,
     private val fileSelectionResultHelper: FileManagerScreenFileSelectionResultHelper
 ) : NavigationNode<Nothing> {
 
