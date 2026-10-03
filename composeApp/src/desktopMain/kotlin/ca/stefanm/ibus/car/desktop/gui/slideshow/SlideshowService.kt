@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.yield
 import java.io.File
@@ -161,8 +162,10 @@ class SlideshowService @Inject constructor(
 
     lateinit var fileList: FileList
 
-    private fun showFile(link : SlideshowLink<Pair<File, FileType>>) {
+    private suspend fun showFile(link : SlideshowLink<Pair<File, FileType>>) {
         navigationNodeTraverser.cleanupBackStackDescendentsOf(SlideShowAppHomeScreen::class.java)
+        // Navigator isn't thread safe.
+        delay(100)
         val file = link.itemToShow.first
         val type = link.itemToShow.second
         updateBottomBarViewState {
@@ -190,8 +193,9 @@ class SlideshowService @Inject constructor(
                 image = link.itemToShow.first,
                 hasNext = { link.hasSubsequent() },
                 onImageNavigateForward = { requestFromAutoAdvance ->
+                    logger.d(TAG, "onImageNavigateForward from ${link.itemToShow.first}")
                     if (link.hasSubsequent()) {
-                        showFile(fileList.getNext(link))
+                        GlobalScope.launch { showFile(fileList.getNext(link)) }
                     } else {
                         // If we get to the last slide by auto advance, don't just
                         // end the show and force the user to set it up again.
@@ -203,7 +207,7 @@ class SlideshowService @Inject constructor(
                 hasPrev = { link.hasPrecedent() },
                 onImageNavigateBackward = {
                     if (link.hasPrecedent()) {
-                        showFile(fileList.getPrev(link))
+                        GlobalScope.launch { showFile(fileList.getPrev(link)) }
                     } else {
                         endShow()
                     }
@@ -261,7 +265,7 @@ class SlideshowService @Inject constructor(
                                             "Next Item",
                                             onClicked = {
                                                 modalMenuService.closeSidePaneOverlay(true)
-                                                showFile(fileList.getNext(link))
+                                                GlobalScope.launch { showFile(fileList.getNext(link)) }
                                             }
                                         )
                                     )
@@ -272,7 +276,7 @@ class SlideshowService @Inject constructor(
                                             "Previous Item",
                                             onClicked = {
                                                 modalMenuService.closeSidePaneOverlay(true)
-                                                showFile(fileList.getPrev(link))
+                                                GlobalScope.launch { showFile(fileList.getPrev(link)) }
                                             }
                                         )
                                     )
