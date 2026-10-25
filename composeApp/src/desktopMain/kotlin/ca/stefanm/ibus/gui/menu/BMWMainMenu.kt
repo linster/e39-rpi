@@ -93,10 +93,10 @@ class BMWMainMenu @Inject constructor(
             )
 
             val swItems = listOf(
-//                TextMenuItem(
-//                    title = "Bluetooth Pairing",
-//                    onClicked = { navigationNodeTraverser.navigateToNode(BluetoothPairingMenu::class.java) }
-//                ),
+                TextMenuItem(
+                    title = "More Apps...",
+                    onClicked = { navigationNodeTraverser.navigateToNode(SnootPhoneMainMenu::class.java) }
+                ),
                 TextMenuItem(
                     title = "Settings",
                     onClicked = { navigationNodeTraverser.navigateToNode(SettingsRootMenu::class.java) }

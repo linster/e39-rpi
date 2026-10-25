@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
+import ca.stefanm.ca.stefanm.ibus.gui.apps.weather.impl.views.WeatherAppSettingsScreen
 import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
@@ -54,6 +55,7 @@ import ca.stefanm.ibus.gui.networkInfo.NetworkInfoScreen
 import ca.stefanm.ibus.di.*
 import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
 import ca.stefanm.ibus.gui.apps.gallery.SlideShowAppHomeScreen
+import ca.stefanm.ibus.gui.apps.weather.WeatherAppHomeScreen
 import ca.stefanm.ibus.gui.bluetoothPairing.BluetoothPairingMenu
 import ca.stefanm.ibus.gui.bluetoothPairing.ui.*
 import ca.stefanm.ibus.gui.chat.screens.chat.*
@@ -193,7 +195,9 @@ class NavigationModule {
         snootPhoneMainMenu: SnootPhoneMainMenu,
         imageViewerScreen: ImageViewerScreen,
         slideShowAppHomeScreen: SlideShowAppHomeScreen,
-        smoothScrollToolbarTest: SmoothScrollToolbarTest
+        smoothScrollToolbarTest: SmoothScrollToolbarTest,
+        weatherAppHomeScreen: WeatherAppHomeScreen,
+        weatherAppSettingsScreen: WeatherAppSettingsScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -283,7 +287,9 @@ class NavigationModule {
         snootPhoneMainMenu,
         imageViewerScreen,
         slideShowAppHomeScreen,
-        smoothScrollToolbarTest
+        smoothScrollToolbarTest,
+        weatherAppHomeScreen,
+        weatherAppSettingsScreen
     )
 }
 

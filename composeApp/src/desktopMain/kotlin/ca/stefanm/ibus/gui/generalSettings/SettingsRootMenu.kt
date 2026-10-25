@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ca.stefanm.ca.stefanm.ibus.gui.apps.weather.impl.views.WeatherAppSettingsScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
 import ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -73,6 +74,7 @@ class SettingsRootMenu @Inject constructor(
                 "Brightness"    to  { navigateToNode(BrightnessCompensationScreen::class.java) },
                 "Griffin Powermate Sensitivity" to  { navigateToNode(GriffinPowermateConfigScreen::class.java) },
                 "File Manager Settings" to { navigateToNode(FileManagerSettingsScreen::class.java) },
+                "Weather App Settings" to { navigateToNode(WeatherAppSettingsScreen::class.java) },
                 "About" to  { navigateToNode(AboutScreen::class.java) }
             )
         )

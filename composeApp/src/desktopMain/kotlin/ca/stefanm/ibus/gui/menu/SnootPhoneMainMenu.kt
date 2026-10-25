@@ -9,6 +9,7 @@ import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.apps.gallery.ImageViewerScreen
 import ca.stefanm.ibus.gui.apps.gallery.SlideShowAppHomeScreen
+import ca.stefanm.ibus.gui.apps.weather.WeatherAppHomeScreen
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ibus.gui.generalSettings.SettingsRootMenu
@@ -57,8 +58,8 @@ class SnootPhoneMainMenu @Inject constructor(
                 "Video Player" to { navigateToNode(VideoPlayerAppHomeScreen::class.java) },
 
                 "Slideshow" to { navigateToNode(SlideShowAppHomeScreen::class.java)},
-                "Image Viewer" to { navigateToNode(ImageViewerScreen::class.java) },
-                "Weather" to {},
+                //"Image Viewer" to { navigateToNode(ImageViewerScreen::class.java) },
+                "Weather" to { navigateToNode(WeatherAppHomeScreen::class.java)},
 
                 "Settings" to { navigateToNode(SettingsRootMenu::class.java) }
             )

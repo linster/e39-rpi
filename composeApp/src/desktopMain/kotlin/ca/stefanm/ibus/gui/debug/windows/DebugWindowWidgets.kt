@@ -1,6 +1,8 @@
 package ca.stefanm.ibus.gui.debug.windows
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -8,8 +10,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import kotlin.enums.enumEntries
 
 @Composable
 fun NestingCard(
@@ -89,5 +93,36 @@ fun CheckBoxWithLabel(isChecked : Boolean, onCheckChanged : (new : Boolean) -> U
             onCheckedChange = { onCheckChanged(it)}
         )
         Text(label)
+    }
+}
+
+@Composable
+inline fun <reified T : Enum<T>> EnumColumn(
+    currentEntry : T,
+    crossinline onEntryChanged : (T) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val radioOptions = enumEntries<T>()
+
+    Column(
+        modifier = modifier.selectableGroup()
+    ) {
+        radioOptions.forEach {
+            Row(
+                Modifier.selectable(
+                    selected = it == currentEntry,
+                    onClick = { onEntryChanged(it) },
+                    role = Role.RadioButton
+                )
+            ) {
+                RadioButton(
+                    selected = it == currentEntry,
+                    onClick = null
+                )
+                Text(
+                    text = it.name
+                )
+            }
+        }
     }
 }
