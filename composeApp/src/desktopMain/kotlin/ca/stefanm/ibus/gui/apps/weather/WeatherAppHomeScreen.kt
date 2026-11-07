@@ -34,5 +34,7 @@ class WeatherAppHomeScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = {
 
+        // https://api.weather.gc.ca/collections/citypageweather-realtime/items/on-118?lang=en
+
     }
 }

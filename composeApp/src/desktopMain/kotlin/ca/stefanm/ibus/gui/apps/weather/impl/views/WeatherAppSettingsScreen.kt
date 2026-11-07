@@ -8,6 +8,8 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,5 +36,32 @@ class WeatherAppSettingsScreen @Inject constructor(
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = {
 
+        FullScreenMenu.OneColumnSmoothScreen(
+            header = "Weather App Settings",
+            knobListenerService = knobListenerServiceMain,
+            logger = logger,
+            navigationNodeTraverser = navigationNodeTraverser,
+            logTag = TAG,
+            prependGoBackEntry = true,
+            items = listOf(
+                //The default forecast the weather app opens to.
+                "Select Default Forecast" to {
+                    //The map screen needs to be able to let the user to pick an item from
+                    // a list of POIs on the map.
+                },
+
+                "Add to Multi-City List" to {
+                    // Add goes to a screen that also opens a map selector.
+                },
+                "Delete from Multi-City List" to {
+                    // Open the editor in delete mode
+                },
+                "Re-order Multi-City List" to { navigateToNode(MultiCityListEditorScreen::class.java) },
+
+                // Tell the repo to sync fresh weather
+                "Fetch fresh weather" to {},
+
+            )
+        )
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.ui.window.WindowScope
 import ca.stefanm.ibus.gui.debug.windows.EnumColumn
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
@@ -29,7 +30,7 @@ class WeatherAppViewDebugWindow @Inject constructor(
         // https://github.com/michaeldavie/env_canada
         // https://github.com/breezy-weather/breezy-weather-icon-packs/blob/main/README.md
 
-        val model = remember { WeatherCardModel() }
+        val model = remember { DayForecastModel() }
         WeatherCard(
             "Today",
             model
@@ -41,19 +42,33 @@ class WeatherAppViewDebugWindow @Inject constructor(
     // Make a Weather Card Model
 
     @Stable
-    class WeatherCardModel {
+    class DayForecastModel {
         var infographic by mutableStateOf(InfoGraphic.SUN)
         enum class InfoGraphic {
             SUN,
             CLOUD,
             MOON
         }
+
+        var lowTemp by mutableStateOf(Temperature(0, Temperature.TempUnit.Celsius))
+        var highTemp by mutableStateOf(Temperature(0, Temperature.TempUnit.Celsius))
+
+        data class Temperature(
+            val value : Int,
+            val tempUnit : TempUnit
+        ) {
+            enum class TempUnit {
+                Celsius,
+                Fahrenheit,
+                Kelvin
+            }
+        }
     }
 
     @Composable
     fun WeatherCard(
         title : String,
-        model : WeatherCardModel
+        model : DayForecastModel
     ) {
         NestingCard {
             NestingCardHeader(title)
@@ -61,7 +76,37 @@ class WeatherAppViewDebugWindow @Inject constructor(
                 model.infographic,
                 { model.infographic = it}
             )
+
+            WeatherTempCard(
+                title = "Low",
+                temperature = model.lowTemp,
+                onTemperatureChanged = { model.lowTemp = it }
+            )
+
+            WeatherTempCard(
+                title = "High",
+                temperature = model.highTemp,
+                onTemperatureChanged = { model.highTemp = it }
+            )
         }
     }
 
+    @Composable
+    fun WeatherTempCard(
+        title: String,
+        temperature: DayForecastModel.Temperature,
+        onTemperatureChanged : (DayForecastModel.Temperature) -> Unit
+    ) {
+       NestingCard {
+           NestingCardHeader(title)
+           NumericTextViewWithSpinnerButtons(
+               initialValue = temperature.value,
+               onValueChanged = { onTemperatureChanged(temperature.copy(value = it))}
+           )
+           EnumColumn(
+               temperature.tempUnit,
+               { onTemperatureChanged(temperature.copy(tempUnit = it))}
+           )
+       }
+    }
 }
