@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.weather.impl.views
+package ca.stefanm.ibus.gui.apps.weather.impl.views
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.util.fastFilterNotNull
+import ca.stefanm.ibus.gui.apps.weather.impl.repo.MultiCityListRepo
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -36,7 +37,8 @@ import javax.inject.Inject
 @AutoDiscover
 class MultiCityListEditorScreen @Inject constructor(
     private val logger: Logger,
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val multiCityListRepo: MultiCityListRepo
 ): NavigationNode<MultiCityListEditorScreen.Result> {
 
     companion object {
@@ -52,11 +54,6 @@ class MultiCityListEditorScreen @Inject constructor(
 
     }
 
-    /** Input params to the screen.
-     * The list the user needs to sort */
-    data class InputParameters(
-        val cityList : List<CityItem>
-    )
 
     /** Output parameters from the screen */
     //TODO this is kinda dumb. Maybe just import the repo here.
@@ -64,23 +61,11 @@ class MultiCityListEditorScreen @Inject constructor(
         // No changes were made to the input list.
         object NoChangesRequested : Result
 
-        // New order for the input list.
-        // We can't return a generic result from a NavigationNode<Result<T>>,
-        // and we do want the original types to be reflected in the returned result.
-        data class NewOrderRequested(
-            // A list where the index is the key, the value (Int) at that index
-            // is the index of the item in the old list.
-            val newlyOrderedCitylist : List<Int>
-        ) {
-            inline fun <reified T : CityItem> List<T>.reorderByNewOrder(result : NewOrderRequested) : List<T> {
-                return result.newlyOrderedCitylist.map { this[it] }
-            }
-        }
+        //The order changed
+        object NewOrderRequested : Result
 
-        /** The user wanted to add an item to the list, and not reorder.
-         */
+        /** The user wanted to add an item to the list, and not reorder.*/
         object InsertionRequested : Result
-
     }
 
     override val thisClass: Class<out NavigationNode<Result>>
@@ -91,9 +76,9 @@ class MultiCityListEditorScreen @Inject constructor(
         val context = SmoothScroll.MenuWindowSmoothScrollContext(TAG)
 
         // Get the items from the parameters
-        val givenList = params?.requestParameters?.let { it as? InputParameters }?.cityList ?: emptyList()
+        val givenList = multiCityListRepo.getMultiCityList().value
 
-        val mutableList = SnapshotStateList<CityItem>().apply { addAll(givenList) }
+        val mutableList = SnapshotStateList<MultiCityListRepo.City>().apply { addAll(givenList) }
 
         ReorderableListScreen(
             "Re-order Weather Cities",
@@ -102,6 +87,7 @@ class MultiCityListEditorScreen @Inject constructor(
             onNewlyOrderedInputItems = {
                 mutableList.clear()
                 mutableList.addAll(it)
+                multiCityListRepo.updateCityList(it)
             },
             inputItemViewFactory = { item ->
                 // Quick and dirty, could also be a two line where the detail is much smaller.
@@ -120,9 +106,7 @@ class MultiCityListEditorScreen @Inject constructor(
                     //Need to take the indexOf everything in the list now
                     navigationNodeTraverser.setResultAndGoBack(
                         MultiCityListEditorScreen::class.java,
-                        Result.NewOrderRequested(
-                            mutableList.map { givenList.indexOf(it) }
-                        )
+                        Result.NewOrderRequested
                     )
                 }
             },
@@ -186,27 +170,29 @@ class MultiCityListEditorScreen @Inject constructor(
             SnapshotStateList()
 
 
-        key (isSelectionMode, items) {
-            LaunchedEffect(Unit, isSelectionMode, items) {
-                //TODO maybe move this in the key so there's no race condition on the index?
-                items.clear()
-                items.addAll(buildList {
-                    add(null to backItem)
-                    newItem?.let { add(null to it) }
-                    items.forEachIndexed { index, (item, menuItem) ->
-                        if (isSelectionMode) {
-                            add(null to selectThisSpotComposable(item, index) { selectedItem, selectedIndex ->
-                                isSelectionMode = false
-                                wereChangesMade = true
-                                items.removeIf { it.first == selectedItem }
-                                items.add (selectedIndex, selectedItem to inputItems.find { it == item }!!.let { inputItemViewFactory.invoke(it) })
-                            })
-                        }
-                        add(item to menuItem)
+        LaunchedEffect(Unit, isSelectionMode, items) {
+            //TODO maybe move this in the key so there's no race condition on the index?
+            logger.d(TAG, "Update items")
+            items.clear()
+            items.addAll(buildList {
+                add(null to backItem)
+                newItem?.let { add(null to it) }
+                items.forEachIndexed { index, (item, menuItem) ->
+                    if (isSelectionMode) {
+                        add(null to selectThisSpotComposable(item, index) { selectedItem, selectedIndex ->
+                            isSelectionMode = false
+                            wereChangesMade = true
+                            items.removeIf { it.first == selectedItem }
+                            items.add (selectedIndex, selectedItem to inputItems.find { it == item }!!.let { inputItemViewFactory.invoke(it) })
+                        })
                     }
-                })
-                onNewlyOrderedInputItems(items.mapNotNull { it.first })
-            }
+                    add(item to menuItem)
+                }
+            })
+            onNewlyOrderedInputItems(items.mapNotNull { it.first })
+        }
+
+        key (isSelectionMode, items) {
             smoothScrollContext.OneColumnSmoothScreenCustomViews(
                 header = header,
                 prependGoBackEntry = false,

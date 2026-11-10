@@ -1,8 +1,9 @@
 package ca.stefanm.ibus.gui.menu.navigator
 
 import androidx.compose.runtime.*
-import ca.stefanm.ca.stefanm.ibus.gui.apps.weather.impl.views.WeatherAppSettingsScreen
-import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
+import ca.stefanm.ibus.gui.apps.weather.impl.views.MultiCityListEditorScreen
+import ca.stefanm.ibus.gui.apps.weather.impl.views.WeatherAppSettingsScreen
+import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.FileManagerSettingsScreen
 import ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens.FilePaneDebugScreen
@@ -197,7 +198,8 @@ class NavigationModule {
         slideShowAppHomeScreen: SlideShowAppHomeScreen,
         smoothScrollToolbarTest: SmoothScrollToolbarTest,
         weatherAppHomeScreen: WeatherAppHomeScreen,
-        weatherAppSettingsScreen: WeatherAppSettingsScreen
+        weatherAppSettingsScreen: WeatherAppSettingsScreen,
+        multiCityListEditorScreen: MultiCityListEditorScreen
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -289,7 +291,8 @@ class NavigationModule {
         slideShowAppHomeScreen,
         smoothScrollToolbarTest,
         weatherAppHomeScreen,
-        weatherAppSettingsScreen
+        weatherAppSettingsScreen,
+        multiCityListEditorScreen
     )
 }
 

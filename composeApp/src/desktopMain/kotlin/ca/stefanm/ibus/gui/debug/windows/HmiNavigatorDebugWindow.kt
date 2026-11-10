@@ -18,11 +18,12 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
-import ca.stefanm.ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
+import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
 import ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens.FilePaneDebugScreen
 import ca.stefanm.ibus.car.desktop.input.griffinPowermate.NavigatorMapScreenListener
 import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
+import ca.stefanm.ibus.gui.apps.weather.impl.views.MultiCityListEditorScreen
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiKeyboard
 import ca.stefanm.ibus.gui.debug.hmiScreens.DebugHmiMenuTestTwoColumn
 import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothGridScrollTest
@@ -102,6 +103,7 @@ class HmiNavigatorDebugWindow @Inject constructor(
                     ScreenHotKey(SmoothGridScrollTest::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(FilePaneDebugScreen::class.java as Class<NavigationNode<*>>)
                     ScreenHotKey(SmoothScrollToolbarTest::class.java as Class<NavigationNode<*>>)
+                    ScreenHotKey(MultiCityListEditorScreen::class.java as Class<NavigationNode<*>>)
                 }
             }
 

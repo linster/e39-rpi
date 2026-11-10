@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.gallery.impl
+package ca.stefanm.ibus.gui.apps.gallery.impl
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row

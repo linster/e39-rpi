@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ca.stefanm.ca.stefanm.ibus.gui.apps.gallery.impl.ImageViewerToolbars
+import ca.stefanm.ibus.gui.apps.gallery.impl.ImageViewerToolbars
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.gui.menu.Notification

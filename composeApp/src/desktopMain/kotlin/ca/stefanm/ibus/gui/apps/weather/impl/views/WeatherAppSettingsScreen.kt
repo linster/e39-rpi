@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.weather.impl.views
+package ca.stefanm.ibus.gui.apps.weather.impl.views
 
 import androidx.compose.runtime.Composable
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -9,6 +9,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoothScreen
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
@@ -19,13 +20,7 @@ import javax.inject.Named
     description = "Settings for the weather app"
 )
 @AutoDiscover
-class WeatherAppSettingsScreen @Inject constructor(
-    @Named(ApplicationModule.KNOB_LISTENER_MAIN)
-    private val knobListenerServiceMain: KnobListenerService,
-
-    private val logger: Logger,
-    private val navigationNodeTraverser: NavigationNodeTraverser,
-) : NavigationNode<Nothing> {
+class WeatherAppSettingsScreen @Inject constructor() : NavigationNode<Nothing> {
 
     companion object {
         const val TAG = "WeatherAppSettingsScreen"
@@ -35,14 +30,9 @@ class WeatherAppSettingsScreen @Inject constructor(
         get() = WeatherAppSettingsScreen::class.java
 
     override fun provideMainContent(): @Composable ((incomingResult: Navigator.IncomingResult?) -> Unit) = {
-
-        FullScreenMenu.OneColumnSmoothScreen(
+        val context = SmoothScroll.MenuWindowSmoothScrollContext()
+        context.OneColumnSmoothScreen(
             header = "Weather App Settings",
-            knobListenerService = knobListenerServiceMain,
-            logger = logger,
-            navigationNodeTraverser = navigationNodeTraverser,
-            logTag = TAG,
-            prependGoBackEntry = true,
             items = listOf(
                 //The default forecast the weather app opens to.
                 "Select Default Forecast" to {
@@ -60,7 +50,6 @@ class WeatherAppSettingsScreen @Inject constructor(
 
                 // Tell the repo to sync fresh weather
                 "Fetch fresh weather" to {},
-
             )
         )
     }

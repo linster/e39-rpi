@@ -1,4 +1,4 @@
-package ca.stefanm.ca.stefanm.ibus.gui.apps.weather.debug
+package ca.stefanm.ibus.gui.apps.weather.debug
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
