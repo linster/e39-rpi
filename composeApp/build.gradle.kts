@@ -161,7 +161,16 @@ kotlin {
             implementation("io.github.vinceglb:filekit-coil:${fileKitversion}")
 
             // Media player
-            implementation("io.github.kdroidfilter:composemediaplayer:0.10.0")
+            // composemediaplayer leaks kotlinx-coroutines-test into the runtime
+            // classpath (https://github.com/kdroidFilter/ComposeMediaPlayer/pull/264,
+            // not in a release yet). In the uber jar its MainDispatcherFactory
+            // service entry replaces kotlinx-coroutines-swing's, so Dispatchers.Main
+            // throws "Dispatchers.Main was accessed when the platform dispatcher was
+            // absent" (e.g. LinuxVideoPlayerState.openUri). Drop it until fixed.
+            implementation("io.github.kdroidfilter:composemediaplayer:0.10.0") {
+                exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-test")
+                exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-test-jvm")
+            }
 // TODO update to Kotlin 2.4 eventually.
 //            implementation("io.github.kdroidfilter:composemediaplayer:0.11.4")
 
