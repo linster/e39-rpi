@@ -106,7 +106,14 @@ kotlin {
 
             implementation("com.ginsberg:cirkle:1.0.1")
 
-            implementation("com.uchuhimo:konf:1.1.2")
+            // Only the HOCON format is used. The "konf" umbrella artifact also
+            // pulls in konf-xml -> dom4j -> XPP, whose SAXParserFactory service
+            // entry replaces the JDK's XML parser and breaks logback.xml parsing.
+            implementation("com.uchuhimo:konf-core:1.1.2")
+            implementation("com.uchuhimo:konf-hocon:1.1.2")
+
+            // JNA: Journald.kt calls sd_journal_send() in libsystemd.
+            implementation("net.java.dev.jna:jna:5.18.1")
 
             //Web
             val ktor_version = "2.1.0"

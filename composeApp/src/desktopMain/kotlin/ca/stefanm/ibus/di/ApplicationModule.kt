@@ -8,6 +8,8 @@ import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.car.di.ConfiguredCarComponent
 import ca.stefanm.ibus.car.di.ConfiguredCarModule
 import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.ibus.lib.logging.Journald
+import ca.stefanm.ibus.lib.logging.JournaldLogger
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
@@ -181,10 +183,12 @@ class ApplicationModule {
     @ApplicationScope
     fun provideLogger(
         stdOutLogger: StdOutLogger,
+        journaldLogger: JournaldLogger,
         logDistributionHub: LogDistributionHub
     ) : Logger {
+        // Journal when running as the systemd service (see Journald), else stdout.
         return CompositeLogger(
-            stdOutLogger,
+            if (Journald.isEnabled) journaldLogger else stdOutLogger,
             logDistributionHub
         )
     }

@@ -41,7 +41,47 @@ class StdOutLogger @Inject constructor() : Logger {
 
     override fun e(tag: String, msg: String, e: Throwable?) {
         if (e != null) {
-            e(tag, "$msg exception: {${e.toString()}} ${e.message} ${e.printStackTrace()}")
+            e(tag, "$msg exception: ${e.stackTraceToString()}")
+        } else {
+            e(tag, msg)
+        }
+    }
+}
+
+/**
+ * Logs to the systemd journal (see [Journald]): priority from the level, plus
+ * the fields HMI_TAG (the tag) and HMI_LEVEL (V/D/I/W/E; V and D are both
+ * journal priority "debug"). E.g. `journalctl -t e39rpi-hmi HMI_TAG=Bluetooth`.
+ * Falls back to stdout if an entry can't be written.
+ */
+@ApplicationScope
+class JournaldLogger @Inject constructor(
+    private val fallback: StdOutLogger
+) : Logger {
+
+    private fun send(level: String, priority: Int, tag: String, msg: String, orElse: () -> Unit) {
+        val sent = Journald.send(priority, "$tag / $msg", mapOf("HMI_TAG" to tag, "HMI_LEVEL" to level))
+        if (!sent) orElse()
+    }
+
+    override fun v(tag: String, msg: String) =
+        send("V", Journald.Priority.DEBUG, tag, msg) { fallback.v(tag, msg) }
+
+    override fun d(tag: String, msg: String) =
+        send("D", Journald.Priority.DEBUG, tag, msg) { fallback.d(tag, msg) }
+
+    override fun i(tag: String, msg: String) =
+        send("I", Journald.Priority.INFO, tag, msg) { fallback.i(tag, msg) }
+
+    override fun w(tag: String, msg: String) =
+        send("W", Journald.Priority.WARNING, tag, msg) { fallback.w(tag, msg) }
+
+    override fun e(tag: String, msg: String) =
+        send("E", Journald.Priority.ERR, tag, msg) { fallback.e(tag, msg) }
+
+    override fun e(tag: String, msg: String, e: Throwable?) {
+        if (e != null) {
+            e(tag, "$msg exception: ${e.stackTraceToString()}")
         } else {
             e(tag, msg)
         }
