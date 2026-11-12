@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import kotlinx.coroutines.CancellationException
 
 @Composable
 fun TileView(
@@ -32,15 +33,27 @@ fun TileView(
 
     val image = remember { mutableStateOf<ImageBitmap?>(null) }
 
-    LaunchedEffect(x, y, zoom) {
-        val tileFetcher = DaggerApplicationComponent.create().tileFetcher()
+    // The tile source (OpenStreetMap or the maps backend) is part of the key:
+    // switching it redraws the tiles from the other server.
+    val source = DaggerApplicationComponent.create().configurationStorage()
+        .config[E39Config.MapConfig.tileSource]
 
-        val tileFile = tileFetcher.getTile(x, y, zoom)
-
-        tileFile.inputStream().buffered().use {
-            image.value = org.jetbrains.skia.Image.makeFromEncoded(
-                        it.readBytes()
-                    ).toComposeImageBitmap()
+    LaunchedEffect(x, y, zoom, source) {
+        val component = DaggerApplicationComponent.create()
+        try {
+            val tileFile = component.tileFetcher().getTile(x, y, zoom)
+            tileFile.inputStream().buffered().use {
+                image.value = org.jetbrains.skia.Image.makeFromEncoded(
+                    it.readBytes()
+                ).toComposeImageBitmap()
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // No network, or the maps backend has no such tile offline: leave
+            // the tile blank rather than failing the whole map.
+            image.value = null
+            component.logger().w("TileView", "Tile $zoom/$x/$y unavailable: ${e.message}")
         }
     }
 

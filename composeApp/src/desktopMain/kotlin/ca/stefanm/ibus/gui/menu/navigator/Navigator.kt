@@ -65,6 +65,7 @@ import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.menu.ComposeDebugMenu
 import ca.stefanm.ibus.gui.map.settings.MapCenterSettingsScreen
 import ca.stefanm.ibus.gui.map.settings.MapsBackendSettingsScreen
+import ca.stefanm.ibus.gui.map.settings.MapTileSourceScreen
 import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
 import ca.stefanm.ibus.gui.menu.*
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
@@ -137,6 +138,7 @@ class NavigationModule {
         mapSettingsMainScreen: MapSettingsMainScreen,
         mapCenterSettingsScreen: MapCenterSettingsScreen,
         mapsBackendSettingsScreen: MapsBackendSettingsScreen,
+        mapTileSourceScreen: MapTileSourceScreen,
         themeSelectorScreen: ThemeSelectorScreen,
         createOrEditPoiScreen: CreateOrEditPoiScreen,
         poiManagerScreen: PoiManagerScreen,
@@ -231,6 +233,7 @@ class NavigationModule {
         mapSettingsMainScreen,
         mapCenterSettingsScreen,
         mapsBackendSettingsScreen,
+        mapTileSourceScreen,
         themeSelectorScreen,
         createOrEditPoiScreen,
         poiManagerScreen,

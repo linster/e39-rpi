@@ -43,10 +43,11 @@ class TileFetcher @Inject constructor(
     }
 
     internal suspend fun getTileFromServer(x : Int, y : Int, zoom : Int) : ByteArray {
-        val response : HttpResponse = httpClient.get(osmTileServerInfo.getTileUrl(x, y, zoom))
+        val url = osmTileServerInfo.getTileUrl(x, y, zoom)
+        val response : HttpResponse = httpClient.get(url)
 
         if (!response.status.isSuccess()) {
-            error("Response was a failure: ${response.headers}")
+            error("$url: ${response.status}")
         }
         if (response.contentType() != ContentType.Image.PNG) {
             error("Content type was ${response.contentType()} and not PNG")
@@ -170,34 +171,56 @@ class TileServerImageCacheClearer @Inject constructor(
 }
 
 class TileServerImageCache @Inject constructor(
-    private val logger: Logger
+    private val logger: Logger,
+    private val tileServerInfo: OSMTileServerInfo,
 ) {
     private val TAG = "TileServerImageCache"
 
     private val homeFolder = System.getProperty("user.home")
     private val e39BaseFolder = File(homeFolder, ".e39")
-    private val cacheDir = File(e39BaseFolder, "mapTiles")
+    /** One folder per tile server (OSMTileServerInfo.Server.cacheFolder). */
+    private val cacheRoot = File(e39BaseFolder, "mapTiles")
+
+    /** The current server's cache: tiles from different servers differ. */
+    private val cacheDir : File get() = File(cacheRoot, tileServerInfo.current().cacheFolder)
 
     init {
+        moveLegacyCache()
         createCacheDir()
     }
 
+    /**
+     * Before there was a choice of servers, OpenStreetMap's tiles were
+     * cached straight in mapTiles/<zoom>/...: move them to mapTiles/openstreetmap.
+     */
+    private fun moveLegacyCache() {
+        val legacy = cacheRoot.listFiles { f -> f.isDirectory && f.name.all { it.isDigit() } } ?: return
+        if (legacy.isEmpty()) return
+        val osm = File(cacheRoot, "openstreetmap").apply { mkdirs() }
+        legacy.forEach { zoomDir ->
+            val target = File(osm, zoomDir.name)
+            if (!target.exists() && zoomDir.renameTo(target)) return@forEach
+            logger.w(TAG, "Couldn't move legacy tile cache ${zoomDir.absolutePath}")
+        }
+    }
+
     private fun createCacheDir() {
-        if (!cacheDir.exists()) {
-            cacheDir.mkdirs().also { success ->
-                if (!success) error("Could not make tile cache dir: ${cacheDir.absolutePath}")
+        val dir = cacheDir
+        if (!dir.exists()) {
+            dir.mkdirs().also { success ->
+                if (!success) error("Could not make tile cache dir: ${dir.absolutePath}")
             }
         }
     }
 
+    /** Clears the cache of every tile server. */
     fun clearCache() {
-        cacheDir.deleteRecursively()
+        cacheRoot.deleteRecursively()
         createCacheDir()
     }
 
     fun retrieve(x : Int, y : Int, zoom : Int) : File? {
-        //"http://tile.openstreetmap.org/${OSMTileServerInfo.MAX_ZOOM - zoom}/$x/$y.png"
-
+        val cacheDir = cacheDir
         if (!File(cacheDir, zoom.toString()).exists()){
             logger.d(TAG, "Zoom folder doesn't exist: $zoom")
             return null
@@ -236,8 +259,10 @@ class TileServerImageCache @Inject constructor(
         tile.writeBytes(imageDataPng)
     }
 
+    /** Of the current tile server's cache. */
     fun calculateCacheSize() : Long {
-        return FileUtils.sizeOf(cacheDir)
+        val dir = cacheDir
+        return if (dir.exists()) FileUtils.sizeOf(dir) else 0L
     }
 
 

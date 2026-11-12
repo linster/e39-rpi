@@ -1,14 +1,46 @@
 package ca.stefanm.ibus.gui.map.widget.tile
 
-import androidx.compose.ui.unit.dp
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.configuration.E39Config.MapConfig.TileSource
 import javax.inject.Inject
 import kotlin.math.sin
 
-class OSMTileServerInfo @Inject constructor() {
+/**
+ * Where map tiles come from (E39Config.MapConfig.tileSource): OpenStreetMap's
+ * tile server, or the maps backend (e39-rpi-maps), whose /tiles serves its
+ * own cache (offline too) and fetches misses from OpenStreetMap.
+ *
+ * Read from the configuration on every call: TileView builds a new component
+ * per tile, so a change applies to the next tile fetched.
+ */
+class OSMTileServerInfo @Inject constructor(
+    private val configurationStorage: ConfigurationStorage,
+) {
+    data class Server(
+        val source: TileSource,
+        /** With {z}, {x}, {y}. */
+        val urlTemplate: String,
+        /** The local cache's folder for this server (tiles differ per server). */
+        val cacheFolder: String,
+    )
 
-    fun getTileUrl(x : Int, y : Int, zoom : Int) : String {
-        return "http://tile.openstreetmap.org/$zoom/$x/$y.png"
+    fun current(): Server {
+        val config = configurationStorage.config
+        return when (config[E39Config.MapConfig.tileSource]) {
+            TileSource.OPENSTREETMAP -> Server(
+                TileSource.OPENSTREETMAP, "https://tile.openstreetmap.org/{z}/{x}/{y}.png", "openstreetmap")
+            TileSource.MAPS_BACKEND -> {
+                val host = config[E39Config.MapConfig.Backend.host]
+                val port = config[E39Config.MapConfig.Backend.httpPort]
+                Server(TileSource.MAPS_BACKEND, "http://$host:$port/tiles/{z}/{x}/{y}.png",
+                    "maps-backend-${host.replace(Regex("[^A-Za-z0-9.-]"), "_")}-$port")
+            }
+        }
     }
+
+    fun getTileUrl(x : Int, y : Int, zoom : Int) : String =
+        current().urlTemplate.replace("{z}", "$zoom").replace("{x}", "$x").replace("{y}", "$y")
 }
 
 object MercartorCalc {
