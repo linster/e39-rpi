@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.repo.MapsBackendSettings
 import ca.stefanm.ibus.gui.map.repo.MapsBackendSettingsRepository
 import ca.stefanm.ibus.gui.map.repo.RemotePoiRepository
@@ -27,6 +28,7 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import javax.inject.Inject
 
 /** Host and port of the maps backend (POIs, routes), and whether it's reachable. */
+@AutoDiscover
 class MapsBackendSettingsScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
