@@ -1,0 +1,133 @@
+// Points of interest.
+//
+// v1 covers the user's own POIs: created, edited and deleted from the HMI
+// (or the Django admin), stored in the backend's writable state database, so
+// they survive map updates. POIs from the map data (OpenStreetMap) will be
+// searchable through the same SearchPois call later, as source MAP.
+
+syntax = "proto3";
+
+package e39maps.v1;
+
+import "e39maps_api/v1/common.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "ca.stefanm.e39maps.v1";
+option java_multiple_files = true;
+
+service PoiService {
+  // The user's POIs, by name.
+  rpc ListPois(ListPoisRequest) returns (ListPoisResponse);
+  // NOT_FOUND if there's no POI with that id.
+  rpc GetPoi(GetPoiRequest) returns (Poi);
+  // Creates a user POI (id, source and timestamps are set by the server).
+  // INVALID_ARGUMENT for a missing name or location, or coordinates out of
+  // range.
+  rpc CreatePoi(CreatePoiRequest) returns (Poi);
+  // Changes the fields named in update_mask (all editable fields if it's
+  // empty). NOT_FOUND / INVALID_ARGUMENT as above.
+  rpc UpdatePoi(UpdatePoiRequest) returns (Poi);
+  // NOT_FOUND if there's no POI with that id.
+  rpc DeletePoi(DeletePoiRequest) returns (google.protobuf.Empty);
+  // POIs near a point or inside an area, optionally matching a name, nearest
+  // first (near) or by name (bounding box / no area).
+  rpc SearchPois(SearchPoisRequest) returns (SearchPoisResponse);
+}
+
+// Where a POI comes from.
+enum PoiSource {
+  POI_SOURCE_UNSPECIFIED = 0;
+  POI_SOURCE_USER = 1;  // the user's own, editable
+  POI_SOURCE_MAP = 2;   // from the map data (OpenStreetMap), read-only; later
+}
+
+// How the HMI draws the POI on the map (the HMI's Poi.PoiIcon).
+message PoiIcon {
+  oneof kind {
+    NoIcon none = 1;
+    ColoredCircle colored_circle = 2;
+    BundledIcon bundled = 3;
+  }
+  message NoIcon {}
+  message ColoredCircle {
+    // 0xAARRGGBB, like Compose's Color.toArgb().
+    uint32 argb = 1;
+  }
+  message BundledIcon {
+    // An icon bundled with the HMI: its Compose resource name (a key of the
+    // HMI's Res.allDrawableResources, e.g. "poi_fuel").
+    string file_name = 1;
+    // Colour the icon is drawn in, 0xAARRGGBB. 0 (unset; a fully transparent
+    // tint would be invisible) = the HMI's default, white.
+    uint32 tint_argb = 2;
+  }
+}
+
+message Poi {
+  int64 id = 1;                               // set by the server
+  string name = 2;
+  LatLng location = 3;
+  PoiIcon icon = 4;                           // unset = no icon
+  bool visible = 5;                           // shown on the map
+  PoiSource source = 6;                       // set by the server
+  google.protobuf.Timestamp created = 7;      // set by the server
+  google.protobuf.Timestamp updated = 8;      // set by the server
+}
+
+message ListPoisRequest {
+  bool visible_only = 1;
+}
+
+message ListPoisResponse {
+  repeated Poi pois = 1;
+}
+
+message GetPoiRequest {
+  int64 id = 1;
+}
+
+message CreatePoiRequest {
+  Poi poi = 1;
+}
+
+message UpdatePoiRequest {
+  Poi poi = 1;  // poi.id selects the POI
+  // Editable: name, location, icon, visible.
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeletePoiRequest {
+  int64 id = 1;
+}
+
+message SearchPoisRequest {
+  // No area: all POIs (matching the name).
+  oneof area {
+    Near near = 1;
+    BoundingBox bounding_box = 2;
+  }
+  // Case-insensitive part of the name; empty = any name.
+  string name_contains = 3;
+  bool visible_only = 4;
+  // Default 50, at most 500.
+  int32 limit = 5;
+  // Default: USER (the only source in v1).
+  repeated PoiSource sources = 6;
+
+  message Near {
+    LatLng center = 1;
+    double radius_meters = 2;  // > 0
+  }
+}
+
+message SearchPoisResponse {
+  repeated PoiResult results = 1;
+}
+
+message PoiResult {
+  Poi poi = 1;
+  // Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+  double distance_meters = 2;
+}

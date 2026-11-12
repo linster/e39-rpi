@@ -1,0 +1,109 @@
+// Routing (turn-by-turn), computed on the device by Valhalla from the
+// routing tiles built with the map data.
+//
+// Not implemented yet: until Valhalla is in, ComputeRoute answers
+// UNIMPLEMENTED. The messages follow Valhalla's route response (trip legs,
+// maneuvers, shape) so the server can fill them directly.
+
+syntax = "proto3";
+
+package e39maps.v1;
+
+import "e39maps_api/v1/common.proto";
+
+option java_package = "ca.stefanm.e39maps.v1";
+option java_multiple_files = true;
+
+service RouteService {
+  // INVALID_ARGUMENT for missing/out-of-range points; NOT_FOUND if no route
+  // connects them (e.g. outside the map data); UNIMPLEMENTED until routing
+  // is available; UNAVAILABLE if the routing data isn't installed.
+  rpc ComputeRoute(ComputeRouteRequest) returns (Route);
+}
+
+enum Costing {
+  COSTING_UNSPECIFIED = 0;  // = AUTO
+  COSTING_AUTO = 1;
+}
+
+enum Units {
+  UNITS_UNSPECIFIED = 0;  // = KILOMETERS
+  UNITS_KILOMETERS = 1;
+  UNITS_MILES = 2;
+}
+
+message ComputeRouteRequest {
+  LatLng origin = 1;
+  LatLng destination = 2;
+  // Stops in between, in order.
+  repeated LatLng via = 3;
+  Costing costing = 4;
+  // Units for the instruction texts (lengths below are always meters).
+  Units units = 5;
+  // Language of the instruction texts, BCP 47 ("en-US", "de-DE", ...);
+  // empty = en-US.
+  string language = 6;
+}
+
+message Route {
+  // The whole route as a line, origin to destination.
+  repeated LatLng shape = 1;
+  double length_meters = 2;
+  double duration_seconds = 3;
+  repeated Maneuver maneuvers = 4;
+}
+
+message Maneuver {
+  ManeuverType type = 1;
+  // Spoken/displayed instruction, e.g. "Turn left onto Main Street."
+  string instruction = 2;
+  // Text to speak ahead of the maneuver, e.g. "Turn left onto Main Street."
+  string verbal_pre_transition = 3;
+  repeated string street_names = 4;
+  double length_meters = 5;      // of the stretch after this maneuver
+  double duration_seconds = 6;
+  // Where this maneuver starts/ends in Route.shape (indexes).
+  int32 begin_shape_index = 7;
+  int32 end_shape_index = 8;
+  // Roundabouts: which exit (1 = first); 0 otherwise.
+  int32 roundabout_exit_count = 9;
+}
+
+// Valhalla's maneuver types (same numbers + 1: 0 is unspecified here).
+enum ManeuverType {
+  MANEUVER_TYPE_UNSPECIFIED = 0;
+  MANEUVER_TYPE_NONE = 1;
+  MANEUVER_TYPE_START = 2;
+  MANEUVER_TYPE_START_RIGHT = 3;
+  MANEUVER_TYPE_START_LEFT = 4;
+  MANEUVER_TYPE_DESTINATION = 5;
+  MANEUVER_TYPE_DESTINATION_RIGHT = 6;
+  MANEUVER_TYPE_DESTINATION_LEFT = 7;
+  MANEUVER_TYPE_BECOMES = 8;
+  MANEUVER_TYPE_CONTINUE = 9;
+  MANEUVER_TYPE_SLIGHT_RIGHT = 10;
+  MANEUVER_TYPE_RIGHT = 11;
+  MANEUVER_TYPE_SHARP_RIGHT = 12;
+  MANEUVER_TYPE_UTURN_RIGHT = 13;
+  MANEUVER_TYPE_UTURN_LEFT = 14;
+  MANEUVER_TYPE_SHARP_LEFT = 15;
+  MANEUVER_TYPE_LEFT = 16;
+  MANEUVER_TYPE_SLIGHT_LEFT = 17;
+  MANEUVER_TYPE_RAMP_STRAIGHT = 18;
+  MANEUVER_TYPE_RAMP_RIGHT = 19;
+  MANEUVER_TYPE_RAMP_LEFT = 20;
+  MANEUVER_TYPE_EXIT_RIGHT = 21;
+  MANEUVER_TYPE_EXIT_LEFT = 22;
+  MANEUVER_TYPE_STAY_STRAIGHT = 23;
+  MANEUVER_TYPE_STAY_RIGHT = 24;
+  MANEUVER_TYPE_STAY_LEFT = 25;
+  MANEUVER_TYPE_MERGE = 26;
+  MANEUVER_TYPE_ROUNDABOUT_ENTER = 27;
+  MANEUVER_TYPE_ROUNDABOUT_EXIT = 28;
+  MANEUVER_TYPE_FERRY_ENTER = 29;
+  MANEUVER_TYPE_FERRY_EXIT = 30;
+  // 31-34: Valhalla's transit connection types (not used for cars).
+  reserved 31 to 34;
+  MANEUVER_TYPE_MERGE_RIGHT = 35;
+  MANEUVER_TYPE_MERGE_LEFT = 36;
+}

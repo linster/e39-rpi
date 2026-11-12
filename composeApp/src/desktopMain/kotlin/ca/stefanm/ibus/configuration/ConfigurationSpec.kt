@@ -173,6 +173,21 @@ object E39Config : ConfigSpec() {
             "default LatLng to open all maps at. Default is in Kanata, ON, Canada."
         )
 
+        /** The maps backend (e39-rpi-maps) gRPC API: POIs, routes. */
+        object Backend : ConfigSpec() {
+            val host by optional(
+                "localhost",
+                "host",
+                "Host of the maps backend's gRPC API. localhost: the backend on the Pi, " +
+                        "or on the laptop QEMU's port forward / a local run_grpc_server."
+            )
+            val port by optional(
+                50051,
+                "port",
+                "Port of the maps backend's gRPC API."
+            )
+        }
+
         object GuidanceService : ConfigSpec() {
             val hereMapsApiToken by optional(
                 "",
