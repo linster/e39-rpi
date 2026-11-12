@@ -1,9 +1,7 @@
-// Routing (turn-by-turn), computed on the device by Valhalla from the
-// routing tiles built with the map data.
-//
-// Not implemented yet: until Valhalla is in, ComputeRoute answers
-// UNIMPLEMENTED. The messages follow Valhalla's route response (trip legs,
-// maneuvers, shape) so the server can fill them directly.
+// Routing (turn-by-turn), computed on the device by Valhalla (in-process,
+// pyvalhalla / the image's python3-valhalla) from the routing tiles the map
+// toolkit builds with the map database (car only). The messages follow
+// Valhalla's route response (trip legs, maneuvers, shape).
 
 syntax = "proto3";
 
@@ -16,8 +14,10 @@ option java_multiple_files = true;
 
 service RouteService {
   // INVALID_ARGUMENT for missing/out-of-range points; NOT_FOUND if no route
-  // connects them (e.g. outside the map data); UNIMPLEMENTED until routing
-  // is available; UNAVAILABLE if the routing data isn't installed.
+  // connects them (e.g. a point far from any road, or outside the map
+  // data); UNAVAILABLE if the routing tiles (or Valhalla) aren't installed.
+  // Via points are stops: each ends a leg; the legs are joined into one
+  // shape, with the maneuvers' shape indexes into the joined shape.
   rpc ComputeRoute(ComputeRouteRequest) returns (Route);
 }
 
@@ -67,6 +67,13 @@ message Maneuver {
   int32 end_shape_index = 8;
   // Roundabouts: which exit (1 = first); 0 otherwise.
   int32 roundabout_exit_count = 9;
+  // Where the maneuver happens: Route.shape[begin_shape_index].
+  LatLng location = 10;
+  // Show/announce the maneuver once the car is this close to `location`
+  // (straight line): about 15 s at the speed of the approach (the previous
+  // maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+  // that stretch, so it can't fire before the previous maneuver.
+  double trigger_radius_meters = 11;
 }
 
 // Valhalla's maneuver types (same numbers + 1: 0 is unspecified here).

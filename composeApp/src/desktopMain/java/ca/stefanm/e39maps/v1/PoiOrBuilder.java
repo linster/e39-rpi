@@ -155,4 +155,87 @@ public interface PoiOrBuilder extends
    * <code>.google.protobuf.Timestamp updated = 8;</code>
    */
   com.google.protobuf.TimestampOrBuilder getUpdatedOrBuilder();
+
+  /**
+   * <pre>
+   * MAP POIs
+   * </pre>
+   *
+   * <code>.e39maps.v1.PoiCategory category = 9;</code>
+   * @return The enum numeric value on the wire for category.
+   */
+  int getCategoryValue();
+  /**
+   * <pre>
+   * MAP POIs
+   * </pre>
+   *
+   * <code>.e39maps.v1.PoiCategory category = 9;</code>
+   * @return The category.
+   */
+  ca.stefanm.e39maps.v1.PoiCategory getCategory();
+
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  int getDetailsCount();
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  boolean containsDetails(
+      java.lang.String key);
+  /**
+   * Use {@link #getDetailsMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getDetails();
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getDetailsMap();
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  /* nullable */
+java.lang.String getDetailsOrDefault(
+      java.lang.String key,
+      /* nullable */
+java.lang.String defaultValue);
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  java.lang.String getDetailsOrThrow(
+      java.lang.String key);
 }

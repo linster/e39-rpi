@@ -126,4 +126,44 @@ public interface ManeuverOrBuilder extends
    * @return The roundaboutExitCount.
    */
   int getRoundaboutExitCount();
+
+  /**
+   * <pre>
+   * Where the maneuver happens: Route.shape[begin_shape_index].
+   * </pre>
+   *
+   * <code>.e39maps.v1.LatLng location = 10;</code>
+   * @return Whether the location field is set.
+   */
+  boolean hasLocation();
+  /**
+   * <pre>
+   * Where the maneuver happens: Route.shape[begin_shape_index].
+   * </pre>
+   *
+   * <code>.e39maps.v1.LatLng location = 10;</code>
+   * @return The location.
+   */
+  ca.stefanm.e39maps.v1.LatLng getLocation();
+  /**
+   * <pre>
+   * Where the maneuver happens: Route.shape[begin_shape_index].
+   * </pre>
+   *
+   * <code>.e39maps.v1.LatLng location = 10;</code>
+   */
+  ca.stefanm.e39maps.v1.LatLngOrBuilder getLocationOrBuilder();
+
+  /**
+   * <pre>
+   * Show/announce the maneuver once the car is this close to `location`
+   * (straight line): about 15 s at the speed of the approach (the previous
+   * maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+   * that stretch, so it can't fire before the previous maneuver.
+   * </pre>
+   *
+   * <code>double trigger_radius_meters = 11;</code>
+   * @return The triggerRadiusMeters.
+   */
+  double getTriggerRadiusMeters();
 }

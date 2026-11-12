@@ -47,6 +47,7 @@ private static final long serialVersionUID = 0L;
             ca.stefanm.e39maps.v1.Maneuver.class, ca.stefanm.e39maps.v1.Maneuver.Builder.class);
   }
 
+  private int bitField0_;
   public static final int TYPE_FIELD_NUMBER = 1;
   private int type_ = 0;
   /**
@@ -263,6 +264,62 @@ private static final long serialVersionUID = 0L;
     return roundaboutExitCount_;
   }
 
+  public static final int LOCATION_FIELD_NUMBER = 10;
+  private ca.stefanm.e39maps.v1.LatLng location_;
+  /**
+   * <pre>
+   * Where the maneuver happens: Route.shape[begin_shape_index].
+   * </pre>
+   *
+   * <code>.e39maps.v1.LatLng location = 10;</code>
+   * @return Whether the location field is set.
+   */
+  @java.lang.Override
+  public boolean hasLocation() {
+    return ((bitField0_ & 0x00000001) != 0);
+  }
+  /**
+   * <pre>
+   * Where the maneuver happens: Route.shape[begin_shape_index].
+   * </pre>
+   *
+   * <code>.e39maps.v1.LatLng location = 10;</code>
+   * @return The location.
+   */
+  @java.lang.Override
+  public ca.stefanm.e39maps.v1.LatLng getLocation() {
+    return location_ == null ? ca.stefanm.e39maps.v1.LatLng.getDefaultInstance() : location_;
+  }
+  /**
+   * <pre>
+   * Where the maneuver happens: Route.shape[begin_shape_index].
+   * </pre>
+   *
+   * <code>.e39maps.v1.LatLng location = 10;</code>
+   */
+  @java.lang.Override
+  public ca.stefanm.e39maps.v1.LatLngOrBuilder getLocationOrBuilder() {
+    return location_ == null ? ca.stefanm.e39maps.v1.LatLng.getDefaultInstance() : location_;
+  }
+
+  public static final int TRIGGER_RADIUS_METERS_FIELD_NUMBER = 11;
+  private double triggerRadiusMeters_ = 0D;
+  /**
+   * <pre>
+   * Show/announce the maneuver once the car is this close to `location`
+   * (straight line): about 15 s at the speed of the approach (the previous
+   * maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+   * that stretch, so it can't fire before the previous maneuver.
+   * </pre>
+   *
+   * <code>double trigger_radius_meters = 11;</code>
+   * @return The triggerRadiusMeters.
+   */
+  @java.lang.Override
+  public double getTriggerRadiusMeters() {
+    return triggerRadiusMeters_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -303,6 +360,12 @@ private static final long serialVersionUID = 0L;
     }
     if (roundaboutExitCount_ != 0) {
       output.writeInt32(9, roundaboutExitCount_);
+    }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      output.writeMessage(10, getLocation());
+    }
+    if (java.lang.Double.doubleToRawLongBits(triggerRadiusMeters_) != 0) {
+      output.writeDouble(11, triggerRadiusMeters_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -351,6 +414,14 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt32Size(9, roundaboutExitCount_);
     }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(10, getLocation());
+    }
+    if (java.lang.Double.doubleToRawLongBits(triggerRadiusMeters_) != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeDoubleSize(11, triggerRadiusMeters_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -385,6 +456,14 @@ private static final long serialVersionUID = 0L;
         != other.getEndShapeIndex()) return false;
     if (getRoundaboutExitCount()
         != other.getRoundaboutExitCount()) return false;
+    if (hasLocation() != other.hasLocation()) return false;
+    if (hasLocation()) {
+      if (!getLocation()
+          .equals(other.getLocation())) return false;
+    }
+    if (java.lang.Double.doubleToLongBits(getTriggerRadiusMeters())
+        != java.lang.Double.doubleToLongBits(
+            other.getTriggerRadiusMeters())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -418,6 +497,13 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getEndShapeIndex();
     hash = (37 * hash) + ROUNDABOUT_EXIT_COUNT_FIELD_NUMBER;
     hash = (53 * hash) + getRoundaboutExitCount();
+    if (hasLocation()) {
+      hash = (37 * hash) + LOCATION_FIELD_NUMBER;
+      hash = (53 * hash) + getLocation().hashCode();
+    }
+    hash = (37 * hash) + TRIGGER_RADIUS_METERS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        java.lang.Double.doubleToLongBits(getTriggerRadiusMeters()));
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -537,13 +623,19 @@ private static final long serialVersionUID = 0L;
 
     // Construct using ca.stefanm.e39maps.v1.Maneuver.newBuilder()
     private Builder() {
-
+      maybeForceBuilderInitialization();
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       super(parent);
-
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessage
+              .alwaysUseFieldBuilders) {
+        getLocationFieldBuilder();
+      }
     }
     @java.lang.Override
     public Builder clear() {
@@ -559,6 +651,12 @@ private static final long serialVersionUID = 0L;
       beginShapeIndex_ = 0;
       endShapeIndex_ = 0;
       roundaboutExitCount_ = 0;
+      location_ = null;
+      if (locationBuilder_ != null) {
+        locationBuilder_.dispose();
+        locationBuilder_ = null;
+      }
+      triggerRadiusMeters_ = 0D;
       return this;
     }
 
@@ -620,6 +718,17 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000100) != 0)) {
         result.roundaboutExitCount_ = roundaboutExitCount_;
       }
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000200) != 0)) {
+        result.location_ = locationBuilder_ == null
+            ? location_
+            : locationBuilder_.build();
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000400) != 0)) {
+        result.triggerRadiusMeters_ = triggerRadiusMeters_;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
 
     @java.lang.Override
@@ -671,6 +780,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getRoundaboutExitCount() != 0) {
         setRoundaboutExitCount(other.getRoundaboutExitCount());
+      }
+      if (other.hasLocation()) {
+        mergeLocation(other.getLocation());
+      }
+      if (other.getTriggerRadiusMeters() != 0D) {
+        setTriggerRadiusMeters(other.getTriggerRadiusMeters());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -744,6 +859,18 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000100;
               break;
             } // case 72
+            case 82: {
+              input.readMessage(
+                  getLocationFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000200;
+              break;
+            } // case 82
+            case 89: {
+              triggerRadiusMeters_ = input.readDouble();
+              bitField0_ |= 0x00000400;
+              break;
+            } // case 89
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1301,6 +1428,216 @@ private static final long serialVersionUID = 0L;
     public Builder clearRoundaboutExitCount() {
       bitField0_ = (bitField0_ & ~0x00000100);
       roundaboutExitCount_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private ca.stefanm.e39maps.v1.LatLng location_;
+    private com.google.protobuf.SingleFieldBuilder<
+        ca.stefanm.e39maps.v1.LatLng, ca.stefanm.e39maps.v1.LatLng.Builder, ca.stefanm.e39maps.v1.LatLngOrBuilder> locationBuilder_;
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     * @return Whether the location field is set.
+     */
+    public boolean hasLocation() {
+      return ((bitField0_ & 0x00000200) != 0);
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     * @return The location.
+     */
+    public ca.stefanm.e39maps.v1.LatLng getLocation() {
+      if (locationBuilder_ == null) {
+        return location_ == null ? ca.stefanm.e39maps.v1.LatLng.getDefaultInstance() : location_;
+      } else {
+        return locationBuilder_.getMessage();
+      }
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     */
+    public Builder setLocation(ca.stefanm.e39maps.v1.LatLng value) {
+      if (locationBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        location_ = value;
+      } else {
+        locationBuilder_.setMessage(value);
+      }
+      bitField0_ |= 0x00000200;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     */
+    public Builder setLocation(
+        ca.stefanm.e39maps.v1.LatLng.Builder builderForValue) {
+      if (locationBuilder_ == null) {
+        location_ = builderForValue.build();
+      } else {
+        locationBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00000200;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     */
+    public Builder mergeLocation(ca.stefanm.e39maps.v1.LatLng value) {
+      if (locationBuilder_ == null) {
+        if (((bitField0_ & 0x00000200) != 0) &&
+          location_ != null &&
+          location_ != ca.stefanm.e39maps.v1.LatLng.getDefaultInstance()) {
+          getLocationBuilder().mergeFrom(value);
+        } else {
+          location_ = value;
+        }
+      } else {
+        locationBuilder_.mergeFrom(value);
+      }
+      if (location_ != null) {
+        bitField0_ |= 0x00000200;
+        onChanged();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     */
+    public Builder clearLocation() {
+      bitField0_ = (bitField0_ & ~0x00000200);
+      location_ = null;
+      if (locationBuilder_ != null) {
+        locationBuilder_.dispose();
+        locationBuilder_ = null;
+      }
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     */
+    public ca.stefanm.e39maps.v1.LatLng.Builder getLocationBuilder() {
+      bitField0_ |= 0x00000200;
+      onChanged();
+      return getLocationFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     */
+    public ca.stefanm.e39maps.v1.LatLngOrBuilder getLocationOrBuilder() {
+      if (locationBuilder_ != null) {
+        return locationBuilder_.getMessageOrBuilder();
+      } else {
+        return location_ == null ?
+            ca.stefanm.e39maps.v1.LatLng.getDefaultInstance() : location_;
+      }
+    }
+    /**
+     * <pre>
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * </pre>
+     *
+     * <code>.e39maps.v1.LatLng location = 10;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        ca.stefanm.e39maps.v1.LatLng, ca.stefanm.e39maps.v1.LatLng.Builder, ca.stefanm.e39maps.v1.LatLngOrBuilder> 
+        getLocationFieldBuilder() {
+      if (locationBuilder_ == null) {
+        locationBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            ca.stefanm.e39maps.v1.LatLng, ca.stefanm.e39maps.v1.LatLng.Builder, ca.stefanm.e39maps.v1.LatLngOrBuilder>(
+                getLocation(),
+                getParentForChildren(),
+                isClean());
+        location_ = null;
+      }
+      return locationBuilder_;
+    }
+
+    private double triggerRadiusMeters_ ;
+    /**
+     * <pre>
+     * Show/announce the maneuver once the car is this close to `location`
+     * (straight line): about 15 s at the speed of the approach (the previous
+     * maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+     * that stretch, so it can't fire before the previous maneuver.
+     * </pre>
+     *
+     * <code>double trigger_radius_meters = 11;</code>
+     * @return The triggerRadiusMeters.
+     */
+    @java.lang.Override
+    public double getTriggerRadiusMeters() {
+      return triggerRadiusMeters_;
+    }
+    /**
+     * <pre>
+     * Show/announce the maneuver once the car is this close to `location`
+     * (straight line): about 15 s at the speed of the approach (the previous
+     * maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+     * that stretch, so it can't fire before the previous maneuver.
+     * </pre>
+     *
+     * <code>double trigger_radius_meters = 11;</code>
+     * @param value The triggerRadiusMeters to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTriggerRadiusMeters(double value) {
+
+      triggerRadiusMeters_ = value;
+      bitField0_ |= 0x00000400;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Show/announce the maneuver once the car is this close to `location`
+     * (straight line): about 15 s at the speed of the approach (the previous
+     * maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+     * that stretch, so it can't fire before the previous maneuver.
+     * </pre>
+     *
+     * <code>double trigger_radius_meters = 11;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTriggerRadiusMeters() {
+      bitField0_ = (bitField0_ & ~0x00000400);
+      triggerRadiusMeters_ = 0D;
       onChanged();
       return this;
     }

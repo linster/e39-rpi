@@ -28,7 +28,7 @@ public enum PoiSource
   POI_SOURCE_USER(1),
   /**
    * <pre>
-   * from the map data (OpenStreetMap), read-only; later
+   * from the map data (OpenStreetMap), read-only
    * </pre>
    *
    * <code>POI_SOURCE_MAP = 2;</code>
@@ -60,7 +60,7 @@ public enum PoiSource
   public static final int POI_SOURCE_USER_VALUE = 1;
   /**
    * <pre>
-   * from the map data (OpenStreetMap), read-only; later
+   * from the map data (OpenStreetMap), read-only
    * </pre>
    *
    * <code>POI_SOURCE_MAP = 2;</code>

@@ -35,8 +35,13 @@ class RemoteRouteRepository @Inject constructor(
         /** Of the stretch after this maneuver. */
         val lengthMeters: Double,
         val durationSeconds: Double,
-        /** Where the maneuver is: path[location index]. */
+        /** Where the maneuver happens. */
         val location: LatLng?,
+        /**
+         * Show/announce the maneuver once the car is this close to [location]
+         * (straight line): ~15 s at the approach speed, 30-1000 m.
+         */
+        val triggerRadiusMeters: Double,
         val pathIndexRange: IntRange,
         /** Roundabouts: which exit (1 = first); 0 otherwise. */
         val roundaboutExit: Int,
@@ -91,7 +96,9 @@ class RemoteRouteRepository @Inject constructor(
         streetNames = streetNamesList,
         lengthMeters = lengthMeters,
         durationSeconds = durationSeconds,
-        location = path.getOrNull(beginShapeIndex),
+        // Older backends send no location: fall back to the shape index.
+        location = if (hasLocation()) location.toLatLng() else path.getOrNull(beginShapeIndex),
+        triggerRadiusMeters = triggerRadiusMeters,
         pathIndexRange = beginShapeIndex..endShapeIndex,
         roundaboutExit = roundaboutExitCount,
     )

@@ -51,6 +51,11 @@ public final class Pois {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_e39maps_v1_Poi_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_e39maps_v1_Poi_DetailsEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_e39maps_v1_Poi_DetailsEntry_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_e39maps_v1_ListPoisRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -119,45 +124,57 @@ public final class Pois {
       "\000\0222\n\007bundled\030\003 \001(\0132\037.e39maps.v1.PoiIcon." +
       "BundledIconH\000\032\010\n\006NoIcon\032\035\n\rColoredCircle" +
       "\022\014\n\004argb\030\001 \001(\r\0323\n\013BundledIcon\022\021\n\tfile_na" +
-      "me\030\001 \001(\t\022\021\n\ttint_argb\030\002 \001(\rB\006\n\004kind\"\372\001\n\003" +
+      "me\030\001 \001(\t\022\021\n\ttint_argb\030\002 \001(\rB\006\n\004kind\"\204\003\n\003" +
       "Poi\022\n\n\002id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022$\n\010locatio" +
       "n\030\003 \001(\0132\022.e39maps.v1.LatLng\022!\n\004icon\030\004 \001(" +
       "\0132\023.e39maps.v1.PoiIcon\022\017\n\007visible\030\005 \001(\010\022" +
       "%\n\006source\030\006 \001(\0162\025.e39maps.v1.PoiSource\022+" +
       "\n\007created\030\007 \001(\0132\032.google.protobuf.Timest" +
       "amp\022+\n\007updated\030\010 \001(\0132\032.google.protobuf.T" +
-      "imestamp\"\'\n\017ListPoisRequest\022\024\n\014visible_o" +
-      "nly\030\001 \001(\010\"1\n\020ListPoisResponse\022\035\n\004pois\030\001 " +
-      "\003(\0132\017.e39maps.v1.Poi\"\033\n\rGetPoiRequest\022\n\n" +
-      "\002id\030\001 \001(\003\"0\n\020CreatePoiRequest\022\034\n\003poi\030\001 \001" +
-      "(\0132\017.e39maps.v1.Poi\"a\n\020UpdatePoiRequest\022" +
-      "\034\n\003poi\030\001 \001(\0132\017.e39maps.v1.Poi\022/\n\013update_" +
-      "mask\030\002 \001(\0132\032.google.protobuf.FieldMask\"\036" +
-      "\n\020DeletePoiRequest\022\n\n\002id\030\001 \001(\003\"\247\002\n\021Searc" +
-      "hPoisRequest\0222\n\004near\030\001 \001(\0132\".e39maps.v1." +
-      "SearchPoisRequest.NearH\000\022/\n\014bounding_box" +
-      "\030\002 \001(\0132\027.e39maps.v1.BoundingBoxH\000\022\025\n\rnam" +
-      "e_contains\030\003 \001(\t\022\024\n\014visible_only\030\004 \001(\010\022\r" +
-      "\n\005limit\030\005 \001(\005\022&\n\007sources\030\006 \003(\0162\025.e39maps" +
-      ".v1.PoiSource\032A\n\004Near\022\"\n\006center\030\001 \001(\0132\022." +
-      "e39maps.v1.LatLng\022\025\n\rradius_meters\030\002 \001(\001" +
-      "B\006\n\004area\"<\n\022SearchPoisResponse\022&\n\007result" +
-      "s\030\001 \003(\0132\025.e39maps.v1.PoiResult\"B\n\tPoiRes" +
-      "ult\022\034\n\003poi\030\001 \001(\0132\017.e39maps.v1.Poi\022\027\n\017dis" +
-      "tance_meters\030\002 \001(\001*P\n\tPoiSource\022\032\n\026POI_S" +
-      "OURCE_UNSPECIFIED\020\000\022\023\n\017POI_SOURCE_USER\020\001" +
-      "\022\022\n\016POI_SOURCE_MAP\020\0022\221\003\n\nPoiService\022E\n\010L" +
-      "istPois\022\033.e39maps.v1.ListPoisRequest\032\034.e" +
-      "39maps.v1.ListPoisResponse\0224\n\006GetPoi\022\031.e" +
-      "39maps.v1.GetPoiRequest\032\017.e39maps.v1.Poi" +
-      "\022:\n\tCreatePoi\022\034.e39maps.v1.CreatePoiRequ" +
-      "est\032\017.e39maps.v1.Poi\022:\n\tUpdatePoi\022\034.e39m" +
-      "aps.v1.UpdatePoiRequest\032\017.e39maps.v1.Poi" +
-      "\022A\n\tDeletePoi\022\034.e39maps.v1.DeletePoiRequ" +
-      "est\032\026.google.protobuf.Empty\022K\n\nSearchPoi" +
-      "s\022\035.e39maps.v1.SearchPoisRequest\032\036.e39ma" +
-      "ps.v1.SearchPoisResponseB\031\n\025ca.stefanm.e" +
-      "39maps.v1P\001b\006proto3"
+      "imestamp\022)\n\010category\030\t \001(\0162\027.e39maps.v1." +
+      "PoiCategory\022-\n\007details\030\n \003(\0132\034.e39maps.v" +
+      "1.Poi.DetailsEntry\032.\n\014DetailsEntry\022\013\n\003ke" +
+      "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\'\n\017ListPoisRe" +
+      "quest\022\024\n\014visible_only\030\001 \001(\010\"1\n\020ListPoisR" +
+      "esponse\022\035\n\004pois\030\001 \003(\0132\017.e39maps.v1.Poi\"\033" +
+      "\n\rGetPoiRequest\022\n\n\002id\030\001 \001(\003\"0\n\020CreatePoi" +
+      "Request\022\034\n\003poi\030\001 \001(\0132\017.e39maps.v1.Poi\"a\n" +
+      "\020UpdatePoiRequest\022\034\n\003poi\030\001 \001(\0132\017.e39maps" +
+      ".v1.Poi\022/\n\013update_mask\030\002 \001(\0132\032.google.pr" +
+      "otobuf.FieldMask\"\036\n\020DeletePoiRequest\022\n\n\002" +
+      "id\030\001 \001(\003\"\324\002\n\021SearchPoisRequest\0222\n\004near\030\001" +
+      " \001(\0132\".e39maps.v1.SearchPoisRequest.Near" +
+      "H\000\022/\n\014bounding_box\030\002 \001(\0132\027.e39maps.v1.Bo" +
+      "undingBoxH\000\022\025\n\rname_contains\030\003 \001(\t\022\024\n\014vi" +
+      "sible_only\030\004 \001(\010\022\r\n\005limit\030\005 \001(\005\022&\n\007sourc" +
+      "es\030\006 \003(\0162\025.e39maps.v1.PoiSource\022+\n\ncateg" +
+      "ories\030\007 \003(\0162\027.e39maps.v1.PoiCategory\032A\n\004" +
+      "Near\022\"\n\006center\030\001 \001(\0132\022.e39maps.v1.LatLng" +
+      "\022\025\n\rradius_meters\030\002 \001(\001B\006\n\004area\"<\n\022Searc" +
+      "hPoisResponse\022&\n\007results\030\001 \003(\0132\025.e39maps" +
+      ".v1.PoiResult\"B\n\tPoiResult\022\034\n\003poi\030\001 \001(\0132" +
+      "\017.e39maps.v1.Poi\022\027\n\017distance_meters\030\002 \001(" +
+      "\001*P\n\tPoiSource\022\032\n\026POI_SOURCE_UNSPECIFIED" +
+      "\020\000\022\023\n\017POI_SOURCE_USER\020\001\022\022\n\016POI_SOURCE_MA" +
+      "P\020\002*\227\002\n\013PoiCategory\022\034\n\030POI_CATEGORY_UNSP" +
+      "ECIFIED\020\000\022\025\n\021POI_CATEGORY_FUEL\020\001\022\033\n\027POI_" +
+      "CATEGORY_RESTAURANT\020\002\022\031\n\025POI_CATEGORY_SK" +
+      "I_AREA\020\003\022\027\n\023POI_CATEGORY_MUSEUM\020\004\022\030\n\024POI" +
+      "_CATEGORY_AIRPORT\020\005\022\025\n\021POI_CATEGORY_PARK" +
+      "\020\006\022\032\n\026POI_CATEGORY_TRAILHEAD\020\007\022\032\n\026POI_CA" +
+      "TEGORY_CAR_PARTS\020\010\022\031\n\025POI_CATEGORY_JUNKY" +
+      "ARD\020\t2\221\003\n\nPoiService\022E\n\010ListPois\022\033.e39ma" +
+      "ps.v1.ListPoisRequest\032\034.e39maps.v1.ListP" +
+      "oisResponse\0224\n\006GetPoi\022\031.e39maps.v1.GetPo" +
+      "iRequest\032\017.e39maps.v1.Poi\022:\n\tCreatePoi\022\034" +
+      ".e39maps.v1.CreatePoiRequest\032\017.e39maps.v" +
+      "1.Poi\022:\n\tUpdatePoi\022\034.e39maps.v1.UpdatePo" +
+      "iRequest\032\017.e39maps.v1.Poi\022A\n\tDeletePoi\022\034" +
+      ".e39maps.v1.DeletePoiRequest\032\026.google.pr" +
+      "otobuf.Empty\022K\n\nSearchPois\022\035.e39maps.v1." +
+      "SearchPoisRequest\032\036.e39maps.v1.SearchPoi" +
+      "sResponseB\031\n\025ca.stefanm.e39maps.v1P\001b\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -196,7 +213,13 @@ public final class Pois {
     internal_static_e39maps_v1_Poi_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39maps_v1_Poi_descriptor,
-        new java.lang.String[] { "Id", "Name", "Location", "Icon", "Visible", "Source", "Created", "Updated", });
+        new java.lang.String[] { "Id", "Name", "Location", "Icon", "Visible", "Source", "Created", "Updated", "Category", "Details", });
+    internal_static_e39maps_v1_Poi_DetailsEntry_descriptor =
+      internal_static_e39maps_v1_Poi_descriptor.getNestedTypes().get(0);
+    internal_static_e39maps_v1_Poi_DetailsEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_e39maps_v1_Poi_DetailsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
     internal_static_e39maps_v1_ListPoisRequest_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_e39maps_v1_ListPoisRequest_fieldAccessorTable = new
@@ -238,7 +261,7 @@ public final class Pois {
     internal_static_e39maps_v1_SearchPoisRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39maps_v1_SearchPoisRequest_descriptor,
-        new java.lang.String[] { "Near", "BoundingBox", "NameContains", "VisibleOnly", "Limit", "Sources", "Area", });
+        new java.lang.String[] { "Near", "BoundingBox", "NameContains", "VisibleOnly", "Limit", "Sources", "Categories", "Area", });
     internal_static_e39maps_v1_SearchPoisRequest_Near_descriptor =
       internal_static_e39maps_v1_SearchPoisRequest_descriptor.getNestedTypes().get(0);
     internal_static_e39maps_v1_SearchPoisRequest_Near_fieldAccessorTable = new

@@ -57,6 +57,8 @@ public object PoiResultKt {
     /**
      * ```
      * Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+     * Results from several sources are merged: nearest first with near,
+     * otherwise by name.
      * ```
      *
      * `double distance_meters = 2;`
@@ -71,6 +73,8 @@ public object PoiResultKt {
     /**
      * ```
      * Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+     * Results from several sources are merged: nearest first with near,
+     * otherwise by name.
      * ```
      *
      * `double distance_meters = 2;`

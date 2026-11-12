@@ -77,7 +77,7 @@ public interface SearchPoisRequestOrBuilder extends
 
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -86,7 +86,7 @@ public interface SearchPoisRequestOrBuilder extends
   java.util.List<ca.stefanm.e39maps.v1.PoiSource> getSourcesList();
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -95,7 +95,7 @@ public interface SearchPoisRequestOrBuilder extends
   int getSourcesCount();
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -105,7 +105,7 @@ public interface SearchPoisRequestOrBuilder extends
   ca.stefanm.e39maps.v1.PoiSource getSources(int index);
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -115,7 +115,7 @@ public interface SearchPoisRequestOrBuilder extends
   getSourcesValueList();
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -123,6 +123,55 @@ public interface SearchPoisRequestOrBuilder extends
    * @return The enum numeric value on the wire of sources at the given index.
    */
   int getSourcesValue(int index);
+
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @return A list containing the categories.
+   */
+  java.util.List<ca.stefanm.e39maps.v1.PoiCategory> getCategoriesList();
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @return The count of categories.
+   */
+  int getCategoriesCount();
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @param index The index of the element to return.
+   * @return The categories at the given index.
+   */
+  ca.stefanm.e39maps.v1.PoiCategory getCategories(int index);
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @return A list containing the enum numeric values on the wire for categories.
+   */
+  java.util.List<java.lang.Integer>
+  getCategoriesValueList();
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @param index The index of the value to return.
+   * @return The enum numeric value on the wire of categories at the given index.
+   */
+  int getCategoriesValue(int index);
 
   ca.stefanm.e39maps.v1.SearchPoisRequest.AreaCase getAreaCase();
 }

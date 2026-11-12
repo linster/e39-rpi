@@ -280,9 +280,81 @@ public object ManeuverKt {
     public fun clearRoundaboutExitCount() {
       _builder.clearRoundaboutExitCount()
     }
+
+    /**
+     * ```
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * ```
+     *
+     * `.e39maps.v1.LatLng location = 10;`
+     */
+    public var location: ca.stefanm.e39maps.v1.LatLng
+      @JvmName("getLocation")
+      get() = _builder.location
+      @JvmName("setLocation")
+      set(value) {
+        _builder.location = value
+      }
+    /**
+     * ```
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * ```
+     *
+     * `.e39maps.v1.LatLng location = 10;`
+     */
+    public fun clearLocation() {
+      _builder.clearLocation()
+    }
+    /**
+     * ```
+     * Where the maneuver happens: Route.shape[begin_shape_index].
+     * ```
+     *
+     * `.e39maps.v1.LatLng location = 10;`
+     * @return Whether the location field is set.
+     */
+    public fun hasLocation(): kotlin.Boolean {
+      return _builder.hasLocation()
+    }
+    public val ManeuverKt.Dsl.locationOrNull: ca.stefanm.e39maps.v1.LatLng?
+      get() = _builder.locationOrNull
+
+    /**
+     * ```
+     * Show/announce the maneuver once the car is this close to `location`
+     * (straight line): about 15 s at the speed of the approach (the previous
+     * maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+     * that stretch, so it can't fire before the previous maneuver.
+     * ```
+     *
+     * `double trigger_radius_meters = 11;`
+     */
+    public var triggerRadiusMeters: kotlin.Double
+      @JvmName("getTriggerRadiusMeters")
+      get() = _builder.triggerRadiusMeters
+      @JvmName("setTriggerRadiusMeters")
+      set(value) {
+        _builder.triggerRadiusMeters = value
+      }
+    /**
+     * ```
+     * Show/announce the maneuver once the car is this close to `location`
+     * (straight line): about 15 s at the speed of the approach (the previous
+     * maneuver's stretch), at least 30 m, at most 1000 m, and no longer than
+     * that stretch, so it can't fire before the previous maneuver.
+     * ```
+     *
+     * `double trigger_radius_meters = 11;`
+     */
+    public fun clearTriggerRadiusMeters() {
+      _builder.clearTriggerRadiusMeters()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun ca.stefanm.e39maps.v1.Maneuver.copy(block: `ca.stefanm.e39maps.v1`.ManeuverKt.Dsl.() -> kotlin.Unit): ca.stefanm.e39maps.v1.Maneuver =
   `ca.stefanm.e39maps.v1`.ManeuverKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+public val ca.stefanm.e39maps.v1.ManeuverOrBuilder.locationOrNull: ca.stefanm.e39maps.v1.LatLng?
+  get() = if (hasLocation()) getLocation() else null
 

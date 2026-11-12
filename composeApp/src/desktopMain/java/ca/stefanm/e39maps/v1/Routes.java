@@ -59,45 +59,47 @@ public final class Routes {
       "language\030\006 \001(\t\"\204\001\n\005Route\022!\n\005shape\030\001 \003(\0132" +
       "\022.e39maps.v1.LatLng\022\025\n\rlength_meters\030\002 \001" +
       "(\001\022\030\n\020duration_seconds\030\003 \001(\001\022\'\n\tmaneuver" +
-      "s\030\004 \003(\0132\024.e39maps.v1.Maneuver\"\200\002\n\010Maneuv" +
+      "s\030\004 \003(\0132\024.e39maps.v1.Maneuver\"\305\002\n\010Maneuv" +
       "er\022&\n\004type\030\001 \001(\0162\030.e39maps.v1.ManeuverTy" +
       "pe\022\023\n\013instruction\030\002 \001(\t\022\035\n\025verbal_pre_tr" +
       "ansition\030\003 \001(\t\022\024\n\014street_names\030\004 \003(\t\022\025\n\r" +
       "length_meters\030\005 \001(\001\022\030\n\020duration_seconds\030" +
       "\006 \001(\001\022\031\n\021begin_shape_index\030\007 \001(\005\022\027\n\017end_" +
       "shape_index\030\010 \001(\005\022\035\n\025roundabout_exit_cou" +
-      "nt\030\t \001(\005*4\n\007Costing\022\027\n\023COSTING_UNSPECIFI" +
-      "ED\020\000\022\020\n\014COSTING_AUTO\020\001*E\n\005Units\022\025\n\021UNITS" +
-      "_UNSPECIFIED\020\000\022\024\n\020UNITS_KILOMETERS\020\001\022\017\n\013" +
-      "UNITS_MILES\020\002*\367\007\n\014ManeuverType\022\035\n\031MANEUV" +
-      "ER_TYPE_UNSPECIFIED\020\000\022\026\n\022MANEUVER_TYPE_N" +
-      "ONE\020\001\022\027\n\023MANEUVER_TYPE_START\020\002\022\035\n\031MANEUV" +
-      "ER_TYPE_START_RIGHT\020\003\022\034\n\030MANEUVER_TYPE_S" +
-      "TART_LEFT\020\004\022\035\n\031MANEUVER_TYPE_DESTINATION" +
-      "\020\005\022#\n\037MANEUVER_TYPE_DESTINATION_RIGHT\020\006\022" +
-      "\"\n\036MANEUVER_TYPE_DESTINATION_LEFT\020\007\022\031\n\025M" +
-      "ANEUVER_TYPE_BECOMES\020\010\022\032\n\026MANEUVER_TYPE_" +
-      "CONTINUE\020\t\022\036\n\032MANEUVER_TYPE_SLIGHT_RIGHT" +
-      "\020\n\022\027\n\023MANEUVER_TYPE_RIGHT\020\013\022\035\n\031MANEUVER_" +
-      "TYPE_SHARP_RIGHT\020\014\022\035\n\031MANEUVER_TYPE_UTUR" +
-      "N_RIGHT\020\r\022\034\n\030MANEUVER_TYPE_UTURN_LEFT\020\016\022" +
-      "\034\n\030MANEUVER_TYPE_SHARP_LEFT\020\017\022\026\n\022MANEUVE" +
-      "R_TYPE_LEFT\020\020\022\035\n\031MANEUVER_TYPE_SLIGHT_LE" +
-      "FT\020\021\022\037\n\033MANEUVER_TYPE_RAMP_STRAIGHT\020\022\022\034\n" +
-      "\030MANEUVER_TYPE_RAMP_RIGHT\020\023\022\033\n\027MANEUVER_" +
-      "TYPE_RAMP_LEFT\020\024\022\034\n\030MANEUVER_TYPE_EXIT_R" +
-      "IGHT\020\025\022\033\n\027MANEUVER_TYPE_EXIT_LEFT\020\026\022\037\n\033M" +
-      "ANEUVER_TYPE_STAY_STRAIGHT\020\027\022\034\n\030MANEUVER" +
-      "_TYPE_STAY_RIGHT\020\030\022\033\n\027MANEUVER_TYPE_STAY" +
-      "_LEFT\020\031\022\027\n\023MANEUVER_TYPE_MERGE\020\032\022\"\n\036MANE" +
-      "UVER_TYPE_ROUNDABOUT_ENTER\020\033\022!\n\035MANEUVER" +
-      "_TYPE_ROUNDABOUT_EXIT\020\034\022\035\n\031MANEUVER_TYPE" +
-      "_FERRY_ENTER\020\035\022\034\n\030MANEUVER_TYPE_FERRY_EX" +
-      "IT\020\036\022\035\n\031MANEUVER_TYPE_MERGE_RIGHT\020#\022\034\n\030M" +
-      "ANEUVER_TYPE_MERGE_LEFT\020$\"\004\010\037\020\"2R\n\014Route" +
-      "Service\022B\n\014ComputeRoute\022\037.e39maps.v1.Com" +
-      "puteRouteRequest\032\021.e39maps.v1.RouteB\031\n\025c" +
-      "a.stefanm.e39maps.v1P\001b\006proto3"
+      "nt\030\t \001(\005\022$\n\010location\030\n \001(\0132\022.e39maps.v1." +
+      "LatLng\022\035\n\025trigger_radius_meters\030\013 \001(\001*4\n" +
+      "\007Costing\022\027\n\023COSTING_UNSPECIFIED\020\000\022\020\n\014COS" +
+      "TING_AUTO\020\001*E\n\005Units\022\025\n\021UNITS_UNSPECIFIE" +
+      "D\020\000\022\024\n\020UNITS_KILOMETERS\020\001\022\017\n\013UNITS_MILES" +
+      "\020\002*\367\007\n\014ManeuverType\022\035\n\031MANEUVER_TYPE_UNS" +
+      "PECIFIED\020\000\022\026\n\022MANEUVER_TYPE_NONE\020\001\022\027\n\023MA" +
+      "NEUVER_TYPE_START\020\002\022\035\n\031MANEUVER_TYPE_STA" +
+      "RT_RIGHT\020\003\022\034\n\030MANEUVER_TYPE_START_LEFT\020\004" +
+      "\022\035\n\031MANEUVER_TYPE_DESTINATION\020\005\022#\n\037MANEU" +
+      "VER_TYPE_DESTINATION_RIGHT\020\006\022\"\n\036MANEUVER" +
+      "_TYPE_DESTINATION_LEFT\020\007\022\031\n\025MANEUVER_TYP" +
+      "E_BECOMES\020\010\022\032\n\026MANEUVER_TYPE_CONTINUE\020\t\022" +
+      "\036\n\032MANEUVER_TYPE_SLIGHT_RIGHT\020\n\022\027\n\023MANEU" +
+      "VER_TYPE_RIGHT\020\013\022\035\n\031MANEUVER_TYPE_SHARP_" +
+      "RIGHT\020\014\022\035\n\031MANEUVER_TYPE_UTURN_RIGHT\020\r\022\034" +
+      "\n\030MANEUVER_TYPE_UTURN_LEFT\020\016\022\034\n\030MANEUVER" +
+      "_TYPE_SHARP_LEFT\020\017\022\026\n\022MANEUVER_TYPE_LEFT" +
+      "\020\020\022\035\n\031MANEUVER_TYPE_SLIGHT_LEFT\020\021\022\037\n\033MAN" +
+      "EUVER_TYPE_RAMP_STRAIGHT\020\022\022\034\n\030MANEUVER_T" +
+      "YPE_RAMP_RIGHT\020\023\022\033\n\027MANEUVER_TYPE_RAMP_L" +
+      "EFT\020\024\022\034\n\030MANEUVER_TYPE_EXIT_RIGHT\020\025\022\033\n\027M" +
+      "ANEUVER_TYPE_EXIT_LEFT\020\026\022\037\n\033MANEUVER_TYP" +
+      "E_STAY_STRAIGHT\020\027\022\034\n\030MANEUVER_TYPE_STAY_" +
+      "RIGHT\020\030\022\033\n\027MANEUVER_TYPE_STAY_LEFT\020\031\022\027\n\023" +
+      "MANEUVER_TYPE_MERGE\020\032\022\"\n\036MANEUVER_TYPE_R" +
+      "OUNDABOUT_ENTER\020\033\022!\n\035MANEUVER_TYPE_ROUND" +
+      "ABOUT_EXIT\020\034\022\035\n\031MANEUVER_TYPE_FERRY_ENTE" +
+      "R\020\035\022\034\n\030MANEUVER_TYPE_FERRY_EXIT\020\036\022\035\n\031MAN" +
+      "EUVER_TYPE_MERGE_RIGHT\020#\022\034\n\030MANEUVER_TYP" +
+      "E_MERGE_LEFT\020$\"\004\010\037\020\"2R\n\014RouteService\022B\n\014" +
+      "ComputeRoute\022\037.e39maps.v1.ComputeRouteRe" +
+      "quest\032\021.e39maps.v1.RouteB\031\n\025ca.stefanm.e" +
+      "39maps.v1P\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -121,7 +123,7 @@ public final class Routes {
     internal_static_e39maps_v1_Maneuver_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39maps_v1_Maneuver_descriptor,
-        new java.lang.String[] { "Type", "Instruction", "VerbalPreTransition", "StreetNames", "LengthMeters", "DurationSeconds", "BeginShapeIndex", "EndShapeIndex", "RoundaboutExitCount", });
+        new java.lang.String[] { "Type", "Instruction", "VerbalPreTransition", "StreetNames", "LengthMeters", "DurationSeconds", "BeginShapeIndex", "EndShapeIndex", "RoundaboutExitCount", "Location", "TriggerRadiusMeters", });
     descriptor.resolveAllFeaturesImmutable();
     ca.stefanm.e39maps.v1.Common.getDescriptor();
   }

@@ -29,6 +29,7 @@ private static final long serialVersionUID = 0L;
   private Poi() {
     name_ = "";
     source_ = 0;
+    category_ = 0;
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -36,6 +37,18 @@ private static final long serialVersionUID = 0L;
     return ca.stefanm.e39maps.v1.Pois.internal_static_e39maps_v1_Poi_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+      int number) {
+    switch (number) {
+      case 10:
+        return internalGetDetails();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -280,6 +293,135 @@ private static final long serialVersionUID = 0L;
     return updated_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : updated_;
   }
 
+  public static final int CATEGORY_FIELD_NUMBER = 9;
+  private int category_ = 0;
+  /**
+   * <pre>
+   * MAP POIs
+   * </pre>
+   *
+   * <code>.e39maps.v1.PoiCategory category = 9;</code>
+   * @return The enum numeric value on the wire for category.
+   */
+  @java.lang.Override public int getCategoryValue() {
+    return category_;
+  }
+  /**
+   * <pre>
+   * MAP POIs
+   * </pre>
+   *
+   * <code>.e39maps.v1.PoiCategory category = 9;</code>
+   * @return The category.
+   */
+  @java.lang.Override public ca.stefanm.e39maps.v1.PoiCategory getCategory() {
+    ca.stefanm.e39maps.v1.PoiCategory result = ca.stefanm.e39maps.v1.PoiCategory.forNumber(category_);
+    return result == null ? ca.stefanm.e39maps.v1.PoiCategory.UNRECOGNIZED : result;
+  }
+
+  public static final int DETAILS_FIELD_NUMBER = 10;
+  private static final class DetailsDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                ca.stefanm.e39maps.v1.Pois.internal_static_e39maps_v1_Poi_DetailsEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
+  }
+  @SuppressWarnings("serial")
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> details_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetDetails() {
+    if (details_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          DetailsDefaultEntryHolder.defaultEntry);
+    }
+    return details_;
+  }
+  public int getDetailsCount() {
+    return internalGetDetails().getMap().size();
+  }
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  @java.lang.Override
+  public boolean containsDetails(
+      java.lang.String key) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    return internalGetDetails().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getDetailsMap()} instead.
+   */
+  @java.lang.Override
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getDetails() {
+    return getDetailsMap();
+  }
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  @java.lang.Override
+  public java.util.Map<java.lang.String, java.lang.String> getDetailsMap() {
+    return internalGetDetails().getMap();
+  }
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  @java.lang.Override
+  public /* nullable */
+java.lang.String getDetailsOrDefault(
+      java.lang.String key,
+      /* nullable */
+java.lang.String defaultValue) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetDetails().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <pre>
+   * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+   * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+   * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; details = 10;</code>
+   */
+  @java.lang.Override
+  public java.lang.String getDetailsOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetDetails().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
+    }
+    return map.get(key);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -318,6 +460,15 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000008) != 0)) {
       output.writeMessage(8, getUpdated());
     }
+    if (category_ != ca.stefanm.e39maps.v1.PoiCategory.POI_CATEGORY_UNSPECIFIED.getNumber()) {
+      output.writeEnum(9, category_);
+    }
+    com.google.protobuf.GeneratedMessage
+      .serializeStringMapTo(
+        output,
+        internalGetDetails(),
+        DetailsDefaultEntryHolder.defaultEntry,
+        10);
     getUnknownFields().writeTo(output);
   }
 
@@ -357,6 +508,20 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000008) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(8, getUpdated());
+    }
+    if (category_ != ca.stefanm.e39maps.v1.PoiCategory.POI_CATEGORY_UNSPECIFIED.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(9, category_);
+    }
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetDetails().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      details__ = DetailsDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
+      size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, details__);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -400,6 +565,9 @@ private static final long serialVersionUID = 0L;
       if (!getUpdated()
           .equals(other.getUpdated())) return false;
     }
+    if (category_ != other.category_) return false;
+    if (!internalGetDetails().equals(
+        other.internalGetDetails())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -436,6 +604,12 @@ private static final long serialVersionUID = 0L;
     if (hasUpdated()) {
       hash = (37 * hash) + UPDATED_FIELD_NUMBER;
       hash = (53 * hash) + getUpdated().hashCode();
+    }
+    hash = (37 * hash) + CATEGORY_FIELD_NUMBER;
+    hash = (53 * hash) + category_;
+    if (!internalGetDetails().getMap().isEmpty()) {
+      hash = (37 * hash) + DETAILS_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetDetails().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -546,6 +720,28 @@ private static final long serialVersionUID = 0L;
       return ca.stefanm.e39maps.v1.Pois.internal_static_e39maps_v1_Poi_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 10:
+          return internalGetDetails();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 10:
+          return internalGetMutableDetails();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -601,6 +797,8 @@ private static final long serialVersionUID = 0L;
         updatedBuilder_.dispose();
         updatedBuilder_ = null;
       }
+      category_ = 0;
+      internalGetMutableDetails().clear();
       return this;
     }
 
@@ -671,6 +869,13 @@ private static final long serialVersionUID = 0L;
             : updatedBuilder_.build();
         to_bitField0_ |= 0x00000008;
       }
+      if (((from_bitField0_ & 0x00000100) != 0)) {
+        result.category_ = category_;
+      }
+      if (((from_bitField0_ & 0x00000200) != 0)) {
+        result.details_ = internalGetDetails();
+        result.details_.makeImmutable();
+      }
       result.bitField0_ |= to_bitField0_;
     }
 
@@ -712,6 +917,12 @@ private static final long serialVersionUID = 0L;
       if (other.hasUpdated()) {
         mergeUpdated(other.getUpdated());
       }
+      if (other.category_ != 0) {
+        setCategoryValue(other.getCategoryValue());
+      }
+      internalGetMutableDetails().mergeFrom(
+          other.internalGetDetails());
+      bitField0_ |= 0x00000200;
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -786,6 +997,20 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000080;
               break;
             } // case 66
+            case 72: {
+              category_ = input.readEnum();
+              bitField0_ |= 0x00000100;
+              break;
+            } // case 72
+            case 82: {
+              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+              details__ = input.readMessage(
+                  DetailsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              internalGetMutableDetails().getMutableMap().put(
+                  details__.getKey(), details__.getValue());
+              bitField0_ |= 0x00000200;
+              break;
+            } // case 82
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1626,6 +1851,248 @@ private static final long serialVersionUID = 0L;
         updated_ = null;
       }
       return updatedBuilder_;
+    }
+
+    private int category_ = 0;
+    /**
+     * <pre>
+     * MAP POIs
+     * </pre>
+     *
+     * <code>.e39maps.v1.PoiCategory category = 9;</code>
+     * @return The enum numeric value on the wire for category.
+     */
+    @java.lang.Override public int getCategoryValue() {
+      return category_;
+    }
+    /**
+     * <pre>
+     * MAP POIs
+     * </pre>
+     *
+     * <code>.e39maps.v1.PoiCategory category = 9;</code>
+     * @param value The enum numeric value on the wire for category to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCategoryValue(int value) {
+      category_ = value;
+      bitField0_ |= 0x00000100;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * MAP POIs
+     * </pre>
+     *
+     * <code>.e39maps.v1.PoiCategory category = 9;</code>
+     * @return The category.
+     */
+    @java.lang.Override
+    public ca.stefanm.e39maps.v1.PoiCategory getCategory() {
+      ca.stefanm.e39maps.v1.PoiCategory result = ca.stefanm.e39maps.v1.PoiCategory.forNumber(category_);
+      return result == null ? ca.stefanm.e39maps.v1.PoiCategory.UNRECOGNIZED : result;
+    }
+    /**
+     * <pre>
+     * MAP POIs
+     * </pre>
+     *
+     * <code>.e39maps.v1.PoiCategory category = 9;</code>
+     * @param value The category to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCategory(ca.stefanm.e39maps.v1.PoiCategory value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      bitField0_ |= 0x00000100;
+      category_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * MAP POIs
+     * </pre>
+     *
+     * <code>.e39maps.v1.PoiCategory category = 9;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearCategory() {
+      bitField0_ = (bitField0_ & ~0x00000100);
+      category_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> details_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+        internalGetDetails() {
+      if (details_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            DetailsDefaultEntryHolder.defaultEntry);
+      }
+      return details_;
+    }
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+        internalGetMutableDetails() {
+      if (details_ == null) {
+        details_ = com.google.protobuf.MapField.newMapField(
+            DetailsDefaultEntryHolder.defaultEntry);
+      }
+      if (!details_.isMutable()) {
+        details_ = details_.copy();
+      }
+      bitField0_ |= 0x00000200;
+      onChanged();
+      return details_;
+    }
+    public int getDetailsCount() {
+      return internalGetDetails().getMap().size();
+    }
+    /**
+     * <pre>
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; details = 10;</code>
+     */
+    @java.lang.Override
+    public boolean containsDetails(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetDetails().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getDetailsMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getDetails() {
+      return getDetailsMap();
+    }
+    /**
+     * <pre>
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; details = 10;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getDetailsMap() {
+      return internalGetDetails().getMap();
+    }
+    /**
+     * <pre>
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; details = 10;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getDetailsOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetDetails().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; details = 10;</code>
+     */
+    @java.lang.Override
+    public java.lang.String getDetailsOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetDetails().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+    public Builder clearDetails() {
+      bitField0_ = (bitField0_ & ~0x00000200);
+      internalGetMutableDetails().getMutableMap()
+          .clear();
+      return this;
+    }
+    /**
+     * <pre>
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; details = 10;</code>
+     */
+    public Builder removeDetails(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      internalGetMutableDetails().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+        getMutableDetails() {
+      bitField0_ |= 0x00000200;
+      return internalGetMutableDetails().getMutableMap();
+    }
+    /**
+     * <pre>
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; details = 10;</code>
+     */
+    public Builder putDetails(
+        java.lang.String key,
+        java.lang.String value) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      if (value == null) { throw new NullPointerException("map value"); }
+      internalGetMutableDetails().getMutableMap()
+          .put(key, value);
+      bitField0_ |= 0x00000200;
+      return this;
+    }
+    /**
+     * <pre>
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; details = 10;</code>
+     */
+    public Builder putAllDetails(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableDetails().getMutableMap()
+          .putAll(values);
+      bitField0_ |= 0x00000200;
+      return this;
     }
 
     // @@protoc_insertion_point(builder_scope:e39maps.v1.Poi)

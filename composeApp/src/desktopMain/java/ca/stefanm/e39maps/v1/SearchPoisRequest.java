@@ -29,6 +29,7 @@ private static final long serialVersionUID = 0L;
   private SearchPoisRequest() {
     nameContains_ = "";
     sources_ = emptyIntList();
+    categories_ = emptyIntList();
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -899,7 +900,7 @@ private static final long serialVersionUID = 0L;
           };
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -912,7 +913,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -924,7 +925,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -937,7 +938,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -950,7 +951,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Default: USER (the only source in v1).
+   * Default: USER only.
    * </pre>
    *
    * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -962,6 +963,84 @@ private static final long serialVersionUID = 0L;
     return sources_.getInt(index);
   }
   private int sourcesMemoizedSerializedSize;
+
+  public static final int CATEGORIES_FIELD_NUMBER = 7;
+  @SuppressWarnings("serial")
+  private com.google.protobuf.Internal.IntList categories_;
+  private static final com.google.protobuf.Internal.IntListAdapter.IntConverter<
+      ca.stefanm.e39maps.v1.PoiCategory> categories_converter_ =
+          new com.google.protobuf.Internal.IntListAdapter.IntConverter<
+              ca.stefanm.e39maps.v1.PoiCategory>() {
+            public ca.stefanm.e39maps.v1.PoiCategory convert(int from) {
+              ca.stefanm.e39maps.v1.PoiCategory result = ca.stefanm.e39maps.v1.PoiCategory.forNumber(from);
+              return result == null ? ca.stefanm.e39maps.v1.PoiCategory.UNRECOGNIZED : result;
+            }
+          };
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @return A list containing the categories.
+   */
+  @java.lang.Override
+  public java.util.List<ca.stefanm.e39maps.v1.PoiCategory> getCategoriesList() {
+    return new com.google.protobuf.Internal.IntListAdapter<
+        ca.stefanm.e39maps.v1.PoiCategory>(categories_, categories_converter_);
+  }
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @return The count of categories.
+   */
+  @java.lang.Override
+  public int getCategoriesCount() {
+    return categories_.size();
+  }
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @param index The index of the element to return.
+   * @return The categories at the given index.
+   */
+  @java.lang.Override
+  public ca.stefanm.e39maps.v1.PoiCategory getCategories(int index) {
+    return categories_converter_.convert(categories_.getInt(index));
+  }
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @return A list containing the enum numeric values on the wire for categories.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Integer>
+  getCategoriesValueList() {
+    return categories_;
+  }
+  /**
+   * <pre>
+   * Only POIs of these categories (so no user POIs); empty = any.
+   * </pre>
+   *
+   * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+   * @param index The index of the value to return.
+   * @return The enum numeric value on the wire of categories at the given index.
+   */
+  @java.lang.Override
+  public int getCategoriesValue(int index) {
+    return categories_.getInt(index);
+  }
+  private int categoriesMemoizedSerializedSize;
 
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
@@ -999,6 +1078,13 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < sources_.size(); i++) {
       output.writeEnumNoTag(sources_.getInt(i));
+    }
+    if (getCategoriesList().size() > 0) {
+      output.writeUInt32NoTag(58);
+      output.writeUInt32NoTag(categoriesMemoizedSerializedSize);
+    }
+    for (int i = 0; i < categories_.size(); i++) {
+      output.writeEnumNoTag(categories_.getInt(i));
     }
     getUnknownFields().writeTo(output);
   }
@@ -1040,6 +1126,18 @@ private static final long serialVersionUID = 0L;
           .computeUInt32SizeNoTag(dataSize);
       }sourcesMemoizedSerializedSize = dataSize;
     }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < categories_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeEnumSizeNoTag(categories_.getInt(i));
+      }
+      size += dataSize;
+      if (!getCategoriesList().isEmpty()) {  size += 1;
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32SizeNoTag(dataSize);
+      }categoriesMemoizedSerializedSize = dataSize;
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1062,6 +1160,7 @@ private static final long serialVersionUID = 0L;
     if (getLimit()
         != other.getLimit()) return false;
     if (!sources_.equals(other.sources_)) return false;
+    if (!categories_.equals(other.categories_)) return false;
     if (!getAreaCase().equals(other.getAreaCase())) return false;
     switch (areaCase_) {
       case 1:
@@ -1096,6 +1195,10 @@ private static final long serialVersionUID = 0L;
     if (getSourcesCount() > 0) {
       hash = (37 * hash) + SOURCES_FIELD_NUMBER;
       hash = (53 * hash) + sources_.hashCode();
+    }
+    if (getCategoriesCount() > 0) {
+      hash = (37 * hash) + CATEGORIES_FIELD_NUMBER;
+      hash = (53 * hash) + categories_.hashCode();
     }
     switch (areaCase_) {
       case 1:
@@ -1251,6 +1354,8 @@ private static final long serialVersionUID = 0L;
       limit_ = 0;
       sources_ = emptyIntList();
       bitField0_ = (bitField0_ & ~0x00000020);
+      categories_ = emptyIntList();
+      bitField0_ = (bitField0_ & ~0x00000040);
       areaCase_ = 0;
       area_ = null;
       return this;
@@ -1292,6 +1397,11 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000020);
       }
       result.sources_ = sources_;
+      if (((bitField0_ & 0x00000040) != 0)) {
+        categories_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000040);
+      }
+      result.categories_ = categories_;
     }
 
     private void buildPartial0(ca.stefanm.e39maps.v1.SearchPoisRequest result) {
@@ -1350,6 +1460,16 @@ private static final long serialVersionUID = 0L;
         } else {
           ensureSourcesIsMutable();
           sources_.addAll(other.sources_);
+        }
+        onChanged();
+      }
+      if (!other.categories_.isEmpty()) {
+        if (categories_.isEmpty()) {
+          categories_ = other.categories_;
+          bitField0_ = (bitField0_ & ~0x00000040);
+        } else {
+          ensureCategoriesIsMutable();
+          categories_.addAll(other.categories_);
         }
         onChanged();
       }
@@ -1438,6 +1558,23 @@ private static final long serialVersionUID = 0L;
               input.popLimit(oldLimit);
               break;
             } // case 50
+            case 56: {
+              int tmpRaw = input.readEnum();
+              ensureCategoriesIsMutable();
+              categories_.addInt(tmpRaw);
+              break;
+            } // case 56
+            case 58: {
+              int length = input.readRawVarint32();
+              int oldLimit = input.pushLimit(length);
+              while(input.getBytesUntilLimit() > 0) {
+                int tmpRaw = input.readEnum();
+                ensureCategoriesIsMutable();
+                categories_.addInt(tmpRaw);
+              }
+              input.popLimit(oldLimit);
+              break;
+            } // case 58
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1932,7 +2069,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -1944,7 +2081,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -1955,7 +2092,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -1967,7 +2104,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -1987,7 +2124,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2005,7 +2142,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2023,7 +2160,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2037,7 +2174,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2049,7 +2186,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2061,7 +2198,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2078,7 +2215,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2093,7 +2230,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * </pre>
      *
      * <code>repeated .e39maps.v1.PoiSource sources = 6;</code>
@@ -2105,6 +2242,194 @@ private static final long serialVersionUID = 0L;
       ensureSourcesIsMutable();
       for (int value : values) {
         sources_.addInt(value);
+      }
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.Internal.IntList categories_ =
+      emptyIntList();
+    private void ensureCategoriesIsMutable() {
+      if (!((bitField0_ & 0x00000040) != 0)) {
+        categories_ = makeMutableCopy(categories_);
+        bitField0_ |= 0x00000040;
+      }
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @return A list containing the categories.
+     */
+    public java.util.List<ca.stefanm.e39maps.v1.PoiCategory> getCategoriesList() {
+      return new com.google.protobuf.Internal.IntListAdapter<
+          ca.stefanm.e39maps.v1.PoiCategory>(categories_, categories_converter_);
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @return The count of categories.
+     */
+    public int getCategoriesCount() {
+      return categories_.size();
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param index The index of the element to return.
+     * @return The categories at the given index.
+     */
+    public ca.stefanm.e39maps.v1.PoiCategory getCategories(int index) {
+      return categories_converter_.convert(categories_.getInt(index));
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param index The index to set the value at.
+     * @param value The categories to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCategories(
+        int index, ca.stefanm.e39maps.v1.PoiCategory value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      ensureCategoriesIsMutable();
+      categories_.setInt(index, value.getNumber());
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param value The categories to add.
+     * @return This builder for chaining.
+     */
+    public Builder addCategories(ca.stefanm.e39maps.v1.PoiCategory value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      ensureCategoriesIsMutable();
+      categories_.addInt(value.getNumber());
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param values The categories to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllCategories(
+        java.lang.Iterable<? extends ca.stefanm.e39maps.v1.PoiCategory> values) {
+      ensureCategoriesIsMutable();
+      for (ca.stefanm.e39maps.v1.PoiCategory value : values) {
+        categories_.addInt(value.getNumber());
+      }
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearCategories() {
+      categories_ = emptyIntList();
+      bitField0_ = (bitField0_ & ~0x00000040);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @return A list containing the enum numeric values on the wire for categories.
+     */
+    public java.util.List<java.lang.Integer>
+    getCategoriesValueList() {
+      return java.util.Collections.unmodifiableList(categories_);
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param index The index of the value to return.
+     * @return The enum numeric value on the wire of categories at the given index.
+     */
+    public int getCategoriesValue(int index) {
+      return categories_.getInt(index);
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param index The index to set the value at.
+     * @param value The enum numeric value on the wire for categories to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCategoriesValue(
+        int index, int value) {
+      ensureCategoriesIsMutable();
+      categories_.setInt(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param value The enum numeric value on the wire for categories to add.
+     * @return This builder for chaining.
+     */
+    public Builder addCategoriesValue(int value) {
+      ensureCategoriesIsMutable();
+      categories_.addInt(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * </pre>
+     *
+     * <code>repeated .e39maps.v1.PoiCategory categories = 7;</code>
+     * @param values The enum numeric values on the wire for categories to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllCategoriesValue(
+        java.lang.Iterable<java.lang.Integer> values) {
+      ensureCategoriesIsMutable();
+      for (int value : values) {
+        categories_.addInt(value);
       }
       onChanged();
       return this;

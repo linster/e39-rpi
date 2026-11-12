@@ -266,6 +266,135 @@ public object PoiKt {
     }
     public val PoiKt.Dsl.updatedOrNull: com.google.protobuf.Timestamp?
       get() = _builder.updatedOrNull
+
+    /**
+     * ```
+     * MAP POIs
+     * ```
+     *
+     * `.e39maps.v1.PoiCategory category = 9;`
+     */
+    public var category: ca.stefanm.e39maps.v1.PoiCategory
+      @JvmName("getCategory")
+      get() = _builder.category
+      @JvmName("setCategory")
+      set(value) {
+        _builder.category = value
+      }
+    public var categoryValue: kotlin.Int
+      @JvmName("getCategoryValue")
+      get() = _builder.categoryValue
+      @JvmName("setCategoryValue")
+      set(value) {
+        _builder.categoryValue = value
+      }
+    /**
+     * ```
+     * MAP POIs
+     * ```
+     *
+     * `.e39maps.v1.PoiCategory category = 9;`
+     */
+    public fun clearCategory() {
+      _builder.clearCategory()
+    }
+
+    /**
+     * An uninstantiable, behaviorless type to represent the field in
+     * generics.
+     */
+    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
+    public class DetailsProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    /**
+     * ```
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * ```
+     *
+     * `map<string, string> details = 10;`
+     */
+     public val details: com.google.protobuf.kotlin.DslMap<kotlin.String, kotlin.String, DetailsProxy>
+      @kotlin.jvm.JvmSynthetic
+      @JvmName("getDetailsMap")
+      get() = com.google.protobuf.kotlin.DslMap(
+        _builder.detailsMap
+      )
+    /**
+     * ```
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * ```
+     *
+     * `map<string, string> details = 10;`
+     */
+    @JvmName("putDetails")
+    public fun com.google.protobuf.kotlin.DslMap<kotlin.String, kotlin.String, DetailsProxy>
+      .put(key: kotlin.String, value: kotlin.String) {
+         _builder.putDetails(key, value)
+       }
+    /**
+     * ```
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * ```
+     *
+     * `map<string, string> details = 10;`
+     */
+    @kotlin.jvm.JvmSynthetic
+    @JvmName("setDetails")
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslMap<kotlin.String, kotlin.String, DetailsProxy>
+      .set(key: kotlin.String, value: kotlin.String) {
+         put(key, value)
+       }
+    /**
+     * ```
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * ```
+     *
+     * `map<string, string> details = 10;`
+     */
+    @kotlin.jvm.JvmSynthetic
+    @JvmName("removeDetails")
+    public fun com.google.protobuf.kotlin.DslMap<kotlin.String, kotlin.String, DetailsProxy>
+      .remove(key: kotlin.String) {
+         _builder.removeDetails(key)
+       }
+    /**
+     * ```
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * ```
+     *
+     * `map<string, string> details = 10;`
+     */
+    @kotlin.jvm.JvmSynthetic
+    @JvmName("putAllDetails")
+    public fun com.google.protobuf.kotlin.DslMap<kotlin.String, kotlin.String, DetailsProxy>
+      .putAll(map: kotlin.collections.Map<kotlin.String, kotlin.String>) {
+         _builder.putAllDetails(map)
+       }
+    /**
+     * ```
+     * MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+     * e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+     * opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+     * ```
+     *
+     * `map<string, string> details = 10;`
+     */
+    @kotlin.jvm.JvmSynthetic
+    @JvmName("clearDetails")
+    public fun com.google.protobuf.kotlin.DslMap<kotlin.String, kotlin.String, DetailsProxy>
+      .clear() {
+         _builder.clearDetails()
+       }
   }
 }
 @kotlin.jvm.JvmSynthetic

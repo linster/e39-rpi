@@ -1,9 +1,13 @@
 // Points of interest.
 //
-// v1 covers the user's own POIs: created, edited and deleted from the HMI
-// (or the Django admin), stored in the backend's writable state database, so
-// they survive map updates. POIs from the map data (OpenStreetMap) will be
-// searchable through the same SearchPois call later, as source MAP.
+// Two kinds of POIs:
+// - USER: the user's own, created, edited and deleted from the HMI (or the
+//   Django admin), stored in the backend's writable state database, so they
+//   survive map updates. List/Get/Create/Update/DeletePoi work on these.
+// - MAP: from the map data (OpenStreetMap, built by the map toolkit), read
+//   only, with a category (fuel, restaurant, ...). Found with SearchPois
+//   (sources: MAP). Their ids are stable across map updates (derived from
+//   the OSM object) but separate from user POI ids.
 
 syntax = "proto3";
 
@@ -40,7 +44,22 @@ service PoiService {
 enum PoiSource {
   POI_SOURCE_UNSPECIFIED = 0;
   POI_SOURCE_USER = 1;  // the user's own, editable
-  POI_SOURCE_MAP = 2;   // from the map data (OpenStreetMap), read-only; later
+  POI_SOURCE_MAP = 2;   // from the map data (OpenStreetMap), read-only
+}
+
+// What a map POI is (OpenStreetMap tags: see the map toolkit's
+// categories.py). User POIs have none.
+enum PoiCategory {
+  POI_CATEGORY_UNSPECIFIED = 0;
+  POI_CATEGORY_FUEL = 1;        // amenity=fuel
+  POI_CATEGORY_RESTAURANT = 2;  // amenity=restaurant, fast_food
+  POI_CATEGORY_SKI_AREA = 3;    // landuse=winter_sports
+  POI_CATEGORY_MUSEUM = 4;      // tourism=museum
+  POI_CATEGORY_AIRPORT = 5;     // aeroway=aerodrome
+  POI_CATEGORY_PARK = 6;        // leisure=park, nature_reserve; boundary=national_park
+  POI_CATEGORY_TRAILHEAD = 7;   // highway=trailhead
+  POI_CATEGORY_CAR_PARTS = 8;   // shop=car_parts
+  POI_CATEGORY_JUNKYARD = 9;    // industrial/shop=scrap_yard, amenity=scrapyard
 }
 
 // How the HMI draws the POI on the map (the HMI's Poi.PoiIcon).
@@ -74,6 +93,11 @@ message Poi {
   PoiSource source = 6;                       // set by the server
   google.protobuf.Timestamp created = 7;      // set by the server
   google.protobuf.Timestamp updated = 8;      // set by the server
+  PoiCategory category = 9;                   // MAP POIs
+  // MAP POIs: extra OpenStreetMap facts when known: kind (the matching tag,
+  // e.g. "amenity=fast_food"), brand, operator, cuisine, phone, website,
+  // opening_hours, iata, icao, ele, addr:housenumber/street/city/postcode.
+  map<string, string> details = 10;
 }
 
 message ListPoisRequest {
@@ -113,8 +137,10 @@ message SearchPoisRequest {
   bool visible_only = 4;
   // Default 50, at most 500.
   int32 limit = 5;
-  // Default: USER (the only source in v1).
+  // Default: USER only.
   repeated PoiSource sources = 6;
+  // Only POIs of these categories (so no user POIs); empty = any.
+  repeated PoiCategory categories = 7;
 
   message Near {
     LatLng center = 1;
@@ -129,5 +155,7 @@ message SearchPoisResponse {
 message PoiResult {
   Poi poi = 1;
   // Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+  // Results from several sources are merged: nearest first with near,
+  // otherwise by name.
   double distance_meters = 2;
 }

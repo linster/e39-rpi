@@ -74,6 +74,8 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+   * Results from several sources are merged: nearest first with near,
+   * otherwise by name.
    * </pre>
    *
    * <code>double distance_meters = 2;</code>
@@ -549,6 +551,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+     * Results from several sources are merged: nearest first with near,
+     * otherwise by name.
      * </pre>
      *
      * <code>double distance_meters = 2;</code>
@@ -561,6 +565,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+     * Results from several sources are merged: nearest first with near,
+     * otherwise by name.
      * </pre>
      *
      * <code>double distance_meters = 2;</code>
@@ -577,6 +583,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * Great-circle distance from SearchPoisRequest.near.center; 0 without it.
+     * Results from several sources are merged: nearest first with near,
+     * otherwise by name.
      * </pre>
      *
      * <code>double distance_meters = 2;</code>

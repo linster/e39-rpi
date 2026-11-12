@@ -151,7 +151,7 @@ public object SearchPoisRequestKt {
     public class SourcesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * ```
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * ```
      *
      * `repeated .e39maps.v1.PoiSource sources = 6;`
@@ -163,7 +163,7 @@ public object SearchPoisRequestKt {
       )
     /**
      * ```
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * ```
      *
      * `repeated .e39maps.v1.PoiSource sources = 6;`
@@ -175,7 +175,7 @@ public object SearchPoisRequestKt {
       _builder.addSources(value)
     }/**
      * ```
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * ```
      *
      * `repeated .e39maps.v1.PoiSource sources = 6;`
@@ -188,7 +188,7 @@ public object SearchPoisRequestKt {
       add(value)
     }/**
      * ```
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * ```
      *
      * `repeated .e39maps.v1.PoiSource sources = 6;`
@@ -200,7 +200,7 @@ public object SearchPoisRequestKt {
       _builder.addAllSources(values)
     }/**
      * ```
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * ```
      *
      * `repeated .e39maps.v1.PoiSource sources = 6;`
@@ -213,7 +213,7 @@ public object SearchPoisRequestKt {
       addAll(values)
     }/**
      * ```
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * ```
      *
      * `repeated .e39maps.v1.PoiSource sources = 6;`
@@ -226,7 +226,7 @@ public object SearchPoisRequestKt {
       _builder.setSources(index, value)
     }/**
      * ```
-     * Default: USER (the only source in v1).
+     * Default: USER only.
      * ```
      *
      * `repeated .e39maps.v1.PoiSource sources = 6;`
@@ -235,6 +235,99 @@ public object SearchPoisRequestKt {
     @kotlin.jvm.JvmName("clearSources")
     public fun com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiSource, SourcesProxy>.clear() {
       _builder.clearSources()
+    }
+    /**
+     * An uninstantiable, behaviorless type to represent the field in
+     * generics.
+     */
+    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
+    public class CategoriesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    /**
+     * ```
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * ```
+     *
+     * `repeated .e39maps.v1.PoiCategory categories = 7;`
+     */
+    public val categories: com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiCategory, CategoriesProxy>
+      @kotlin.jvm.JvmSynthetic
+      get() = com.google.protobuf.kotlin.DslList(
+        _builder.categoriesList
+      )
+    /**
+     * ```
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * ```
+     *
+     * `repeated .e39maps.v1.PoiCategory categories = 7;`
+     * @param value The categories to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addCategories")
+    public fun com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiCategory, CategoriesProxy>.add(value: ca.stefanm.e39maps.v1.PoiCategory) {
+      _builder.addCategories(value)
+    }/**
+     * ```
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * ```
+     *
+     * `repeated .e39maps.v1.PoiCategory categories = 7;`
+     * @param value The categories to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignCategories")
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiCategory, CategoriesProxy>.plusAssign(value: ca.stefanm.e39maps.v1.PoiCategory) {
+      add(value)
+    }/**
+     * ```
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * ```
+     *
+     * `repeated .e39maps.v1.PoiCategory categories = 7;`
+     * @param values The categories to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addAllCategories")
+    public fun com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiCategory, CategoriesProxy>.addAll(values: kotlin.collections.Iterable<ca.stefanm.e39maps.v1.PoiCategory>) {
+      _builder.addAllCategories(values)
+    }/**
+     * ```
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * ```
+     *
+     * `repeated .e39maps.v1.PoiCategory categories = 7;`
+     * @param values The categories to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignAllCategories")
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiCategory, CategoriesProxy>.plusAssign(values: kotlin.collections.Iterable<ca.stefanm.e39maps.v1.PoiCategory>) {
+      addAll(values)
+    }/**
+     * ```
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * ```
+     *
+     * `repeated .e39maps.v1.PoiCategory categories = 7;`
+     * @param index The index to set the value at.
+     * @param value The categories to set.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("setCategories")
+    public operator fun com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiCategory, CategoriesProxy>.set(index: kotlin.Int, value: ca.stefanm.e39maps.v1.PoiCategory) {
+      _builder.setCategories(index, value)
+    }/**
+     * ```
+     * Only POIs of these categories (so no user POIs); empty = any.
+     * ```
+     *
+     * `repeated .e39maps.v1.PoiCategory categories = 7;`
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("clearCategories")
+    public fun com.google.protobuf.kotlin.DslList<ca.stefanm.e39maps.v1.PoiCategory, CategoriesProxy>.clear() {
+      _builder.clearCategories()
     }public val areaCase: ca.stefanm.e39maps.v1.SearchPoisRequest.AreaCase
       @JvmName("getAreaCase")
       get() = _builder.getAreaCase()

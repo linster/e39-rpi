@@ -109,8 +109,10 @@ public final class RouteServiceGrpc {
     /**
      * <pre>
      * INVALID_ARGUMENT for missing/out-of-range points; NOT_FOUND if no route
-     * connects them (e.g. outside the map data); UNIMPLEMENTED until routing
-     * is available; UNAVAILABLE if the routing data isn't installed.
+     * connects them (e.g. a point far from any road, or outside the map
+     * data); UNAVAILABLE if the routing tiles (or Valhalla) aren't installed.
+     * Via points are stops: each ends a leg; the legs are joined into one
+     * shape, with the maneuvers' shape indexes into the joined shape.
      * </pre>
      */
     default void computeRoute(ca.stefanm.e39maps.v1.ComputeRouteRequest request,
@@ -149,8 +151,10 @@ public final class RouteServiceGrpc {
     /**
      * <pre>
      * INVALID_ARGUMENT for missing/out-of-range points; NOT_FOUND if no route
-     * connects them (e.g. outside the map data); UNIMPLEMENTED until routing
-     * is available; UNAVAILABLE if the routing data isn't installed.
+     * connects them (e.g. a point far from any road, or outside the map
+     * data); UNAVAILABLE if the routing tiles (or Valhalla) aren't installed.
+     * Via points are stops: each ends a leg; the legs are joined into one
+     * shape, with the maneuvers' shape indexes into the joined shape.
      * </pre>
      */
     public void computeRoute(ca.stefanm.e39maps.v1.ComputeRouteRequest request,
@@ -179,8 +183,10 @@ public final class RouteServiceGrpc {
     /**
      * <pre>
      * INVALID_ARGUMENT for missing/out-of-range points; NOT_FOUND if no route
-     * connects them (e.g. outside the map data); UNIMPLEMENTED until routing
-     * is available; UNAVAILABLE if the routing data isn't installed.
+     * connects them (e.g. a point far from any road, or outside the map
+     * data); UNAVAILABLE if the routing tiles (or Valhalla) aren't installed.
+     * Via points are stops: each ends a leg; the legs are joined into one
+     * shape, with the maneuvers' shape indexes into the joined shape.
      * </pre>
      */
     public ca.stefanm.e39maps.v1.Route computeRoute(ca.stefanm.e39maps.v1.ComputeRouteRequest request) throws io.grpc.StatusException {
@@ -208,8 +214,10 @@ public final class RouteServiceGrpc {
     /**
      * <pre>
      * INVALID_ARGUMENT for missing/out-of-range points; NOT_FOUND if no route
-     * connects them (e.g. outside the map data); UNIMPLEMENTED until routing
-     * is available; UNAVAILABLE if the routing data isn't installed.
+     * connects them (e.g. a point far from any road, or outside the map
+     * data); UNAVAILABLE if the routing tiles (or Valhalla) aren't installed.
+     * Via points are stops: each ends a leg; the legs are joined into one
+     * shape, with the maneuvers' shape indexes into the joined shape.
      * </pre>
      */
     public ca.stefanm.e39maps.v1.Route computeRoute(ca.stefanm.e39maps.v1.ComputeRouteRequest request) {
@@ -237,8 +245,10 @@ public final class RouteServiceGrpc {
     /**
      * <pre>
      * INVALID_ARGUMENT for missing/out-of-range points; NOT_FOUND if no route
-     * connects them (e.g. outside the map data); UNIMPLEMENTED until routing
-     * is available; UNAVAILABLE if the routing data isn't installed.
+     * connects them (e.g. a point far from any road, or outside the map
+     * data); UNAVAILABLE if the routing tiles (or Valhalla) aren't installed.
+     * Via points are stops: each ends a leg; the legs are joined into one
+     * shape, with the maneuvers' shape indexes into the joined shape.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<ca.stefanm.e39maps.v1.Route> computeRoute(
