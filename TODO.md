@@ -6,27 +6,20 @@ device-side items (Yocto layers) are in e39-rpi-yocto's TODO.md.
 
 ## Bugs
 
-- [ ] **Map screen handles every knob event three times.** `MapScreen`
-      starts `knobListenerService.knobTurnEvents().collect` with
-      `scope.launch` directly in the composable body, so every
-      recomposition adds a collector (the log shows "collect turn ..."
-      three times per event). A press toggles the overlay state several
-      times; menus open on one press and close or pick "Zoom" on the next.
-      Fix: collect in a `LaunchedEffect(Unit)`.
-- [ ] **Map markers aren't drawn.** `MapScreenParameters.markers` (Places
-      Nearby's Show on map: the results as orange circles) reach
-      `MapScreen` ("POI LIST" in the log lists them) but nothing appears
-      on the map, and `PoiOverlayLayer` logs nothing. Not yet known whether
-      the user's own POIs are drawn either. Also: `PoiOverlayLayer` creates
-      a whole `DaggerApplicationComponent` per POI per recomposition just
-      to log (slow with 50 markers).
-- [ ] **IBUS reader can't reopen the port.** `BlockingJSerialCommsReader`
-      used to crash for good when the port reported -1 (`ByteArray(-1)`);
-      it now waits and retries, but retries `openPort()` on its old
-      `SerialPort` object, which keeps failing (the provider's
-      `setupSerialPort()` makes a new one the reader never uses). After a
-      USB adapter glitch IBUS only comes back with an HMI restart. Fix:
-      reopen through the provider and use the new port.
+- [x] **Map screen handled every knob event three times** (a collector
+      launched in the composable body per recomposition); now one
+      `LaunchedEffect`. Fixed and tested in QEMU.
+- [x] **Map markers weren't drawn** (overlays placed with a density of 2
+      on a density-1 screen: off the screen); fixed and tested in QEMU
+      (docs/guidance/places/06-show-on-map-with-markers.png).
+- [x] **IBUS reader couldn't reopen the port**; now reopens through the
+      provider (a new SerialPort, the old one closed). Tested in QEMU:
+      with gpsd holding /dev/ttyUSB0 the HMI retries, and takes the port
+      and the knob works as soon as gpsd lets go, without a restart.
+- [ ] Map markers are 32 px circles (the user POIs' style): 50 search
+      results crowd the 400x234 map. Smaller ones for search results?
+- [ ] The map takes 15+ s to open in QEMU (knob events before it's
+      composed are lost); check how long on the Pi.
 - [ ] **No theme.conf: the theme crashes.** `ThemeWrapper.defaultTheme`
       fails with "Invalid theme name: BMW Blue DoubledPixels" when
       /var/lib/e39/theme.conf is missing (images ship one, so only fresh

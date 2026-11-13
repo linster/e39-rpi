@@ -42,9 +42,14 @@ Places Nearby in QEMU (qemuarm64, the Ottawa map), 3x:
 4. `04-place-side-pane.png`: a station's side pane: distance from the map
    centre, category, address, hours, website; Show on map, Save as POI
    (then "Save to address book").
-5. `05-show-on-map.png`: Show on map: the map centred on the station. (The
-   other results should be drawn as orange circles; they aren't yet, see
-   TODO.md.)
+5. `05-show-on-map.png`: Show on map: the map centred on the station,
+   before the marker fix (the results weren't drawn).
+6. `06-show-on-map-with-markers.png`: the same after the fix: the fuel
+   stations as orange circles, the chosen one (292 Rideau Street) near
+   the centre.
+
+`04-place-side-pane-save-as-poi.png` is the side pane with the final
+"Save as POI" label.
 
 ## qemu-raw/
 
@@ -59,3 +64,6 @@ see TODO.md); kept as a record.
 - `t*`, `u*`: the knob working again; the map and its menu.
 - `d*`-`h*`: getting to the POI menu (turns dropped while the HMI redraws).
 - `i*`: the Places Nearby walk-through (copied to places/).
+- `k*`: after the knob, marker and IBUS fixes: the knob working again
+  once gpsd released the port, the map menu on one press, Places Nearby,
+  and Show on map with markers.
