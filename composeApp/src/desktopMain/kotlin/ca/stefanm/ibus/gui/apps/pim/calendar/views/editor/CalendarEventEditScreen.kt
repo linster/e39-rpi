@@ -38,7 +38,12 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.plusDays
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.EventScope
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendException
+import androidx.compose.ui.text.font.FontWeight
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
@@ -87,6 +92,10 @@ class CalendarEventEditScreen @Inject constructor(
             )
         }
     }
+
+    /** Times shown (and used) for new events, and for all-day events given a time. */
+    private val DEFAULT_START_TIME = LocalTime(13, 0)
+    private val DEFAULT_END_TIME = LocalTime(15, 0)
 
     sealed class CreateCalendarEventEditScreenOpenMode {
         object NewEvent : CreateCalendarEventEditScreenOpenMode()
@@ -139,6 +148,14 @@ class CalendarEventEditScreen @Inject constructor(
 
         val startLocalTime = remember { mutableStateOf<LocalTime?>(null) }
         val endLocalTime = remember { mutableStateOf<LocalTime?>(null) }
+
+        // The event as opened (null for a new one). Fields that weren't
+        // entered show (and keep, on Save) its values; an all-day event stays
+        // all day until a time is entered.
+        val original = (params?.requestParameters as? CreateCalendarEventEditScreenOpenMode.EditExisting)?.event
+        val originalStart = original?.start?.toLocalDateTime(TimeZone.currentSystemDefault())
+        val originalEnd = original?.end?.toLocalDateTime(TimeZone.currentSystemDefault())
+        val staysAllDay = original?.allDayEvent == true && startLocalTime.value == null && endLocalTime.value == null
 
         LaunchedEffect(
             eventName.value,
@@ -206,7 +223,7 @@ class CalendarEventEditScreen @Inject constructor(
 
             onNewEventName = { eventName.value = it},
 
-            startDate = if (startDateEntered.value == null) { today } else { startDateEntered.value!!},
+            startDate = startDateEntered.value ?: originalStart?.date ?: today,
             onStartDateEntered = startDateEntered@ { start ->
                 endDateEntered.value.let { end ->
                     if (end == null) {
@@ -224,7 +241,7 @@ class CalendarEventEditScreen @Inject constructor(
                     }
                     startDateEntered.value = start
                 } },
-            endDate = if (endDateEntered.value == null) { today } else { endDateEntered.value!!},
+            endDate = endDateEntered.value ?: originalEnd?.date ?: today,
             onEndDateEntered = endDateEntered@ { end ->
                 startDateEntered.value.let { start ->
                     if (start == null) {
@@ -245,15 +262,15 @@ class CalendarEventEditScreen @Inject constructor(
                 }
             },
 
-            startLocalTime = if (startLocalTime.value == null) { LocalTime(13, 0)} else {startLocalTime.value!! },
+            startLocalTime = startLocalTime.value ?: originalStart?.time?.takeIf { original?.allDayEvent == false } ?: DEFAULT_START_TIME,
             onStartLocalTimePicked = { startLocalTime.value = it},
 
-            endLocalTime = if (endLocalTime.value == null ) { LocalTime(15, 0) } else { endLocalTime.value!! },
+            endLocalTime = endLocalTime.value ?: originalEnd?.time?.takeIf { original?.allDayEvent == false } ?: DEFAULT_END_TIME,
             onEndLocalTimePicked = { endLocalTime.value = it},
 
             onGoBackClicked = { navigationNodeTraverser.goBack()},
+            allDayTimes = staysAllDay,
             onSaveClicked = {
-                val original = (params?.requestParameters as? CreateCalendarEventEditScreenOpenMode.EditExisting)?.event
                 saveEvent(
                     scope = saveScope,
                     original = original,
@@ -264,6 +281,8 @@ class CalendarEventEditScreen @Inject constructor(
                     endTime = endLocalTime.value,
                 )
             },
+            canDelete = original?.eventRef?.let { !it.readOnly } == true,
+            onDeleteClicked = { original?.let { confirmDelete(saveScope, it) } },
 
 
             onCalendarScrollLeft = { calendarStartDate.value = calendarStartDate.value.minusDays(1) },
@@ -289,10 +308,73 @@ class CalendarEventEditScreen @Inject constructor(
     }
 
     /**
-     * Saves through the PIM bridge: the name, and the new times if all four
-     * date/time fields were entered (else the event keeps its times). A new
-     * event needs all four. For a repeating event, only this occurrence
-     * changes.
+     * The event to save from what was entered. New events need all four
+     * date/time fields. Existing events keep their values for fields that
+     * weren't entered; all-day events stay all day (with the entered dates)
+     * unless a time was entered. Null (and a notification) if it can't be
+     * saved.
+     */
+    private fun editedEvent(
+        original: AgendaCalendarEventData?,
+        name: String,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        startTime: LocalTime?,
+        endTime: LocalTime?,
+    ): AgendaCalendarEventData? {
+        val zone = TimeZone.currentSystemDefault()
+        val edited = if (original == null) {
+            if (startDate == null || endDate == null || startTime == null || endTime == null) {
+                notify(Notification.NotificationImage.ALERT_TRIANGLE, "Not saved", "Enter the start and end first.")
+                return null
+            }
+            AgendaCalendarEventData(
+                headerText = name,
+                start = LocalDateTime(startDate, startTime).toInstant(zone),
+                end = LocalDateTime(endDate, endTime).toInstant(zone),
+                color = Color.Magenta,
+            )
+        } else {
+            val originalStart = original.start.toLocalDateTime(zone)
+            val originalEnd = original.end.toLocalDateTime(zone)
+            val firstDay = startDate ?: originalStart.date
+            val lastDay = endDate ?: originalEnd.date
+            if (original.allDayEvent && startTime == null && endTime == null) {
+                if (lastDay < firstDay) {
+                    notify(Notification.NotificationImage.ALERT_TRIANGLE, "Not saved", "The end must be after the start.")
+                    return null
+                }
+                // As CalendarMapper draws all-day events: midnight to just
+                // before midnight after the last day.
+                original.copy(
+                    headerText = name,
+                    start = firstDay.atStartOfDayIn(zone),
+                    end = lastDay.plusDays(1).atStartOfDayIn(zone).minus(1.seconds),
+                    allDayEvent = true,
+                )
+            } else {
+                val from = startTime ?: if (original.allDayEvent) DEFAULT_START_TIME else originalStart.time
+                val to = endTime ?: if (original.allDayEvent) DEFAULT_END_TIME else originalEnd.time
+                original.copy(
+                    headerText = name,
+                    start = LocalDateTime(firstDay, from).toInstant(zone),
+                    end = LocalDateTime(lastDay, to).toInstant(zone),
+                    allDayEvent = false,
+                )
+            }
+        }
+        if (edited.end <= edited.start) {
+            notify(Notification.NotificationImage.ALERT_TRIANGLE, "Not saved", "The end must be after the start.")
+            return null
+        }
+        return edited
+    }
+
+    /**
+     * Saves through the PIM bridge. For a repeating event it asks first
+     * whether the change is for this occurrence or the whole series (only
+     * this occurrence if its times changed: they don't say where the series
+     * should move).
      */
     private fun saveEvent(
         scope: CoroutineScope,
@@ -303,54 +385,100 @@ class CalendarEventEditScreen @Inject constructor(
         startTime: LocalTime?,
         endTime: LocalTime?,
     ) {
-        val zone = TimeZone.currentSystemDefault()
-        val newTimes = if (startDate != null && endDate != null && startTime != null && endTime != null) {
-            LocalDateTime(startDate, startTime).toInstant(zone) to LocalDateTime(endDate, endTime).toInstant(zone)
-        } else {
-            null
-        }
-        val edited = when {
-            original != null -> original.copy(
-                headerText = name,
-                start = newTimes?.first ?: original.start,
-                end = newTimes?.second ?: original.end,
-                allDayEvent = original.allDayEvent && newTimes == null,
-            )
-            newTimes != null -> AgendaCalendarEventData(
-                headerText = name,
-                start = newTimes.first,
-                end = newTimes.second,
-                color = Color.Magenta,
-            )
-            else -> {
-                notify(Notification.NotificationImage.ALERT_TRIANGLE, "Not saved", "Enter the start and end first.")
-                return
-            }
-        }
-        if (edited.end <= edited.start) {
-            notify(Notification.NotificationImage.ALERT_TRIANGLE, "Not saved", "The end must be after the start.")
+        val edited = editedEvent(original, name, startDate, endDate, startTime, endTime) ?: return
+        val timesChanged = original != null &&
+            (edited.start != original.start || edited.end != original.end || edited.allDayEvent != original.allDayEvent)
+        val changed = original == null || timesChanged || edited.headerText != original.headerText
+        // Nothing to ask about if it doesn't repeat or nothing changed.
+        if (original?.eventRef?.recurring != true || !changed) {
+            save(scope, original, edited, EventScope.THIS_OCCURRENCE)
             return
         }
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "Save Changes To",
+                text = @Composable {
+                    InfoLabel(edited.headerText, FontWeight.Bold)
+                    InfoLabel("This event repeats.")
+                    if (timesChanged) {
+                        InfoLabel("New times can only be saved for this occurrence.")
+                    }
+                },
+                buttons = buildList {
+                    add(TextMenuItem("This Occurrence", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                        save(scope, original, edited, EventScope.THIS_OCCURRENCE)
+                    }))
+                    if (!timesChanged) {
+                        add(TextMenuItem("Whole Series", onClicked = {
+                            modalMenuService.closeSidePaneOverlay(true)
+                            save(scope, original, edited, EventScope.WHOLE_SERIES)
+                        }))
+                    }
+                    add(TextMenuItem("Cancel", onClicked = { modalMenuService.closeSidePaneOverlay(true) }))
+                }
+            )
+        }
+    }
+
+    private fun save(scope: CoroutineScope, original: AgendaCalendarEventData?, edited: AgendaCalendarEventData, eventScope: EventScope) {
         scope.launch {
-            weekViewRepo.saveEditedEvent(original, edited).fold(
+            weekViewRepo.saveEditedEvent(original, edited, eventScope).fold(
                 onSuccess = { saved ->
                     notify(Notification.NotificationImage.MESSAGE_CIRCLE, "Event saved", saved.headerText)
                     navigationNodeTraverser.goBack()
                 },
-                onFailure = { e ->
-                    logger.w("CalendarEventEditScreen", "Saving ${edited.headerText} failed: ${e.message}")
-                    notify(
-                        Notification.NotificationImage.ALERT_TRIANGLE,
-                        "Not saved",
-                        when (e) {
-                            is PimBackendException.Conflict -> "It was changed elsewhere meanwhile. Open it again and redo the change."
-                            is PimBackendException.Unavailable -> "Calendar not reachable: ${e.message}"
-                            else -> e.message ?: e.toString()
-                        }
-                    )
+                onFailure = { e -> notifyFailure("Not saved", edited.headerText, e) }
+            )
+        }
+    }
+
+    /** Asks first; for a repeating event, this occurrence or the whole series. */
+    private fun confirmDelete(scope: CoroutineScope, event: AgendaCalendarEventData) {
+        val recurring = event.eventRef?.recurring == true
+        fun delete(eventScope: EventScope) {
+            modalMenuService.closeSidePaneOverlay(true)
+            scope.launch {
+                weekViewRepo.deleteEvent(event, eventScope).fold(
+                    onSuccess = {
+                        notify(Notification.NotificationImage.MESSAGE_CIRCLE, "Event deleted", event.headerText)
+                        navigationNodeTraverser.goBack()
+                    },
+                    onFailure = { e -> notifyFailure("Not deleted", event.headerText, e) }
+                )
+            }
+        }
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "Delete Event?",
+                text = @Composable {
+                    InfoLabel(event.headerText, FontWeight.Bold)
+                    if (recurring) InfoLabel("This event repeats.")
+                },
+                buttons = buildList {
+                    add(TextMenuItem("Keep It", onClicked = { modalMenuService.closeSidePaneOverlay(true) }))
+                    if (recurring) {
+                        add(TextMenuItem("Delete This Occurrence", onClicked = { delete(EventScope.THIS_OCCURRENCE) }))
+                        add(TextMenuItem("Delete Whole Series", onClicked = { delete(EventScope.WHOLE_SERIES) }))
+                    } else {
+                        add(TextMenuItem("Delete", onClicked = { delete(EventScope.WHOLE_SERIES) }))
+                    }
                 }
             )
         }
+    }
+
+    private fun notifyFailure(top: String, what: String, e: Throwable) {
+        logger.w("CalendarEventEditScreen", "$top: $what: ${e.message}")
+        notify(
+            Notification.NotificationImage.ALERT_TRIANGLE,
+            top,
+            when (e) {
+                is PimBackendException.Conflict -> "It was changed elsewhere meanwhile. Open it again and redo the change."
+                is PimBackendException.Unavailable -> "Calendar not reachable: ${e.message}"
+                else -> e.message ?: e.toString()
+            }
+        )
     }
 
     @Composable
@@ -379,7 +507,11 @@ class CalendarEventEditScreen @Inject constructor(
         onEndLocalTimePicked : (LocalTime) -> Unit,
 
         onGoBackClicked : () -> Unit,
+        /** The time fields show "all day" instead of times. */
+        allDayTimes : Boolean,
         onSaveClicked : () -> Unit,
+        canDelete : Boolean,
+        onDeleteClicked : () -> Unit,
 
         onCalendarScrollLeft : () -> Unit,
         onCalendarScrollDaysResetToToday : () -> Unit,
@@ -585,7 +717,7 @@ class CalendarEventEditScreen @Inject constructor(
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
                                     label = "✐ ${newEventIncompleteMarker}${
-                                        startLocalTime.format(LocalTime.Format {
+                                        if (allDayTimes) "all day" else startLocalTime.format(LocalTime.Format {
                                             hour() ; char(':') ; minute() 
                                         })
                                     }",
@@ -640,7 +772,7 @@ class CalendarEventEditScreen @Inject constructor(
                                 MenuItem(
                                     boxModifier = Modifier.fillMaxWidth(),
                                     label = "✐ ${newEventIncompleteMarker}${
-                                        endLocalTime.format(LocalTime.Format {
+                                        if (allDayTimes) "all day" else endLocalTime.format(LocalTime.Format {
                                             hour() ; char(':') ; minute()
                                         })
                                     }",
@@ -660,17 +792,33 @@ class CalendarEventEditScreen @Inject constructor(
                         }
                     }
 
-                    KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
-                        MenuItem(
-                            boxModifier = Modifier.fillMaxWidth(),
-                            label = "Save",
-                            chipOrientation = ItemChipOrientation.E,
-                            isSelected = currentIndex == allocatedIndex,
-                            isSmallSize = true,
-                            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
-                                onSaveClicked()
+                    Row {
+                        KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                            MenuItem(
+                                boxModifier = Modifier.weight(0.5F, true),
+                                label = "Save",
+                                chipOrientation = ItemChipOrientation.E,
+                                isSelected = currentIndex == allocatedIndex,
+                                isSmallSize = true,
+                                onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                    onSaveClicked()
+                                }
+                            )
+                        }
+                        if (canDelete) {
+                            KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
+                                MenuItem(
+                                    boxModifier = Modifier.weight(0.5F, true),
+                                    label = "Delete...",
+                                    chipOrientation = ItemChipOrientation.E,
+                                    isSelected = currentIndex == allocatedIndex,
+                                    isSmallSize = true,
+                                    onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                                        onDeleteClicked()
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
