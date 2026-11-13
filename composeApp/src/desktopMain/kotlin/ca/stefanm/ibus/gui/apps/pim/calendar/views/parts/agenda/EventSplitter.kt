@@ -106,6 +106,10 @@ data class AgendaCalendarEventData(
         }
     }
 
+    // TODO BUG: the next day's part starts at LocalDateTime(year, month, day + 1),
+    // which throws on the last day of a month (e.g. day 31 + 1 = 32) instead of
+    // rolling over to the 1st of the next month. Multi-day events that cross a
+    // month boundary will crash the agenda. Use startTime.date.plus(1, DateTimeUnit.DAY).
     fun splitToMultipleEvents() : List<AgendaCalendarEventData> {
         //start from the start, and see when we cross a dateline. truncate the event and add it to an accumulator. Repeat
         //for what's left until done
@@ -145,6 +149,7 @@ data class AgendaCalendarEventData(
             //Fabricate a new event that begins right after `endofDayToday` and runs until end.
 
             //Increment endOfDayToday to be the start of the following day.
+            //TODO BUG: day + 1 breaks at the end of a month; see splitToMultipleEvents().
             val newStart = LocalDateTime(startTime.year, startTime.month, startTime.day + 1, hour = 0, minute = 0, second = 0)
                 .toInstant(TimeZone.currentSystemDefault())
             val newEventSplittable = AgendaCalendarEventData(
