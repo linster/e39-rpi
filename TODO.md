@@ -18,8 +18,10 @@ device-side items (Yocto layers) are in e39-rpi-yocto's TODO.md.
       and the knob works as soon as gpsd lets go, without a restart.
 - [ ] Map markers are 32 px circles (the user POIs' style): 50 search
       results crowd the 400x234 map. Smaller ones for search results?
-- [ ] The map takes 15+ s to open in QEMU (knob events before it's
-      composed are lost); check how long on the Pi.
+- [x] **The map was slow** (26.6 s to open in QEMU, slow on the Pi): a
+      Dagger component per tile (three), 81-361 tiles for a 2x1 view,
+      loading on the UI thread. Now 1.2 s in QEMU; see
+      docs/map-performance.md. Check the time on the Pi.
 - [ ] **No theme.conf: the theme crashes.** `ThemeWrapper.defaultTheme`
       fails with "Invalid theme name: BMW Blue DoubledPixels" when
       /var/lib/e39/theme.conf is missing (images ship one, so only fresh

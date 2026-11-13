@@ -27,6 +27,15 @@ import com.javadocmd.simplelatlng.util.LengthUnit
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
+import ca.stefanm.ibus.gui.map.widget.tile.LocalMapTileServices
+import ca.stefanm.ibus.configuration.E39Config
+import kotlin.math.tan
+import kotlin.math.sinh
+import kotlin.math.ln
+import kotlin.math.cos
+import kotlin.math.ceil
+import kotlin.math.atan
+import kotlin.math.PI
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -163,22 +172,32 @@ fun MapViewer(
             val stateVertical = rememberScrollState(0)
             val stateHorizontal = rememberScrollState(0)
 
-            val numPreLoadedTilesX = (maxWidth / 256.dp) * 6
-            val numPreLoadedTilesY = (maxWidth / 256.dp) * 6 //We want this to be square so we a line diagonally across passes through the center.
-
+            // The tiles: the viewport's, plus one tile on each side. (Was six
+            // viewport widths each way, square: 81 tiles for a 400x234 map,
+            // 361 at 800x468, where about 2x1 / 4x2 are on the screen.) Panning
+            // moves the centre and rebuilds the grid around it.
+            val zoom = extents.mapScale.mapZoomLevel
             val centerContainingTile = ExtentCalculator.getTileNumber(
                 extents.center.latitude,
                 extents.center.longitude,
-                extents.mapScale.mapZoomLevel
+                zoom
             )
+            val tilesEachSideX = ceil(viewportWidth.value / 2 / 256).toInt() + 1
+            val tilesEachSideY = ceil(viewportHeight.value / 2 / 256).toInt() + 1
+            val startX = centerContainingTile.first - tilesEachSideX
+            val endX = centerContainingTile.first + tilesEachSideX
+            val startY = centerContainingTile.second - tilesEachSideY
+            val endY = centerContainingTile.second + tilesEachSideY
 
-            //These are the tiles in view.
-            val startX = (centerContainingTile.first) - (numPreLoadedTilesX / 2).toInt()
-            val endX = (centerContainingTile.first) + (numPreLoadedTilesX / 2).toInt()
-            val startY = (centerContainingTile.second) - (numPreLoadedTilesY / 2).toInt()
-            val endY = (centerContainingTile.second) + (numPreLoadedTilesY / 2).toInt()
-            val zoom = extents.mapScale.mapZoomLevel
-
+            // Pixels per dp: the tiles are 256 dp each, the overlays are
+            // placed in pixels. (Was a `var` set in a Canvas draw call,
+            // which runs after composition: the overlays always got its
+            // initial 2, so on a density-1 screen like QEMU's every POI
+            // and route point was placed twice as far from the grid's
+            // corner, off the screen.)
+            val scaling = LocalDensity.current.density
+            val viewportWidthPx = viewportWidth.value * scaling
+            val viewportHeightPx = viewportHeight.value * scaling
 
             BoxWithConstraints(
                 Modifier
@@ -187,111 +206,31 @@ fun MapViewer(
                     .horizontalScroll(stateHorizontal)
             ) {
 
-
-                //Scroll so our center is in the middle of the screen.
-                LaunchedEffect(extents.center, extents.mapScale) {
-                    val canvasTilesTall = endY - startY
-                    val canvasHeightMeters = LatLngTool.distance(
-                        LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
-                        LatLng(ExtentCalculator.tile2lat(endY + 1, zoom), extents.center.longitude),
-                        LengthUnit.METER
-                    )
-
-                    val canvasHeightPixels = (canvasTilesTall) * 256
-                    val actualMetersFromTop = LatLngTool.distance(
-                        LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
-                        LatLng(extents.center.latitude, extents.center.longitude),
-                        LengthUnit.METER
-                    )
-
-//                    val scrollPixelsFromTop = (actualMetersFromTop / canvasHeightMeters) * canvasHeightPixels
-                    val scrollPixelsFromTop_lp = (actualMetersFromTop / canvasHeightMeters) * stateVertical.maxValue
-                    val scrollPixelsFromTop = (actualMetersFromTop / canvasHeightMeters) * stateVertical.maxValue
-
-                    stateVertical.scrollTo(0)
-                    stateVertical.dispatchRawDelta(scrollPixelsFromTop.toFloat())
-
-                    val canvasWidthTiles = endX - startX
-                    val canvasWidthMeters = LatLngTool.distance(
-                        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
-                        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(endX + 1, zoom)),
-                        LengthUnit.METER
-                    )
-                    val canvasWidthPixels = (canvasWidthTiles) * 256
-                    val actualMetersFromLeft = LatLngTool.distance(
-                        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
-                        LatLng(extents.center.latitude, extents.center.longitude),
-                        LengthUnit.METER
-                    )
-
-//                    val scrollPixelsFromLeft = (actualMetersFromLeft / canvasWidthMeters) * canvasWidthPixels
-                    val scrollPixelsFromLeft = (actualMetersFromLeft / canvasWidthMeters) * stateHorizontal.maxValue
-
-                    stateHorizontal.scrollTo(0)
-                    stateHorizontal.dispatchRawDelta(scrollPixelsFromLeft.toFloat())
+                // Scroll so the centre is in the middle of the viewport: its
+                // pixel on the grid, minus half the viewport. (Was a fraction
+                // of the scroll range, exact only for a point in the middle
+                // of a large grid.)
+                LaunchedEffect(extents.center, extents.mapScale, viewportWidthPx, viewportHeightPx) {
+                    withFrameNanos { }   // the grid is laid out: the scroll range is known
+                    val center = latLngToPixels(extents.center, extents, startX, endX, startY, endY, zoom, scaling)
+                    stateVertical.scrollTo((center.fromTop - viewportHeightPx / 2).roundToInt())
+                    stateHorizontal.scrollTo((center.fromLeft - viewportWidthPx / 2).roundToInt())
                 }
 
-                //TODO add an effect here to listen to the scroll state and use the canvas to compute
-                //TODO the new center for the listener
-
+                // The map's centre now (the middle of the viewport), for
+                // "New POI on Center", Places Nearby, location selection.
                 LaunchedEffect(stateHorizontal.value, stateVertical.value) {
-
-                    val startPosition = LatLng(
-                        ExtentCalculator.tile2lat(startY, zoom),
-                        ExtentCalculator.tile2lon(startX, zoom)
-                    )
-
-                    val topRight = LatLng(
-                        ExtentCalculator.tile2lat(startY, zoom),
-                        ExtentCalculator.tile2lon(endX + 1, zoom)
-                    )
-
-                    val bottomLeft = LatLng(
-                        ExtentCalculator.tile2lat(endY + 1, zoom),
-                        ExtentCalculator.tile2lon(startX, zoom)
-                    )
-
-                    val fractionGoingEast = stateHorizontal.value / stateHorizontal.maxValue.toDouble()
-                    val fractionGoingSouth = stateVertical.value / stateVertical.maxValue.toDouble()
-
-                    val longFromLeft = LatLngTool.travel(
-                        startPosition,
-                        LatLngTool.Bearing.EAST,
-                        LatLngTool.distance(
-                            startPosition,
-                            topRight,
-                            LengthUnit.METER
-                        ) * fractionGoingEast,
-                        LengthUnit.METER
-                    ).longitude
-
-                    val latFromNorth = LatLngTool.travel(
-                        startPosition,
-                        LatLngTool.Bearing.SOUTH,
-                        LatLngTool.distance(
-                            startPosition,
-                            bottomLeft,
-                            LengthUnit.METER
-                        ) * fractionGoingSouth,
-                        LengthUnit.METER
-                    ).latitude
-
                     onCenterPositionUpdated(
-                        LatLng(latFromNorth, longFromLeft)
+                        pixelsToLatLng(
+                            stateHorizontal.value + viewportWidthPx / 2.0,
+                            stateVertical.value + viewportHeightPx / 2.0,
+                            startX, startY, zoom, scaling
+                        )
                     )
                 }
 
-                RawTileGrid(startX, endX, startY, endY,
-                    zoom = extents.mapScale.mapZoomLevel
-                )
+                RawTileGrid(startX, endX, startY, endY, zoom = zoom)
 
-                // Pixels per dp: the tiles are 256 dp each, the overlays are
-                // placed in pixels. (Was a `var` set in a Canvas draw call,
-                // which runs after composition: the overlays always got its
-                // initial 2, so on a density-1 screen like QEMU's every POI
-                // and route point was placed twice as far from the grid's
-                // corner, off the screen.)
-                val scaling = LocalDensity.current.density
 
                 if (overlayProperties.poiOverlay != null) {
                     PoiOverlayLayer(
@@ -397,6 +336,23 @@ data class DoublePixelOffset(
     val fromTop : Double
 )
 
+/** [latLng]'s position in tiles (x, y; fractional) at [zoom]: Web Mercator, as the tiles are drawn. */
+fun latLngToTile(latLng: LatLng, zoom: Int): Pair<Double, Double> {
+    val n = 2.0.pow(zoom)
+    val lat = Math.toRadians(latLng.latitude)
+    val x = (latLng.longitude + 180.0) / 360.0 * n
+    val y = (1.0 - ln(tan(lat) + 1.0 / cos(lat)) / PI) / 2.0 * n
+    return x to y
+}
+
+/**
+ * [latLng]'s pixel on the tile grid whose top-left tile is ([startX],
+ * [startY]): tiles are 256 dp, [scaling] pixels per dp. (Was proportional
+ * to meters across the grid, which isn't how the Mercator tiles are drawn:
+ * slightly off, more so on bigger grids.) [extents], [endX], [endY]: unused,
+ * kept for the callers.
+ */
+@Suppress("UNUSED_PARAMETER")
 fun latLngToPixels(
     latLng: LatLng,
     extents: Extents,
@@ -407,37 +363,21 @@ fun latLngToPixels(
     zoom : Int,
     scaling : Float = 2F
 ) : DoublePixelOffset {
-    val canvasHeightMeters = LatLngTool.distance(
-        LatLng(ExtentCalculator.tile2lat(startY, zoom), extents.center.longitude),
-        LatLng(ExtentCalculator.tile2lat(endY + 1, zoom), extents.center.longitude),
-        LengthUnit.METER
+    val (x, y) = latLngToTile(latLng, zoom)
+    return DoublePixelOffset(
+        fromLeft = (x - startX) * 256 * scaling,
+        fromTop = (y - startY) * 256 * scaling,
     )
+}
 
-    val actualMetersFromTop = LatLngTool.distance(
-        LatLng(ExtentCalculator.tile2lat(startY, zoom), latLng.longitude),
-        latLng,
-        LengthUnit.METER
-    )
-
-    val poiPixelsFromTop =
-        scaling * ((actualMetersFromTop / canvasHeightMeters) * (((endY + 1) - startY) * 256))
-
-    val canvasWidthMeters = LatLngTool.distance(
-        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(startX, zoom)),
-        LatLng(extents.center.latitude, ExtentCalculator.tile2lon(endX + 1, zoom)),
-        LengthUnit.METER
-    )
-
-    val actualMetersFromLeft = LatLngTool.distance(
-        LatLng(latLng.latitude, ExtentCalculator.tile2lon(startX, zoom)),
-        latLng,
-        LengthUnit.METER
-    )
-
-    val poiPixelsFromLeft =
-        scaling * ((actualMetersFromLeft / canvasWidthMeters) * (((endX + 1) - startX) * 256))
-
-    return DoublePixelOffset(fromLeft = poiPixelsFromLeft, fromTop = poiPixelsFromTop)
+/** The inverse of [latLngToPixels]: the position at a pixel of the grid. */
+fun pixelsToLatLng(fromLeft: Double, fromTop: Double, startX: Int, startY: Int, zoom: Int, scaling: Float): LatLng {
+    val n = 2.0.pow(zoom)
+    val x = startX + fromLeft / (256 * scaling)
+    val y = startY + fromTop / (256 * scaling)
+    val lon = x / n * 360.0 - 180.0
+    val lat = Math.toDegrees(atan(sinh(PI * (1 - 2 * y / n))))
+    return LatLng(lat, lon)
 }
 
 @Composable
@@ -489,15 +429,15 @@ fun RawTileGrid(
     endY : Int,
     zoom : Int,
 ) {
-    val validXIndices = (0 .. (2.0.pow(zoom) - 1).toInt()).toList().circular()
-    val validYIndices = (0 .. (2.0.pow(zoom) - 1).toInt()).toList().circular()
+    // Tile numbers wrap around the date line.
+    val tilesPerSide = 1 shl zoom
+    val rowIterations = (min(startY, endY)..kotlin.math.max(startY, endY)).map { Math.floorMod(it, tilesPerSide) }
+    val columnIterations = (min(startX, endX)..kotlin.math.max(startX, endX)).map { Math.floorMod(it, tilesPerSide) }
 
-    val rowIterations =
-        (min(startY, endY) .. kotlin.math.max(startY, endY))
-            .map { validYIndices[it] }
-
-    val columnIterations =
-        (min(startX, endX) .. kotlin.math.max(startX, endX)).map { validXIndices[it] }
+    // Read once for all the tiles.
+    val config = LocalMapTileServices.current.configurationStorage.config
+    val debug = config[E39Config.MapConfig.showDebugInfoOnTiles]
+    val source = config[E39Config.MapConfig.tileSource]
 
     Column {
         for (y in rowIterations) {
@@ -508,7 +448,7 @@ fun RawTileGrid(
                     Column(
                         Modifier.width(256.dp)
                     ) {
-                        TileView(x, y, zoom)
+                        key(x, y) { TileView(x, y, zoom, debug, source) }
                     }
                 }
             }
