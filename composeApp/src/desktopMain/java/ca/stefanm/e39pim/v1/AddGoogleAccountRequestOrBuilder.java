@@ -11,7 +11,8 @@ public interface AddGoogleAccountRequestOrBuilder extends
 
   /**
    * <pre>
-   * Shown in the HMI; empty = the Google account's e-mail.
+   * Not used yet: the Google resource names itself "Google Groupware
+   * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
    * </pre>
    *
    * <code>string name = 1;</code>
@@ -20,7 +21,8 @@ public interface AddGoogleAccountRequestOrBuilder extends
   java.lang.String getName();
   /**
    * <pre>
-   * Shown in the HMI; empty = the Google account's e-mail.
+   * Not used yet: the Google resource names itself "Google Groupware
+   * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
    * </pre>
    *
    * <code>string name = 1;</code>

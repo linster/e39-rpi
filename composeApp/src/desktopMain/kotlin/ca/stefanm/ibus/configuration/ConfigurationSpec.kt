@@ -36,6 +36,7 @@ object E39Config : ConfigSpec() {
         fun toCarPlatformConfiguration(config: Config) : CarPlatformConfiguration {
             return object : CarPlatformConfiguration {
                 override val isPi: Boolean get() = config[_isPi]
+                override val hasBrowser: Boolean get() = config[_hasBrowser]
                 override val iBusInterfaceUri: String get() = config[_iBusInterfaceUri]
                 override val displayDriver get() = config[_displayDriver]
                 override val pairedPhone get() = config[_pairedPhone]
@@ -50,6 +51,9 @@ object E39Config : ConfigSpec() {
 
         val _isPi by optional(false,
             "isPi", description = "Is E39 running on the RPi or a laptop?")
+
+        val _hasBrowser by optional(false,
+            "hasBrowser", description = "Does the HMI have its own web browser (OAuth logins, captive portals)? Independent of isPi.")
 
         val _iBusInterfaceUri by optional("/dev/ttyUSB0",
             name = "iBusInterfaceUri", description = "Device file for the LIN transceiver"

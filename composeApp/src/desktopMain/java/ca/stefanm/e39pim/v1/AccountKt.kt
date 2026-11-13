@@ -228,6 +228,37 @@ public object AccountKt {
     public fun clearNeedsLogin() {
       _builder.clearNeedsLogin()
     }
+
+    /**
+     * ```
+     * The last error the account reported, in its words (English), e.g. a
+     * sync that failed because the server refused the password; empty once a
+     * sync went through without errors. Errors don't always make the state
+     * BROKEN: most accounts go back to IDLE and try again at the next sync.
+     * ```
+     *
+     * `string last_error = 10;`
+     */
+    public var lastError: kotlin.String
+      @JvmName("getLastError")
+      get() = _builder.lastError
+      @JvmName("setLastError")
+      set(value) {
+        _builder.lastError = value
+      }
+    /**
+     * ```
+     * The last error the account reported, in its words (English), e.g. a
+     * sync that failed because the server refused the password; empty once a
+     * sync went through without errors. Errors don't always make the state
+     * BROKEN: most accounts go back to IDLE and try again at the next sync.
+     * ```
+     *
+     * `string last_error = 10;`
+     */
+    public fun clearLastError() {
+      _builder.clearLastError()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic

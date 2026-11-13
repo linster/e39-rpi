@@ -2,20 +2,22 @@
 
 `e39maps_api/v1/*.proto` is a **copy** of the maps backend's API
 (e39-rpi-maps, `proto/e39maps_api/v1/`); `e39maps_api/SOURCE` says which
-commit. Change the API there, then copy and regenerate here:
+commit. Change the API there, then copy it here:
 
 ```sh
 ./makeMapsProtos.sh                                # from ~/e39-rpi-maps
 E39_MAPS_REPO=/path/to/e39-rpi-maps ./makeMapsProtos.sh
-./makeMapsProtos.sh --no-copy                      # regenerate from these copies
 ```
 
-The generated code (messages, Kotlin DSL, grpc-java and grpc-kotlin stubs) is
-committed in `../java/ca/stefanm/e39maps/v1/`, like the Pico protos
-(`makeProtos.sh`); Gradle doesn't run protoc. The script downloads protoc and
-the plugins from Maven Central into `~/.cache/e39-rpi-protoc`; their versions
-match the libraries in `composeApp/build.gradle.kts` (protobuf-java 4.28.2,
-grpc-java 1.85.1, grpc-kotlin 1.5.0). Change them together.
+The code (messages, Kotlin DSL, grpc-java and grpc-kotlin stubs) is
+**generated at build time, not committed**: Gradle's `generateProtos` task
+(`composeApp/build.gradle.kts`) runs protoc into
+`composeApp/build/generated/proto/desktopMain`, which is part of the
+`desktopMain` sources; compiling depends on it. protoc and the plugins are
+Maven artifacts that Gradle resolves like the libraries, and their versions
+match the runtime libraries there (protobuf-java 4.28.2, grpc-java 1.85.1,
+grpc-kotlin 1.5.0): change them together. Which API folders it compiles:
+`generatedProtoApis` in that file.
 
 ## Layers in the HMI (`ca.stefanm.ibus.gui.map.repo`)
 

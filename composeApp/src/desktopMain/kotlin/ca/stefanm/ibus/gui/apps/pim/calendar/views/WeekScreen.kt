@@ -93,6 +93,9 @@ class WeekScreen @Inject constructor(
         )
 
         // Remembered: each call queries the PIM bridge and watches it for changes.
+        // TODO BUG: queried once from today; AgendaScreen's ◂/▸ arrows move
+        //  their own start day and the new days aren't loaded. See
+        //  calendar/CALENDAR_BUGS.md, bug 2.
         val events = remember(today, numberOfDays) {
             weekViewRepo.getAgendaViewEvents(today, numberOfDays)
         }.collectAsState(emptyList()).value

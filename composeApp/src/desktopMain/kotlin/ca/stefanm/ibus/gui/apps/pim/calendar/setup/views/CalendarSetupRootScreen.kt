@@ -35,8 +35,8 @@ import javax.inject.Inject
 
 /**
  * Calendar setup: where the PIM bridge (e39-rpi-pim) is, whether it and
- * Akonadi behind it are running, and which calendars it has. Accounts get
- * added here later (e39-rpi-pim phase 5).
+ * Akonadi behind it are running, and which calendars it has; the accounts
+ * the calendars come from are on [AccountListScreen].
  */
 @AutoDiscover
 class CalendarSetupRootScreen @Inject constructor(
@@ -124,6 +124,10 @@ class CalendarSetupRootScreen @Inject constructor(
                             ),
                         ),
                         rightItems = listOf(
+                            TextMenuItem(
+                                title = "Accounts...",
+                                onClicked = { navigationNodeTraverser.navigateToNode(AccountListScreen::class.java) }
+                            ),
                             TextMenuItem(
                                 title = "Test Connection",
                                 onClicked = { check() }

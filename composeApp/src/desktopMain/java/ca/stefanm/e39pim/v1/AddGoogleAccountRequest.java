@@ -49,7 +49,8 @@ private static final long serialVersionUID = 0L;
   private volatile java.lang.Object name_ = "";
   /**
    * <pre>
-   * Shown in the HMI; empty = the Google account's e-mail.
+   * Not used yet: the Google resource names itself "Google Groupware
+   * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
    * </pre>
    *
    * <code>string name = 1;</code>
@@ -70,7 +71,8 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Shown in the HMI; empty = the Google account's e-mail.
+   * Not used yet: the Google resource names itself "Google Groupware
+   * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
    * </pre>
    *
    * <code>string name = 1;</code>
@@ -459,7 +461,8 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object name_ = "";
     /**
      * <pre>
-     * Shown in the HMI; empty = the Google account's e-mail.
+     * Not used yet: the Google resource names itself "Google Groupware
+     * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
      * </pre>
      *
      * <code>string name = 1;</code>
@@ -479,7 +482,8 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Shown in the HMI; empty = the Google account's e-mail.
+     * Not used yet: the Google resource names itself "Google Groupware
+     * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
      * </pre>
      *
      * <code>string name = 1;</code>
@@ -500,7 +504,8 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Shown in the HMI; empty = the Google account's e-mail.
+     * Not used yet: the Google resource names itself "Google Groupware
+     * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
      * </pre>
      *
      * <code>string name = 1;</code>
@@ -517,7 +522,8 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Shown in the HMI; empty = the Google account's e-mail.
+     * Not used yet: the Google resource names itself "Google Groupware
+     * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
      * </pre>
      *
      * <code>string name = 1;</code>
@@ -531,7 +537,8 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Shown in the HMI; empty = the Google account's e-mail.
+     * Not used yet: the Google resource names itself "Google Groupware
+     * (&lt;e-mail&gt;)" whenever it (re)loads its settings.
      * </pre>
      *
      * <code>string name = 1;</code>

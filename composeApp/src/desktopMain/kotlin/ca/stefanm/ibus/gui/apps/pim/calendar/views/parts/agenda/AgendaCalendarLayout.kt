@@ -210,6 +210,10 @@ fun AgendaCalendarLayout(
             subdivisionCalculator.contributeEventToCalculation(event)
         }
 
+        // TODO BUG: result is keyed by the single-day pieces of split
+        //  events, but looked up below with the unsplit event, so events
+        //  spanning several days crash (NPE on result[event]!!). See
+        //  calendar/CALENDAR_BUGS.md, bug 1.
         val result = subdivisionCalculator.calculateAllSubdivisions()
 
         events.forEach { event ->
