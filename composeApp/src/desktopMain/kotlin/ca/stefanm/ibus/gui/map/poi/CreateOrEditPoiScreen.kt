@@ -313,7 +313,8 @@ class CreateOrEditPoiScreen @Inject constructor(
         newPoi : PoiRepository.Poi
     ) {
         poiRepository.saveOrUpdatePoi(
-            new = newPoi.copy(isVisible = existingPoi?.isVisible ?: false),
+            // The existing POI's id makes this an update rather than a new POI.
+            new = newPoi.copy(isVisible = existingPoi?.isVisible ?: false, id = existingPoi?.id),
         )
     }
 }

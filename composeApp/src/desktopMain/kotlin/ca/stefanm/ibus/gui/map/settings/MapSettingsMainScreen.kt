@@ -39,7 +39,8 @@ class MapSettingsMainScreen @Inject constructor(
                 prependGoBackEntry = true,
                 items = listOf(
                     "Download Map Tiles" to { navigateToNode(MapTileDownloaderScreen::class.java) },
-                    "Set Default Center" to { navigateToNode(MapCenterSettingsScreen::class.java) }
+                    "Set Default Center" to { navigateToNode(MapCenterSettingsScreen::class.java) },
+                    "Maps Backend" to { navigateToNode(MapsBackendSettingsScreen::class.java) }
                 )
             )
         }

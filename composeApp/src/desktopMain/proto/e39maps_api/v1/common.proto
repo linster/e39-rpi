@@ -1,0 +1,27 @@
+// Types shared by the e39-rpi maps backend's gRPC services.
+//
+// This repository (e39-rpi-maps) owns the API; the HMI (e39-rpi) generates
+// its Kotlin client from a copy of these files. Python code generated from
+// them is committed in src/e39maps_api (scripts/gen-proto.sh).
+//
+// Versioning: e39maps.v1 only gets backward-compatible changes (new fields,
+// new RPCs, new enum values); anything else goes into e39maps.v2.
+
+syntax = "proto3";
+
+package e39maps.v1;
+
+option java_package = "ca.stefanm.e39maps.v1";
+option java_multiple_files = true;
+
+// WGS 84 coordinates in degrees, as in OpenStreetMap and the HMI's LatLng.
+message LatLng {
+  double latitude = 1;   // -90 .. 90
+  double longitude = 2;  // -180 .. 180
+}
+
+// An area on the map.
+message BoundingBox {
+  LatLng south_west = 1;
+  LatLng north_east = 2;
+}
