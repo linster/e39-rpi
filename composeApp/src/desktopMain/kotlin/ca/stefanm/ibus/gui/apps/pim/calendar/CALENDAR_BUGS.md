@@ -4,10 +4,10 @@ Found while testing the calendar against the PIM bridge (e39-rpi-pim) with
 its test calendar (`scripts/run-dev.sh --test-calendar`, the week of
 2026-11-16; see e39-rpi-pim's `testdata/README.md`). Data, repositories and
 the bridge are fine; these are in the screens and agenda layout. Each code
-site has a `TODO` pointing here. File/line references are as of commit
+site has a `TODO` pointing here. GitHub issues: linster/e39-rpi #12–#19. File/line references are as of commit
 d3d6d79 on `pim-calendar`.
 
-## 1. Agenda layout crashes on events that span several days
+## 1. Agenda layout crashes on events that span several days (#12)
 
 **Symptom.** Opening a week view that contains an event spanning more than
 one day throws, and the HMI shows an "Unknown error" dialog:
@@ -65,7 +65,7 @@ through it.
 Also worth replacing `!!` with a skip-and-log in the layout: one bad event
 shouldn't take down the whole screen.
 
-## 2. Week view arrows don't load the days they move to
+## 2. Week view arrows don't load the days they move to (#13)
 
 **Symptom.** In Calendar → Week, the ◂/▸ arrows change the header (e.g.
 "12 Nov - 15 Nov" → "15 Nov - 18 Nov") and the columns, but the events stay
@@ -104,7 +104,7 @@ The header's label also seems off by one day: `getLabelForDateRange` shows
 `start` to `start + numberOfDays` (e.g. 3 days from the 12th shows
 "12 Nov - 15 Nov"), but the last day shown is `start + numberOfDays - 1`.
 
-## 3. Day splitter breaks at the end of a month
+## 3. Day splitter breaks at the end of a month (#14)
 
 Already marked in `EventSplitter.kt` (`splitToMultipleEvents()`, a `TODO BUG`
 comment). The next day's piece is built with
@@ -117,7 +117,7 @@ would be hit by any event crossing a month boundary.
 
 ## 4. Smaller things
 
-- **Year boundaries in the agenda layout.**
+- **Year boundaries in the agenda layout** (#15).
   `AgendaCalendarEventData.isVisibleOnCalendar` and the layout's
   `dayNumber = (event.startTime.dayOfYear - startDay.dayOfYear)` compare
   `dayOfYear`, so a range crossing New Year (e.g. Dec 30 – Jan 2) misplaces
@@ -125,20 +125,20 @@ would be hit by any event crossing a month boundary.
   `startDay.daysUntil(event.startTime.date)` (kotlinx-datetime) instead.
   The layout also clamps `dayNumber` with `coerceIn(0..numberOfDays)`; the
   last valid day index is `numberOfDays - 1`.
-- **Event editor preview draws the edited event twice.**
+- **Event editor preview draws the edited event twice** (#16).
   `CalendarEventEditScreen` shows today's events from `WeekViewRepo` plus
   `eventToEdit.splitToMultipleEvents()`, and today's events already contain
   the event being edited, so it appears twice side by side (the narrow
   "W W" boxes). Leave out the event being edited from the repo's list, e.g.
   by matching `eventRef?.eventId` and `eventRef?.recurrenceId`.
-- **Month view "today" ignores the year.** `CalendarDay` in
+- **Month view "today" ignores the year** (#17). `CalendarDay` in
   `views/MonthScreen.kt` compares `dayOfYear` only, so Nov 12 of next or
   last year (visible when scrolling months) is also drawn as today. Compare
   the whole `LocalDate`.
-- **`TwoWeekScreen` is empty.** Its `provideMainContent` has no content;
+- **`TwoWeekScreen` is empty** (#18). Its `provideMainContent` has no content;
   Calendar's "Two Week" view shows a blank screen. It could be `WeekScreen`
   with 14 days, or removed from the view list.
-- **No error states on the calendar screens.** When the bridge isn't
+- **No error states on the calendar screens** (#19). When the bridge isn't
   reachable or Akonadi isn't running, the week/month/to-do screens just show
   no events. `RemoteCalendarRepository.connectionState` (and
   `checkConnection()` for Akonadi's state) say why; Calendar → Setup and the
