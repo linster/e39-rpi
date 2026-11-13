@@ -75,7 +75,7 @@ class TodoListScreen @Inject constructor(
         val scope = rememberCoroutineScope()
 
         val items: List<MenuItem> = buildList {
-            add(TextMenuItem("New To-do...", onClicked = { newTodo(scope) }))
+            add(TextMenuItem("New To-do...", onClicked = { showNewTodoPane(scope) }))
             add(CheckBoxMenuItem(
                 title = "Show completed",
                 isChecked = showCompleted.value,
@@ -169,7 +169,34 @@ class TodoListScreen @Inject constructor(
         }
     }
 
-    private fun newTodo(scope: CoroutineScope) {
+    /** Quick add (just a summary, from the keyboard) or the full editor. */
+    private fun showNewTodoPane(scope: CoroutineScope) {
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "New To-do",
+                text = @Composable {
+                    InfoLabel("Quick: just type what to do.")
+                    InfoLabel("Full: also due date, priority, notes.")
+                },
+                buttons = listOf(
+                    TextMenuItem("Quick Add...", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                        quickAdd(scope)
+                    }),
+                    TextMenuItem("Full Editor...", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                        navigationNodeTraverser.navigateToNode(TodoItemEditorScreen::class.java)
+                    }),
+                    TextMenuItem("Go back", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                    }),
+                )
+            )
+        }
+    }
+
+    /** A to-do with just a summary, in the default calendar. */
+    private fun quickAdd(scope: CoroutineScope) {
         modalMenuService.showKeyboard(Keyboard.KeyboardType.FULL, "") { entered ->
             val summary = entered.trim()
             if (summary.isEmpty()) return@showKeyboard
