@@ -63,7 +63,8 @@ class BlockingJSerialCommsReader @Inject constructor(
         const val MAX_MESSAGES_TO_BUFFER = 24 //Max number of messages to buffer from the serial port before processing.
     }
 
-    private val port = serialPortProvider.serialPort
+    // The provider's current port: it's replaced when reopened.
+    private val port get() = serialPortProvider.serialPort
 
     //readtimeout should be set to 75ms
     private val TAG = "OKIO"
@@ -93,9 +94,14 @@ class BlockingJSerialCommsReader @Inject constructor(
                 val bytesAvailable = port.bytesAvailable()
                 if (bytesAvailable == 0) { yield() }
                 if (bytesAvailable == -1) {
+                    // Not open (yet, or any more: unplugged, a USB glitch,
+                    // another process had it): a new port object, opened.
+                    // Nothing to read this round (ByteArray(-1) would end
+                    // this reader for good); try again shortly.
                     logger.w(TAG, "Port not open")
-                    serialPortProvider.setupSerialPort()
-                    port.openPort().let { logger.d(TAG, "Port opening was successful: $it") }
+                    serialPortProvider.reopen().let { logger.d(TAG, "Port opening was successful: ${it.isOpen}") }
+                    delay(500)
+                    continue
                 }
 
                 val readBytes = ByteArray(bytesAvailable)
@@ -208,9 +214,28 @@ class JSerialCommsSerialPortProvider @Inject constructor(
         const val READ_TIMEOUT_NO_DATA_MS = 100 //maybe 75?
     }
 
-    val serialPort : SerialPort = setupSerialPort()
+    /**
+     * The port in use. Ask for it on every use rather than keeping it:
+     * [reopen] replaces it.
+     */
+    @Volatile
+    var serialPort : SerialPort = setupSerialPort()
+        private set
 
-    fun setupSerialPort() : SerialPort {
+    /**
+     * Closes the port in use and opens a new one (a jSerialComm SerialPort
+     * that lost its device, e.g. when the USB adapter was unplugged or
+     * another process held it, doesn't reopen). Returns it; check isOpen.
+     */
+    @Synchronized
+    fun reopen() : SerialPort {
+        serialPort.closePort()
+        serialPort = setupSerialPort()
+        return serialPort
+    }
+
+    /** A new port for the configured device, set up and opened (if it can be). */
+    private fun setupSerialPort() : SerialPort {
         val port = try {
             SerialPort.getCommPort(deviceConfiguration.iBusInterfaceUri)
         } catch (e : SerialPortInvalidPortException) {
@@ -273,10 +298,10 @@ class JSerialCommsSerialPortProvider @Inject constructor(
 @ConfiguredCarScope
 class NonBlockingJSerialCommsWriter @Inject constructor(
     private val logger: Logger,
-    serialPortProvider: JSerialCommsSerialPortProvider
+    private val serialPortProvider: JSerialCommsSerialPortProvider
 ) : SerialPortWriter {
 
-    private val port = serialPortProvider.serialPort
+    private val port get() = serialPortProvider.serialPort
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
         var bytesWritten = 0
@@ -290,13 +315,13 @@ class NonBlockingJSerialCommsWriter @Inject constructor(
 @ConfiguredCarScope
 class BlockingJSerialCommsWriter @Inject constructor(
     private val logger: Logger,
-    serialPortProvider: JSerialCommsSerialPortProvider,
+    private val serialPortProvider: JSerialCommsSerialPortProvider,
     private val coroutineScope: CoroutineScope
 ) : SerialPortWriter {
 
     private val serialOutCoroutineDispatcher = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
 
-    private val port by lazy { serialPortProvider.serialPort }
+    private val port get() = serialPortProvider.serialPort
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
         withContext(coroutineScope.coroutineContext + serialOutCoroutineDispatcher) {

@@ -11,6 +11,7 @@ import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
 import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
+import ca.stefanm.ibus.gui.map.places.PlacesNearbyScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -38,7 +39,6 @@ import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
 import javax.inject.Named
@@ -97,9 +97,11 @@ class MapScreen @Inject constructor(
         val currentOverlayState = remember { mutableStateOf<MapOverlayState>(MapOverlayState.NoOverlay) }
 
 
-        val scope = rememberCoroutineScope()
-
-        scope.launch {
+        // Once per visit to the map (cancelled when it's left): launched
+        // straight in the composable body, every recomposition added another
+        // collector, so each knob event was handled several times (a press
+        // opened the menu and the next one picked "Zoom" or closed it).
+        LaunchedEffect(Unit) {
             knobListenerService.knobTurnEvents()
                 .onStart {
                     logger.d(TAG, "knobTurnEvents() flow started")
@@ -243,7 +245,7 @@ class MapScreen @Inject constructor(
                     currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
                 gpsReceptionIconVisible = false,
-                poiOverlay = poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList()).value.let { list ->
+                poiOverlay = (poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList()).value + parameters.markers).let { list ->
                     logger.d("POI LIST", list.toString())
                     PoiOverlay(
                         pois = list.map { poi ->
@@ -464,6 +466,13 @@ class MapScreen @Inject constructor(
                         onClicked = {
                             modalMenuService.closeModalMenu()
                             onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
+                        }
+                    ),
+                    ModalMenu.ModalMenuItem(
+                        title = "Places Nearby...",
+                        onClicked = {
+                            modalMenuService.closeModalMenu()
+                            PlacesNearbyScreen.open(navigationNodeTraverser, currentCenter)
                         }
                     ),
                     ModalMenu.ModalMenuItem(

@@ -7,6 +7,7 @@ import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.lib.logging.Logger
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.Item
 import com.uchuhimo.konf.source.hocon
 import com.uchuhimo.konf.source.hocon.toHocon
 import kotlinx.coroutines.channels.BufferOverflow
@@ -17,6 +18,16 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 //https://github.com/russhwolf/multiplatform-settings
+
+/**
+ * Sets [item] to [value] in the HOCON [file] as it is now (re-read), keeping
+ * the values other programs wrote there since this process read it.
+ */
+internal fun setOnFile(file: File, spec: ConfigSpec, item: Item<*>, value: Any?) {
+    Config { addSpec(spec) }.from.hocon.file(file, optional = true)
+        .apply { rawSet(item, value) }
+        .toHocon.toFile(file)
+}
 
 @ApplicationScope
 class ConfigurationStorage @Inject constructor(
@@ -56,9 +67,17 @@ class ConfigurationStorage @Inject constructor(
 
         versionConfig.afterSet { item, value ->
             logger.d(TAG, "Setting ${item.name} to $value")
-            versionConfig.toHocon.toFile(versionFile)
+            // Others write this file too, also while the HMI runs: the
+            // device's map installer (mapVersion) and the deploy tools
+            // (hmiHash). Set the one item on the file as it is now rather
+            // than writing back this copy from start-up over their values.
+            setOnFile(versionFile, HmiVersion, item, value)
         }
     }
+
+    /** version.conf as it is on disk now (versionConfig is as of start-up). */
+    fun versionFileNow(): Config = Config { addSpec(HmiVersion) }
+        .from.hocon.file(versionFile, optional = true)
 
     fun saveConfigAsFile(filename : String) {
         config.toHocon.toFile(File(e39BaseFolder, filename))

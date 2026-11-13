@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.map.guidance.GuidanceIcons
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.di.ApplicationScope
@@ -200,7 +201,9 @@ class ModalMenuService @Inject constructor(
 
     data class SidePaneOverlay(
         val ui : (@Composable () -> Unit)? = null,
-        val darkenBackground : Boolean = false
+        val darkenBackground : Boolean = false,
+        /** Who showed it, for [closeSidePaneOverlayIfTagged]; null for the usual (menu) panes. */
+        val tag : Any? = null,
     )
 
     private val _sidePaneOverlay = MutableStateFlow(SidePaneOverlay())
@@ -347,6 +350,31 @@ class ModalMenuService @Inject constructor(
             darkenBackground = darkenBackground
         )
     }
+
+    /**
+     * A side pane that only shows something (e.g. the next guidance
+     * instruction while driving): the knob stays with the main content, and
+     * the background isn't darkened. It doesn't replace a side pane the user
+     * opened (returns false then). Close it with [closeSidePaneOverlayIfTagged].
+     */
+    fun showPassiveSidePaneOverlay(tag : Any, contents : @Composable () -> Unit) : Boolean {
+        val current = _sidePaneOverlay.value
+        if (current.ui != null && current.tag != tag) {
+            return false
+        }
+        _sidePaneOverlay.value = SidePaneOverlay(ui = contents, darkenBackground = false, tag = tag)
+        return true
+    }
+
+    /** Closes the side pane if it's still the one shown with [tag]. */
+    fun closeSidePaneOverlayIfTagged(tag : Any) {
+        if (_sidePaneOverlay.value.ui != null && _sidePaneOverlay.value.tag == tag) {
+            _sidePaneOverlay.value = SidePaneOverlay()
+        }
+    }
+
+    fun isSidePaneOverlayTagged(tag : Any) : Boolean =
+        _sidePaneOverlay.value.ui != null && _sidePaneOverlay.value.tag == tag
 
     fun closeSidePaneOverlay(clearDarkening : Boolean = false) {
         _sidePaneOverlay.value = _sidePaneOverlay.value.copy(
@@ -733,6 +761,7 @@ class ModalMenuService @Inject constructor(
                                                 Notification.NotificationImage.MAP_GENERAL -> Res.drawable.notification_map
                                                 Notification.NotificationImage.MAP_INSTRUCTION -> Res.drawable.notification_navigation
                                                 Notification.NotificationImage.MAP_WAYPOINT -> Res.drawable.notification_map_pin
+                                                else -> GuidanceIcons.drawable(image) ?: error("No drawable for $image")
                                             }
                                         )
                                         Image(

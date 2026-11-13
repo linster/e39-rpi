@@ -1,5 +1,9 @@
 package ca.stefanm.ibus.gui.menu
 
+import ca.stefanm.ibus.gui.map.widget.tile.LocalMapTileServices
+import ca.stefanm.ibus.gui.map.widget.tile.MapTileServices
+import ca.stefanm.ibus.gui.map.widget.tile.TileFetcher
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -58,7 +62,8 @@ class MenuWindow @Inject constructor(
 
     private val bottomBarController: BottomBarController,
 
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val tileFetcher: TileFetcher,
 ) : WindowManager.E39Window {
 
     companion object {
@@ -81,7 +86,13 @@ class MenuWindow @Inject constructor(
         CompositionLocalProvider(KeyboardWindowProvider.Window provides window) {
             CompositionLocalProvider(MenuWindowKnobListener provides knobListenerServiceMain) {
                 CompositionLocalProvider(MenuWindowNavigationNodeTraverser provides navigationNodeTraverser) {
-                    rootContent()
+                    // The map's tiles: the app's fetcher and settings, once
+                    // for the window (not a Dagger component per tile).
+                    CompositionLocalProvider(
+                        LocalMapTileServices provides remember { MapTileServices(tileFetcher, configurationStorage, logger) }
+                    ) {
+                        rootContent()
+                    }
                 }
             }
         }

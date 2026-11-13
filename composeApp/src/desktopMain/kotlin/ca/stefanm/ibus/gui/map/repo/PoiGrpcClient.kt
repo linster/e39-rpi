@@ -1,6 +1,8 @@
 package ca.stefanm.ibus.gui.map.repo
 
 import ca.stefanm.e39maps.v1.BoundingBox
+import ca.stefanm.e39maps.v1.PoiCategory
+import ca.stefanm.e39maps.v1.PoiSource
 import ca.stefanm.e39maps.v1.PoiServiceGrpcKt
 import ca.stefanm.e39maps.v1.PoiResult
 import ca.stefanm.e39maps.v1.SearchPoisRequestKt
@@ -58,7 +60,9 @@ class PoiGrpcClient @Inject constructor(
 
     /**
      * Nearest first within [radiusMeters] of [near], or by name inside
-     * [boundingBox], or all; optionally matching part of the name.
+     * [boundingBox], or all; optionally matching part of the name. [sources]:
+     * the user's POIs (the backend's default when empty) and/or the map's
+     * (OpenStreetMap, read-only); [categories] only finds map POIs.
      */
     suspend fun searchPois(
         near: PbLatLng? = null,
@@ -67,9 +71,12 @@ class PoiGrpcClient @Inject constructor(
         nameContains: String = "",
         visibleOnly: Boolean = false,
         limit: Int = 0,
-    ): List<PoiResult> = backendCall {
+        sources: Collection<PoiSource> = emptyList(),
+        categories: Collection<PoiCategory> = emptyList(),
+    ): List<PoiResult> {
         require(near == null || boundingBox == null) { "near or boundingBox, not both" }
-        stub().searchPois(searchPoisRequest {
+        return backendCall {
+            stub().searchPois(searchPoisRequest {
             if (near != null) {
                 this.near = SearchPoisRequestKt.near {
                     center = near
@@ -80,6 +87,9 @@ class PoiGrpcClient @Inject constructor(
             this.nameContains = nameContains
             this.visibleOnly = visibleOnly
             this.limit = limit
+            this.sources.addAll(sources)
+            this.categories.addAll(categories)
         }).resultsList
+        }
     }
 }

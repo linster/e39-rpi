@@ -22,6 +22,7 @@ import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.HmiVersion
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.gui.map.repo.InstalledMapRepository
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -52,8 +53,8 @@ class AboutScreen @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     @Named(ApplicationModule.IBUS_MESSAGE_OUTPUT_CHANNEL) val outgoingMessages : Channel<IBusMessage>,
     private val piToPicoMessageFactory: PiToPicoMessageFactory,
-    private val notificationHub: NotificationHub
-
+    private val notificationHub: NotificationHub,
+    private val installedMapRepository: InstalledMapRepository,
     ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -146,6 +147,9 @@ class AboutScreen @Inject constructor(
                     configurationStorage.fwVersionAsFlow()
                         .collectAsState(initial = configurationStorage.versionConfig[HmiVersion.fwHash]).value
                 }")
+                // Asked each time the screen opens: maps change while the HMI runs.
+                val map by produceState("...") { value = installedMapRepository.mapVersion() }
+                AboutLabel("      Map: $map")
             }
         }
     }
