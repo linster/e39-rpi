@@ -37,3 +37,45 @@ Development: run the backend on the laptop (`python manage.py
 run_grpc_server` in e39-rpi-maps) or the e39-rpi QEMU image (forwards
 `localhost:50051`); POIs are visible in its Django admin
 (`admin`/`e39rpi`).
+
+# PIM bridge API (gRPC): calendars
+
+`e39pim_api/v1/*.proto` is a **copy** of the PIM bridge's API (e39-rpi-pim,
+`proto/e39pim_api/v1/`: Akonadi behind it); `e39pim_api/SOURCE` says which
+commit. Change the API there, then copy and regenerate here:
+
+```sh
+./makePimProtos.sh                                 # from ~/e39-rpi-pim
+E39_PIM_REPO=/path/to/e39-rpi-pim ./makePimProtos.sh
+./makePimProtos.sh --no-copy                       # regenerate from these copies
+```
+
+Generated code in `../java/ca/stefanm/e39pim/v1/`, same tools and versions as
+the maps API above.
+
+## Layers in the HMI (`ca.stefanm.ibus.gui.pim.calendar.repo`)
+
+| Class | Layer |
+| --- | --- |
+| `backend.PimBackendSettingsRepository` | bridge host/port, in `config.conf` (`E39Config.PimConfig.Backend`, default `localhost:50052`); editable in Calendar → Setup |
+| `backend.PimBackendChannel` | the gRPC connection, rebuilt when the settings change; `PimBackendException` for errors (`Conflict` = the event changed meanwhile) |
+| `backend.CalendarGrpcClient`, `backend.TodoGrpcClient` | transport: CalendarService/StatusService/TodoService calls, protobuf messages in and out; `watchChanges()` as a `Flow` |
+| `backend.PimChangeStream` | the bridge's change notices: one WatchChanges stream shared by the repositories, reconnecting |
+| `backend.CalendarMapper` | protobuf ⇄ HMI types (`AgendaCalendarEventData`, `CalendarEventRef`, `TodoItem`, `EventTimes`, `Instant`) |
+| `backend.RemoteCalendarRepository` | `events(start, end)`: a `Flow` that queries again when the bridge reports changes in that range and retries every 10 s while it's unreachable; `calendars()`, `defaultEventCalendar()`; `createEvent`, `updateEvent`, `deleteEvent` (this occurrence or the whole series); `connectionState`; `checkConnection()` |
+| `backend.RemoteTodoRepository` | `todos(includeCompleted)`: a `Flow` updated on to-do changes; `createTodo`, `updateTodo`, `setCompleted`, `deleteTodo` |
+| `api.WeekViewRepo`, `api.MonthViewRepo` | what the screens use: events for day columns, events by day for the month grid; `saveEditedEvent` for the editor |
+
+Screens must `remember` these flows: every call starts its own queries.
+Writes return `Result`s; `PimBackendException.Conflict` means the event or
+to-do changed meanwhile (e.g. a sync came in): reload and redo the change.
+The editor saves the name and, if entered, new times; for a repeating event
+only that occurrence.
+
+Debug: Debug Launchpad (or the loading window's Debug menu) → Calendar (PIM
+Bridge) Debug: settings, connection check, calendars, live event queries
+through each repository, GetEvent, the raw change stream.
+
+Development: run the bridge on the laptop (`scripts/run-dev.sh
+--test-calendar` in e39-rpi-pim; its test calendar is the week of
+2026-11-16).

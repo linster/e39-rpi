@@ -1,0 +1,67 @@
+// Browser logins (OAuth) for accounts.
+//
+// The bridge can't show web pages, so it asks the HMI to: an AuthRequest
+// carries the login page's URL, and the HMI opens it in its browser. The
+// login page eventually redirects to redirect_prefix, a page served by the
+// bridge's machine on 127.0.0.1 (OAuth "loopback redirect"); the bridge
+// gets the result from that and sends AuthFinished. The browser must run
+// on the same machine as the bridge (the Pi) for 127.0.0.1 to reach it.
+//
+// Several clients may watch; each sees every request. Only one login runs
+// at a time per account (a new one replaces the old, which finishes with
+// success = false).
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+import "google/protobuf/empty.proto";
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "AuthProto";
+
+service AuthService {
+  // Logins waiting for the user first (as opened), then new ones and their
+  // results as they happen.
+  rpc WatchAuthRequests(WatchAuthRequestsRequest) returns (stream AuthEvent);
+  // Gives up on a login (the user closed the browser). It finishes with
+  // success = false. NOT_FOUND if there's no such login running.
+  rpc CancelAuth(CancelAuthRequest) returns (google.protobuf.Empty);
+}
+
+message AuthEvent {
+  oneof event {
+    AuthRequest opened = 1;
+    AuthFinished finished = 2;
+  }
+}
+
+message AuthRequest {
+  string id = 1;
+  // The account logging in; empty if a web page was requested by something
+  // the bridge can't tie to an account (shown anyway).
+  string account_id = 2;
+  // For the browser's title bar, e.g. "Log in to Google".
+  string title = 3;
+  // The page to open.
+  string url = 4;
+  // The login is done when the browser gets to a URL starting with this
+  // (e.g. "http://127.0.0.1:41234/"). The HMI can close the browser once
+  // that page has loaded, or wait for AuthFinished.
+  string redirect_prefix = 5;
+}
+
+message AuthFinished {
+  string id = 1;
+  string account_id = 2;
+  bool success = 3;
+  // Why it failed, for the user (English).
+  string message = 4;
+}
+
+message WatchAuthRequestsRequest {}
+
+message CancelAuthRequest {
+  string id = 1;
+}

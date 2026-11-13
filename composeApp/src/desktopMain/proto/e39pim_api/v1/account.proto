@@ -1,0 +1,140 @@
+// Accounts: where calendars come from and sync to.
+//
+// An account is one Akonadi resource (agent instance): a CalDAV server, a
+// Google account, or (for tests) a local .ics file. The bridge creates and
+// configures them, since Akonadi's own setup dialogs need a desktop.
+//
+// Accounts that log in with OAuth (Google) need a browser: adding one, or a
+// login that has expired, starts a login that the HMI shows through
+// AuthService. Expired access tokens are refreshed without the browser;
+// only a revoked or expired refresh token needs the user.
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+import "google/protobuf/empty.proto";
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "AccountProto";
+
+service AccountService {
+  // By name.
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+  // The whole list first, then again whenever any account changes (added,
+  // removed, renamed, online/offline, sync progress, errors).
+  rpc WatchAccounts(WatchAccountsRequest) returns (stream ListAccountsResponse);
+  // Creates a CalDAV account, stores its password and starts a first sync.
+  // Use an app password where the server offers them. The login is tried
+  // first: UNAUTHENTICATED if the server refuses it, UNAVAILABLE if the
+  // server can't be reached (message: why); nothing is created then.
+  // INVALID_ARGUMENT for a malformed URL or a missing user name/password.
+  rpc AddCalDavAccount(AddCalDavAccountRequest) returns (Account);
+  // Creates a Google account and starts its login: an AuthRequest appears
+  // on AuthService.WatchAuthRequests. The account says needs_login until
+  // the login finishes.
+  rpc AddGoogleAccount(AddGoogleAccountRequest) returns (StartLoginResponse);
+  // Starts a new login for an account that says needs_login.
+  // FAILED_PRECONDITION for account types without OAuth.
+  rpc StartLogin(StartLoginRequest) returns (StartLoginResponse);
+  // Removes the account, its stored password/tokens and its local copy of
+  // the data (nothing on the server is deleted).
+  rpc RemoveAccount(RemoveAccountRequest) returns (google.protobuf.Empty);
+  // Offline accounts don't sync (data stays readable). Akonadi also takes
+  // accounts offline by itself when the network is down.
+  rpc SetAccountOnline(SetAccountOnlineRequest) returns (Account);
+  // Sync now instead of at the next interval.
+  rpc SyncNow(SyncNowRequest) returns (google.protobuf.Empty);
+}
+
+enum AccountType {
+  ACCOUNT_TYPE_UNSPECIFIED = 0;
+  ACCOUNT_TYPE_OTHER = 1;      // created outside the bridge; see type_name
+  ACCOUNT_TYPE_CALDAV = 2;     // akonadi_davgroupware_resource
+  ACCOUNT_TYPE_GOOGLE = 3;     // akonadi_google_resource
+  ACCOUNT_TYPE_ICAL_FILE = 4;  // akonadi_ical_resource (tests, local files)
+}
+
+enum AccountState {
+  ACCOUNT_STATE_UNSPECIFIED = 0;
+  ACCOUNT_STATE_IDLE = 1;            // online, nothing to do
+  ACCOUNT_STATE_SYNCING = 2;         // see progress_percent
+  ACCOUNT_STATE_OFFLINE = 3;
+  ACCOUNT_STATE_NOT_CONFIGURED = 4;  // missing settings (or still setting up)
+  ACCOUNT_STATE_BROKEN = 5;          // see status_message
+}
+
+message Account {
+  string id = 1;
+  AccountType type = 2;
+  // Akonadi's agent type, e.g. "akonadi_davgroupware_resource".
+  string type_name = 3;
+  string name = 4;
+  bool online = 5;
+  AccountState state = 6;
+  // What the account says it's doing or what went wrong, in its words
+  // (English).
+  string status_message = 7;
+  // 0 .. 100 while syncing, else 0.
+  int32 progress_percent = 8;
+  // The login has to be done (again) in a browser: AccountService.StartLogin.
+  bool needs_login = 9;
+  // The last error the account reported, in its words (English), e.g. a
+  // sync that failed because the server refused the password; empty once a
+  // sync went through without errors. Errors don't always make the state
+  // BROKEN: most accounts go back to IDLE and try again at the next sync.
+  string last_error = 10;
+}
+
+message ListAccountsRequest {}
+
+message ListAccountsResponse {
+  repeated Account accounts = 1;
+}
+
+message WatchAccountsRequest {}
+
+message AddCalDavAccountRequest {
+  // Shown in the HMI; empty = the server's host name.
+  string name = 1;
+  // The server's CalDAV URL (or a URL on the server the account can be
+  // discovered from), e.g. "https://cloud.example.com/remote.php/dav".
+  string url = 2;
+  string username = 3;
+  string password = 4;
+  // How often to sync, in minutes; 0 = the default (5).
+  int32 refresh_interval_minutes = 5;
+}
+
+message AddGoogleAccountRequest {
+  // Not used yet: the Google resource names itself "Google Groupware
+  // (<e-mail>)" whenever it (re)loads its settings.
+  string name = 1;
+  // E-mail to suggest on Google's login page; optional.
+  string login_hint = 2;
+}
+
+message StartLoginRequest {
+  string account_id = 1;
+}
+
+message StartLoginResponse {
+  Account account = 1;
+  // The AuthRequest (AuthService) for this login.
+  string auth_request_id = 2;
+}
+
+message RemoveAccountRequest {
+  string account_id = 1;
+}
+
+message SetAccountOnlineRequest {
+  string account_id = 1;
+  bool online = 2;
+}
+
+message SyncNowRequest {
+  // Empty = all accounts.
+  string account_id = 1;
+}

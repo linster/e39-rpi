@@ -70,6 +70,8 @@ import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
 import ca.stefanm.ibus.gui.menu.*
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
+import ca.stefanm.ibus.gui.pim.calendar.setup.views.AccountListScreen
+import ca.stefanm.ibus.gui.pim.calendar.setup.views.AddCalDavAccountScreen
 import ca.stefanm.ibus.gui.pim.calendar.setup.views.CalendarSetupRootScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.WeekScreen
@@ -170,6 +172,8 @@ class NavigationModule {
         todoListScreen: TodoListScreen,
         twoWeekScreen: TwoWeekScreen,
         calendarSetupRootScreen : CalendarSetupRootScreen,
+        accountListScreen: AccountListScreen,
+        addCalDavAccountScreen: AddCalDavAccountScreen,
         calendarEventEditScreen: CalendarEventEditScreen,
         todoItemEditorScreen: TodoItemEditorScreen,
         griffinPowermateConfigScreen: GriffinPowermateConfigScreen,
@@ -265,6 +269,8 @@ class NavigationModule {
         todoListScreen,
         twoWeekScreen,
         calendarSetupRootScreen,
+        accountListScreen,
+        addCalDavAccountScreen,
         calendarEventEditScreen,
         todoItemEditorScreen,
         griffinPowermateConfigScreen,

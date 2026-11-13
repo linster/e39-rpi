@@ -15,6 +15,7 @@ import ca.stefanm.ibus.gui.chat.screens.debug.MatrixServiceDebugWindow
 import ca.stefanm.ibus.gui.debug.windows.commsDebug.PicoCommsDebugWindow
 import ca.stefanm.ibus.gui.map.guidance.GuidanceDebugWindow
 import ca.stefanm.ibus.gui.map.MapDebug
+import ca.stefanm.ibus.gui.pim.calendar.debug.CalendarDebugWindow
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
 
@@ -37,7 +38,9 @@ class DebugLaunchpad @Inject constructor(
 
     private val picoCommsDebugWindow: PicoCommsDebugWindow,
 
-    private val matrixServiceDebugWindow: MatrixServiceDebugWindow
+    private val matrixServiceDebugWindow: MatrixServiceDebugWindow,
+
+    private val calendarDebugWindow: CalendarDebugWindow,
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -88,6 +91,10 @@ class DebugLaunchpad @Inject constructor(
 
             Button(onClick = { windowManager.openDebugWindow(matrixServiceDebugWindow)}) {
                 Text("Matrix Chat Debug")
+            }
+
+            Button(onClick = { windowManager.openDebugWindow(calendarDebugWindow)}) {
+                Text("Calendar (PIM Bridge) Debug")
             }
         }
     }

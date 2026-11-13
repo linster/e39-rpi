@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.constraintlayout.compose.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarEventRef
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
@@ -39,6 +40,9 @@ data class AgendaCalendarEventData(
 
     val multiDayThisPart : Int = 1,
     val multiDayTotalParts : Int = 1, //TODO actually calculate this by subtracting the LocaleDate day numbers.
+
+    // The event in the PIM bridge this shows; null for events not from it.
+    val eventRef : CalendarEventRef? = null,
 ) {
 
 
@@ -102,6 +106,10 @@ data class AgendaCalendarEventData(
         }
     }
 
+    // TODO BUG: the next day's part starts at LocalDateTime(year, month, day + 1),
+    // which throws on the last day of a month (e.g. day 31 + 1 = 32) instead of
+    // rolling over to the 1st of the next month. Multi-day events that cross a
+    // month boundary will crash the agenda. Use startTime.date.plus(1, DateTimeUnit.DAY).
     fun splitToMultipleEvents() : List<AgendaCalendarEventData> {
         //start from the start, and see when we cross a dateline. truncate the event and add it to an accumulator. Repeat
         //for what's left until done
@@ -133,6 +141,7 @@ data class AgendaCalendarEventData(
                 color = color,
                 onClick = onClick,
                 eventUuid = eventUuid,
+                eventRef = eventRef,
                 allDayEvent = allDayEvent,
                 multiDayThisPart = multiDayThisPart,
                 multiDayTotalParts = multiDayTotalParts
@@ -140,6 +149,7 @@ data class AgendaCalendarEventData(
             //Fabricate a new event that begins right after `endofDayToday` and runs until end.
 
             //Increment endOfDayToday to be the start of the following day.
+            //TODO BUG: day + 1 breaks at the end of a month; see splitToMultipleEvents().
             val newStart = LocalDateTime(startTime.year, startTime.month, startTime.day + 1, hour = 0, minute = 0, second = 0)
                 .toInstant(TimeZone.currentSystemDefault())
             val newEventSplittable = AgendaCalendarEventData(
@@ -149,6 +159,7 @@ data class AgendaCalendarEventData(
                 color = color,
                 onClick = onClick,
                 eventUuid = eventUuid,
+                eventRef = eventRef,
                 allDayEvent = allDayEvent,
                 multiDayThisPart = multiDayThisPart + 1,
                 multiDayTotalParts = multiDayTotalParts

@@ -27,7 +27,11 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.MonthViewRepo
+import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
 import ca.stefanm.ibus.lib.logging.Logger
+import androidx.compose.material.Text
+import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import kotlinx.coroutines.launch
@@ -55,7 +59,8 @@ class MonthScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     @Named(ApplicationModule.KNOB_LISTENER_MAIN)
     private val knobListenerService: KnobListenerService,
-    private val calendarOptionsMenu: CalendarOptionsMenu
+    private val calendarOptionsMenu: CalendarOptionsMenu,
+    private val monthViewRepo: MonthViewRepo,
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -80,6 +85,16 @@ class MonthScreen @Inject constructor(
         val endMonth = remember(currentMonth) { currentMonth.value.plusMonths(50) }
 
         val daysOfTheWeek = remember { daysOfWeek() }
+
+        // The grid shows some days of the previous and next months too.
+        // Remembered: each call queries the PIM bridge and watches it.
+        val eventsByDay = remember(currentMonth.value) {
+            val firstOfMonth = LocalDate(currentMonth.value.year, currentMonth.value.month, 1)
+            monthViewRepo.eventsByDay(
+                firstDay = firstOfMonth.minus(7, DateTimeUnit.DAY),
+                lastDay = firstOfMonth.plus(1, DateTimeUnit.MONTH).plus(13, DateTimeUnit.DAY),
+            )
+        }.collectAsState(emptyMap()).value
 
         val state = rememberCalendarState(
             startMonth = startMonth,
@@ -151,6 +166,7 @@ class MonthScreen @Inject constructor(
                     KnobObserverBuilder(knobState) { allocatedIndex: Int, currentIndex: Int ->
                         CalendarDay(
                             day = day,
+                            events = eventsByDay[day.date].orEmpty(),
                             isSelected = allocatedIndex == currentIndex,
                             onClicked = CallWhen(currentIndexIs = allocatedIndex) {}
                         )
@@ -164,6 +180,7 @@ class MonthScreen @Inject constructor(
 @Composable
 fun CalendarDay(
     day : CalendarDay,
+    events : List<AgendaCalendarEventData>,
     isSelected : Boolean,
     onClicked : () -> Unit
 ) {
@@ -193,12 +210,27 @@ fun CalendarDay(
                 },
                 onClicked = { onClicked() }
             )
-            Column {
-                //Event chips
+            // Event chips: a colour mark for each of the first few events.
+            Column(
+                modifier = Modifier.padding(end = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                events.take(MAX_EVENT_CHIPS).forEach { event ->
+                    Box(Modifier.size(width = 16.dp, height = 8.dp).background(event.color))
+                }
+                if (events.size > MAX_EVENT_CHIPS) {
+                    Text(
+                        "+${events.size - MAX_EVENT_CHIPS}",
+                        color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                        fontSize = 10.sp
+                    )
+                }
             }
         }
     }
 }
+
+private const val MAX_EVENT_CHIPS = 3
 
 //TODO clicking on a day should open a side menu with a quick list
 //TODO of the events on that day.

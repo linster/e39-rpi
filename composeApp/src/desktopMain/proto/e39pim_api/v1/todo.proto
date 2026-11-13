@@ -1,0 +1,96 @@
+// To-dos (iCalendar VTODO), for the HMI's to-do list.
+//
+// They live in calendars (CalendarService.ListCalendars, has_todos). Change
+// notices come on CalendarService.WatchChanges (todos_changed). Revisions
+// work as for events (see calendar.proto): changes fail with ABORTED if the
+// to-do changed meanwhile.
+//
+// Repeating to-dos are listed once (their next occurrence's due date);
+// completing one completes that occurrence, as KDE's apps do.
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+import "e39pim_api/v1/common.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "TodoProto";
+
+service TodoService {
+  // Sorted: not completed first, then by due (none last), then priority,
+  // then summary.
+  rpc ListTodos(ListTodosRequest) returns (ListTodosResponse);
+  // FAILED_PRECONDITION if the calendar is read-only or holds no to-dos.
+  rpc CreateTodo(CreateTodoRequest) returns (Todo);
+  // ABORTED on a revision mismatch.
+  rpc UpdateTodo(UpdateTodoRequest) returns (Todo);
+  // Shortcut for the knob: tick/untick. ABORTED on a revision mismatch.
+  rpc SetTodoCompleted(SetTodoCompletedRequest) returns (Todo);
+  // ABORTED on a revision mismatch.
+  rpc DeleteTodo(DeleteTodoRequest) returns (google.protobuf.Empty);
+}
+
+message Todo {
+  // Set by the server.
+  string todo_id = 1;
+  string calendar_id = 2;
+  int64 revision = 3;
+  bool read_only = 4;
+  uint32 color_argb = 5;  // the to-do's colour, else its calendar's
+  bool recurring = 6;
+  google.protobuf.Timestamp completed_at = 7;  // when completed, if known
+
+  // Editable.
+  string summary = 10;
+  string description = 11;
+  // Due: a time (due) or a whole day (due_date); neither = no due date.
+  google.protobuf.Timestamp due = 12;
+  Date due_date = 13;
+  bool completed = 14;
+  // 0 = none, 1 = highest .. 9 = lowest (iCalendar PRIORITY).
+  int32 priority = 15;
+  int32 percent_complete = 16;  // 0 .. 100
+}
+
+message ListTodosRequest {
+  // Only these calendars; empty = all calendars with to-dos.
+  repeated string calendar_ids = 1;
+  bool include_completed = 2;
+}
+
+message ListTodosResponse {
+  repeated Todo todos = 1;
+}
+
+message CreateTodoRequest {
+  string calendar_id = 1;
+  Todo todo = 2;  // server-set fields are ignored; needs a summary
+}
+
+message UpdateTodoRequest {
+  // todo.todo_id selects it; todo.revision is the revision this change is
+  // based on.
+  Todo todo = 1;
+  // Which editable fields to change: summary, description, due, due_date,
+  // completed, priority, percent_complete. Empty = all of them. due and
+  // due_date go together: naming either sets the due date from `todo` (due,
+  // due_date, or neither for none). Timed due dates are stored in the
+  // bridge's zone.
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message SetTodoCompletedRequest {
+  string todo_id = 1;
+  int64 revision = 2;
+  bool completed = 3;
+}
+
+message DeleteTodoRequest {
+  string todo_id = 1;
+  int64 revision = 2;
+}

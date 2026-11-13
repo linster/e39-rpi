@@ -79,7 +79,9 @@ class CalendarScreen @Inject constructor(
                     ),
                     TextMenuItem(
                         "Todo List",
-                        onClicked = {}
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(TodoListScreen::class.java)
+                        }
                     )
                 ),
                 sw = listOf(

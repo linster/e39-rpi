@@ -66,6 +66,7 @@ class DeviceConfigurationViewerWindow @Inject constructor(
         if (this == null) return listOf()
         return listOf(
             ConfigurationItem("isPi", isPi.toString()),
+            ConfigurationItem("hasBrowser", hasBrowser.toString()),
             ConfigurationItem("iBusInterfaceUri", iBusInterfaceUri),
             ConfigurationItem("displayDriver", displayDriver.toString()),
             ConfigurationItem("pairedPhone", pairedPhone.toString()),
