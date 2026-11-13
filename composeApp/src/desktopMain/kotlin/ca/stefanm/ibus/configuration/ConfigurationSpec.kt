@@ -159,6 +159,24 @@ object E39Config : ConfigSpec() {
         //Hide Menu?
     }
 
+    /** Calendars, events, to-dos: the PIM bridge (e39-rpi-pim, Akonadi). */
+    object PimConfig : ConfigSpec() {
+        /** The PIM bridge's gRPC API. */
+        object Backend : ConfigSpec() {
+            val host by optional(
+                "localhost",
+                "host",
+                "Host of the PIM bridge's gRPC API. localhost: the bridge's container on the Pi, " +
+                        "or e39-rpi-pim's scripts/run-dev.sh on the laptop."
+            )
+            val port by optional(
+                50052,
+                "port",
+                "Port of the PIM bridge's gRPC API."
+            )
+        }
+    }
+
     object MapConfig : ConfigSpec() {
 
         val showDebugInfoOnTiles by optional(

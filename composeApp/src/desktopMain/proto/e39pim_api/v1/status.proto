@@ -1,0 +1,50 @@
+// The state of the bridge and of Akonadi behind it.
+//
+// The HMI uses this to tell "the bridge isn't reachable" (the RPC fails),
+// "Akonadi is still starting" and "Akonadi is broken" apart, and for a
+// debug screen. Per-account sync state is in AccountService.
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "StatusProto";
+
+service StatusService {
+  // Never fails while the bridge is up (it works without Akonadi).
+  rpc GetStatus(GetStatusRequest) returns (BridgeStatus);
+  // The current status first, then again whenever it changes.
+  rpc WatchStatus(WatchStatusRequest) returns (stream BridgeStatus);
+}
+
+// Akonadi's server state (Akonadi::ServerManager::State).
+enum AkonadiState {
+  AKONADI_STATE_UNSPECIFIED = 0;
+  AKONADI_STATE_NOT_RUNNING = 1;
+  AKONADI_STATE_STARTING = 2;
+  AKONADI_STATE_RUNNING = 3;    // the other services work
+  AKONADI_STATE_STOPPING = 4;
+  AKONADI_STATE_BROKEN = 5;     // see BridgeStatus.broken_reason
+  AKONADI_STATE_UPGRADING = 6;  // database migration after an update
+}
+
+message BridgeStatus {
+  AkonadiState akonadi_state = 1;
+  // Why Akonadi is broken (AKONADI_STATE_BROKEN), as Akonadi says it.
+  string broken_reason = 2;
+  // Versions, for the debug screen: the bridge (this repo's git describe),
+  // Akonadi (KDE Gear release, e.g. "26.04.2"), KDE Frameworks (e.g.
+  // "6.26.0"), Qt.
+  string bridge_version = 3;
+  string akonadi_version = 4;
+  string frameworks_version = 5;
+  string qt_version = 6;
+  // Akonadi's database driver, e.g. "QSQLITE".
+  string database_driver = 7;
+}
+
+message GetStatusRequest {}
+
+message WatchStatusRequest {}

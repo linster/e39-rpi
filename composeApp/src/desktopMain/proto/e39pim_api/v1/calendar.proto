@@ -1,0 +1,233 @@
+// Calendars and events.
+//
+// A calendar belongs to an account (AccountService) and holds events, to-dos
+// or both. Repeating events are expanded by the bridge: ListEvents returns
+// one EventOccurrence per occurrence with concrete times, so clients never
+// parse iCalendar or recurrence rules.
+//
+// Times:
+// - Timed events: start/end are instants; time_zone is the zone the event
+//   was written in (IANA name, e.g. "America/Edmonton"), for display and
+//   editing. An empty time_zone means "floating" (no zone in the
+//   iCalendar data); the bridge puts floating times in the request's
+//   time_zone.
+// - All-day events: all_day = true and start_date/end_date are set instead
+//   of start/end; end_date is exclusive (a one-day event on the 5th has
+//   start_date 5th, end_date 6th), as in iCalendar.
+//
+// Event IDs: event_id names the event (a whole series for repeating
+// events); an occurrence of a repeating event also has recurrence_id, its
+// original start (as in iCalendar's RECURRENCE-ID), even if that occurrence
+// was moved. The pair names one occurrence. For all-day series,
+// recurrence_id is the occurrence's original date at 00:00 UTC.
+//
+// Revisions: every event has a revision that changes whenever the event
+// does (edits here, edits on another device that arrive by sync). Changes
+// send the revision they were based on; if it no longer matches, the change
+// fails with ABORTED instead of overwriting the newer version.
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+import "e39pim_api/v1/common.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "CalendarProto";
+
+service CalendarService {
+  // All calendars (with events, to-dos or both), by account then name.
+  rpc ListCalendars(ListCalendarsRequest) returns (ListCalendarsResponse);
+  // Occurrences overlapping [start, end), sorted by start then end.
+  // INVALID_ARGUMENT if start isn't before end or the range is longer than
+  // 366 days.
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  // One event with all its details; with recurrence_id, that occurrence's
+  // times. NOT_FOUND for an unknown event or an occurrence that doesn't
+  // exist.
+  rpc GetEvent(GetEventRequest) returns (Event);
+  // FAILED_PRECONDITION if the calendar is read-only or holds no events.
+  rpc CreateEvent(CreateEventRequest) returns (Event);
+  // A whole event/series, or one occurrence of a series (recurrence_id
+  // set; stored as an exception). ABORTED on a revision mismatch.
+  rpc UpdateEvent(UpdateEventRequest) returns (Event);
+  // A whole event/series, or one occurrence of a series (recurrence_id
+  // set). ABORTED on a revision mismatch.
+  rpc DeleteEvent(DeleteEventRequest) returns (google.protobuf.Empty);
+  // Tells clients what to re-query. The first message is `ready` (the
+  // stream is live: query now and rely on the notices after it). Notices
+  // carry no event data; bursts (a sync changing hundreds of events) are
+  // coalesced.
+  rpc WatchChanges(WatchChangesRequest) returns (stream ChangeNotice);
+}
+
+message Calendar {
+  string id = 1;
+  string name = 2;
+  // The account (AccountService) it belongs to.
+  string account_id = 3;
+  string account_name = 4;
+  // 0xAARRGGBB, like Compose's Color.toArgb(): the calendar's colour from
+  // the server (CalDAV, Google), else one picked from a fixed palette by
+  // the bridge (stable for a calendar).
+  uint32 color_argb = 5;
+  // The account doesn't allow changes (or the user made it read-only).
+  bool read_only = 6;
+  // What it holds.
+  bool has_events = 7;
+  bool has_todos = 8;
+}
+
+// One occurrence of an event, as shown in day/week/month views.
+message EventOccurrence {
+  string event_id = 1;
+  // Unset for events that don't repeat.
+  google.protobuf.Timestamp recurrence_id = 2;
+  string calendar_id = 3;
+  string summary = 4;
+  string location = 5;
+  bool all_day = 6;
+  google.protobuf.Timestamp start = 7;  // timed events
+  google.protobuf.Timestamp end = 8;    // timed events
+  Date start_date = 9;                  // all-day events
+  Date end_date = 10;                   // all-day events, exclusive
+  // The event's own colour if it has one, else its calendar's.
+  uint32 color_argb = 11;
+  // Part of a repeating series (so editing asks "this one or all?").
+  bool recurring = 12;
+  // From the calendar: can't be changed.
+  bool read_only = 13;
+  int64 revision = 14;
+}
+
+enum EventStatus {
+  EVENT_STATUS_UNSPECIFIED = 0;  // none given (treated as confirmed)
+  EVENT_STATUS_CONFIRMED = 1;
+  EVENT_STATUS_TENTATIVE = 2;
+  EVENT_STATUS_CANCELLED = 3;
+}
+
+// A whole event (or, from GetEvent with a recurrence_id, one occurrence).
+message Event {
+  // Set by the server.
+  string event_id = 1;
+  google.protobuf.Timestamp recurrence_id = 2;
+  string calendar_id = 3;
+  int64 revision = 4;
+  bool read_only = 5;
+  uint32 color_argb = 6;
+
+  // Editable.
+  string summary = 10;
+  string location = 11;
+  string description = 12;
+  bool all_day = 13;
+  google.protobuf.Timestamp start = 14;  // timed events
+  google.protobuf.Timestamp end = 15;    // timed events
+  Date start_date = 16;                  // all-day events
+  Date end_date = 17;                    // all-day events, exclusive
+  // IANA zone for timed events; empty = the request's/client's zone when
+  // creating, floating when read.
+  string time_zone = 18;
+  // The recurrence rule (iCalendar RRULE value, e.g.
+  // "FREQ=WEEKLY;BYDAY=TU"), empty for events that don't repeat. Editing
+  // it is allowed but the HMI doesn't need to.
+  string rrule = 19;
+  EventStatus status = 20;
+
+  // Read-only extras for the details screen.
+  // A short English description of the recurrence ("Weekly on Tuesday"),
+  // empty if it doesn't repeat.
+  string recurrence_text = 30;
+  string organizer = 31;   // name or e-mail
+  int32 attendee_count = 32;
+  // Minutes before start of each reminder (alarm), smallest first.
+  repeated int32 reminder_minutes_before = 33;
+  string url = 34;
+}
+
+message ListCalendarsRequest {}
+
+message ListCalendarsResponse {
+  repeated Calendar calendars = 1;
+}
+
+message ListEventsRequest {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+  // Only these calendars; empty = all calendars with events.
+  repeated string calendar_ids = 3;
+  // IANA zone the client shows times in (e.g. kotlinx-datetime's
+  // TimeZone.currentSystemDefault().id). Decides which days all-day events
+  // overlap and where floating times are. Empty = the bridge's zone.
+  string time_zone = 4;
+}
+
+message ListEventsResponse {
+  repeated EventOccurrence occurrences = 1;
+}
+
+message GetEventRequest {
+  string event_id = 1;
+  google.protobuf.Timestamp recurrence_id = 2;  // optional
+  // As in ListEventsRequest: where floating times are. Empty = the
+  // bridge's zone.
+  string time_zone = 3;
+}
+
+message CreateEventRequest {
+  string calendar_id = 1;
+  // Server-set fields are ignored. Needs a summary and either start < end
+  // (timed) or start_date < end_date (all-day).
+  Event event = 2;
+}
+
+message UpdateEventRequest {
+  // event.event_id selects the event; event.recurrence_id (optional) one
+  // occurrence of a series; event.revision is the revision this change is
+  // based on.
+  Event event = 1;
+  // Which editable fields to change; empty = all editable fields. With a
+  // recurrence_id, rrule can't be changed.
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeleteEventRequest {
+  string event_id = 1;
+  google.protobuf.Timestamp recurrence_id = 2;  // optional: one occurrence
+  int64 revision = 3;
+}
+
+message WatchChangesRequest {}
+
+message ChangeNotice {
+  oneof notice {
+    // First message on every stream.
+    Ready ready = 1;
+    // Calendars were added, removed, renamed or recoloured: re-run
+    // ListCalendars (and anything filtered by calendar).
+    CalendarsChanged calendars_changed = 2;
+    // Events changed: re-run ListEvents for views overlapping the range.
+    EventsChanged events_changed = 3;
+    // To-dos changed in a calendar: re-run TodoService.ListTodos.
+    TodosChanged todos_changed = 4;
+  }
+
+  message Ready {}
+  message CalendarsChanged {}
+  message EventsChanged {
+    string calendar_id = 1;
+    // The span affected, old and new times together. Unset = unknown
+    // (e.g. a repeating event changed): re-query everything shown for
+    // this calendar.
+    google.protobuf.Timestamp start = 2;
+    google.protobuf.Timestamp end = 3;
+  }
+  message TodosChanged {
+    string calendar_id = 1;
+  }
+}

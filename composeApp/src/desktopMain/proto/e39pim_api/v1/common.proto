@@ -1,0 +1,37 @@
+// Types shared by the e39-rpi PIM bridge's gRPC services.
+//
+// This repository (e39-rpi-pim) owns the API; the HMI (e39-rpi) generates
+// its Kotlin client from a copy of these files (makePimProtos.sh).
+//
+// Versioning: e39pim.v1 only gets backward-compatible changes (new fields,
+// new RPCs, new enum values); anything else goes into e39pim.v2.
+//
+// IDs are opaque strings. Today they're Akonadi IDs (item and collection
+// numbers, agent instance names), but clients must not parse them or keep
+// them across a reinstall of the bridge's data.
+//
+// Errors are gRPC status codes, the same in every service:
+// - UNAVAILABLE: Akonadi isn't running (yet); retry later. StatusService
+//   says why.
+// - NOT_FOUND: no calendar / event / to-do / account with that ID.
+// - INVALID_ARGUMENT: a missing or malformed field; the message says which.
+// - FAILED_PRECONDITION: the calendar is read-only, or the account type
+//   can't do that.
+// - ABORTED: the revision sent with a change doesn't match (it changed
+//   meanwhile, e.g. a sync came in). Re-read and try again.
+// - INTERNAL: Akonadi reported an error; the message has its text.
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "CommonProto";
+
+// A calendar date with no time or time zone (all-day events, due dates).
+message Date {
+  int32 year = 1;   // e.g. 2026
+  int32 month = 2;  // 1 .. 12
+  int32 day = 3;    // 1 .. 31
+}

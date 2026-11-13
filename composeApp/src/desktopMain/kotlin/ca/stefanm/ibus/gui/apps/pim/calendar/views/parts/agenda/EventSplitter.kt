@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.constraintlayout.compose.*
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarEventRef
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.CalendarEventBox
@@ -39,6 +40,9 @@ data class AgendaCalendarEventData(
 
     val multiDayThisPart : Int = 1,
     val multiDayTotalParts : Int = 1, //TODO actually calculate this by subtracting the LocaleDate day numbers.
+
+    // The event in the PIM bridge this shows; null for events not from it.
+    val eventRef : CalendarEventRef? = null,
 ) {
 
 
@@ -133,6 +137,7 @@ data class AgendaCalendarEventData(
                 color = color,
                 onClick = onClick,
                 eventUuid = eventUuid,
+                eventRef = eventRef,
                 allDayEvent = allDayEvent,
                 multiDayThisPart = multiDayThisPart,
                 multiDayTotalParts = multiDayTotalParts
@@ -149,6 +154,7 @@ data class AgendaCalendarEventData(
                 color = color,
                 onClick = onClick,
                 eventUuid = eventUuid,
+                eventRef = eventRef,
                 allDayEvent = allDayEvent,
                 multiDayThisPart = multiDayThisPart + 1,
                 multiDayTotalParts = multiDayTotalParts

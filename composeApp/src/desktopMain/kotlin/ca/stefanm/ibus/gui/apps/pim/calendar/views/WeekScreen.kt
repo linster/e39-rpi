@@ -92,6 +92,11 @@ class WeekScreen @Inject constructor(
             "weekScreen"
         )
 
+        // Remembered: each call queries the PIM bridge and watches it for changes.
+        val events = remember(today, numberOfDays) {
+            weekViewRepo.getAgendaViewEvents(today, numberOfDays)
+        }.collectAsState(emptyList()).value
+
         Column(Modifier
             .fillMaxSize()
             .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
@@ -100,19 +105,14 @@ class WeekScreen @Inject constructor(
                 knobListenerService = knobListenerService,
                 logger = logger,
                 numberOfDays = numberOfDays,
-                eventData = weekViewRepo.getAgendaViewEvents(
-                    today,
-                    numberOfDays
-                ).map { list ->
-                    list.map { event ->
-                        event.copy(
-                            onClick = {
-                                CalendarEventEditScreen
-                                    .openEventForEditing(navigationNodeTraverser, event)
-                            }
-                        )
-                    }
-                }.collectAsState(emptyList()).value,
+                eventData = events.map { event ->
+                    event.copy(
+                        onClick = {
+                            CalendarEventEditScreen
+                                .openEventForEditing(navigationNodeTraverser, event)
+                        }
+                    )
+                },
                 onMenuClicked = {
                     showMenu()
                 }

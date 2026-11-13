@@ -182,11 +182,13 @@ class CalendarEventEditScreen @Inject constructor(
             }.minusDays(1)
         }
 
-        val events = weekViewRepo
-            .getAgendaViewEvents(today, 1)
-            .map { list -> list.map { event -> event.copy(onClick = {}) } }
-            .map { list -> if (eventToEdit.value == null) { list } else { list.plus(eventToEdit.value!!.splitToMultipleEvents())} }
-            .collectAsState(listOf())
+        // Remembered: each call queries the PIM bridge and watches it for changes.
+        val todaysEvents = remember(today) { weekViewRepo.getAgendaViewEvents(today, 1) }
+            .collectAsState(listOf()).value
+        val events = remember(todaysEvents, eventToEdit.value) {
+            val list = todaysEvents.map { event -> event.copy(onClick = {}) }
+            mutableStateOf(eventToEdit.value?.let { list.plus(it.splitToMultipleEvents()) } ?: list)
+        }
 
         ContentLayout(
             calendarEventList = events.value,
