@@ -26,8 +26,10 @@ service AccountService {
   // removed, renamed, online/offline, sync progress, errors).
   rpc WatchAccounts(WatchAccountsRequest) returns (stream ListAccountsResponse);
   // Creates a CalDAV account, stores its password and starts a first sync.
-  // Use an app password where the server offers them. INVALID_ARGUMENT for
-  // a malformed URL or a missing user name.
+  // Use an app password where the server offers them. The login is tried
+  // first: UNAUTHENTICATED if the server refuses it, UNAVAILABLE if the
+  // server can't be reached (message: why); nothing is created then.
+  // INVALID_ARGUMENT for a malformed URL or a missing user name/password.
   rpc AddCalDavAccount(AddCalDavAccountRequest) returns (Account);
   // Creates a Google account and starts its login: an AuthRequest appears
   // on AuthService.WatchAuthRequests. The account says needs_login until
@@ -78,6 +80,11 @@ message Account {
   int32 progress_percent = 8;
   // The login has to be done (again) in a browser: AccountService.StartLogin.
   bool needs_login = 9;
+  // The last error the account reported, in its words (English), e.g. a
+  // sync that failed because the server refused the password; empty once a
+  // sync went through without errors. Errors don't always make the state
+  // BROKEN: most accounts go back to IDLE and try again at the next sync.
+  string last_error = 10;
 }
 
 message ListAccountsRequest {}
@@ -101,7 +108,8 @@ message AddCalDavAccountRequest {
 }
 
 message AddGoogleAccountRequest {
-  // Shown in the HMI; empty = the Google account's e-mail.
+  // Not used yet: the Google resource names itself "Google Groupware
+  // (<e-mail>)" whenever it (re)loads its settings.
   string name = 1;
   // E-mail to suggest on Google's login page; optional.
   string login_hint = 2;

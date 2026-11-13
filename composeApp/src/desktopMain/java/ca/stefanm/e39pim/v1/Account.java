@@ -33,6 +33,7 @@ private static final long serialVersionUID = 0L;
     name_ = "";
     state_ = 0;
     statusMessage_ = "";
+    lastError_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -299,6 +300,59 @@ private static final long serialVersionUID = 0L;
     return needsLogin_;
   }
 
+  public static final int LAST_ERROR_FIELD_NUMBER = 10;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object lastError_ = "";
+  /**
+   * <pre>
+   * The last error the account reported, in its words (English), e.g. a
+   * sync that failed because the server refused the password; empty once a
+   * sync went through without errors. Errors don't always make the state
+   * BROKEN: most accounts go back to IDLE and try again at the next sync.
+   * </pre>
+   *
+   * <code>string last_error = 10;</code>
+   * @return The lastError.
+   */
+  @java.lang.Override
+  public java.lang.String getLastError() {
+    java.lang.Object ref = lastError_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      lastError_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * The last error the account reported, in its words (English), e.g. a
+   * sync that failed because the server refused the password; empty once a
+   * sync went through without errors. Errors don't always make the state
+   * BROKEN: most accounts go back to IDLE and try again at the next sync.
+   * </pre>
+   *
+   * <code>string last_error = 10;</code>
+   * @return The bytes for lastError.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getLastErrorBytes() {
+    java.lang.Object ref = lastError_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      lastError_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -339,6 +393,9 @@ private static final long serialVersionUID = 0L;
     }
     if (needsLogin_ != false) {
       output.writeBool(9, needsLogin_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(lastError_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 10, lastError_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -381,6 +438,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(9, needsLogin_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(lastError_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(10, lastError_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -412,6 +472,8 @@ private static final long serialVersionUID = 0L;
         != other.getProgressPercent()) return false;
     if (getNeedsLogin()
         != other.getNeedsLogin()) return false;
+    if (!getLastError()
+        .equals(other.getLastError())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -443,6 +505,8 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + NEEDS_LOGIN_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getNeedsLogin());
+    hash = (37 * hash) + LAST_ERROR_FIELD_NUMBER;
+    hash = (53 * hash) + getLastError().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -583,6 +647,7 @@ private static final long serialVersionUID = 0L;
       statusMessage_ = "";
       progressPercent_ = 0;
       needsLogin_ = false;
+      lastError_ = "";
       return this;
     }
 
@@ -643,6 +708,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000100) != 0)) {
         result.needsLogin_ = needsLogin_;
       }
+      if (((from_bitField0_ & 0x00000200) != 0)) {
+        result.lastError_ = lastError_;
+      }
     }
 
     @java.lang.Override
@@ -691,6 +759,11 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getNeedsLogin() != false) {
         setNeedsLogin(other.getNeedsLogin());
+      }
+      if (!other.getLastError().isEmpty()) {
+        lastError_ = other.lastError_;
+        bitField0_ |= 0x00000200;
+        onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -763,6 +836,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000100;
               break;
             } // case 72
+            case 82: {
+              lastError_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000200;
+              break;
+            } // case 82
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1335,6 +1413,113 @@ private static final long serialVersionUID = 0L;
     public Builder clearNeedsLogin() {
       bitField0_ = (bitField0_ & ~0x00000100);
       needsLogin_ = false;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object lastError_ = "";
+    /**
+     * <pre>
+     * The last error the account reported, in its words (English), e.g. a
+     * sync that failed because the server refused the password; empty once a
+     * sync went through without errors. Errors don't always make the state
+     * BROKEN: most accounts go back to IDLE and try again at the next sync.
+     * </pre>
+     *
+     * <code>string last_error = 10;</code>
+     * @return The lastError.
+     */
+    public java.lang.String getLastError() {
+      java.lang.Object ref = lastError_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        lastError_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The last error the account reported, in its words (English), e.g. a
+     * sync that failed because the server refused the password; empty once a
+     * sync went through without errors. Errors don't always make the state
+     * BROKEN: most accounts go back to IDLE and try again at the next sync.
+     * </pre>
+     *
+     * <code>string last_error = 10;</code>
+     * @return The bytes for lastError.
+     */
+    public com.google.protobuf.ByteString
+        getLastErrorBytes() {
+      java.lang.Object ref = lastError_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        lastError_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The last error the account reported, in its words (English), e.g. a
+     * sync that failed because the server refused the password; empty once a
+     * sync went through without errors. Errors don't always make the state
+     * BROKEN: most accounts go back to IDLE and try again at the next sync.
+     * </pre>
+     *
+     * <code>string last_error = 10;</code>
+     * @param value The lastError to set.
+     * @return This builder for chaining.
+     */
+    public Builder setLastError(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      lastError_ = value;
+      bitField0_ |= 0x00000200;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The last error the account reported, in its words (English), e.g. a
+     * sync that failed because the server refused the password; empty once a
+     * sync went through without errors. Errors don't always make the state
+     * BROKEN: most accounts go back to IDLE and try again at the next sync.
+     * </pre>
+     *
+     * <code>string last_error = 10;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearLastError() {
+      lastError_ = getDefaultInstance().getLastError();
+      bitField0_ = (bitField0_ & ~0x00000200);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The last error the account reported, in its words (English), e.g. a
+     * sync that failed because the server refused the password; empty once a
+     * sync went through without errors. Errors don't always make the state
+     * BROKEN: most accounts go back to IDLE and try again at the next sync.
+     * </pre>
+     *
+     * <code>string last_error = 10;</code>
+     * @param value The bytes for lastError to set.
+     * @return This builder for chaining.
+     */
+    public Builder setLastErrorBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      lastError_ = value;
+      bitField0_ |= 0x00000200;
       onChanged();
       return this;
     }

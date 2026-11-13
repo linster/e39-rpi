@@ -347,8 +347,10 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Creates a CalDAV account, stores its password and starts a first sync.
-     * Use an app password where the server offers them. INVALID_ARGUMENT for
-     * a malformed URL or a missing user name.
+     * Use an app password where the server offers them. The login is tried
+     * first: UNAUTHENTICATED if the server refuses it, UNAVAILABLE if the
+     * server can't be reached (message: why); nothing is created then.
+     * INVALID_ARGUMENT for a malformed URL or a missing user name/password.
      * </pre>
      */
     default void addCalDavAccount(ca.stefanm.e39pim.v1.AddCalDavAccountRequest request,
@@ -465,8 +467,10 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Creates a CalDAV account, stores its password and starts a first sync.
-     * Use an app password where the server offers them. INVALID_ARGUMENT for
-     * a malformed URL or a missing user name.
+     * Use an app password where the server offers them. The login is tried
+     * first: UNAUTHENTICATED if the server refuses it, UNAVAILABLE if the
+     * server can't be reached (message: why); nothing is created then.
+     * INVALID_ARGUMENT for a malformed URL or a missing user name/password.
      * </pre>
      */
     public void addCalDavAccount(ca.stefanm.e39pim.v1.AddCalDavAccountRequest request,
@@ -578,8 +582,10 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Creates a CalDAV account, stores its password and starts a first sync.
-     * Use an app password where the server offers them. INVALID_ARGUMENT for
-     * a malformed URL or a missing user name.
+     * Use an app password where the server offers them. The login is tried
+     * first: UNAUTHENTICATED if the server refuses it, UNAVAILABLE if the
+     * server can't be reached (message: why); nothing is created then.
+     * INVALID_ARGUMENT for a malformed URL or a missing user name/password.
      * </pre>
      */
     public ca.stefanm.e39pim.v1.Account addCalDavAccount(ca.stefanm.e39pim.v1.AddCalDavAccountRequest request) throws io.grpc.StatusException {
@@ -684,8 +690,10 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Creates a CalDAV account, stores its password and starts a first sync.
-     * Use an app password where the server offers them. INVALID_ARGUMENT for
-     * a malformed URL or a missing user name.
+     * Use an app password where the server offers them. The login is tried
+     * first: UNAUTHENTICATED if the server refuses it, UNAVAILABLE if the
+     * server can't be reached (message: why); nothing is created then.
+     * INVALID_ARGUMENT for a malformed URL or a missing user name/password.
      * </pre>
      */
     public ca.stefanm.e39pim.v1.Account addCalDavAccount(ca.stefanm.e39pim.v1.AddCalDavAccountRequest request) {
@@ -779,8 +787,10 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Creates a CalDAV account, stores its password and starts a first sync.
-     * Use an app password where the server offers them. INVALID_ARGUMENT for
-     * a malformed URL or a missing user name.
+     * Use an app password where the server offers them. The login is tried
+     * first: UNAUTHENTICATED if the server refuses it, UNAVAILABLE if the
+     * server can't be reached (message: why); nothing is created then.
+     * INVALID_ARGUMENT for a malformed URL or a missing user name/password.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<ca.stefanm.e39pim.v1.Account> addCalDavAccount(

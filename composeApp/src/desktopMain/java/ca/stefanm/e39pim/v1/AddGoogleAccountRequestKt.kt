@@ -30,7 +30,8 @@ public object AddGoogleAccountRequestKt {
 
     /**
      * ```
-     * Shown in the HMI; empty = the Google account's e-mail.
+     * Not used yet: the Google resource names itself "Google Groupware
+     * (<e-mail>)" whenever it (re)loads its settings.
      * ```
      *
      * `string name = 1;`
@@ -44,7 +45,8 @@ public object AddGoogleAccountRequestKt {
       }
     /**
      * ```
-     * Shown in the HMI; empty = the Google account's e-mail.
+     * Not used yet: the Google resource names itself "Google Groupware
+     * (<e-mail>)" whenever it (re)loads its settings.
      * ```
      *
      * `string name = 1;`

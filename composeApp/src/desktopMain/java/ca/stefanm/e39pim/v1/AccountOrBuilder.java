@@ -122,4 +122,30 @@ public interface AccountOrBuilder extends
    * @return The needsLogin.
    */
   boolean getNeedsLogin();
+
+  /**
+   * <pre>
+   * The last error the account reported, in its words (English), e.g. a
+   * sync that failed because the server refused the password; empty once a
+   * sync went through without errors. Errors don't always make the state
+   * BROKEN: most accounts go back to IDLE and try again at the next sync.
+   * </pre>
+   *
+   * <code>string last_error = 10;</code>
+   * @return The lastError.
+   */
+  java.lang.String getLastError();
+  /**
+   * <pre>
+   * The last error the account reported, in its words (English), e.g. a
+   * sync that failed because the server refused the password; empty once a
+   * sync went through without errors. Errors don't always make the state
+   * BROKEN: most accounts go back to IDLE and try again at the next sync.
+   * </pre>
+   *
+   * <code>string last_error = 10;</code>
+   * @return The bytes for lastError.
+   */
+  com.google.protobuf.ByteString
+      getLastErrorBytes();
 }

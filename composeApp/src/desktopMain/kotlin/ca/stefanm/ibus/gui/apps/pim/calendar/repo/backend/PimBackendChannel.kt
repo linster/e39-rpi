@@ -75,6 +75,8 @@ sealed class PimBackendException(message: String, cause: Throwable?) : Exception
     class NotFound(message: String, cause: Throwable?) : PimBackendException(message, cause)
     /** The bridge rejected the request; [message] says why. */
     class InvalidArgument(message: String, cause: Throwable?) : PimBackendException(message, cause)
+    /** A server refused the user name or password (adding an account). */
+    class Unauthenticated(message: String, cause: Throwable?) : PimBackendException(message, cause)
     /** E.g. the calendar is read-only. */
     class FailedPrecondition(message: String, cause: Throwable?) : PimBackendException(message, cause)
     /** The event changed meanwhile (e.g. a sync came in): reload and try again. */
@@ -98,6 +100,7 @@ sealed class PimBackendException(message: String, cause: Throwable?) : Exception
                 Status.Code.DEADLINE_EXCEEDED -> Unavailable("No answer in time", e)
                 Status.Code.NOT_FOUND -> NotFound(message, e)
                 Status.Code.INVALID_ARGUMENT -> InvalidArgument(message, e)
+                Status.Code.UNAUTHENTICATED -> Unauthenticated(message, e)
                 Status.Code.FAILED_PRECONDITION -> FailedPrecondition(message, e)
                 Status.Code.ABORTED -> Conflict(message, e)
                 Status.Code.UNIMPLEMENTED -> Unimplemented(message, e)

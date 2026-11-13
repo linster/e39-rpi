@@ -90,52 +90,53 @@ public final class AccountProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\033e39pim_api/v1/account.proto\022\te39pim.v1" +
-      "\032\033google/protobuf/empty.proto\"\333\001\n\007Accoun" +
+      "\032\033google/protobuf/empty.proto\"\357\001\n\007Accoun" +
       "t\022\n\n\002id\030\001 \001(\t\022$\n\004type\030\002 \001(\0162\026.e39pim.v1." +
       "AccountType\022\021\n\ttype_name\030\003 \001(\t\022\014\n\004name\030\004" +
       " \001(\t\022\016\n\006online\030\005 \001(\010\022&\n\005state\030\006 \001(\0162\027.e3" +
       "9pim.v1.AccountState\022\026\n\016status_message\030\007" +
       " \001(\t\022\030\n\020progress_percent\030\010 \001(\005\022\023\n\013needs_" +
-      "login\030\t \001(\010\"\025\n\023ListAccountsRequest\"<\n\024Li" +
-      "stAccountsResponse\022$\n\010accounts\030\001 \003(\0132\022.e" +
-      "39pim.v1.Account\"\026\n\024WatchAccountsRequest" +
-      "\"z\n\027AddCalDavAccountRequest\022\014\n\004name\030\001 \001(" +
-      "\t\022\013\n\003url\030\002 \001(\t\022\020\n\010username\030\003 \001(\t\022\020\n\010pass" +
-      "word\030\004 \001(\t\022 \n\030refresh_interval_minutes\030\005" +
-      " \001(\005\";\n\027AddGoogleAccountRequest\022\014\n\004name\030" +
-      "\001 \001(\t\022\022\n\nlogin_hint\030\002 \001(\t\"\'\n\021StartLoginR" +
-      "equest\022\022\n\naccount_id\030\001 \001(\t\"R\n\022StartLogin" +
-      "Response\022#\n\007account\030\001 \001(\0132\022.e39pim.v1.Ac" +
-      "count\022\027\n\017auth_request_id\030\002 \001(\t\"*\n\024Remove" +
-      "AccountRequest\022\022\n\naccount_id\030\001 \001(\t\"=\n\027Se" +
-      "tAccountOnlineRequest\022\022\n\naccount_id\030\001 \001(" +
-      "\t\022\016\n\006online\030\002 \001(\010\"$\n\016SyncNowRequest\022\022\n\na" +
-      "ccount_id\030\001 \001(\t*\221\001\n\013AccountType\022\034\n\030ACCOU" +
-      "NT_TYPE_UNSPECIFIED\020\000\022\026\n\022ACCOUNT_TYPE_OT" +
-      "HER\020\001\022\027\n\023ACCOUNT_TYPE_CALDAV\020\002\022\027\n\023ACCOUN" +
-      "T_TYPE_GOOGLE\020\003\022\032\n\026ACCOUNT_TYPE_ICAL_FIL" +
-      "E\020\004*\267\001\n\014AccountState\022\035\n\031ACCOUNT_STATE_UN" +
-      "SPECIFIED\020\000\022\026\n\022ACCOUNT_STATE_IDLE\020\001\022\031\n\025A" +
-      "CCOUNT_STATE_SYNCING\020\002\022\031\n\025ACCOUNT_STATE_" +
-      "OFFLINE\020\003\022 \n\034ACCOUNT_STATE_NOT_CONFIGURE" +
-      "D\020\004\022\030\n\024ACCOUNT_STATE_BROKEN\020\0052\370\004\n\016Accoun" +
-      "tService\022O\n\014ListAccounts\022\036.e39pim.v1.Lis" +
-      "tAccountsRequest\032\037.e39pim.v1.ListAccount" +
-      "sResponse\022S\n\rWatchAccounts\022\037.e39pim.v1.W" +
-      "atchAccountsRequest\032\037.e39pim.v1.ListAcco" +
-      "untsResponse0\001\022J\n\020AddCalDavAccount\022\".e39" +
-      "pim.v1.AddCalDavAccountRequest\032\022.e39pim." +
-      "v1.Account\022U\n\020AddGoogleAccount\022\".e39pim." +
-      "v1.AddGoogleAccountRequest\032\035.e39pim.v1.S" +
-      "tartLoginResponse\022I\n\nStartLogin\022\034.e39pim" +
-      ".v1.StartLoginRequest\032\035.e39pim.v1.StartL" +
-      "oginResponse\022H\n\rRemoveAccount\022\037.e39pim.v" +
-      "1.RemoveAccountRequest\032\026.google.protobuf" +
-      ".Empty\022J\n\020SetAccountOnline\022\".e39pim.v1.S" +
-      "etAccountOnlineRequest\032\022.e39pim.v1.Accou" +
-      "nt\022<\n\007SyncNow\022\031.e39pim.v1.SyncNowRequest" +
-      "\032\026.google.protobuf.EmptyB&\n\024ca.stefanm.e" +
-      "39pim.v1B\014AccountProtoP\001b\006proto3"
+      "login\030\t \001(\010\022\022\n\nlast_error\030\n \001(\t\"\025\n\023ListA" +
+      "ccountsRequest\"<\n\024ListAccountsResponse\022$" +
+      "\n\010accounts\030\001 \003(\0132\022.e39pim.v1.Account\"\026\n\024" +
+      "WatchAccountsRequest\"z\n\027AddCalDavAccount" +
+      "Request\022\014\n\004name\030\001 \001(\t\022\013\n\003url\030\002 \001(\t\022\020\n\010us" +
+      "ername\030\003 \001(\t\022\020\n\010password\030\004 \001(\t\022 \n\030refres" +
+      "h_interval_minutes\030\005 \001(\005\";\n\027AddGoogleAcc" +
+      "ountRequest\022\014\n\004name\030\001 \001(\t\022\022\n\nlogin_hint\030" +
+      "\002 \001(\t\"\'\n\021StartLoginRequest\022\022\n\naccount_id" +
+      "\030\001 \001(\t\"R\n\022StartLoginResponse\022#\n\007account\030" +
+      "\001 \001(\0132\022.e39pim.v1.Account\022\027\n\017auth_reques" +
+      "t_id\030\002 \001(\t\"*\n\024RemoveAccountRequest\022\022\n\nac" +
+      "count_id\030\001 \001(\t\"=\n\027SetAccountOnlineReques" +
+      "t\022\022\n\naccount_id\030\001 \001(\t\022\016\n\006online\030\002 \001(\010\"$\n" +
+      "\016SyncNowRequest\022\022\n\naccount_id\030\001 \001(\t*\221\001\n\013" +
+      "AccountType\022\034\n\030ACCOUNT_TYPE_UNSPECIFIED\020" +
+      "\000\022\026\n\022ACCOUNT_TYPE_OTHER\020\001\022\027\n\023ACCOUNT_TYP" +
+      "E_CALDAV\020\002\022\027\n\023ACCOUNT_TYPE_GOOGLE\020\003\022\032\n\026A" +
+      "CCOUNT_TYPE_ICAL_FILE\020\004*\267\001\n\014AccountState" +
+      "\022\035\n\031ACCOUNT_STATE_UNSPECIFIED\020\000\022\026\n\022ACCOU" +
+      "NT_STATE_IDLE\020\001\022\031\n\025ACCOUNT_STATE_SYNCING" +
+      "\020\002\022\031\n\025ACCOUNT_STATE_OFFLINE\020\003\022 \n\034ACCOUNT" +
+      "_STATE_NOT_CONFIGURED\020\004\022\030\n\024ACCOUNT_STATE" +
+      "_BROKEN\020\0052\370\004\n\016AccountService\022O\n\014ListAcco" +
+      "unts\022\036.e39pim.v1.ListAccountsRequest\032\037.e" +
+      "39pim.v1.ListAccountsResponse\022S\n\rWatchAc" +
+      "counts\022\037.e39pim.v1.WatchAccountsRequest\032" +
+      "\037.e39pim.v1.ListAccountsResponse0\001\022J\n\020Ad" +
+      "dCalDavAccount\022\".e39pim.v1.AddCalDavAcco" +
+      "untRequest\032\022.e39pim.v1.Account\022U\n\020AddGoo" +
+      "gleAccount\022\".e39pim.v1.AddGoogleAccountR" +
+      "equest\032\035.e39pim.v1.StartLoginResponse\022I\n" +
+      "\nStartLogin\022\034.e39pim.v1.StartLoginReques" +
+      "t\032\035.e39pim.v1.StartLoginResponse\022H\n\rRemo" +
+      "veAccount\022\037.e39pim.v1.RemoveAccountReque" +
+      "st\032\026.google.protobuf.Empty\022J\n\020SetAccount" +
+      "Online\022\".e39pim.v1.SetAccountOnlineReque" +
+      "st\032\022.e39pim.v1.Account\022<\n\007SyncNow\022\031.e39p" +
+      "im.v1.SyncNowRequest\032\026.google.protobuf.E" +
+      "mptyB&\n\024ca.stefanm.e39pim.v1B\014AccountPro" +
+      "toP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -147,7 +148,7 @@ public final class AccountProto {
     internal_static_e39pim_v1_Account_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_Account_descriptor,
-        new java.lang.String[] { "Id", "Type", "TypeName", "Name", "Online", "State", "StatusMessage", "ProgressPercent", "NeedsLogin", });
+        new java.lang.String[] { "Id", "Type", "TypeName", "Name", "Online", "State", "StatusMessage", "ProgressPercent", "NeedsLogin", "LastError", });
     internal_static_e39pim_v1_ListAccountsRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_e39pim_v1_ListAccountsRequest_fieldAccessorTable = new
