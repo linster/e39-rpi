@@ -3,6 +3,12 @@ package ca.stefanm.ibus.configuration
 
 interface CarPlatformConfiguration {
     val isPi : Boolean
+    /**
+     * The HMI has its own web browser (for OAuth logins and Wi-Fi captive
+     * portals). Set separately from [isPi]: a Pi image may ship without it,
+     * and a laptop may use it instead of the desktop's browser.
+     */
+    val hasBrowser : Boolean
     val iBusInterfaceUri : String
     val displayDriver : DisplayDriver
 
@@ -18,6 +24,7 @@ interface CarPlatformConfiguration {
     fun toDebugString() : String {
         return "DeviceConfiguration(" +
                 "isPi: $isPi," +
+                "hasBrowser: $hasBrowser," +
                 "iBusInterfaceUri: $iBusInterfaceUri," +
                 "baudRate: $serialPortBaudRate" +
                 "displayDriver: $displayDriver," +
@@ -48,6 +55,7 @@ interface CarPlatformConfiguration {
 
 class Pi3BPlusDeviceConfiguration() : CarPlatformConfiguration {
     override val isPi = true
+    override val hasBrowser = false
     override val iBusInterfaceUri = "/dev/ttyUSB0"
     override val displayDriver = CarPlatformConfiguration.DisplayDriver.TV_MODULE
 
@@ -70,6 +78,7 @@ class Pi3BPlusDeviceConfiguration() : CarPlatformConfiguration {
 
 class LaptopDeviceConfiguration : CarPlatformConfiguration {
     override val isPi = false
+    override val hasBrowser = false
 //    override val iBusInterfaceUri = "/dev/ttyS5"
     override val iBusInterfaceUri = "/dev/ttyUSB0"
     override val displayDriver = CarPlatformConfiguration.DisplayDriver.TV_MODULE

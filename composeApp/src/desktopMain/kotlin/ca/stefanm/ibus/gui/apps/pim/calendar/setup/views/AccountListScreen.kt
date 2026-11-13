@@ -9,6 +9,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.font.FontWeight
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
@@ -38,9 +40,9 @@ import javax.inject.Inject
  * offline/online, log in again, remove). Logins waiting for a browser are
  * listed first.
  *
- * There's no browser in the HMI yet: a Google login can only be finished
- * with "Open in Browser", which opens the desktop's browser (development
- * on a laptop).
+ * Logins open in the HMI's browser if the configuration says there is one
+ * (hasBrowser; the browser itself isn't written yet), else in the
+ * desktop's browser where there is one (development on a laptop).
  */
 @ScreenDoc(
     screenName = "AccountListScreen",
@@ -57,6 +59,7 @@ class AccountListScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
     private val accountRepository: RemoteAccountRepository,
+    private val configurationStorage: ConfigurationStorage,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -204,31 +207,64 @@ class AccountListScreen @Inject constructor(
         }
     }
 
-    private fun canOpenBrowser(): Boolean =
-        Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
+    /** Where a login page can be shown. */
+    private enum class LoginBrowser {
+        /** The HMI's own browser (configuration: hasBrowser). */
+        HMI,
+        /** The desktop's browser (laptop). */
+        DESKTOP,
+        NONE,
+    }
+
+    private fun loginBrowser(): LoginBrowser = when {
+        configurationStorage.config[E39Config.CarPlatformConfigSpec._hasBrowser] -> LoginBrowser.HMI
+        Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE) -> LoginBrowser.DESKTOP
+        else -> LoginBrowser.NONE
+    }
+
+    private fun openLoginPage(browser: LoginBrowser, login: PendingLogin) {
+        when (browser) {
+            // TODO HMI browser (e39-rpi-pim TODO.md, phase 5): open login.url
+            //  in it, close it when it reaches login.redirectPrefix or the
+            //  login finishes (loginResults).
+            LoginBrowser.HMI -> notify(
+                Notification.NotificationImage.ALERT_TRIANGLE,
+                "No browser yet",
+                "hasBrowser is set, but the HMI's browser isn't written yet."
+            )
+            LoginBrowser.DESKTOP -> try {
+                Desktop.getDesktop().browse(URI(login.url))
+            } catch (e: Exception) {
+                notifyFailure("Browser didn't open", e)
+            }
+            LoginBrowser.NONE -> {}
+        }
+    }
 
     private fun showLoginPane(scope: CoroutineScope, login: PendingLogin) {
+        val browser = loginBrowser()
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
             SidePanelMenu.SidePanelMenu(
                 title = login.title,
                 text = @Composable {
                     InfoLabel("This needs a web browser.", FontWeight.Bold)
-                    if (canOpenBrowser()) {
-                        InfoLabel("Open it in this computer's browser,")
-                        InfoLabel("log in there, then come back.")
-                    } else {
-                        InfoLabel("There's no browser in the car yet.")
+                    when (browser) {
+                        LoginBrowser.HMI -> {
+                            InfoLabel("Log in on the page that opens,")
+                            InfoLabel("then come back here.")
+                        }
+                        LoginBrowser.DESKTOP -> {
+                            InfoLabel("Open it in this computer's browser,")
+                            InfoLabel("log in there, then come back.")
+                        }
+                        LoginBrowser.NONE -> InfoLabel("There's no browser in the car.")
                     }
                 },
                 buttons = buildList {
-                    if (canOpenBrowser()) {
+                    if (browser != LoginBrowser.NONE) {
                         add(TextMenuItem("Open in Browser", onClicked = {
                             modalMenuService.closeSidePaneOverlay(true)
-                            try {
-                                Desktop.getDesktop().browse(URI(login.url))
-                            } catch (e: Exception) {
-                                notifyFailure("Browser didn't open", e)
-                            }
+                            openLoginPage(browser, login)
                         }))
                     }
                     add(TextMenuItem("Cancel Login", onClicked = {
