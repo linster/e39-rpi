@@ -39,7 +39,6 @@ import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 import org.jxmapviewer.viewer.GeoPosition
 import javax.inject.Inject
 import javax.inject.Named
@@ -98,9 +97,11 @@ class MapScreen @Inject constructor(
         val currentOverlayState = remember { mutableStateOf<MapOverlayState>(MapOverlayState.NoOverlay) }
 
 
-        val scope = rememberCoroutineScope()
-
-        scope.launch {
+        // Once per visit to the map (cancelled when it's left): launched
+        // straight in the composable body, every recomposition added another
+        // collector, so each knob event was handled several times (a press
+        // opened the menu and the next one picked "Zoom" or closed it).
+        LaunchedEffect(Unit) {
             knobListenerService.knobTurnEvents()
                 .onStart {
                     logger.d(TAG, "knobTurnEvents() flow started")

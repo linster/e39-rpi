@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import org.jxmapviewer.viewer.GeoPosition
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -14,13 +15,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.*
-import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.map.widget.tile.TileView
 import ca.stefanm.ibus.gui.menu.widgets.halveIfNotPixelDoubled
-import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
@@ -92,7 +91,7 @@ data class PoiOverlay(
             val ICON_BLUE_CIRCLE = @Composable {
                 Canvas(Modifier.size(16.dp)){
                     drawCircle(
-                        center = Offset(0F, 0F),
+                        center = Offset(size.width / 2, size.height / 2),
                         radius = 32F,
                         color = Color.Blue
                     )
@@ -109,7 +108,7 @@ data class PoiOverlay(
                 val circleRadius = 32F.halveIfNotPixelDoubled()
                 Canvas(Modifier.size(16.dp)){
                     drawCircle(
-                        center = Offset(0F, 0F),
+                        center = Offset(size.width / 2, size.height / 2),
                         radius = circleRadius,
                         color = color
                     )
@@ -286,10 +285,13 @@ fun MapViewer(
                     zoom = extents.mapScale.mapZoomLevel
                 )
 
-                var scaling = 2F
-                Canvas(Modifier.matchParentSize()) {
-                    scaling = this.size.height.dp.toPx() / this.size.height.dp.value
-                }
+                // Pixels per dp: the tiles are 256 dp each, the overlays are
+                // placed in pixels. (Was a `var` set in a Canvas draw call,
+                // which runs after composition: the overlays always got its
+                // initial 2, so on a density-1 screen like QEMU's every POI
+                // and route point was placed twice as far from the grid's
+                // corner, off the screen.)
+                val scaling = LocalDensity.current.density
 
                 if (overlayProperties.poiOverlay != null) {
                     PoiOverlayLayer(
@@ -357,7 +359,7 @@ fun BoxWithConstraintsScope.RouteLineLayer(
 ) {
 
     val canvasWidthPixels = ((endX + 1) - startX) * 256 * scaling
-    val canvasHeightPixels = ((endY + 1) - startX) * 256 * scaling
+    val canvasHeightPixels = ((endY + 1) - startY) * 256 * scaling
 
 
     Canvas(
@@ -455,29 +457,21 @@ fun BoxWithConstraintsScope.PoiOverlayLayer(
             extents, startX, endX, startY, endY, zoom, scaling
         )
 
-        with (DaggerApplicationComponent.create().logger()) {
-            d("POI", "$poi")
-            d("POI", "pixels from top: $poiPixelsFromTop")
-            d("POI", "pixels from left: $poiPixelsFromLeft")
-            d("POI", "scaling: $scaling")
-        }
-
         Layout(
             modifier = Modifier.matchParentSize(),
             content = {
                 poi.icon()
             }
         ) { measurables, constraints ->
-            val placeables = measurables.map { it.measure(constraints) }
-            layout(constraints.minWidth, constraints.minWidth) {
-                if (placeables.isEmpty()) {
-                    StdOutLogger().w("WAT WAT", "Placables is empty!")
-                    return@layout
-                }
-                placeables[0].place(
+            // The icon at its own size (not stretched to the layer), centred
+            // on the POI.
+            val placeables = measurables.map { it.measure(constraints.copy(minWidth = 0, minHeight = 0)) }
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                val icon = placeables.firstOrNull() ?: return@layout
+                icon.place(
                     IntOffset(
-                        poiPixelsFromLeft.roundToInt(),
-                        poiPixelsFromTop.roundToInt(),
+                        poiPixelsFromLeft.roundToInt() - icon.width / 2,
+                        poiPixelsFromTop.roundToInt() - icon.height / 2,
                     )
                 )
             }
