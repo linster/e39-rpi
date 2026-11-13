@@ -75,6 +75,7 @@ class SettingsRootMenu @Inject constructor(
                 "Griffin Powermate Sensitivity" to  { navigateToNode(GriffinPowermateConfigScreen::class.java) },
                 "File Manager Settings" to { navigateToNode(FileManagerSettingsScreen::class.java) },
                 "Weather App Settings" to { navigateToNode(WeatherAppSettingsScreen::class.java) },
+                "Time Zone" to { navigateToNode(TimeZoneScreen::class.java) },
                 "About" to  { navigateToNode(AboutScreen::class.java) }
             )
         )
