@@ -13,6 +13,9 @@ object HmiVersion : ConfigSpec() {
         "hmiHash", description = "Git Hash of the e39-rpi HMI")
     val fwHash by optional("<no version set>",
         "fwHash", description = "Git Hash of the e39-rpi firmware on pico")
+    val mapVersion by optional("<no version set>",
+        "mapVersion", description = "The installed map, named like its e39-rpi-maps release " +
+                "(map-ottawa-20261113T044215Z); written by the device's map installer (e39maps-mapdb)")
 }
 
 object E39Config : ConfigSpec() {

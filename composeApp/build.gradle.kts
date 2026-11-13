@@ -119,6 +119,9 @@ kotlin {
             implementation("io.grpc:grpc-protobuf:$grpcVersion")
             implementation("io.grpc:grpc-stub:$grpcVersion")
             implementation("io.grpc:grpc-kotlin-stub:1.5.0")
+            // JSON from the maps backend's /healthz (the installed map, for
+            // the About screen); the version gRPC already brings.
+            implementation("com.google.code.gson:gson:2.14.0")
 
             implementation("com.javadocmd:simplelatlng:1.3.1")
             implementation("org.jxmapviewer:jxmapviewer2:2.5")
