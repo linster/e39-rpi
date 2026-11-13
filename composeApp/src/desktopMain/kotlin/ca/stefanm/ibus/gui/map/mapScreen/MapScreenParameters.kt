@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.map.mapScreen
 
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
+import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import com.javadocmd.simplelatlng.LatLng
 
 data class MapScreenParameters(
@@ -9,7 +10,11 @@ data class MapScreenParameters(
     /* If true, use the stored map zoom and center state when opening */
     val usePersistedStateOnOpen : Boolean = false,
 
-    val openMode : MapScreenOpenMode
+    val openMode : MapScreenOpenMode,
+
+    /* Drawn on the map along with the user's visible POIs, for this opening
+     * only (e.g. the places a search found); not saved anywhere. */
+    val markers : List<PoiRepository.Poi> = emptyList(),
 ) {
     sealed class MapScreenOpenMode(
         open val center : LatLng

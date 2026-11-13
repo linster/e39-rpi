@@ -7,6 +7,8 @@ import ca.stefanm.e39maps.v1.PoiIconKt
 import ca.stefanm.e39maps.v1.latLng
 import ca.stefanm.e39maps.v1.poi
 import ca.stefanm.e39maps.v1.poiIcon
+import ca.stefanm.ibus.gui.map.places.MapPoi
+import ca.stefanm.ibus.gui.map.places.MapPoiCategory
 import ca.stefanm.ibus.gui.map.poi.PoiRepository.Poi
 import ca.stefanm.ibus.resources.Res
 import ca.stefanm.ibus.resources.allDrawableResources
@@ -17,7 +19,8 @@ import ca.stefanm.e39maps.v1.Poi as PbPoi
 
 /**
  * Conversion between the API's messages (ca.stefanm.e39maps.v1) and the HMI's
- * types (PoiRepository.Poi, simplelatlng's LatLng).
+ * types (PoiRepository.Poi for the user's POIs, MapPoi for the map's,
+ * simplelatlng's LatLng).
  *
  * Icons: a coloured circle's colour and a bundled icon's tint are 0xAARRGGBB
  * (Color.toArgb(); the proto's uint32 is a Java int with the same bits). A
@@ -55,6 +58,15 @@ object PoiMapper {
         location = location.toLatLng(),
         icon = icon.toPoiIcon(),
         isVisible = visible,
+    )
+
+    /** A map POI (source MAP): read-only, with its category and OSM details. */
+    fun PbPoi.toMapPoi(): MapPoi = MapPoi(
+        id = id,
+        name = name,
+        location = location.toLatLng(),
+        category = MapPoiCategory.fromPb(category),
+        details = detailsMap,
     )
 
     fun Poi.PoiIcon.toPb(): PoiIcon = when (this) {

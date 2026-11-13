@@ -11,6 +11,7 @@ import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
 import ca.stefanm.ibus.gui.map.poi.CreateOrEditPoiScreen
 import ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ibus.gui.map.poi.PoiRepository
+import ca.stefanm.ibus.gui.map.places.PlacesNearbyScreen
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.configuration.ConfigurationStorage
@@ -243,7 +244,7 @@ class MapScreen @Inject constructor(
                     currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
                 gpsReceptionIconVisible = false,
-                poiOverlay = poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList()).value.let { list ->
+                poiOverlay = (poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList()).value + parameters.markers).let { list ->
                     logger.d("POI LIST", list.toString())
                     PoiOverlay(
                         pois = list.map { poi ->
@@ -464,6 +465,13 @@ class MapScreen @Inject constructor(
                         onClicked = {
                             modalMenuService.closeModalMenu()
                             onOverlayStateChanged(MapOverlayState.ModifyViewMenu)
+                        }
+                    ),
+                    ModalMenu.ModalMenuItem(
+                        title = "Places Nearby...",
+                        onClicked = {
+                            modalMenuService.closeModalMenu()
+                            PlacesNearbyScreen.open(navigationNodeTraverser, currentCenter)
                         }
                     ),
                     ModalMenu.ModalMenuItem(
