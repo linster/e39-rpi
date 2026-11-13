@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.menu.notifications
 
+import ca.stefanm.ibus.gui.map.guidance.GuidanceIcons
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,6 +83,7 @@ import org.jetbrains.compose.resources.painterResource
                             Notification.NotificationImage.MAP_GENERAL -> Res.drawable.notification_map
                             Notification.NotificationImage.MAP_INSTRUCTION -> Res.drawable.notification_navigation
                             Notification.NotificationImage.MAP_WAYPOINT -> Res.drawable.notification_map_pin
+                            else -> GuidanceIcons.drawable(this@toView.image) ?: error("No drawable for ${this@toView.image}")
                         }
                     )
                     Image(
