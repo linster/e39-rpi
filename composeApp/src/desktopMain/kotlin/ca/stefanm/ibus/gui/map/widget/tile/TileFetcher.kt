@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.map.widget.tile
 
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.di.MapModule
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
@@ -31,21 +32,32 @@ class TileFetcher @Inject constructor(
     private val notificationHub: NotificationHub
 ) {
 
-    suspend fun getTile(x : Int, y : Int, zoom : Int) : File {
+    /** The server has no such tile for this request (prefetching: not available offline). */
+    class TileUnavailableException(message: String) : Exception(message)
+
+    /** prefetch: a bulk download (see downloadTiles). */
+    suspend fun getTile(x : Int, y : Int, zoom : Int, prefetch : Boolean = false) : File {
         val localTile = tileServerImageCache.retrieve(x, y, zoom)
 
         if (localTile != null) {
             return localTile
         }
 
-        tileServerImageCache.saveTileToCache(x, y, zoom, getTileFromServer(x, y, zoom))
+        tileServerImageCache.saveTileToCache(x, y, zoom, getTileFromServer(x, y, zoom, prefetch))
         return tileServerImageCache.retrieve(x, y, zoom)!!
     }
 
-    internal suspend fun getTileFromServer(x : Int, y : Int, zoom : Int) : ByteArray {
+    internal suspend fun getTileFromServer(x : Int, y : Int, zoom : Int, prefetch : Boolean = false) : ByteArray {
         val url = osmTileServerInfo.getTileUrl(x, y, zoom)
-        val response : HttpResponse = httpClient.get(url)
+        val response : HttpResponse = httpClient.get(url) {
+            // The maps backend then serves only what it has offline (its
+            // MBTiles and cache) and never bulk-fetches from OpenStreetMap.
+            if (prefetch) header("X-Tile-Prefetch", "1")
+        }
 
+        if (prefetch && response.status == HttpStatusCode.NotFound) {
+            throw TileUnavailableException("$url: not available offline")
+        }
         if (!response.status.isSuccess()) {
             error("$url: ${response.status}")
         }
@@ -58,9 +70,25 @@ class TileFetcher @Inject constructor(
 
     data class DownloadStatus(
         val tilesDownloaded : Int,
-        val totalTilesToDownload : Int
+        val totalTilesToDownload : Int,
+        /** Not available offline on the maps backend. */
+        val tilesUnavailable : Int = 0,
     )
+
+    /** Bulk downloads are only allowed from the maps backend (see downloadTiles). */
+    fun bulkDownloadAllowed() : Boolean =
+        osmTileServerInfo.current().source == E39Config.MapConfig.TileSource.MAPS_BACKEND
+
+    /**
+     * Pre-fetches every tile of an area. Only from the maps backend, with
+     * X-Tile-Prefetch: it serves what it has offline and never fetches from
+     * OpenStreetMap, whose tile usage policy forbids bulk downloading.
+     */
     suspend fun downloadTiles(center : LatLng, radius : MapScale, closestZoom : MapScale) : Flow<DownloadStatus> {
+
+        check(bulkDownloadAllowed()) {
+            "Bulk downloads from tile.openstreetmap.org aren't allowed (OSM tile policy); use the maps backend"
+        }
 
         if (radius.meters < closestZoom.meters) {
             return flowOf(DownloadStatus(0, 0))
@@ -130,8 +158,10 @@ class TileFetcher @Inject constructor(
         ).map {
             flowOf(*it.toTypedArray()).map { tile ->
                 try {
-                    getTile(tile.first, tile.second, tile.third)
+                    getTile(tile.first, tile.second, tile.third, prefetch = true)
                     true
+                } catch (e : TileUnavailableException) {
+                    null
                 } catch (e : Exception) {
                     logger.e("TileFetcher", "Server response exception on tile ${tile}", e)
                     notificationHub.postNotificationBackground(Notification(
@@ -147,16 +177,10 @@ class TileFetcher @Inject constructor(
 
         return merge(*flowsByWorker.toTypedArray())
             .scan(DownloadStatus(tilesDownloaded = 0, totalTilesToDownload = tilesToDownload.size)) { accumulator, tileLoadSuccess ->
-                if (tileLoadSuccess) {
-                    DownloadStatus(
-                        tilesDownloaded = accumulator.tilesDownloaded + 1,
-                        totalTilesToDownload = accumulator.totalTilesToDownload
-                    )
-                } else {
-                    DownloadStatus(
-                        tilesDownloaded = accumulator.tilesDownloaded,
-                        totalTilesToDownload = accumulator.totalTilesToDownload
-                    )
+                when (tileLoadSuccess) {
+                    true -> accumulator.copy(tilesDownloaded = accumulator.tilesDownloaded + 1)
+                    null -> accumulator.copy(tilesUnavailable = accumulator.tilesUnavailable + 1)
+                    false -> accumulator
                 }
             }
     }
