@@ -173,6 +173,21 @@ object E39Config : ConfigSpec() {
             "default LatLng to open all maps at. Default is in Kanata, ON, Canada."
         )
 
+        /** Where the map's raster tiles come from. */
+        enum class TileSource {
+            /** tile.openstreetmap.org, directly. */
+            OPENSTREETMAP,
+            /** The maps backend's /tiles (its cache, else OSM; works offline for cached tiles). */
+            MAPS_BACKEND
+        }
+
+        val tileSource by optional(
+            TileSource.OPENSTREETMAP,
+            "tileSource",
+            "Where map tiles are downloaded from: OPENSTREETMAP or MAPS_BACKEND " +
+                    "(http://<Backend.host>:<Backend.httpPort>/tiles/...)."
+        )
+
         /** The maps backend (e39-rpi-maps) gRPC API: POIs, routes. */
         object Backend : ConfigSpec() {
             val host by optional(
@@ -185,6 +200,11 @@ object E39Config : ConfigSpec() {
                 50051,
                 "port",
                 "Port of the maps backend's gRPC API."
+            )
+            val httpPort by optional(
+                8080,
+                "httpPort",
+                "Port of the maps backend's web server (map tiles)."
             )
         }
 

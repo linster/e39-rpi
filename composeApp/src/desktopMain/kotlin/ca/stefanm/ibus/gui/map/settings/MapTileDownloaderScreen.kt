@@ -61,6 +61,7 @@ class MapTileDownloaderScreen @Inject constructor(
 
         val downloadingTotal = remember { mutableStateOf(0) }
         val downloadedCurrent = remember { mutableStateOf(0) }
+        val unavailable = remember { mutableStateOf(0) }
 
         DisposableEffect(true) {
             onDispose {
@@ -100,6 +101,12 @@ class MapTileDownloaderScreen @Inject constructor(
                     })
 
                 InfoLabel("Download zooms: ${downloadClosestZoom.value.displayString} - ${downloadRadius.value.displayString}")
+                if (!tileFetcher.bulkDownloadAllowed()) {
+                    InfoLabel("Not from openstreetmap.org (its tile policy forbids bulk downloads):", FontWeight.Bold)
+                    InfoLabel("choose Map Tile Source -> Maps backend. It serves what it has offline.")
+                } else if (unavailable.value > 0) {
+                    InfoLabel("${unavailable.value} tiles not available offline on the maps backend.")
+                }
             }
 
 
@@ -121,12 +128,25 @@ class MapTileDownloaderScreen @Inject constructor(
                         title = if (!isDownloading.value) "Download Tiles" else "Cancel Download",
                         onClicked = {
                             scope.launch {
+                                if (!tileFetcher.bulkDownloadAllowed()) {
+                                    notificationHub.postNotification(
+                                        Notification(
+                                            image = Notification.NotificationImage.ALERT_TRIANGLE,
+                                            topText = "Not from openstreetmap.org",
+                                            contentText = "Its tile policy forbids bulk downloads. " +
+                                                    "Map Tile Source -> Maps backend."
+                                        )
+                                    )
+                                    return@launch
+                                }
                                 if (downloadLocation != null && !isDownloading.value) {
                                     isDownloading.value = true
+                                    unavailable.value = 0
                                     val updateFlow = tileFetcher.downloadTiles(downloadLocation, downloadRadius.value, downloadClosestZoom.value)
                                     updateFlow.collect { status ->
                                         downloadedCurrent.value = status.tilesDownloaded
                                         downloadingTotal.value = status.totalTilesToDownload
+                                        unavailable.value = status.tilesUnavailable
                                     }
                                     isDownloading.value = false
                                 }

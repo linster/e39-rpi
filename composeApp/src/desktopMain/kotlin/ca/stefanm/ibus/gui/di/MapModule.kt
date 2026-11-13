@@ -5,6 +5,7 @@ import ca.stefanm.ibus.gui.map.guidance.RouteCalculator
 import dagger.Module
 import dagger.Provides
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 
 import javax.inject.Named
 
@@ -17,7 +18,11 @@ class MapModule {
         const val TILE_CLIENT = "tileClient"
 
         val httpClient = HttpClient {
-
+            // OpenStreetMap's tile usage policy requires an identifying
+            // User-Agent; generic library ones (Ktor's default) are blocked.
+            install(UserAgent) {
+                agent = "e39-rpi HMI (BMW E39 car display; +https://github.com/linster/e39-rpi)"
+            }
 
 //            install(Logging) {
 //                logger = Logger.SIMPLE
