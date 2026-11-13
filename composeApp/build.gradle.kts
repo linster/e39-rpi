@@ -1,5 +1,9 @@
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.util.zip.ZipFile
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -35,6 +39,13 @@ kotlin {
 
         commonMain.dependencies {
             implementation(compose.components.resources)
+        }
+
+        // Unit tests (./gradlew :composeApp:desktopTest), JUnit 4.
+        val desktopTest by getting {
+            dependencies {
+                implementation("junit:junit:4.13.2")
+            }
         }
 
         desktopMain.dependencies {
@@ -216,4 +227,36 @@ compose.resources {
     publicResClass = true
     packageOfResClass = "ca.stefanm.ibus.resources"
     generateResClass = always
+}
+// The uber jar (packageUberJarForCurrentOS: what the image and QEMU deploys
+// run) keeps only the first library's copy of each file. For the
+// ServiceLoader lists in META-INF/services/ that drops providers: grpc-core's
+// DNS name resolver and pick_first load balancer lost to grpc-netty-shaded's
+// and grpc-util's lists, so the maps backend's "localhost:50051" was taken
+// for a Unix socket path and every call failed. Merge each list from all
+// libraries into the jar, like a shadow jar does.
+tasks.matching { it.name in setOf("packageUberJarForCurrentOS", "packageReleaseUberJarForCurrentOS") }.configureEach {
+    val runtimeJars = configurations.getByName("desktopRuntimeClasspath")
+    doLast {
+        val uberJar = (this as AbstractArchiveTask).archiveFile.get().asFile
+        val merged = linkedMapOf<String, LinkedHashSet<String>>()
+        // The jar's own lists first (what the first library said), then
+        // every library's.
+        (listOf(uberJar) + runtimeJars.files.filter { it.name.endsWith(".jar") }).forEach { file ->
+            ZipFile(file).use { zip ->
+                zip.entries().asSequence()
+                    .filter { !it.isDirectory && it.name.startsWith("META-INF/services/") }
+                    .forEach { entry ->
+                        merged.getOrPut(entry.name) { linkedSetOf() } += zip.getInputStream(entry).reader().readText()
+                            .lines().map { it.substringBefore('#').trim() }.filter { it.isNotEmpty() }
+                    }
+            }
+        }
+        FileSystems.newFileSystem(uberJar.toPath()).use { fs ->
+            merged.forEach { (name, providers) ->
+                Files.write(fs.getPath(name), (providers.joinToString("\n") + "\n").toByteArray())
+            }
+        }
+        logger.lifecycle("Merged ${merged.size} META-INF/services lists into ${uberJar.name}")
+    }
 }

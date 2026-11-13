@@ -96,6 +96,10 @@ class BlockingJSerialCommsReader @Inject constructor(
                     logger.w(TAG, "Port not open")
                     serialPortProvider.setupSerialPort()
                     port.openPort().let { logger.d(TAG, "Port opening was successful: $it") }
+                    // Nothing to read this round (and ByteArray(-1) would
+                    // end this reader for good); try again shortly.
+                    delay(500)
+                    continue
                 }
 
                 val readBytes = ByteArray(bytesAvailable)

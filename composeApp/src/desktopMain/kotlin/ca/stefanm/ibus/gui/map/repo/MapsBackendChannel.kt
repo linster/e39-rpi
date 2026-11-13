@@ -98,7 +98,12 @@ sealed class MapsBackendException(message: String, cause: Throwable?) : Exceptio
     }
 }
 
-/** Run a gRPC call, turning gRPC errors into [MapsBackendException]. */
+/**
+ * Run a gRPC call, turning gRPC errors into [MapsBackendException]. So does
+ * a channel gRPC can't build (IllegalArgumentException from
+ * [MapsBackendChannel.channel], e.g. no name resolver for the target): it
+ * would otherwise escape the repositories' error handling.
+ */
 internal suspend fun <T> backendCall(block: suspend () -> T): T =
     try {
         block()
@@ -106,4 +111,6 @@ internal suspend fun <T> backendCall(block: suspend () -> T): T =
         throw MapsBackendException.from(e)
     } catch (e: StatusRuntimeException) {
         throw MapsBackendException.from(e)
+    } catch (e: IllegalArgumentException) {
+        throw MapsBackendException.Failed("Can't reach the maps backend: ${e.message}", e)
     }
