@@ -328,7 +328,9 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * FAILED_PRECONDITION if the calendar is read-only or holds no events.
+     * Returns the new event. INVALID_ARGUMENT for a missing summary or
+     * inconsistent times; FAILED_PRECONDITION if the calendar is read-only or
+     * holds no events.
      * </pre>
      */
     default void createEvent(ca.stefanm.e39pim.v1.CreateEventRequest request,
@@ -339,7 +341,10 @@ public final class CalendarServiceGrpc {
     /**
      * <pre>
      * A whole event/series, or one occurrence of a series (recurrence_id
-     * set; stored as an exception). ABORTED on a revision mismatch.
+     * set: the first change creates an exception, later ones change it).
+     * Returns the changed event (occurrence). ABORTED on a revision mismatch;
+     * NOT_FOUND for an occurrence that isn't on the series' schedule;
+     * FAILED_PRECONDITION for read-only calendars.
      * </pre>
      */
     default void updateEvent(ca.stefanm.e39pim.v1.UpdateEventRequest request,
@@ -349,8 +354,10 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * A whole event/series, or one occurrence of a series (recurrence_id
-     * set). ABORTED on a revision mismatch.
+     * A whole event (a series with all its exceptions), or one occurrence of
+     * a series (recurrence_id set: excluded from the series, its exception
+     * removed, so it doesn't come back at its original time). ABORTED on a
+     * revision mismatch.
      * </pre>
      */
     default void deleteEvent(ca.stefanm.e39pim.v1.DeleteEventRequest request,
@@ -438,7 +445,9 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * FAILED_PRECONDITION if the calendar is read-only or holds no events.
+     * Returns the new event. INVALID_ARGUMENT for a missing summary or
+     * inconsistent times; FAILED_PRECONDITION if the calendar is read-only or
+     * holds no events.
      * </pre>
      */
     public void createEvent(ca.stefanm.e39pim.v1.CreateEventRequest request,
@@ -450,7 +459,10 @@ public final class CalendarServiceGrpc {
     /**
      * <pre>
      * A whole event/series, or one occurrence of a series (recurrence_id
-     * set; stored as an exception). ABORTED on a revision mismatch.
+     * set: the first change creates an exception, later ones change it).
+     * Returns the changed event (occurrence). ABORTED on a revision mismatch;
+     * NOT_FOUND for an occurrence that isn't on the series' schedule;
+     * FAILED_PRECONDITION for read-only calendars.
      * </pre>
      */
     public void updateEvent(ca.stefanm.e39pim.v1.UpdateEventRequest request,
@@ -461,8 +473,10 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * A whole event/series, or one occurrence of a series (recurrence_id
-     * set). ABORTED on a revision mismatch.
+     * A whole event (a series with all its exceptions), or one occurrence of
+     * a series (recurrence_id set: excluded from the series, its exception
+     * removed, so it doesn't come back at its original time). ABORTED on a
+     * revision mismatch.
      * </pre>
      */
     public void deleteEvent(ca.stefanm.e39pim.v1.DeleteEventRequest request,
@@ -538,7 +552,9 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * FAILED_PRECONDITION if the calendar is read-only or holds no events.
+     * Returns the new event. INVALID_ARGUMENT for a missing summary or
+     * inconsistent times; FAILED_PRECONDITION if the calendar is read-only or
+     * holds no events.
      * </pre>
      */
     public ca.stefanm.e39pim.v1.Event createEvent(ca.stefanm.e39pim.v1.CreateEventRequest request) throws io.grpc.StatusException {
@@ -549,7 +565,10 @@ public final class CalendarServiceGrpc {
     /**
      * <pre>
      * A whole event/series, or one occurrence of a series (recurrence_id
-     * set; stored as an exception). ABORTED on a revision mismatch.
+     * set: the first change creates an exception, later ones change it).
+     * Returns the changed event (occurrence). ABORTED on a revision mismatch;
+     * NOT_FOUND for an occurrence that isn't on the series' schedule;
+     * FAILED_PRECONDITION for read-only calendars.
      * </pre>
      */
     public ca.stefanm.e39pim.v1.Event updateEvent(ca.stefanm.e39pim.v1.UpdateEventRequest request) throws io.grpc.StatusException {
@@ -559,8 +578,10 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * A whole event/series, or one occurrence of a series (recurrence_id
-     * set). ABORTED on a revision mismatch.
+     * A whole event (a series with all its exceptions), or one occurrence of
+     * a series (recurrence_id set: excluded from the series, its exception
+     * removed, so it doesn't come back at its original time). ABORTED on a
+     * revision mismatch.
      * </pre>
      */
     public com.google.protobuf.Empty deleteEvent(ca.stefanm.e39pim.v1.DeleteEventRequest request) throws io.grpc.StatusException {
@@ -636,7 +657,9 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * FAILED_PRECONDITION if the calendar is read-only or holds no events.
+     * Returns the new event. INVALID_ARGUMENT for a missing summary or
+     * inconsistent times; FAILED_PRECONDITION if the calendar is read-only or
+     * holds no events.
      * </pre>
      */
     public ca.stefanm.e39pim.v1.Event createEvent(ca.stefanm.e39pim.v1.CreateEventRequest request) {
@@ -647,7 +670,10 @@ public final class CalendarServiceGrpc {
     /**
      * <pre>
      * A whole event/series, or one occurrence of a series (recurrence_id
-     * set; stored as an exception). ABORTED on a revision mismatch.
+     * set: the first change creates an exception, later ones change it).
+     * Returns the changed event (occurrence). ABORTED on a revision mismatch;
+     * NOT_FOUND for an occurrence that isn't on the series' schedule;
+     * FAILED_PRECONDITION for read-only calendars.
      * </pre>
      */
     public ca.stefanm.e39pim.v1.Event updateEvent(ca.stefanm.e39pim.v1.UpdateEventRequest request) {
@@ -657,8 +683,10 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * A whole event/series, or one occurrence of a series (recurrence_id
-     * set). ABORTED on a revision mismatch.
+     * A whole event (a series with all its exceptions), or one occurrence of
+     * a series (recurrence_id set: excluded from the series, its exception
+     * removed, so it doesn't come back at its original time). ABORTED on a
+     * revision mismatch.
      * </pre>
      */
     public com.google.protobuf.Empty deleteEvent(ca.stefanm.e39pim.v1.DeleteEventRequest request) {
@@ -736,7 +764,9 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * FAILED_PRECONDITION if the calendar is read-only or holds no events.
+     * Returns the new event. INVALID_ARGUMENT for a missing summary or
+     * inconsistent times; FAILED_PRECONDITION if the calendar is read-only or
+     * holds no events.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<ca.stefanm.e39pim.v1.Event> createEvent(
@@ -748,7 +778,10 @@ public final class CalendarServiceGrpc {
     /**
      * <pre>
      * A whole event/series, or one occurrence of a series (recurrence_id
-     * set; stored as an exception). ABORTED on a revision mismatch.
+     * set: the first change creates an exception, later ones change it).
+     * Returns the changed event (occurrence). ABORTED on a revision mismatch;
+     * NOT_FOUND for an occurrence that isn't on the series' schedule;
+     * FAILED_PRECONDITION for read-only calendars.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<ca.stefanm.e39pim.v1.Event> updateEvent(
@@ -759,8 +792,10 @@ public final class CalendarServiceGrpc {
 
     /**
      * <pre>
-     * A whole event/series, or one occurrence of a series (recurrence_id
-     * set). ABORTED on a revision mismatch.
+     * A whole event (a series with all its exceptions), or one occurrence of
+     * a series (recurrence_id set: excluded from the series, its exception
+     * removed, so it doesn't come back at its original time). ABORTED on a
+     * revision mismatch.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.google.protobuf.Empty> deleteEvent(

@@ -38,6 +38,8 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.lib.logging.Logger
 import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.plusDays
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -111,6 +113,7 @@ class CalendarEventEditScreen @Inject constructor(
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             .date
 
+        val saveScope = rememberCoroutineScope()
 
         val knobState = setupListener(
             knobListenerService,
@@ -165,6 +168,7 @@ class CalendarEventEditScreen @Inject constructor(
                 end = LocalDateTime(newEndDate, newEndLocalTime).toInstant(TimeZone.currentSystemDefault()),
                 color = eventToEdit.value?.color ?: Color.Magenta,
                 eventUuid = eventToEdit.value?.eventUuid,
+                eventRef = eventToEdit.value?.eventRef,
                 onClick = {}
             )
         }
@@ -249,9 +253,16 @@ class CalendarEventEditScreen @Inject constructor(
 
             onGoBackClicked = { navigationNodeTraverser.goBack()},
             onSaveClicked = {
-                eventToEdit.value?.let { event ->
-                    weekViewRepo.saveEditedEvent(event)
-                }
+                val original = (params?.requestParameters as? CreateCalendarEventEditScreenOpenMode.EditExisting)?.event
+                saveEvent(
+                    scope = saveScope,
+                    original = original,
+                    name = eventName.value,
+                    startDate = startDateEntered.value,
+                    endDate = endDateEntered.value,
+                    startTime = startLocalTime.value,
+                    endTime = endLocalTime.value,
+                )
             },
 
 
@@ -271,6 +282,75 @@ class CalendarEventEditScreen @Inject constructor(
             onCalendarDaysVisibleChanged = { calendarDaysVisible.value = it}
         )
 
+    }
+
+    private fun notify(image: Notification.NotificationImage, top: String, content: String) {
+        notificationHub.postNotificationBackground(Notification(image, top, content))
+    }
+
+    /**
+     * Saves through the PIM bridge: the name, and the new times if all four
+     * date/time fields were entered (else the event keeps its times). A new
+     * event needs all four. For a repeating event, only this occurrence
+     * changes.
+     */
+    private fun saveEvent(
+        scope: CoroutineScope,
+        original: AgendaCalendarEventData?,
+        name: String,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        startTime: LocalTime?,
+        endTime: LocalTime?,
+    ) {
+        val zone = TimeZone.currentSystemDefault()
+        val newTimes = if (startDate != null && endDate != null && startTime != null && endTime != null) {
+            LocalDateTime(startDate, startTime).toInstant(zone) to LocalDateTime(endDate, endTime).toInstant(zone)
+        } else {
+            null
+        }
+        val edited = when {
+            original != null -> original.copy(
+                headerText = name,
+                start = newTimes?.first ?: original.start,
+                end = newTimes?.second ?: original.end,
+                allDayEvent = original.allDayEvent && newTimes == null,
+            )
+            newTimes != null -> AgendaCalendarEventData(
+                headerText = name,
+                start = newTimes.first,
+                end = newTimes.second,
+                color = Color.Magenta,
+            )
+            else -> {
+                notify(Notification.NotificationImage.ALERT_TRIANGLE, "Not saved", "Enter the start and end first.")
+                return
+            }
+        }
+        if (edited.end <= edited.start) {
+            notify(Notification.NotificationImage.ALERT_TRIANGLE, "Not saved", "The end must be after the start.")
+            return
+        }
+        scope.launch {
+            weekViewRepo.saveEditedEvent(original, edited).fold(
+                onSuccess = { saved ->
+                    notify(Notification.NotificationImage.MESSAGE_CIRCLE, "Event saved", saved.headerText)
+                    navigationNodeTraverser.goBack()
+                },
+                onFailure = { e ->
+                    logger.w("CalendarEventEditScreen", "Saving ${edited.headerText} failed: ${e.message}")
+                    notify(
+                        Notification.NotificationImage.ALERT_TRIANGLE,
+                        "Not saved",
+                        when (e) {
+                            is PimBackendException.Conflict -> "It was changed elsewhere meanwhile. Open it again and redo the change."
+                            is PimBackendException.Unavailable -> "Calendar not reachable: ${e.message}"
+                            else -> e.message ?: e.toString()
+                        }
+                    )
+                }
+            )
+        }
     }
 
     @Composable

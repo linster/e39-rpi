@@ -124,6 +124,12 @@ private static final long serialVersionUID = 0L;
   public static final int REVISION_FIELD_NUMBER = 3;
   private long revision_ = 0L;
   /**
+   * <pre>
+   * The revision of the event (occurrence) being deleted. Checked by the
+   * bridge against its copy, which follows Akonadi closely but not
+   * atomically: a change arriving in the same instant can be lost.
+   * </pre>
+   *
    * <code>int64 revision = 3;</code>
    * @return The revision.
    */
@@ -726,6 +732,12 @@ private static final long serialVersionUID = 0L;
 
     private long revision_ ;
     /**
+     * <pre>
+     * The revision of the event (occurrence) being deleted. Checked by the
+     * bridge against its copy, which follows Akonadi closely but not
+     * atomically: a change arriving in the same instant can be lost.
+     * </pre>
+     *
      * <code>int64 revision = 3;</code>
      * @return The revision.
      */
@@ -734,6 +746,12 @@ private static final long serialVersionUID = 0L;
       return revision_;
     }
     /**
+     * <pre>
+     * The revision of the event (occurrence) being deleted. Checked by the
+     * bridge against its copy, which follows Akonadi closely but not
+     * atomically: a change arriving in the same instant can be lost.
+     * </pre>
+     *
      * <code>int64 revision = 3;</code>
      * @param value The revision to set.
      * @return This builder for chaining.
@@ -746,6 +764,12 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * The revision of the event (occurrence) being deleted. Checked by the
+     * bridge against its copy, which follows Akonadi closely but not
+     * atomically: a change arriving in the same instant can be lost.
+     * </pre>
+     *
      * <code>int64 revision = 3;</code>
      * @return This builder for chaining.
      */

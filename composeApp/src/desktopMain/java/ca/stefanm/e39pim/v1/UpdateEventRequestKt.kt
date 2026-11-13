@@ -74,8 +74,12 @@ public object UpdateEventRequestKt {
 
     /**
      * ```
-     * Which editable fields to change; empty = all editable fields. With a
-     * recurrence_id, rrule can't be changed.
+     * Which editable fields to change: summary, location, description,
+     * all_day, start, end, start_date, end_date, time_zone, rrule, status.
+     * Empty = all of them. The time fields go together: naming any of them
+     * sets all_day, start/end (timed) or start_date/end_date (all-day) and
+     * time_zone from `event`. With a recurrence_id, rrule can't be changed
+     * (INVALID_ARGUMENT if named; left out of an empty mask).
      * ```
      *
      * `.google.protobuf.FieldMask update_mask = 2;`
@@ -89,8 +93,12 @@ public object UpdateEventRequestKt {
       }
     /**
      * ```
-     * Which editable fields to change; empty = all editable fields. With a
-     * recurrence_id, rrule can't be changed.
+     * Which editable fields to change: summary, location, description,
+     * all_day, start, end, start_date, end_date, time_zone, rrule, status.
+     * Empty = all of them. The time fields go together: naming any of them
+     * sets all_day, start/end (timed) or start_date/end_date (all-day) and
+     * time_zone from `event`. With a recurrence_id, rrule can't be changed
+     * (INVALID_ARGUMENT if named; left out of an empty mask).
      * ```
      *
      * `.google.protobuf.FieldMask update_mask = 2;`
@@ -100,8 +108,12 @@ public object UpdateEventRequestKt {
     }
     /**
      * ```
-     * Which editable fields to change; empty = all editable fields. With a
-     * recurrence_id, rrule can't be changed.
+     * Which editable fields to change: summary, location, description,
+     * all_day, start, end, start_date, end_date, time_zone, rrule, status.
+     * Empty = all of them. The time fields go together: naming any of them
+     * sets all_day, start/end (timed) or start_date/end_date (all-day) and
+     * time_zone from `event`. With a recurrence_id, rrule can't be changed
+     * (INVALID_ARGUMENT if named; left out of an empty mask).
      * ```
      *
      * `.google.protobuf.FieldMask update_mask = 2;`

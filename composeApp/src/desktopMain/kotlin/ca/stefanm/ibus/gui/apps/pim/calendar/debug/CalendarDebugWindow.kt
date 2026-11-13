@@ -25,7 +25,11 @@ import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarInfo
 import ca.stefanm.ibus.gui.pim.calendar.repo.api.CalendarViewConfigRepo
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.EventScope
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.EventTimes
+import ca.stefanm.ibus.gui.pim.calendar.repo.api.TodoItem
 import ca.stefanm.ibus.gui.pim.calendar.repo.api.MonthViewRepo
 import ca.stefanm.ibus.gui.pim.calendar.repo.api.WeekViewRepo
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.CalendarGrpcClient
@@ -34,6 +38,7 @@ import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendSettings
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendSettingsRepository
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.RemoteCalendarRepository
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.RemoteCalendarRepository.BridgeSummary
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.RemoteTodoRepository
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaCalendarEventData
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
@@ -48,8 +53,8 @@ import kotlin.time.Instant
  * Everything the calendar repositories (and the PIM bridge client under
  * them) can do, with the bridge's raw answers: settings and connection,
  * calendars, event queries through each repository (live: they re-emit on
- * change notices), GetEvent, the raw change stream, the HMI's calendar view
- * setting.
+ * change notices), GetEvent, creating/changing/deleting events, to-dos, the
+ * raw change stream, the HMI's calendar view setting.
  */
 class CalendarDebugWindow @Inject constructor(
     private val settingsRepository: PimBackendSettingsRepository,
@@ -58,6 +63,7 @@ class CalendarDebugWindow @Inject constructor(
     private val weekViewRepo: WeekViewRepo,
     private val monthViewRepo: MonthViewRepo,
     private val calendarViewConfigRepo: CalendarViewConfigRepo,
+    private val todoRepository: RemoteTodoRepository,
 ) : WindowManager.E39Window {
 
     companion object {
@@ -93,12 +99,13 @@ class CalendarDebugWindow @Inject constructor(
                 BackendPane()
                 CalendarsPane()
                 ViewConfigPane()
+                TodosPane()
                 ChangeStreamPane()
             }
             Column(Modifier.weight(0.55f).verticalScroll(rememberScrollState())) {
                 EventQueryPane(onEventSelected = { selectedEvent.value = it })
                 GetEventPane(selectedEvent.value)
-                SaveEventPane(selectedEvent.value)
+                WriteEventPane(selectedEvent.value, onSaved = { selectedEvent.value = it })
             }
         }
     }
@@ -171,8 +178,28 @@ class CalendarDebugWindow @Inject constructor(
     @Composable
     private fun CalendarsPane() {
         val calendars = remember { mutableStateOf<Result<List<Calendar>>?>(null) }
+        val repoCalendars = remember { mutableStateOf<Result<List<CalendarInfo>>?>(null) }
+        val defaultCalendar = remember { mutableStateOf<Result<CalendarInfo>?>(null) }
         val scope = rememberCoroutineScope()
 
+        NestingCard {
+            NestingCardHeader("Calendars (RemoteCalendarRepository)")
+            Row {
+                Button(onClick = { scope.launch { repoCalendars.value = remoteCalendarRepository.calendars() } }) { Text("calendars()") }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = { scope.launch { defaultCalendar.value = remoteCalendarRepository.defaultEventCalendar() } }) {
+                    Text("defaultEventCalendar()")
+                }
+            }
+            repoCalendars.value?.fold(
+                onSuccess = { list -> list.forEach { Text(it.toString(), fontSize = 12.sp) } },
+                onFailure = { Text("Failed: ${it.describe()}", color = Color.Red) }
+            )
+            defaultCalendar.value?.fold(
+                onSuccess = { Text("Default for new events: ${it.id} ${it.name}") },
+                onFailure = { Text("Default: ${it.describe()}", color = Color.Red) }
+            )
+        }
         NestingCard {
             NestingCardHeader("Calendars (CalendarGrpcClient.listCalendars)")
             Button(onClick = {
@@ -428,18 +455,256 @@ class CalendarDebugWindow @Inject constructor(
         }
     }
 
-    // --- Saving --------------------------------------------------------------
+    // --- Writing events ----------------------------------------------------
+
+    /** Parses the time fields of the write pane; throws IllegalArgumentException with a message. */
+    private fun parseTimes(allDay: Boolean, startText: String, endText: String, zoneText: String): EventTimes {
+        return try {
+            if (allDay) {
+                EventTimes.AllDay(LocalDate.parse(startText.trim().take(10)), LocalDate.parse(endText.trim().take(10)))
+            } else {
+                val zone = TimeZone.of(zoneText.trim())
+                EventTimes.Timed(
+                    LocalDateTime.parse(startText.trim()).toInstant(zone),
+                    LocalDateTime.parse(endText.trim()).toInstant(zone),
+                    zone,
+                )
+            }
+        } catch (e: IllegalArgumentException) {
+            throw e
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Can't read the times: ${e.message}", e)
+        }
+    }
 
     @Composable
-    private fun SaveEventPane(selected: AgendaCalendarEventData?) {
+    private fun WriteEventPane(selected: AgendaCalendarEventData?, onSaved: (AgendaCalendarEventData) -> Unit) {
+        val scope = rememberCoroutineScope()
+        val summary = remember { mutableStateOf("Debug event") }
+        val location = remember { mutableStateOf("") }
+        val allDay = remember { mutableStateOf(false) }
+        val startText = remember { mutableStateOf("2026-11-16T10:00") }
+        val endText = remember { mutableStateOf("2026-11-16T11:00") }
+        val zoneText = remember { mutableStateOf(TimeZone.currentSystemDefault().id) }
+        val calendarId = remember { mutableStateOf("") }
+        val eventScope = remember { mutableStateOf(EventScope.THIS_OCCURRENCE) }
+        val changeName = remember { mutableStateOf(true) }
+        val changeLocation = remember { mutableStateOf(false) }
+        val changeTimes = remember { mutableStateOf(false) }
+        val outcome = remember { mutableStateOf("") }
+
+        fun report(what: String, result: Result<*>) {
+            outcome.value = result.fold(
+                onSuccess = { "$what: OK" + if (it == null || it == Unit) "" else " $it" },
+                onFailure = { "$what failed: ${it.describe()}" }
+            )
+        }
+
         NestingCard {
-            NestingCardHeader("Save (WeekViewRepo.saveEditedEvent)")
-            Text("Selected: ${selected?.headerText ?: "(click an event above)"}")
-            Button(
-                enabled = selected != null,
-                onClick = { selected?.let { weekViewRepo.saveEditedEvent(it) } }
-            ) { Text("saveEditedEvent()") }
-            Text("Not supported by the bridge yet (e39-rpi-pim phase 4): only logs a warning.")
+            NestingCardHeader("Write events (RemoteCalendarRepository, WeekViewRepo)")
+            Row {
+                OutlinedTextField(summary.value, { summary.value = it }, label = { Text("Summary") }, singleLine = true,
+                    modifier = Modifier.width(260.dp))
+                OutlinedTextField(location.value, { location.value = it }, label = { Text("Location") }, singleLine = true,
+                    modifier = Modifier.width(200.dp))
+                OutlinedTextField(calendarId.value, { calendarId.value = it }, singleLine = true,
+                    label = { Text("Calendar ID (empty: default)") }, modifier = Modifier.width(220.dp))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CheckBoxWithLabel(allDay.value, { allDay.value = it }, "All day")
+                OutlinedTextField(startText.value, { startText.value = it }, singleLine = true,
+                    label = { Text(if (allDay.value) "First day" else "Start (local)") }, modifier = Modifier.width(200.dp))
+                OutlinedTextField(endText.value, { endText.value = it }, singleLine = true,
+                    label = { Text(if (allDay.value) "End day (exclusive)" else "End (local)") }, modifier = Modifier.width(200.dp))
+                OutlinedTextField(zoneText.value, { zoneText.value = it }, singleLine = true,
+                    label = { Text("Zone") }, modifier = Modifier.width(200.dp), enabled = !allDay.value)
+            }
+
+            NestingCard {
+                NestingCardHeader("New event")
+                Button(onClick = {
+                    scope.launch {
+                        val result = runCatching { parseTimes(allDay.value, startText.value, endText.value, zoneText.value) }
+                            .fold(
+                                onSuccess = { times ->
+                                    remoteCalendarRepository.createEvent(
+                                        summary = summary.value,
+                                        times = times,
+                                        location = location.value,
+                                        calendarId = calendarId.value.trim().ifEmpty { null },
+                                    )
+                                },
+                                onFailure = { Result.failure(it) }
+                            )
+                        result.onSuccess(onSaved)
+                        report("createEvent", result.map { it.headerText })
+                    }
+                }) { Text("createEvent()") }
+            }
+
+            NestingCard {
+                NestingCardHeader("Selected event")
+                val ref = selected?.eventRef
+                Text("Selected: ${selected?.headerText ?: "(click an event in Events)"}" +
+                    (ref?.let { " — event ${it.eventId}, rev ${it.revision}" + if (it.recurring) ", repeats" else "" } ?: ""))
+                EnumColumn(eventScope.value, { eventScope.value = it })
+                Row {
+                    CheckBoxWithLabel(changeName.value, { changeName.value = it }, "summary")
+                    CheckBoxWithLabel(changeLocation.value, { changeLocation.value = it }, "location")
+                    CheckBoxWithLabel(changeTimes.value, { changeTimes.value = it }, "times (from the fields above)")
+                }
+                Row {
+                    Button(enabled = ref != null, onClick = {
+                        if (ref == null) return@Button
+                        scope.launch {
+                            val result = runCatching {
+                                if (changeTimes.value) parseTimes(allDay.value, startText.value, endText.value, zoneText.value) else null
+                            }.fold(
+                                onSuccess = { times ->
+                                    remoteCalendarRepository.updateEvent(
+                                        ref = ref,
+                                        scope = eventScope.value,
+                                        summary = summary.value.takeIf { changeName.value },
+                                        location = location.value.takeIf { changeLocation.value },
+                                        times = times,
+                                    )
+                                },
+                                onFailure = { Result.failure(it) }
+                            )
+                            result.onSuccess(onSaved)
+                            report("updateEvent", result.map { it.headerText })
+                        }
+                    }) { Text("updateEvent()") }
+                    Spacer(Modifier.width(8.dp))
+                    Button(enabled = ref != null, onClick = {
+                        if (ref == null) return@Button
+                        scope.launch { report("deleteEvent", remoteCalendarRepository.deleteEvent(ref, eventScope.value)) }
+                    }) { Text("deleteEvent()") }
+                    Spacer(Modifier.width(8.dp))
+                    Button(enabled = selected != null, onClick = {
+                        if (selected == null) return@Button
+                        scope.launch {
+                            val result = weekViewRepo.saveEditedEvent(selected, selected.copy(headerText = summary.value))
+                            result.onSuccess(onSaved)
+                            report("saveEditedEvent (rename)", result.map { it.headerText })
+                        }
+                    }) { Text("WeekViewRepo.saveEditedEvent(rename)") }
+                }
+                Text("Revisions come from the selection: after a change, click the event again (or use the event returned) before the next one.", fontSize = 11.sp)
+            }
+            if (outcome.value.isNotEmpty()) {
+                Text(outcome.value, color = if (outcome.value.contains("failed")) Color.Red else Color.Unspecified)
+            }
+        }
+    }
+
+    // --- To-dos ------------------------------------------------------------------
+
+    @Composable
+    private fun TodosPane() {
+        val scope = rememberCoroutineScope()
+        val live = remember { mutableStateOf(false) }
+        val includeCompleted = remember { mutableStateOf(true) }
+        val selected = remember { mutableStateOf<TodoItem?>(null) }
+        val summary = remember { mutableStateOf("Debug to-do") }
+        val dueDateText = remember { mutableStateOf("") }
+        val priority = remember { mutableStateOf(0) }
+        val outcome = remember { mutableStateOf("") }
+
+        fun report(what: String, result: Result<*>) {
+            outcome.value = result.fold(onSuccess = { "$what: OK" }, onFailure = { "$what failed: ${it.describe()}" })
+        }
+        fun dueDate(): LocalDate? = dueDateText.value.trim().takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it) }
+
+        NestingCard {
+            NestingCardHeader("To-dos (RemoteTodoRepository)")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CheckBoxWithLabel(live.value, { live.value = it }, "Collect todos() (live)")
+                CheckBoxWithLabel(includeCompleted.value, { includeCompleted.value = it }, "include completed")
+            }
+            if (live.value) {
+                val todos = remember(includeCompleted.value) { todoRepository.todos(includeCompleted.value) }
+                    .collectAsState(null).value
+                if (todos == null) Text("Waiting for the first answer...")
+                todos?.forEach { todo ->
+                    Row(
+                        Modifier.fillMaxWidth().clickable { selected.value = todo }.padding(vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ColorSwatch(todo.color)
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            (if (todo.completed) "[X] " else "[ ] ") + todo.summary +
+                                (todo.dueDate?.let { "  due $it" } ?: todo.due?.let { "  due $it" } ?: "") +
+                                (if (todo.priority > 0) "  p${todo.priority}" else "") +
+                                "  (id ${todo.id}, rev ${todo.revision})",
+                            fontSize = 13.sp,
+                        )
+                    }
+                }
+            }
+            Row {
+                OutlinedTextField(summary.value, { summary.value = it }, label = { Text("Summary") }, singleLine = true,
+                    modifier = Modifier.width(220.dp))
+                OutlinedTextField(dueDateText.value, { dueDateText.value = it }, label = { Text("Due day (YYYY-MM-DD)") },
+                    singleLine = true, modifier = Modifier.width(180.dp))
+            }
+            NumericTextViewWithSpinnerButtons(label = "Priority", initialValue = priority.value,
+                onValueChanged = { priority.value = it.coerceIn(0, 9) })
+            Button(onClick = {
+                scope.launch {
+                    report("createTodo", runCatching { dueDate() }.fold(
+                        onSuccess = { todoRepository.createTodo(summary.value, dueDate = it, priority = priority.value) },
+                        onFailure = { Result.failure(it) }
+                    ))
+                }
+            }) { Text("createTodo()") }
+
+            val todo = selected.value
+            Text("Selected: ${todo?.let { "${it.summary} (rev ${it.revision})" } ?: "(click a to-do)"}")
+            Row {
+                Button(enabled = todo != null, onClick = {
+                    if (todo == null) return@Button
+                    scope.launch {
+                        val result = todoRepository.setCompleted(todo, !todo.completed)
+                        result.onSuccess { selected.value = it }
+                        report("setCompleted(${!todo.completed})", result)
+                    }
+                }) { Text("setCompleted(toggle)") }
+                Spacer(Modifier.width(6.dp))
+                Button(enabled = todo != null, onClick = {
+                    if (todo == null) return@Button
+                    scope.launch {
+                        val result = todoRepository.updateTodo(todo, summary = summary.value, priority = priority.value)
+                        result.onSuccess { selected.value = it }
+                        report("updateTodo(summary, priority)", result)
+                    }
+                }) { Text("updateTodo()") }
+                Spacer(Modifier.width(6.dp))
+                Button(enabled = todo != null, onClick = {
+                    if (todo == null) return@Button
+                    scope.launch {
+                        val result = runCatching { dueDate() }.fold(
+                            onSuccess = { todoRepository.updateTodo(todo, changeDue = true, dueDate = it) },
+                            onFailure = { Result.failure(it) }
+                        )
+                        result.onSuccess { selected.value = it }
+                        report("updateTodo(due)", result)
+                    }
+                }) { Text("set due day") }
+                Spacer(Modifier.width(6.dp))
+                Button(enabled = todo != null, onClick = {
+                    if (todo == null) return@Button
+                    scope.launch {
+                        val result = todoRepository.deleteTodo(todo)
+                        result.onSuccess { selected.value = null }
+                        report("deleteTodo", result)
+                    }
+                }) { Text("deleteTodo()") }
+            }
+            if (outcome.value.isNotEmpty()) {
+                Text(outcome.value, color = if (outcome.value.contains("failed")) Color.Red else Color.Unspecified)
+            }
         }
     }
 

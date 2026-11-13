@@ -84,6 +84,12 @@ public object DeleteEventRequestKt {
       get() = _builder.recurrenceIdOrNull
 
     /**
+     * ```
+     * The revision of the event (occurrence) being deleted. Checked by the
+     * bridge against its copy, which follows Akonadi closely but not
+     * atomically: a change arriving in the same instant can be lost.
+     * ```
+     *
      * `int64 revision = 3;`
      */
     public var revision: kotlin.Long
@@ -94,6 +100,12 @@ public object DeleteEventRequestKt {
         _builder.revision = value
       }
     /**
+     * ```
+     * The revision of the event (occurrence) being deleted. Checked by the
+     * bridge against its copy, which follows Akonadi closely but not
+     * atomically: a change arriving in the same instant can be lost.
+     * ```
+     *
      * `int64 revision = 3;`
      */
     public fun clearRevision() {

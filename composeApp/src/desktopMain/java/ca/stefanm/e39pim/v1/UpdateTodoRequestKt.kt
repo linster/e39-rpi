@@ -71,7 +71,11 @@ public object UpdateTodoRequestKt {
 
     /**
      * ```
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * ```
      *
      * `.google.protobuf.FieldMask update_mask = 2;`
@@ -85,7 +89,11 @@ public object UpdateTodoRequestKt {
       }
     /**
      * ```
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * ```
      *
      * `.google.protobuf.FieldMask update_mask = 2;`
@@ -95,7 +103,11 @@ public object UpdateTodoRequestKt {
     }
     /**
      * ```
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * ```
      *
      * `.google.protobuf.FieldMask update_mask = 2;`

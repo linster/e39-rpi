@@ -7,7 +7,11 @@ import ca.stefanm.e39pim.v1.ChangeNotice
 import ca.stefanm.e39pim.v1.Event
 import ca.stefanm.e39pim.v1.EventOccurrence
 import ca.stefanm.e39pim.v1.StatusServiceGrpcKt
+import ca.stefanm.e39pim.v1.createEventRequest
+import ca.stefanm.e39pim.v1.deleteEventRequest
 import ca.stefanm.e39pim.v1.getEventRequest
+import ca.stefanm.e39pim.v1.updateEventRequest
+import com.google.protobuf.fieldMask
 import ca.stefanm.e39pim.v1.getStatusRequest
 import ca.stefanm.e39pim.v1.listCalendarsRequest
 import ca.stefanm.e39pim.v1.listEventsRequest
@@ -66,6 +70,36 @@ class CalendarGrpcClient @Inject constructor(
             if (recurrenceId != null) this.recurrenceId = recurrenceId.toTimestamp()
             timeZone = zone.id
         })
+    }
+
+    /** Creates [event] (server-set fields ignored) in calendar [calendarId]. */
+    suspend fun createEvent(calendarId: String, event: Event): Event = pimCall {
+        calendarStub().withTimeout().createEvent(createEventRequest {
+            this.calendarId = calendarId
+            this.event = event
+        })
+    }
+
+    /**
+     * Changes the [paths] of the event (occurrence, if event.recurrenceId is
+     * set) named by event.eventId, based on event.revision. Empty [paths]:
+     * all editable fields.
+     */
+    suspend fun updateEvent(event: Event, paths: Collection<String>): Event = pimCall {
+        calendarStub().withTimeout().updateEvent(updateEventRequest {
+            this.event = event
+            if (paths.isNotEmpty()) updateMask = fieldMask { this.paths.addAll(paths) }
+        })
+    }
+
+    suspend fun deleteEvent(eventId: String, recurrenceId: Instant?, revision: Long) {
+        pimCall {
+            calendarStub().withTimeout().deleteEvent(deleteEventRequest {
+                this.eventId = eventId
+                if (recurrenceId != null) this.recurrenceId = recurrenceId.toTimestamp()
+                this.revision = revision
+            })
+        }
     }
 
     /**

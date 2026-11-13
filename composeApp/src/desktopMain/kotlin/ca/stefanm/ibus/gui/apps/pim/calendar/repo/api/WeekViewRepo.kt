@@ -45,10 +45,42 @@ class WeekViewRepo @Inject constructor(
         )
     }
 
-    fun saveEditedEvent(
-        eventData: AgendaCalendarEventData
-    ) {
-        // The bridge gets CreateEvent/UpdateEvent in e39-rpi-pim's phase 4.
-        logger.w(TAG, "Saving events isn't supported yet: ${eventData.headerText}")
+    /**
+     * Saves an event from the editor. [original]: the event as it was
+     * opened (null, or without an eventRef: a new event, created in the
+     * default calendar). Only what changed is sent (the name; the times if
+     * start or end moved). For a repeating event only this occurrence
+     * changes. Returns the saved event; a failure's exception is a
+     * [ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendException]
+     * (Conflict: it changed meanwhile) or an IllegalArgumentException.
+     */
+    suspend fun saveEditedEvent(
+        original: AgendaCalendarEventData?,
+        edited: AgendaCalendarEventData,
+    ): Result<AgendaCalendarEventData> {
+        val ref = original?.eventRef
+        if (ref == null) {
+            val times = if (edited.allDayEvent) {
+                val zone = TimeZone.currentSystemDefault()
+                EventTimes.AllDay(
+                    startDate = edited.start.toLocalDateTime(zone).date,
+                    endDateExclusive = edited.end.toLocalDateTime(zone).date.plusDays(1),
+                )
+            } else {
+                EventTimes.Timed(edited.start, edited.end)
+            }
+            return remoteCalendarRepository.createEvent(summary = edited.headerText, times = times)
+        }
+        val summary = edited.headerText.takeIf { it != original.headerText }
+        val times = if (edited.start != original.start || edited.end != original.end) {
+            EventTimes.Timed(edited.start, edited.end)
+        } else {
+            null
+        }
+        if (summary == null && times == null) {
+            logger.d(TAG, "Nothing changed in ${original.headerText}")
+            return Result.success(original)
+        }
+        return remoteCalendarRepository.updateEvent(ref, EventScope.THIS_OCCURRENCE, summary = summary, times = times)
     }
 }

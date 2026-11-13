@@ -497,8 +497,9 @@ private static final long serialVersionUID = 0L;
   private volatile java.lang.Object timeZone_ = "";
   /**
    * <pre>
-   * IANA zone for timed events; empty = the request's/client's zone when
-   * creating, floating when read.
+   * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+   * local time across DST changes in it. Read: empty = floating (no zone).
+   * Written: empty = the bridge's zone (send the HMI's).
    * </pre>
    *
    * <code>string time_zone = 18;</code>
@@ -519,8 +520,9 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * IANA zone for timed events; empty = the request's/client's zone when
-   * creating, floating when read.
+   * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+   * local time across DST changes in it. Read: empty = floating (no zone).
+   * Written: empty = the bridge's zone (send the HMI's).
    * </pre>
    *
    * <code>string time_zone = 18;</code>
@@ -2991,8 +2993,9 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object timeZone_ = "";
     /**
      * <pre>
-     * IANA zone for timed events; empty = the request's/client's zone when
-     * creating, floating when read.
+     * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+     * local time across DST changes in it. Read: empty = floating (no zone).
+     * Written: empty = the bridge's zone (send the HMI's).
      * </pre>
      *
      * <code>string time_zone = 18;</code>
@@ -3012,8 +3015,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * IANA zone for timed events; empty = the request's/client's zone when
-     * creating, floating when read.
+     * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+     * local time across DST changes in it. Read: empty = floating (no zone).
+     * Written: empty = the bridge's zone (send the HMI's).
      * </pre>
      *
      * <code>string time_zone = 18;</code>
@@ -3034,8 +3038,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * IANA zone for timed events; empty = the request's/client's zone when
-     * creating, floating when read.
+     * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+     * local time across DST changes in it. Read: empty = floating (no zone).
+     * Written: empty = the bridge's zone (send the HMI's).
      * </pre>
      *
      * <code>string time_zone = 18;</code>
@@ -3052,8 +3057,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * IANA zone for timed events; empty = the request's/client's zone when
-     * creating, floating when read.
+     * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+     * local time across DST changes in it. Read: empty = floating (no zone).
+     * Written: empty = the bridge's zone (send the HMI's).
      * </pre>
      *
      * <code>string time_zone = 18;</code>
@@ -3067,8 +3073,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * IANA zone for timed events; empty = the request's/client's zone when
-     * creating, floating when read.
+     * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+     * local time across DST changes in it. Read: empty = floating (no zone).
+     * Written: empty = the bridge's zone (send the HMI's).
      * </pre>
      *
      * <code>string time_zone = 18;</code>

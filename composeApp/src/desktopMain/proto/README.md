@@ -57,13 +57,18 @@ the maps API above.
 | --- | --- |
 | `backend.PimBackendSettingsRepository` | bridge host/port, in `config.conf` (`E39Config.PimConfig.Backend`, default `localhost:50052`); editable in Calendar → Setup |
 | `backend.PimBackendChannel` | the gRPC connection, rebuilt when the settings change; `PimBackendException` for errors (`Conflict` = the event changed meanwhile) |
-| `backend.CalendarGrpcClient` | transport: CalendarService/StatusService calls, protobuf messages in and out; `watchChanges()` as a `Flow` |
-| `backend.CalendarMapper` | protobuf ⇄ HMI types (`AgendaCalendarEventData`, `CalendarEventRef`, `Instant`) |
-| `backend.RemoteCalendarRepository` | `events(start, end)`: a `Flow` that queries again when the bridge reports changes in that range (one shared WatchChanges stream) and retries every 10 s while it's unreachable; `connectionState`; `checkConnection()` |
-| `api.WeekViewRepo`, `api.MonthViewRepo` | what the screens use: events for day columns, events by day for the month grid |
+| `backend.CalendarGrpcClient`, `backend.TodoGrpcClient` | transport: CalendarService/StatusService/TodoService calls, protobuf messages in and out; `watchChanges()` as a `Flow` |
+| `backend.PimChangeStream` | the bridge's change notices: one WatchChanges stream shared by the repositories, reconnecting |
+| `backend.CalendarMapper` | protobuf ⇄ HMI types (`AgendaCalendarEventData`, `CalendarEventRef`, `TodoItem`, `EventTimes`, `Instant`) |
+| `backend.RemoteCalendarRepository` | `events(start, end)`: a `Flow` that queries again when the bridge reports changes in that range and retries every 10 s while it's unreachable; `calendars()`, `defaultEventCalendar()`; `createEvent`, `updateEvent`, `deleteEvent` (this occurrence or the whole series); `connectionState`; `checkConnection()` |
+| `backend.RemoteTodoRepository` | `todos(includeCompleted)`: a `Flow` updated on to-do changes; `createTodo`, `updateTodo`, `setCompleted`, `deleteTodo` |
+| `api.WeekViewRepo`, `api.MonthViewRepo` | what the screens use: events for day columns, events by day for the month grid; `saveEditedEvent` for the editor |
 
 Screens must `remember` these flows: every call starts its own queries.
-`WeekViewRepo.saveEditedEvent` only logs until the bridge can write events.
+Writes return `Result`s; `PimBackendException.Conflict` means the event or
+to-do changed meanwhile (e.g. a sync came in): reload and redo the change.
+The editor saves the name and, if entered, new times; for a repeating event
+only that occurrence.
 
 Debug: Debug Launchpad (or the loading window's Debug menu) → Calendar (PIM
 Bridge) Debug: settings, connection check, calendars, live event queries

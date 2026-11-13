@@ -88,7 +88,11 @@ private static final long serialVersionUID = 0L;
   private com.google.protobuf.FieldMask updateMask_;
   /**
    * <pre>
-   * Which editable fields to change; empty = all editable fields.
+   * Which editable fields to change: summary, description, due, due_date,
+   * completed, priority, percent_complete. Empty = all of them. due and
+   * due_date go together: naming either sets the due date from `todo` (due,
+   * due_date, or neither for none). Timed due dates are stored in the
+   * bridge's zone.
    * </pre>
    *
    * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -100,7 +104,11 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Which editable fields to change; empty = all editable fields.
+   * Which editable fields to change: summary, description, due, due_date,
+   * completed, priority, percent_complete. Empty = all of them. due and
+   * due_date go together: naming either sets the due date from `todo` (due,
+   * due_date, or neither for none). Timed due dates are stored in the
+   * bridge's zone.
    * </pre>
    *
    * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -112,7 +120,11 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Which editable fields to change; empty = all editable fields.
+   * Which editable fields to change: summary, description, due, due_date,
+   * completed, priority, percent_complete. Empty = all of them. due and
+   * due_date go together: naming either sets the due date from `todo` (due,
+   * due_date, or neither for none). Timed due dates are stored in the
+   * bridge's zone.
    * </pre>
    *
    * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -646,7 +658,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.FieldMask, com.google.protobuf.FieldMask.Builder, com.google.protobuf.FieldMaskOrBuilder> updateMaskBuilder_;
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -657,7 +673,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -672,7 +692,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -692,7 +716,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -710,7 +738,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -735,7 +767,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -752,7 +788,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -764,7 +804,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -779,7 +823,11 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Which editable fields to change; empty = all editable fields.
+     * Which editable fields to change: summary, description, due, due_date,
+     * completed, priority, percent_complete. Empty = all of them. due and
+     * due_date go together: naming either sets the due date from `todo` (due,
+     * due_date, or neither for none). Timed due dates are stored in the
+     * bridge's zone.
      * </pre>
      *
      * <code>.google.protobuf.FieldMask update_mask = 2;</code>

@@ -24,7 +24,14 @@
 // Revisions: every event has a revision that changes whenever the event
 // does (edits here, edits on another device that arrive by sync). Changes
 // send the revision they were based on; if it no longer matches, the change
-// fails with ABORTED instead of overwriting the newer version.
+// fails with ABORTED instead of overwriting the newer version. An occurrence
+// of a repeating event carries the revision of what it comes from: its
+// exception (a changed occurrence is stored separately) if it has one, else
+// the series. Use the revision from the occurrence being changed.
+//
+// Writing: changes go to the calendar's account (Akonadi syncs them to the
+// server) and show up in ListEvents right away; WatchChanges reports them
+// like any other change.
 
 syntax = "proto3";
 
@@ -50,13 +57,20 @@ service CalendarService {
   // times. NOT_FOUND for an unknown event or an occurrence that doesn't
   // exist.
   rpc GetEvent(GetEventRequest) returns (Event);
-  // FAILED_PRECONDITION if the calendar is read-only or holds no events.
+  // Returns the new event. INVALID_ARGUMENT for a missing summary or
+  // inconsistent times; FAILED_PRECONDITION if the calendar is read-only or
+  // holds no events.
   rpc CreateEvent(CreateEventRequest) returns (Event);
   // A whole event/series, or one occurrence of a series (recurrence_id
-  // set; stored as an exception). ABORTED on a revision mismatch.
+  // set: the first change creates an exception, later ones change it).
+  // Returns the changed event (occurrence). ABORTED on a revision mismatch;
+  // NOT_FOUND for an occurrence that isn't on the series' schedule;
+  // FAILED_PRECONDITION for read-only calendars.
   rpc UpdateEvent(UpdateEventRequest) returns (Event);
-  // A whole event/series, or one occurrence of a series (recurrence_id
-  // set). ABORTED on a revision mismatch.
+  // A whole event (a series with all its exceptions), or one occurrence of
+  // a series (recurrence_id set: excluded from the series, its exception
+  // removed, so it doesn't come back at its original time). ABORTED on a
+  // revision mismatch.
   rpc DeleteEvent(DeleteEventRequest) returns (google.protobuf.Empty);
   // Tells clients what to re-query. The first message is `ready` (the
   // stream is live: query now and rely on the notices after it). Notices
@@ -130,8 +144,9 @@ message Event {
   google.protobuf.Timestamp end = 15;    // timed events
   Date start_date = 16;                  // all-day events
   Date end_date = 17;                    // all-day events, exclusive
-  // IANA zone for timed events; empty = the request's/client's zone when
-  // creating, floating when read.
+  // IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+  // local time across DST changes in it. Read: empty = floating (no zone).
+  // Written: empty = the bridge's zone (send the HMI's).
   string time_zone = 18;
   // The recurrence rule (iCalendar RRULE value, e.g.
   // "FREQ=WEEKLY;BYDAY=TU"), empty for events that don't repeat. Editing
@@ -191,14 +206,21 @@ message UpdateEventRequest {
   // occurrence of a series; event.revision is the revision this change is
   // based on.
   Event event = 1;
-  // Which editable fields to change; empty = all editable fields. With a
-  // recurrence_id, rrule can't be changed.
+  // Which editable fields to change: summary, location, description,
+  // all_day, start, end, start_date, end_date, time_zone, rrule, status.
+  // Empty = all of them. The time fields go together: naming any of them
+  // sets all_day, start/end (timed) or start_date/end_date (all-day) and
+  // time_zone from `event`. With a recurrence_id, rrule can't be changed
+  // (INVALID_ARGUMENT if named; left out of an empty mask).
   google.protobuf.FieldMask update_mask = 2;
 }
 
 message DeleteEventRequest {
   string event_id = 1;
   google.protobuf.Timestamp recurrence_id = 2;  // optional: one occurrence
+  // The revision of the event (occurrence) being deleted. Checked by the
+  // bridge against its copy, which follows Akonadi closely but not
+  // atomically: a change arriving in the same instant can be lost.
   int64 revision = 3;
 }
 

@@ -44,8 +44,12 @@ public interface UpdateEventRequestOrBuilder extends
 
   /**
    * <pre>
-   * Which editable fields to change; empty = all editable fields. With a
-   * recurrence_id, rrule can't be changed.
+   * Which editable fields to change: summary, location, description,
+   * all_day, start, end, start_date, end_date, time_zone, rrule, status.
+   * Empty = all of them. The time fields go together: naming any of them
+   * sets all_day, start/end (timed) or start_date/end_date (all-day) and
+   * time_zone from `event`. With a recurrence_id, rrule can't be changed
+   * (INVALID_ARGUMENT if named; left out of an empty mask).
    * </pre>
    *
    * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -54,8 +58,12 @@ public interface UpdateEventRequestOrBuilder extends
   boolean hasUpdateMask();
   /**
    * <pre>
-   * Which editable fields to change; empty = all editable fields. With a
-   * recurrence_id, rrule can't be changed.
+   * Which editable fields to change: summary, location, description,
+   * all_day, start, end, start_date, end_date, time_zone, rrule, status.
+   * Empty = all of them. The time fields go together: naming any of them
+   * sets all_day, start/end (timed) or start_date/end_date (all-day) and
+   * time_zone from `event`. With a recurrence_id, rrule can't be changed
+   * (INVALID_ARGUMENT if named; left out of an empty mask).
    * </pre>
    *
    * <code>.google.protobuf.FieldMask update_mask = 2;</code>
@@ -64,8 +72,12 @@ public interface UpdateEventRequestOrBuilder extends
   com.google.protobuf.FieldMask getUpdateMask();
   /**
    * <pre>
-   * Which editable fields to change; empty = all editable fields. With a
-   * recurrence_id, rrule can't be changed.
+   * Which editable fields to change: summary, location, description,
+   * all_day, start, end, start_date, end_date, time_zone, rrule, status.
+   * Empty = all of them. The time fields go together: naming any of them
+   * sets all_day, start/end (timed) or start_date/end_date (all-day) and
+   * time_zone from `event`. With a recurrence_id, rrule can't be changed
+   * (INVALID_ARGUMENT if named; left out of an empty mask).
    * </pre>
    *
    * <code>.google.protobuf.FieldMask update_mask = 2;</code>

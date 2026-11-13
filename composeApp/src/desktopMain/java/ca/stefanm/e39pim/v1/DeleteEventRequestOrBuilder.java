@@ -49,6 +49,12 @@ public interface DeleteEventRequestOrBuilder extends
   com.google.protobuf.TimestampOrBuilder getRecurrenceIdOrBuilder();
 
   /**
+   * <pre>
+   * The revision of the event (occurrence) being deleted. Checked by the
+   * bridge against its copy, which follows Akonadi closely but not
+   * atomically: a change arriving in the same instant can be lost.
+   * </pre>
+   *
    * <code>int64 revision = 3;</code>
    * @return The revision.
    */

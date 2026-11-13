@@ -381,8 +381,9 @@ public object EventKt {
 
     /**
      * ```
-     * IANA zone for timed events; empty = the request's/client's zone when
-     * creating, floating when read.
+     * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+     * local time across DST changes in it. Read: empty = floating (no zone).
+     * Written: empty = the bridge's zone (send the HMI's).
      * ```
      *
      * `string time_zone = 18;`
@@ -396,8 +397,9 @@ public object EventKt {
       }
     /**
      * ```
-     * IANA zone for timed events; empty = the request's/client's zone when
-     * creating, floating when read.
+     * IANA zone for timed events, e.g. "America/Edmonton": repeats keep their
+     * local time across DST changes in it. Read: empty = floating (no zone).
+     * Written: empty = the bridge's zone (send the HMI's).
      * ```
      *
      * `string time_zone = 18;`
