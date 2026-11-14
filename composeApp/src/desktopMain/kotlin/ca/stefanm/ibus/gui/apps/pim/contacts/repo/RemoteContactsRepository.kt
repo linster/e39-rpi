@@ -77,6 +77,18 @@ class RemoteContactsRepository @Inject constructor(
         client.getPhoto(contactId, maxSize).toContactPhoto()
     }
 
+    override suspend fun createContact(input: ContactInput, addressBookId: String?): Result<Contact> = result {
+        client.createContact(addressBookId ?: "", input.toProto()).toContact()
+    }
+
+    override suspend fun updateContact(contact: ContactSummary, input: ContactInput, fields: Set<ContactField>): Result<Contact> = result {
+        client.updateContact(contact.id, contact.revision, input.toProto(), fields.map { it.path }).toContact()
+    }
+
+    override suspend fun deleteContact(contact: ContactSummary): Result<Unit> = result {
+        client.deleteContact(contact.id, contact.revision)
+    }
+
     private fun <T> reloading(
         what: String,
         affects: (ContactNotice) -> Boolean,
