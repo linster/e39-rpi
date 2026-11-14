@@ -42,6 +42,8 @@ public interface Active extends DBusInterface {
     UInt32 getState();
     @DBusBoundProperty
     DBusPath getConnection();
+    @DBusBoundProperty
+    DBusPath getSpecificObject();
     /* Added by Stefan */
 
     public static interface PropertyDevicesType extends TypeRef<List<DBusPath>> {

@@ -4,202 +4,349 @@ import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMActiveCo
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
-import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.get.all.GetActiveConnectionsUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
-import ca.stefanm.ibus.gui.networkSetup.activateConnection.ui.connectionList.Throbbers
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.WifiSecurity
+import ca.stefanm.ibus.gui.networkSetup.editConnection.dbus.SavedConnectionsUseCase
 import ca.stefanm.ibus.lib.logging.Logger
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.freedesktop.NetworkManager
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
+import org.freedesktop.dbus.interfaces.DBus
+import org.freedesktop.dbus.interfaces.DBusSigHandler
+import org.freedesktop.dbus.types.Variant
+import org.freedesktop.networkmanager.connection.Active
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.time.Duration.Companion.seconds
 
 class ConnectNmtDeviceConnectionUseCase @Inject constructor(
     private val logger: Logger,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
-    private val throbbers: Throbbers,
-    private val getActiveConnectionsUseCase: GetActiveConnectionsUseCase
+    private val savedConnectionsUseCase: SavedConnectionsUseCase
 ) {
 
     companion object {
         const val TAG = "ConnectNmtDeviceConnectionUseCase"
+
+        private val ACTIVATION_TIMEOUT = 45.seconds
+        private val NO_SPECIFIC_OBJECT = DBusPath("/")
+
+        //NMActiveConnectionStateReason
+        fun reasonText(reason : Int?) : String? = when (reason) {
+            2 -> "Disconnected by the user."
+            3 -> "The device was disconnected."
+            4 -> "The VPN service stopped."
+            5 -> "The IP configuration was invalid."
+            6 -> "The connection timed out."
+            7 -> "The VPN service took too long to start."
+            8 -> "The VPN service failed to start."
+            9 -> "No password or secrets were provided."
+            10 -> "Login failed."
+            11 -> "The connection was deleted."
+            12 -> "A connection it depends on failed."
+            13 -> "Could not create the device."
+            14 -> "The device was removed."
+            else -> null
+        }
     }
-    suspend fun connect(conn : Nmt.NmtConnectConnection) {
+
+    sealed interface ConnectOutcome {
+        data object Connected : ConnectOutcome
+        data object Failed : ConnectOutcome
+        //The wifi network has no saved profile and needs a password before we can add one.
+        data class NeedsSecret(val security : WifiSecurity) : ConnectOutcome
+    }
+
+    suspend fun connect(conn : Nmt.NmtConnectConnection) : ConnectOutcome {
         //https://networkmanager.dev/docs/api/latest/gdbus-org.freedesktop.NetworkManager.html#gdbus-method-org-freedesktop-NetworkManager.ActivateConnection
-
-        throbbers.showConnectingThrobber(bodyText = "Starting connection") { }
         logger.i(TAG, "Starting connection flow for $conn")
-        if (conn.deviceIsWifi == true) {
-            activateWifi(conn)
-        } else if (conn.deviceIsVpn == true) {
-            activateVpn(conn)
-        } else {
-            activateRegular(conn)
-        }
-
-
-        //Might have to listen to StateChanged signal to see if we're done
-        //might also have to make this a suspend fun
-
-    }
-
-
-
-
-    internal suspend fun activateRegular(conn : Nmt.NmtConnectConnection) {
-        val result = activateConnection(
-            device = DBusPath(conn.device!!.objectPath),
-            connection = DBusPath(conn.conn!!.objectPath),
-            specificObject = DBusPath("/")
-        )
-        if (result.isFailure) {
-            result.exceptionOrNull()?.let {
-                logger.e(TAG, "Failed to activate connection", it)
-                modalMenuService.showModalWaitDialog(
-                    image = Notification.NotificationImage.ALERT_TRIANGLE,
-                    throbber = false,
-                    headerText = "",
-                    bodyText = "${it.message}",
-                    autoCloseTimeout = 15.seconds,
-                    isCancellable = true,
-                    onCancel = {
-                        modalMenuService.closeModalMenu()
-                    }
-                )
-
+        return runConnection(conn.ssid ?: conn.name ?: "connection") {
+            if (conn.deviceIsWifi == true) {
+                activateWifi(conn, secret = null)
+            } else if (conn.deviceIsVpn == true) {
+                activateVpn(conn)
+            } else {
+                activateRegular(conn)
             }
-            return
         }
-        val newConn = result.getOrThrow()
-        modalMenuService.showModalWaitDialog(
-            image = Notification.NotificationImage.NONE,
-            throbber = true,
-            headerText = "Connecting",
-            bodyText = "Got new Active Connection",
-            autoCloseTimeout = null,
-            isCancellable = false,
-        )
-        throbbers.showConnectingThrobber(bodyText = "Got new ActiveConnection") {
-            notificationHub.postNotificationBackground(Notification(
-                topText = "Connecting timed out"
-            ))
+    }
+
+    //Used after the user has typed in a password for a wifi network, either for a new
+    //network or to replace the password of a saved one.
+    suspend fun connectWifiWithSecret(conn : Nmt.NmtConnectConnection, secret : String) : ConnectOutcome {
+        logger.i(TAG, "Connecting to wifi ${conn.ssid} with a new password")
+        return runConnection(conn.ssid ?: "wifi network") {
+            activateWifi(conn, secret)
         }
+    }
+
+    private suspend fun runConnection(
+        name : String,
+        block : suspend () -> ConnectOutcome
+    ) : ConnectOutcome = withContext(Dispatchers.IO) {
+        showProgress(name, "Starting connection")
         try {
-            getActiveConnectionsUseCase
-                .getActiveConnection(newConn)
-                .let { with(getActiveConnectionsUseCase) { it.getReactiveActive()} }
-                .map { NMActiveConnectionState.fromInt(it.state) }
-                .catch {
-                    logger.e(TAG, "Error getting activating state", it)
-                    emit(NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_UNKNOWN)
-                }
-                .takeWhile { it != NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED }
-                .timeout(30.seconds)
-                .catch {
-                    if (it is TimeoutCancellationException) {
-                        modalMenuService.showModalWaitDialog(
-                            image = Notification.NotificationImage.NONE,
-                            throbber = false,
-                            headerText = "Error connecting",
-                            bodyText = "No status update received",
-                            autoCloseTimeout = null,
-                            isCancellable = true,
-                            onCancel = {
-                                modalMenuService.closeModalMenu()
-                            }
-                        )
-                    } else {
-                        throw it
-                    }
-                }.onCompletion {
-                    if (it != null) {
-                        notificationHub.postNotification(Notification(
-                            topText = "Error Connecting",
-                            contentText = "${it.message}"
-                        ))
-                        logger.e(TAG, "Error connecting", it)
-                    }
-                    modalMenuService.closeModalMenu()
-                }.collect {
-                    modalMenuService.showModalWaitDialog(
-                        image = Notification.NotificationImage.NONE,
-                        throbber = false,
-                        headerText = "Connecting",
-                        bodyText = it.let {
-                            when(it) {
-                                NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_UNKNOWN -> "Unknown"
-                                NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATING -> "Activating"
-                                NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED -> "Activated"
-                                NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_DEACTIVATING -> "Deactivating"
-                                NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_DEACTIVATED -> "Deactivated"
-                            }
-                        },
-                        autoCloseTimeout = null,
-                        isCancellable = false,
-                    )
-                }
+            block()
         } catch (e : Throwable) {
-            modalMenuService.closeModalMenu()
-            notificationHub.postNotification(Notification(
-                topText = "Error Connecting",
-                contentText = "${e.message}"
-            ))
-            logger.e(TAG, "Error connecting", e)
+            logger.e(TAG, "Failed to activate connection $name", e)
+            showError("Couldn't connect to $name", e.message ?: e.toString())
+            ConnectOutcome.Failed
         }
     }
 
-    internal fun activateVpn(conn : Nmt.NmtConnectConnection) : Result<DBusPath> {
-        TODO()
-    }
-
-    internal fun activateWifi(conn : Nmt.NmtConnectConnection) : Result<DBusPath> {
-        val newConn = activateConnection(
+    private suspend fun activateRegular(conn : Nmt.NmtConnectConnection) : ConnectOutcome {
+        val name = conn.name ?: "connection"
+        val active = activateConnection(
             device = DBusPath(conn.device!!.objectPath),
             connection = DBusPath(conn.conn!!.objectPath),
-            specificObject = DBusPath(conn.ap!!.objectPath)
+            specificObject = NO_SPECIFIC_OBJECT
         )
-        //TODO register an AgentManager so that the user can enter a password if needed
-        //TODO check with NetworkManager if there already is a secret for this network. If so,
-        //TODO then try to connect with it anyways.
-        //TODO If not, then go to a secret entry screen, and then prompt the user to connect there.
-
-        return newConn
+        return monitorActivation(name, active, failureHint = null)
     }
 
-    internal fun activateConnection(
-        connection : DBusPath,
+    private suspend fun activateVpn(conn : Nmt.NmtConnectConnection) : ConnectOutcome {
+        val name = conn.name ?: "VPN"
+        //VPNs aren't tied to a device, NetworkManager picks the one with the default route.
+        val active = activateConnection(
+            device = NO_SPECIFIC_OBJECT,
+            connection = DBusPath(conn.conn!!.objectPath),
+            specificObject = NO_SPECIFIC_OBJECT
+        )
+        return monitorActivation(name, active, failureHint = null)
+    }
+
+    private suspend fun activateWifi(conn : Nmt.NmtConnectConnection, secret : String?) : ConnectOutcome {
+        val ssid = conn.ssid ?: error("Wifi network has no SSID")
+        val device = DBusPath(conn.device?.objectPath ?: error("Wifi network has no device"))
+        val ap = conn.ap ?: error("Wifi network has no access point")
+        val apPath = DBusPath(ap.objectPath)
+
+        val passwordHint = "If the password is wrong, choose Change Password for the network."
+
+        //Wifi entries in the list are access points, so find the profile NetworkManager saved for the SSID.
+        val saved = savedConnectionsUseCase.findSavedWifiConnection(ssid)
+        if (saved != null) {
+            if (secret != null) {
+                savedConnectionsUseCase.setWifiPassword(saved.path, secret)
+            }
+            val active = activateConnection(
+                connection = saved.path,
+                device = device,
+                specificObject = apPath
+            )
+            return monitorActivation(ssid, active, failureHint = passwordHint.takeIf { saved.hasWifiPassword })
+        }
+
+        val security = WifiSecurity.fromAccessPoint(ap)
+        if (!security.isSupported) {
+            showError(
+                "Can't connect to $ssid",
+                "${security.label} networks aren't supported here. Set it up with nmtui instead."
+            )
+            return ConnectOutcome.Failed
+        }
+
+        if (security.needsPassword && secret == null) {
+            modalMenuService.closeModalMenu()
+            return ConnectOutcome.NeedsSecret(security)
+        }
+
+        val active = addAndActivateWifi(ssid, security, secret, device, apPath)
+        return monitorActivation(ssid, active, failureHint = passwordHint.takeIf { security.needsPassword })
+    }
+
+    private fun newWifiSettings(
+        ssid : String,
+        security : WifiSecurity,
+        secret : String?
+    ) : Map<String, Map<String, Variant<*>>> {
+        //NetworkManager fills in the rest of the profile (uuid, ipv4, ipv6...) itself.
+        return buildMap {
+            put(SavedConnectionsUseCase.SETTING_CONNECTION, mapOf(
+                "id" to Variant(ssid),
+                "type" to Variant(SavedConnectionsUseCase.TYPE_WIFI)
+            ))
+            put(SavedConnectionsUseCase.SETTING_WIFI, mapOf(
+                "ssid" to Variant(ssid.toByteArray()),
+                "mode" to Variant("infrastructure")
+            ))
+            if (security.keyMgmt != null) {
+                put(SavedConnectionsUseCase.SETTING_WIFI_SECURITY, buildMap {
+                    put("key-mgmt", Variant(security.keyMgmt))
+                    if (secret != null) {
+                        put("psk", Variant(secret))
+                    }
+                })
+            }
+        }
+    }
+
+    private fun addAndActivateWifi(
+        ssid : String,
+        security : WifiSecurity,
+        secret : String?,
         device : DBusPath,
-        specificObject : DBusPath
-    ) : Result<DBusPath>{
+        accessPoint : DBusPath
+    ) : DBusPath {
         return DBusConnectionBuilder.forSystemBus().build().use {
             val nmClient = it.getRemoteObject(
                 "org.freedesktop.NetworkManager",
                 "/org/freedesktop/NetworkManager",
                 NetworkManager::class.java
             )
+            nmClient.AddAndActivateConnection(
+                newWifiSettings(ssid, security, secret),
+                device,
+                accessPoint
+            ).activeConnection
+        }
+    }
 
-            runCatching {
-                nmClient.ActivateConnection(
-                    connection,
-                    device,
-                    specificObject
+    private fun activateConnection(
+        connection : DBusPath,
+        device : DBusPath,
+        specificObject : DBusPath
+    ) : DBusPath {
+        return DBusConnectionBuilder.forSystemBus().build().use {
+            val nmClient = it.getRemoteObject(
+                "org.freedesktop.NetworkManager",
+                "/org/freedesktop/NetworkManager",
+                NetworkManager::class.java
+            )
+            nmClient.ActivateConnection(
+                connection,
+                device,
+                specificObject
+            )
+        }
+    }
+
+    //Show the activating states for the new active connection until it's either up or has failed.
+    private suspend fun monitorActivation(
+        name : String,
+        activeConnection : DBusPath,
+        failureHint : String?
+    ) : ConnectOutcome {
+        showProgress(name, "Activating")
+
+        val finalState = withTimeoutOrNull(ACTIVATION_TIMEOUT) {
+            watchActiveConnectionState(activeConnection)
+                .onEach { (state, _) -> showProgress(name, stateText(state)) }
+                .first { (state, _) ->
+                    state == NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED
+                            || state == NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_DEACTIVATED
+                }
+        }
+
+        return when (finalState?.first) {
+            null -> {
+                showError("Error connecting to $name", "No status update received")
+                ConnectOutcome.Failed
+            }
+            NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED -> {
+                modalMenuService.closeModalMenu()
+                notificationHub.postNotificationBackground(Notification(
+                    topText = "Connected",
+                    contentText = name
+                ))
+                ConnectOutcome.Connected
+            }
+            else -> {
+                showError(
+                    "Couldn't connect to $name",
+                    listOfNotNull(reasonText(finalState.second), failureHint).joinToString(" ")
                 )
+                ConnectOutcome.Failed
             }
         }
     }
 
-    //Ok, then we need to subscribe to the state for the new activating connection
+    private fun watchActiveConnectionState(
+        activeConnection : DBusPath
+    ) : Flow<Pair<NMActiveConnectionState.State, Int?>> = callbackFlow {
+        val connection = DBusConnectionBuilder.forSystemBus().build()
+        connection.connect()
 
-    //Show some throbbers as we go through the connecting states for the active connection
+        val active = connection.getRemoteObject(
+            "org.freedesktop.NetworkManager",
+            activeConnection.path,
+            Active::class.java
+        )
 
+        val handler = object : DBusSigHandler<Active.StateChanged> {
+            override fun handle(_signal: Active.StateChanged?) {
+                if (_signal != null) {
+                    trySend(NMActiveConnectionState.fromInt(_signal.state) to _signal.reason.toInt())
+                }
+            }
+        }
 
+        connection.addSigHandler(
+            Active.StateChanged::class.java,
+            connection.getRemoteObject(
+                "org.freedesktop.DBus", "/org/freedesktop/DBus", DBus::class.java
+            )!!.GetNameOwner("org.freedesktop.NetworkManager")!!,
+            active,
+            handler
+        )
+
+        //Read the state after subscribing so a change in between isn't missed.
+        //If the active connection is already gone, it failed before we could look at it.
+        val initialState = try {
+            NMActiveConnectionState.fromInt(active.state)
+        } catch (e : Throwable) {
+            logger.w(TAG, "Active connection $activeConnection disappeared: ${e.message}")
+            NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_DEACTIVATED
+        }
+        trySend(initialState to null)
+
+        awaitClose {
+            connection.removeSigHandler(
+                Active.StateChanged::class.java,
+                handler
+            )
+            connection.close()
+        }
+    }
+
+    private fun stateText(state : NMActiveConnectionState.State) : String = when (state) {
+        NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_UNKNOWN -> "Unknown"
+        NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATING -> "Activating"
+        NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED -> "Activated"
+        NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_DEACTIVATING -> "Deactivating"
+        NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_DEACTIVATED -> "Deactivated"
+    }
+
+    private fun showProgress(name : String, status : String) {
+        modalMenuService.showModalWaitDialog(
+            image = Notification.NotificationImage.NONE,
+            throbber = true,
+            headerText = "Connecting to $name",
+            bodyText = status,
+            autoCloseTimeout = null,
+            isCancellable = false,
+        )
+    }
+
+    private fun showError(header : String, body : String) {
+        modalMenuService.showModalWaitDialog(
+            image = Notification.NotificationImage.ALERT_TRIANGLE,
+            throbber = false,
+            headerText = header,
+            bodyText = body,
+            autoCloseTimeout = 15.seconds,
+            isCancellable = true,
+            onCancel = {
+                modalMenuService.closeModalMenu()
+            }
+        )
+    }
 }

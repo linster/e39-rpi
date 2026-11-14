@@ -151,13 +151,32 @@ class MarkActiveConnectionsUseCase @Inject constructor(
         //Run the other markActive so that the NmtConnection.active gets set, but then also
         // Do a match on the APs.
 
+        val devicePath = device.device.objectPath
+        val wireless = convertDeviceToWirelessUseCase.deviceToWireless(device.device)
+        val activeAccessPoint = try {
+            wireless.activeAccessPoint.path
+        } catch (e : Throwable) {
+            null
+        }
+
+        //Wifi entries are access points without a settings connection, so the matching above
+        //can't find their Active. Find it by the device instead so they can be disconnected.
+        val activatedForDevice = activeConns.firstOrNull { active ->
+            try {
+                NMActiveConnectionState.fromInt(active.state) == NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED
+                        && active.devices.any { it.path == devicePath }
+            } catch (e : Throwable) {
+                false
+            }
+        }
+
         return markActive(device, activeConns)?.map { conn ->
-            val ap = conn.ap?.objectPath
-            val wireless = convertDeviceToWirelessUseCase.deviceToWireless(device.device)
-            val apIsActive = wireless.activeAccessPoint.path == ap
+            val apIsActive = activeAccessPoint != null && activeAccessPoint == conn.ap?.objectPath
 
             conn.copy(
-                apIsactive = apIsActive
+                apIsactive = apIsActive,
+                hasActiveConnection = apIsActive && activatedForDevice != null,
+                active = if (apIsActive) activatedForDevice else null
             )
         }
     }
