@@ -31,6 +31,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.CompositeLogger
 import ca.stefanm.ibus.lib.logging.LogDistributionHub
 import dagger.Component
+import ca.stefanm.ibus.gui.pim.email.repo.MailModule
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.*
@@ -53,7 +54,8 @@ annotation class ApplicationScope
 //    MapDatabaseModule::class,
 //    NavigationBindsModule::class,
     MatrixChatModule::class,
-    MapModule::class
+    MapModule::class,
+    MailModule::class,
 ])
 @ApplicationScope
 interface ApplicationComponent {
