@@ -29,6 +29,7 @@ import ca.stefanm.ibus.lib.logging.cli.debugPrinters.PlatformMetronomeLogger
 import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import dagger.*
 import kotlinx.coroutines.*
+import ca.stefanm.ibus.gui.pim.email.notifier.MailNotifierService
 import javax.inject.Named
 import javax.inject.Scope
 import kotlin.coroutines.CoroutineContext
@@ -81,6 +82,8 @@ interface ConfiguredCarComponent {
 
     fun discoveredServiceGriffinPowermateListener() : GriffinPowermateReader
     fun discoveredServiceSlideshowService() : SlideshowService
+
+    fun discoveredServiceMailNotifierService() : MailNotifierService
 }
 
 @Module

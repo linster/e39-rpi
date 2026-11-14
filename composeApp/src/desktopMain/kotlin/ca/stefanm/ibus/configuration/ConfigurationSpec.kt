@@ -182,6 +182,47 @@ object E39Config : ConfigSpec() {
                 "Port of the PIM bridge's gRPC API."
             )
         }
+
+        /** The mail app and new-mail notifications. */
+        object Mail : ConfigSpec() {
+            val useFakeData by optional(
+                false,
+                "useFakeData",
+                "Show sample mail instead of the PIM bridge's (for working on the screens). Takes effect after a restart."
+            )
+            val quickReplies by optional(
+                listOf(
+                    "I'm driving, I'll reply later.",
+                    "On my way.",
+                    "Running late, sorry.",
+                    "Yes.",
+                    "No.",
+                    "Thanks!",
+                ),
+                "quickReplies",
+                "Canned replies offered when answering mail in the car."
+            )
+            val notificationsEnabled by optional(
+                true,
+                "notificationsEnabled",
+                "Show a notification for new mail (needs the Pim platform service group)."
+            )
+            val sentNotificationsEnabled by optional(
+                true,
+                "sentNotificationsEnabled",
+                "Show a notification when a message was sent or couldn't be sent."
+            )
+            val mutedAccountIds by optional(
+                emptyList<String>(),
+                "mutedAccountIds",
+                "Accounts (bridge account IDs) whose new mail doesn't notify."
+            )
+            val mutedFolderIds by optional(
+                emptyList<String>(),
+                "mutedFolderIds",
+                "Folders (bridge folder IDs) whose new mail doesn't notify."
+            )
+        }
     }
 
     object MapConfig : ConfigSpec() {

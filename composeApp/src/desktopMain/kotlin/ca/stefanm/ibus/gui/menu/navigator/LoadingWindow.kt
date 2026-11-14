@@ -12,6 +12,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
 import ca.stefanm.ibus.gui.apps.weather.debug.WeatherAppViewDebugWindow
 import ca.stefanm.ibus.gui.pim.calendar.debug.CalendarDebugWindow
+import ca.stefanm.ibus.gui.pim.email.debug.MailDebugWindow
 import ca.stefanm.ibus.gui.pim.calendar.views.parts.agenda.AgendaPartsDebugWindow
 import ca.stefanm.ibus.gui.chat.screens.debug.MatrixServiceDebugWindow
 import ca.stefanm.ibus.gui.debug.windows.DebugLaunchpad
@@ -56,6 +57,7 @@ class LoadingWindow @Inject constructor(
     private val matrixServiceDebugWindow: MatrixServiceDebugWindow,
     private val agendaPartsDebugWindow: AgendaPartsDebugWindow,
     private val calendarDebugWindow: CalendarDebugWindow,
+    private val mailDebugWindow: MailDebugWindow,
     private val weatherAppViewDebugWindow: WeatherAppViewDebugWindow,
     private val windowManager : Provider<WindowManager>
 ) {
@@ -162,6 +164,10 @@ class LoadingWindow @Inject constructor(
                     Item(
                         "Calendar (PIM Bridge) Debug",
                         onClick = { windowManager.get().openDebugWindow(calendarDebugWindow) }
+                    )
+                    Item(
+                        "Mail (PIM Bridge) Debug",
+                        onClick = { windowManager.get().openDebugWindow(mailDebugWindow) }
                     )
                     Item(
                         "Weather GUI Debug",

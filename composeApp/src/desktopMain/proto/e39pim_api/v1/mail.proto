@@ -1,0 +1,276 @@
+// Mail: folders, messages, sending.
+//
+// Mail comes from accounts (AccountService; IMAP, and for tests a local
+// maildir). Akonadi syncs the folder list and message headers; a message's
+// body is downloaded only when it's read (GetMessage), so lists stay cheap
+// and the SD card holds headers plus the messages actually opened.
+//
+// Messages are given to clients as text: the bridge decodes MIME, charsets
+// and quoted-printable/base64, and turns HTML-only mail into plain text.
+// Clients never parse MIME.
+//
+// No revisions (unlike events): flag changes merge with changes from other
+// devices, and moving or deleting a message twice is harmless.
+//
+// Folder roles: inboxes are marked by the account; sent, drafts, trash and
+// junk folders are recognised by their usual names ("Sent", "Sent Items",
+// "[Gmail]/Trash", ...) unless the account says otherwise. The outbox is
+// the bridge's own local folder where sent mail waits for the server.
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "MailProto";
+
+service MailService {
+  // Folders, per account: the inbox first, then the other folders in tree
+  // order (depth first, by name). Empty account_id = all accounts.
+  rpc ListMailFolders(ListMailFoldersRequest) returns (ListMailFoldersResponse);
+  // A folder's messages, newest first, in pages. NOT_FOUND for an unknown
+  // folder.
+  rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse);
+  // One message with its text. Downloads it from the server if it isn't
+  // stored yet (UNAVAILABLE if the account is offline or unreachable).
+  rpc GetMessage(GetMessageRequest) returns (MailMessage);
+  // Like GetMessage (the same message, text and all), plus the message's
+  // HTML body for showing it as a web page. See MailMessageHtml.
+  rpc GetMessageHtml(GetMessageRequest) returns (MailMessageHtml);
+  // Read/unread, flagged/unflagged; only the fields that are set change.
+  rpc SetMessageFlags(SetMessageFlagsRequest) returns (google.protobuf.Empty);
+  // To another folder of the same account. FAILED_PRECONDITION across
+  // accounts or into a folder that can't hold messages.
+  rpc MoveMessages(MoveMessagesRequest) returns (google.protobuf.Empty);
+  // To the account's trash folder; messages already in the trash are
+  // deleted. FAILED_PRECONDITION if the account has no trash folder.
+  rpc TrashMessages(TrashMessagesRequest) returns (google.protobuf.Empty);
+  // Puts a message in the outbox; the account's server sends it, then it
+  // moves to the account's sent folder. WatchMail reports the result
+  // (sent / send_failed). FAILED_PRECONDITION if no sending account is set
+  // up; INVALID_ARGUMENT for no recipients or a malformed address.
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  // Messages whose subject, sender or recipients contain the text
+  // (case-insensitive), newest first. Searches what the bridge has stored:
+  // headers of all messages, not bodies.
+  rpc SearchMessages(SearchMessagesRequest) returns (ListMessagesResponse);
+  // Tells clients what to re-query, and about new mail. The first message
+  // is `ready`. Bursts (a sync bringing hundreds of messages) are
+  // coalesced.
+  rpc WatchMail(WatchMailRequest) returns (stream MailNotice);
+}
+
+enum MailFolderRole {
+  MAIL_FOLDER_ROLE_UNSPECIFIED = 0;
+  MAIL_FOLDER_ROLE_OTHER = 1;
+  MAIL_FOLDER_ROLE_INBOX = 2;
+  MAIL_FOLDER_ROLE_SENT = 3;
+  MAIL_FOLDER_ROLE_DRAFTS = 4;
+  MAIL_FOLDER_ROLE_TRASH = 5;
+  MAIL_FOLDER_ROLE_JUNK = 6;
+  MAIL_FOLDER_ROLE_OUTBOX = 7;
+}
+
+message MailFolder {
+  string id = 1;
+  string account_id = 2;
+  string account_name = 3;
+  // This folder's name, e.g. "Work"; display names ("Inbox") where the
+  // account gives one.
+  string name = 4;
+  // The names from the account's top folder down, e.g. ["Inbox", "Work"].
+  repeated string path = 5;
+  // Empty for top-level folders.
+  string parent_id = 6;
+  MailFolderRole role = 7;
+  int64 unread_count = 8;
+  int64 total_count = 9;
+  // False for folders that only group others (IMAP \Noselect).
+  bool holds_messages = 10;
+  bool read_only = 11;
+}
+
+message MailAddress {
+  // Display name; may be empty.
+  string name = 1;
+  string email = 2;
+}
+
+message MessageSummary {
+  string id = 1;
+  string folder_id = 2;
+  string subject = 3;
+  MailAddress from = 4;
+  repeated MailAddress to = 5;
+  // The Date header (when it was sent); the arrival time if missing.
+  google.protobuf.Timestamp date = 6;
+  bool seen = 7;
+  bool flagged = 8;
+  bool answered = 9;
+  bool forwarded = 10;
+  // As far as the headers tell (multipart/mixed); exact once GetMessage
+  // has read the message.
+  bool has_attachments = 11;
+  int64 size_bytes = 12;
+}
+
+message Attachment {
+  // Position among the message's attachments (for a later download call).
+  int32 index = 1;
+  string filename = 2;
+  string mime_type = 3;
+  int64 size_bytes = 4;
+}
+
+message MailMessage {
+  MessageSummary summary = 1;
+  repeated MailAddress cc = 2;
+  repeated MailAddress reply_to = 3;
+  // The Message-ID header.
+  string message_id = 4;
+  // The body as plain text (the text/plain part; or the HTML part turned
+  // into text, then text_was_html is set).
+  string text = 5;
+  bool text_was_html = 6;
+  repeated Attachment attachments = 7;
+}
+
+// A message with its HTML body.
+message MailMessageHtml {
+  // Exactly what GetMessage returns.
+  MailMessage message = 1;
+  // The text/html part, decoded to UTF-8 (also when the message has a
+  // plain-text part too); empty if the message has no HTML part.
+  //
+  // As the sender wrote it: not sanitised. A viewer must not run its
+  // scripts or load remote content without asking (tracking pixels).
+  // Inline images are referenced as "cid:<Content-ID>" and left as they
+  // are; the bridge doesn't serve them (yet).
+  string html = 2;
+}
+
+message ListMailFoldersRequest {
+  string account_id = 1;
+}
+
+message ListMailFoldersResponse {
+  repeated MailFolder folders = 1;
+}
+
+message ListMessagesRequest {
+  string folder_id = 1;
+  // 1 .. 500; 0 = 50.
+  int32 page_size = 2;
+  // From the previous response; empty for the first page.
+  string page_token = 3;
+  bool unread_only = 4;
+}
+
+message ListMessagesResponse {
+  repeated MessageSummary messages = 1;
+  // Empty on the last page.
+  string next_page_token = 2;
+  // Matching messages in all pages.
+  int64 total_count = 3;
+}
+
+message GetMessageRequest {
+  string message_id = 1;
+  // Also mark it as read.
+  bool mark_seen = 2;
+}
+
+message SetMessageFlagsRequest {
+  repeated string message_ids = 1;
+  optional bool seen = 2;
+  optional bool flagged = 3;
+}
+
+message MoveMessagesRequest {
+  repeated string message_ids = 1;
+  string folder_id = 2;
+}
+
+message TrashMessagesRequest {
+  repeated string message_ids = 1;
+}
+
+message SendMessageRequest {
+  // Whose name, address and server to send with; empty = the default.
+  string account_id = 1;
+  repeated MailAddress to = 2;
+  repeated MailAddress cc = 3;
+  repeated MailAddress bcc = 4;
+  string subject = 5;
+  // Plain text; the client quotes the original when replying.
+  string text = 6;
+  // Replying to this message (its id here): sets In-Reply-To and
+  // References, and marks it answered once sent.
+  string in_reply_to_id = 7;
+  // Forwarding this message: attached as a whole, marked forwarded once
+  // sent.
+  string forward_of_id = 8;
+}
+
+message SendMessageResponse {
+  // The message in the outbox, as WatchMail's sent / send_failed name it.
+  string outbox_message_id = 1;
+}
+
+message SearchMessagesRequest {
+  string text = 1;
+  // Empty = all folders.
+  string folder_id = 2;
+  // 1 .. 500; 0 = 50.
+  int32 limit = 3;
+}
+
+message WatchMailRequest {}
+
+message MailNotice {
+  oneof notice {
+    // First message on every stream.
+    Ready ready = 1;
+    // Folders were added, removed, renamed: re-run ListMailFolders.
+    FoldersChanged folders_changed = 2;
+    // Messages arrived, changed (flags) or went in a folder: re-run
+    // ListMessages for it; its counts changed too.
+    MessagesChanged messages_changed = 3;
+    // New unread mail in an inbox, for a notification. Not sent for the
+    // first sync of an account.
+    NewMail new_mail = 4;
+    // A message from SendMessage went out.
+    Sent sent = 5;
+    // A message from SendMessage couldn't be sent (it stays in the outbox
+    // and is tried again at the next send).
+    SendFailed send_failed = 6;
+  }
+
+  message Ready {}
+  message FoldersChanged {}
+  message MessagesChanged {
+    string folder_id = 1;
+  }
+  message NewMail {
+    string folder_id = 1;
+    string account_id = 2;
+    // How many arrived since the last notice for this folder.
+    int32 count = 3;
+    // The newest of them.
+    MessageSummary latest = 4;
+  }
+  message Sent {
+    string outbox_message_id = 1;
+    string subject = 2;
+  }
+  message SendFailed {
+    string outbox_message_id = 1;
+    string subject = 2;
+    // Why, in the server's or Akonadi's words (English).
+    string reason = 3;
+  }
+}

@@ -90,3 +90,9 @@ annotation class PeripheralsDesktopGroup
     description = "Services that are exist in the GUI for 'frilly' things like Slideshows"
 )
 annotation class LongRunningGuiServices
+
+@PlatformServiceGroup(
+    name = "Pim",
+    description = "Services that use the PIM bridge (e39-rpi-pim): new-mail notifications."
+)
+annotation class PimServiceGroup
