@@ -15,6 +15,7 @@ import ca.stefanm.e39pim.v1.cancelAuthRequest
 import ca.stefanm.e39pim.v1.listAccountsRequest
 import ca.stefanm.e39pim.v1.removeAccountRequest
 import ca.stefanm.e39pim.v1.setAccountOnlineRequest
+import ca.stefanm.e39pim.v1.setContactsEnabledRequest
 import ca.stefanm.e39pim.v1.startLoginRequest
 import ca.stefanm.e39pim.v1.syncNowRequest
 import ca.stefanm.e39pim.v1.watchAccountsRequest
@@ -58,13 +59,23 @@ class AccountGrpcClient @Inject constructor(
             .map { it.accountsList }
             .catch { throw PimBackendException.from(it) }
 
-    suspend fun addCalDavAccount(name: String, url: String, username: String, password: String, refreshMinutes: Int = 0): Account = pimCall {
+    /** [contacts]: also the server's address books (CardDAV). */
+    suspend fun addCalDavAccount(name: String, url: String, username: String, password: String, refreshMinutes: Int = 0, contacts: Boolean = true): Account = pimCall {
         accountStub().withTimeout(ADD_ACCOUNT_TIMEOUT_SECONDS).addCalDavAccount(addCalDavAccountRequest {
             this.name = name
             this.url = url
             this.username = username
             this.password = password
             this.refreshIntervalMinutes = refreshMinutes
+            this.contacts = contacts
+        })
+    }
+
+    /** CalDAV accounts only; restarts the account's sync (slow-ish). */
+    suspend fun setContactsEnabled(accountId: String, enabled: Boolean): Account = pimCall {
+        accountStub().withTimeout(ADD_ACCOUNT_TIMEOUT_SECONDS).setContactsEnabled(setContactsEnabledRequest {
+            this.accountId = accountId
+            this.enabled = enabled
         })
     }
 
