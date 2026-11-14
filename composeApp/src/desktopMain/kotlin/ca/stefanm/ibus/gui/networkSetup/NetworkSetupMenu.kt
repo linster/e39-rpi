@@ -9,6 +9,7 @@ import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConne
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.GetDevicesUseCaseDebugScreen
 import ca.stefanm.ibus.gui.networkSetup.debug.ui.NetworkManagerDebugLaunchpad
 import ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
+import ca.stefanm.ibus.gui.networkSetup.editConnection.screens.EditConnectionScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -45,7 +46,9 @@ class NetworkSetupMenu @Inject constructor(
                 ne = listOf(
                     TextMenuItem(
                         "Edit a connection",
-                        onClicked = {}
+                        onClicked = {
+                            navigationNodeTraverser.navigateToNode(EditConnectionScreen::class.java)
+                        }
                     ),
                     TextMenuItem(
                         "Activate a connection",

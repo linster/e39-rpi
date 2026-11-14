@@ -38,7 +38,12 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NM80211ApSecurityFlags
 import ca.stefanm.ibus.lib.logging.Logger
+import androidx.compose.runtime.LaunchedEffect
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.WifiSecurity
+import ca.stefanm.ibus.gui.networkSetup.editConnection.dbus.SavedConnectionsUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -65,17 +70,30 @@ class ActivateConnectionScreen @Inject constructor(
     private val getConnectionListUseCase: GetConnectionListUseCase,
     private val convertDeviceToWirelessUseCase: ConvertDeviceToWirelessUseCase,
     private val connectNmtDeviceConnectionUseCase: ConnectNmtDeviceConnectionUseCase,
-    private val disconnectNmtDeviceConnectionUseCase: DisconnectNmtDeviceConnectionUseCase
+    private val disconnectNmtDeviceConnectionUseCase: DisconnectNmtDeviceConnectionUseCase,
+    private val savedConnectionsUseCase: SavedConnectionsUseCase
 ) : NavigationNode<Nothing> {
 
     companion object {
         const val TAG = "ActivateConnectionScreen"
     }
 
+    //The navigator replays the last result whenever this screen is shown again,
+    //so remember which password result we've already acted on.
+    private var lastHandledSecretResult : PromptSecretScreen.PromptSecretResult? = null
+
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = ActivateConnectionScreen::class.java
 
-    override fun provideMainContent(): @Composable ((Navigator.IncomingResult?) -> Unit) = {
+    override fun provideMainContent(): @Composable ((Navigator.IncomingResult?) -> Unit) = { incomingResult ->
+
+        LaunchedEffect(incomingResult) {
+            val result = incomingResult?.result
+            if (result is PromptSecretScreen.PromptSecretResult.SecretEntered && result !== lastHandledSecretResult) {
+                lastHandledSecretResult = result
+                connectWithSecret(result.connection, result.secret)
+            }
+        }
 
         Column(Modifier
             .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
@@ -101,6 +119,13 @@ class ActivateConnectionScreen @Inject constructor(
         val views = mutableListOf<@Composable KnobObserverBuilderScope.(Int, Int) -> Unit>()
         this.forEach { item ->
             when (item) {
+                is ConnectionListItem.SectionHeader -> {
+                    views.add { allocatedIndex, currentIndex ->
+                        ConnectionListItemViews.ConnectionListDivider(
+                            dividerHeader = item.name
+                        )
+                    }
+                }
                 is ConnectionListItem.DeviceHeader -> {
                     views.add { allocatedIndex, currentIndex ->
                         ConnectionListItemViews.ConnectionListDivider(
@@ -149,12 +174,29 @@ class ActivateConnectionScreen @Inject constructor(
 
 
     fun openSidebarForConnection(conn: ConnectionListItem.ConnectionListConnection.WifiAccessPoint) {
+        //Look up the saved profile for the network first, it decides which actions we can offer.
+        GlobalScope.launch(Dispatchers.IO) {
+            val saved = try {
+                savedConnectionsUseCase.findSavedWifiConnection(conn.ssid)
+            } catch (e : Throwable) {
+                logger.e(TAG, "Could not look up saved profile for ${conn.ssid}", e)
+                null
+            }
+            showWifiSidebar(conn, saved)
+        }
+    }
+
+    private fun showWifiSidebar(
+        conn: ConnectionListItem.ConnectionListConnection.WifiAccessPoint,
+        saved : SavedConnectionsUseCase.SavedConnection?
+    ) {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
             SidePanelMenu.SidePanelMenu(
                 title = "Wifi Connection Info",
                 @Composable {
 
                     InfoLabel("SSID: ${conn.ssid}")
+                    InfoLabel("Saved: ${saved?.id ?: "No"}")
                     InfoLabel("Strength: \t (${conn.strength}) ${ConnectionListItemViews.toStrengthBars(conn.strength)}")
 
                     InfoLabel("AP Mode: ${conn.nmtConnectConnection.ap?.mode?.let { NM80211Mode.toSidebarList(it.toInt()) }}")
@@ -184,12 +226,28 @@ class ActivateConnectionScreen @Inject constructor(
 
 
                 },
-                listOf(
+                listOfNotNull(
                     if (conn.isConnected) {
                         TextMenuItem("Disconnect", onClicked = { disconnect(conn.nmtConnectConnection)})
                     } else {
                         TextMenuItem("Connect", onClicked = { connect(conn.nmtConnectConnection)})
                     },
+                    if (saved != null && saved.hasWifiPassword) {
+                        TextMenuItem("Change Password", onClicked = {
+                            modalMenuService.closeSidePaneOverlay(true)
+                            navigationNodeTraverser.promptForWifiSecret(
+                                PromptSecretScreen.PromptSecretParameters(
+                                    networkName = conn.ssid,
+                                    security = if (saved.keyMgmt == "sae") WifiSecurity.SAE else WifiSecurity.WPA_PSK,
+                                    isChangingPassword = true,
+                                    connection = conn.nmtConnectConnection
+                                )
+                            )
+                        })
+                    } else null,
+                    if (saved != null) {
+                        TextMenuItem("Forget Network", onClicked = { confirmForget(conn) })
+                    } else null,
                     TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true)})
                 )
             )
@@ -197,6 +255,25 @@ class ActivateConnectionScreen @Inject constructor(
 
     }
 
+
+    private fun confirmForget(conn: ConnectionListItem.ConnectionListConnection.WifiAccessPoint) {
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "Forget Network?",
+                @Composable {
+                    InfoLabel("Forget ${conn.ssid}?")
+                    InfoLabel("The saved password will be deleted.")
+                },
+                listOf(
+                    TextMenuItem("Forget", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                        forget(conn.ssid)
+                    }),
+                    TextMenuItem("Cancel", onClicked = { modalMenuService.closeSidePaneOverlay(true) })
+                )
+            )
+        }
+    }
 
     fun openSidebarForConnection(conn: ConnectionListItem.ConnectionListConnection.OtherConnection) {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
@@ -233,18 +310,52 @@ class ActivateConnectionScreen @Inject constructor(
     }
 
     private fun connect(connectDevice: Nmt.NmtConnectConnection) {
-        //Hide the sidebar
-        //Show the throbber
-        //start the usecase to make the connection
         GlobalScope.launch {
             modalMenuService.closeSidePaneOverlay(true)
-            connectNmtDeviceConnectionUseCase.connect(connectDevice)
+            val outcome = connectNmtDeviceConnectionUseCase.connect(connectDevice)
+            if (outcome is ConnectNmtDeviceConnectionUseCase.ConnectOutcome.NeedsSecret) {
+                withContext(Dispatchers.Main) {
+                    navigationNodeTraverser.promptForWifiSecret(
+                        PromptSecretScreen.PromptSecretParameters(
+                            networkName = connectDevice.ssid ?: "Wi-Fi",
+                            security = outcome.security,
+                            isChangingPassword = false,
+                            connection = connectDevice
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun connectWithSecret(connectDevice: Nmt.NmtConnectConnection, secret : String) {
+        GlobalScope.launch {
+            connectNmtDeviceConnectionUseCase.connectWifiWithSecret(connectDevice, secret)
         }
     }
 
     private fun disconnect(connectDevice: Nmt.NmtConnectConnection) {
         disconnectNmtDeviceConnectionUseCase.disconnect(connectDevice)
         modalMenuService.closeSidePaneOverlay(true)
+    }
+
+    private fun forget(ssid : String) {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val deleted = savedConnectionsUseCase.forgetWifi(ssid)
+                notificationHub.postNotificationBackground(Notification(
+                    topText = "Forgot network",
+                    contentText = if (deleted > 1) "$ssid ($deleted saved profiles)" else ssid
+                ))
+            } catch (e : Throwable) {
+                logger.e(TAG, "Could not forget $ssid", e)
+                notificationHub.postNotificationBackground(Notification(
+                    image = Notification.NotificationImage.ALERT_TRIANGLE,
+                    topText = "Could not forget $ssid",
+                    contentText = e.message ?: ""
+                ))
+            }
+        }
     }
 
 }

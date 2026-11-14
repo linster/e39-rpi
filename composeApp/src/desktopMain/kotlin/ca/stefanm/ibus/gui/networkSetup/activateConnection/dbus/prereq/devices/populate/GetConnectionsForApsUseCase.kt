@@ -146,18 +146,44 @@ class GetConnectionsForApsUseCase @Inject constructor(
         wireless: Wireless
     ) : List<AccessPointWithSsid> {
         val accessPoints = wireless.GetAccessPoints().toList().map { getAccessPointFromPath(it) }
-        //TODO STEFAN
-        //TODO STEFAN this is where hash_ap is used in nmtui to prevent duplicates from being added
-        //TODO STEFAN to the list.
-        //TODO STEFAN before using hash collisions to prune out duplicates, the connections are sorted by strength,
-        //TODO STEFAN which means only the strongest access point for the network will survive.
-        return accessPoints.map { ap ->
-            AccessPointWithSsid(
-                accessPoint = ap,
-                ssid = String(ap.ssid.toByteArray()),
-                isActive = DBusPath(ap.objectPath) == wireless.activeAccessPoint,
-            )
+        val activeAccessPoint = wireless.activeAccessPoint
+
+        //Like hash_ap in nmtui: access points with the same SSID, mode and security are the same
+        //network (e.g. a mesh, or 2.4 and 5GHz radios), so only show one of them. Keep the
+        //active one, otherwise the strongest.
+        data class ApKey(val ssid : String, val mode : Int, val flags : Int, val wpaFlags : Int, val rsnFlags : Int)
+        data class ApInfo(val key : ApKey, val ap : AccessPointWithSsid, val strength : Int)
+
+        return accessPoints.mapNotNull { ap ->
+            try {
+                val ssid = String(ap.ssid.toByteArray())
+                ApInfo(
+                    key = ApKey(
+                        ssid = ssid,
+                        mode = ap.mode.toInt(),
+                        flags = ap.flags.toInt(),
+                        wpaFlags = ap.wpaFlags.toInt(),
+                        rsnFlags = ap.rsnFlags.toInt()
+                    ),
+                    ap = AccessPointWithSsid(
+                        accessPoint = ap,
+                        ssid = ssid,
+                        isActive = DBusPath(ap.objectPath) == activeAccessPoint,
+                    ),
+                    strength = ap.strength.toInt()
+                )
+            } catch (e : Throwable) {
+                //Access points can disappear while we're reading them.
+                logger.w(TAG, "Could not read access point ${ap.objectPath}: ${e.message}")
+                null
+            }
         }
+            //Hidden networks don't broadcast an SSID, so there's nothing to connect to by name.
+            .filter { it.key.ssid.isNotBlank() }
+            .groupBy { it.key }
+            .map { (_, group) -> group.firstOrNull { it.ap.isActive } ?: group.maxBy { it.strength } }
+            .sortedWith(compareByDescending<ApInfo> { it.ap.isActive }.thenByDescending { it.strength })
+            .map { it.ap }
     }
 
     fun getAccessPointFromPath(path : DBusPath) : AccessPoint {

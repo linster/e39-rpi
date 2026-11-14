@@ -12,10 +12,17 @@ import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.p
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetConnectionsForDeviceUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.devices.populate.GetDisambiguatedDeviceNameUseCase
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.Nmt
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.types.NMActiveConnectionState
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.GetConnectionIdFromConnectionUseCase
+import ca.stefanm.ibus.gui.networkSetup.activateConnection.dbus.prereq.connections.filter.GetConnectionTypeFromConnectionUseCase
+import ca.stefanm.ibus.gui.networkSetup.editConnection.dbus.SavedConnectionsUseCase
 import ca.stefanm.ibus.lib.logging.Logger
 import io.ktor.network.sockets.Connection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -42,10 +49,23 @@ class GetConnectionListUseCase @Inject constructor(
 
     private val markActiveConnectionsUseCase: MarkActiveConnectionsUseCase,
 
+    private val getConnectionsUseCase: GetConnectionsUseCase,
+    private val getConnectionTypeFromConnectionUseCase: GetConnectionTypeFromConnectionUseCase,
+    private val getConnectionIdFromConnectionUseCase: GetConnectionIdFromConnectionUseCase,
+
     private val logger: Logger
 ) {
 
+    companion object {
+        const val TAG = "GetConnectionListUseCase"
+    }
+
     sealed interface ConnectionListItem {
+        //A header for connections that don't belong to a device, like VPNs.
+        data class SectionHeader(
+            val name : String
+        ) : ConnectionListItem
+
         data class DeviceHeader(
             val name : String,
             val device: Device,
@@ -143,11 +163,60 @@ class GetConnectionListUseCase @Inject constructor(
                 }
                 result
             }
-
-
-
+            .combine(getVpnConnections()) { deviceItems, vpns ->
+                if (vpns.isEmpty()) {
+                    deviceItems
+                } else {
+                    deviceItems + ConnectionListItem.SectionHeader("VPN") + vpns.map { vpn ->
+                        ConnectionListItem.ConnectionListConnection.OtherConnection(
+                            name = vpn.name ?: "<unknown VPN>",
+                            isConnected = vpn.hasActiveConnection,
+                            nmtConnectConnection = vpn
+                        )
+                    }
+                }
+            }
 
         return foo
+    }
+
+    //VPNs (and WireGuard) aren't attached to a device, so they're listed in their own section like nmtui does.
+    private fun getVpnConnections() : Flow<List<Nmt.NmtConnectConnection>> {
+        return getConnectionsUseCase.getConnections()
+            .map { connections ->
+                connections.mapNotNull { connection ->
+                    try {
+                        val type = getConnectionTypeFromConnectionUseCase.getConnectionTypeFromConnection(connection)
+                        if (type in SavedConnectionsUseCase.VPN_TYPES) connection else null
+                    } catch (e : Throwable) {
+                        null
+                    }
+                }
+            }
+            .combine(getActiveConnectionsUseCase.getAllActiveConnections().onStart { emit(emptyList()) }) { vpns, actives ->
+                vpns.map { vpn ->
+                    val active = actives.firstOrNull { active ->
+                        try {
+                            active.connection.path == vpn.objectPath
+                                    && NMActiveConnectionState.fromInt(active.state) == NMActiveConnectionState.State.NM_ACTIVE_CONNECTION_STATE_ACTIVATED
+                        } catch (e : Throwable) {
+                            false
+                        }
+                    }
+                    Nmt.NmtConnectConnection(
+                        name = try { getConnectionIdFromConnectionUseCase.getConnectionIdFromConnection(vpn) } catch (e : Throwable) { null },
+                        conn = vpn,
+                        deviceIsVpn = true,
+                        hasActiveConnection = active != null,
+                        active = active
+                    )
+                }
+            }
+            .onStart { emit(emptyList()) }
+            .catch {
+                logger.e(TAG, "Error listing VPN connections", it)
+                emit(emptyList())
+            }
     }
 
 }

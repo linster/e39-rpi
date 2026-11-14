@@ -37,8 +37,10 @@ class BtEmptyMenu @Inject constructor(
             navigationNodeTraverser.cleanupBackStackDescendentsOf(BtEmptyMenu::class.java)
         }
 
-        if (incomingResult?.result is UiResult) {
-            pairingManager.onUiResult(incomingResult.result)
+        LaunchedEffect(incomingResult) {
+            if (incomingResult?.result is UiResult) {
+                pairingManager.onUiResult(incomingResult.result)
+            }
         }
 
         Column {

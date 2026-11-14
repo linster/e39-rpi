@@ -49,6 +49,9 @@ public interface AccessPoint extends DBusInterface {
 
     @DBusBoundProperty
     UInt32 getMode();
+
+    @DBusBoundProperty
+    UInt32 getFlags();
     /* Added by Stefan */
 
     public static interface PropertySsidType extends TypeRef<List<Byte>> {

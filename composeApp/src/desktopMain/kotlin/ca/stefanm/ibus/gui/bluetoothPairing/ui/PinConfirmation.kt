@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
+import ca.stefanm.ibus.gui.bluetoothPairing.stateMachine.PairingManager
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -24,7 +25,8 @@ fun NavigationNodeTraverser.requestPinConfirmation(params : BluetoothPinConfirma
 
 @AutoDiscover
 class BluetoothPinConfirmationScreen @Inject constructor(
-    private val navigationNodeTraverser: NavigationNodeTraverser
+    private val navigationNodeTraverser: NavigationNodeTraverser,
+    private val pairingManager: PairingManager
 ) : NavigationNode<BluetoothPinConfirmationScreen.PinConfirmationResult> {
 
     data class PinConfirmationResult(
@@ -47,11 +49,13 @@ class BluetoothPinConfirmationScreen @Inject constructor(
             header = "Pair with Device?",
             options = FullScreenPrompts.YesNoOptions(
                 onYesSelected = {
+                    pairingManager.onPinConfirmationAnswered(true)
                     navigationNodeTraverser.setResultAndGoBack(this,
                         PinConfirmationResult(true)
                     )
                 },
                 onNoSelected = {
+                    pairingManager.onPinConfirmationAnswered(false)
                     navigationNodeTraverser.setResultAndGoBack(this,
                         PinConfirmationResult(false)
                     )
