@@ -251,3 +251,52 @@ fun MessageBodyView(content: ReaderContent) {
         content.attachments.forEach { Text(it, color = colors.TEXT_WHITE, fontSize = smallSize()) }
     }
 }
+
+/**
+ * A form row: [label] small above [value] (up to [valueLines] lines); just
+ * [label], large, when there's no value. [dim]: the value is a hint, not
+ * something entered.
+ */
+@Composable
+fun ComposeFieldRow(
+    label: String,
+    value: String,
+    isSelected: Boolean,
+    onClicked: () -> Unit,
+    valueLines: Int = 1,
+    dim: Boolean = false,
+) {
+    val colors = ThemeWrapper.ThemeHandle.current.colors
+    ArbitraryContentsMenuItem(chipOrientation = ItemChipOrientation.W, isSelected = isSelected, onClicked = onClicked) {
+        Column(Modifier.fillMaxWidth().padding(end = 16.dp.halveIfNotPixelDoubled(), top = 2.dp.halveIfNotPixelDoubled(), bottom = 2.dp.halveIfNotPixelDoubled())) {
+            if (value.isEmpty()) {
+                Text(label, color = colors.TEXT_WHITE, fontSize = bigSize(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            } else {
+                if (label.isNotEmpty()) {
+                    Text(label.uppercase(), color = colors.textMenuColorAccent, fontSize = smallSize(), fontWeight = FontWeight.Bold)
+                }
+                Text(
+                    value,
+                    color = if (dim) colors.textMenuColorAccent else colors.TEXT_WHITE,
+                    fontSize = bigSize(),
+                    maxLines = valueLines,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+/** Someone to pick: the name large, the address below. */
+@Composable
+fun PersonRow(name: String, detail: String, isSelected: Boolean, onClicked: () -> Unit) {
+    val colors = ThemeWrapper.ThemeHandle.current.colors
+    ArbitraryContentsMenuItem(chipOrientation = ItemChipOrientation.W, isSelected = isSelected, onClicked = onClicked) {
+        Column(Modifier.fillMaxWidth().padding(end = 16.dp.halveIfNotPixelDoubled(), top = 2.dp.halveIfNotPixelDoubled(), bottom = 2.dp.halveIfNotPixelDoubled())) {
+            Text(name, color = colors.TEXT_WHITE, fontSize = bigSize(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (detail.isNotEmpty()) {
+                Text(detail, color = colors.TEXT_WHITE, fontSize = smallSize(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}

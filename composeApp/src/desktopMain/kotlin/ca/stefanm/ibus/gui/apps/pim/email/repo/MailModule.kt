@@ -3,6 +3,11 @@ package ca.stefanm.ibus.gui.pim.email.repo
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.pim.email.repo.api.AccountMailSenders
+import ca.stefanm.ibus.gui.pim.email.repo.api.FakeMailSenders
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailSenders
+import ca.stefanm.ibus.gui.pim.email.repo.api.RecentCorrespondents
+import ca.stefanm.ibus.gui.pim.email.repo.api.RecipientSuggestions
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
@@ -23,4 +28,18 @@ class MailModule {
         fake: Provider<FakeMailRepository>,
     ): MailRepository =
         if (configurationStorage.config[E39Config.PimConfig.Mail.useFakeData]) fake.get() else remote.get()
+
+    @Provides
+    @ApplicationScope
+    fun provideMailSenders(
+        configurationStorage: ConfigurationStorage,
+        remote: Provider<AccountMailSenders>,
+        fake: Provider<FakeMailSenders>,
+    ): MailSenders =
+        if (configurationStorage.config[E39Config.PimConfig.Mail.useFakeData]) fake.get() else remote.get()
+
+    /** A stub: people from recent mail. The contacts app replaces it with the address book. */
+    @Provides
+    @ApplicationScope
+    fun provideRecipientSuggestions(recent: RecentCorrespondents): RecipientSuggestions = recent
 }
