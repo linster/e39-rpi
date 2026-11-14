@@ -7,7 +7,12 @@ import ca.stefanm.e39pim.v1.ContactPhoto as ProtoPhoto
 import ca.stefanm.e39pim.v1.ContactServiceGrpcKt
 import ca.stefanm.e39pim.v1.ListContactsResponse
 import ca.stefanm.e39pim.v1.PhoneMatch as ProtoPhoneMatch
+import ca.stefanm.e39pim.v1.ContactFields
+import ca.stefanm.e39pim.v1.createContactRequest
+import ca.stefanm.e39pim.v1.deleteContactRequest
 import ca.stefanm.e39pim.v1.findByPhoneNumberRequest
+import ca.stefanm.e39pim.v1.updateContactRequest
+import com.google.protobuf.FieldMask
 import ca.stefanm.e39pim.v1.getContactPhotoRequest
 import ca.stefanm.e39pim.v1.getContactRequest
 import ca.stefanm.e39pim.v1.listAddressBooksRequest
@@ -74,6 +79,33 @@ class ContactsGrpcClient @Inject constructor(
             this.contactId = contactId
             this.maxSize = maxSize
         })
+    }
+
+    /** [addressBookId] empty: the first writable one. */
+    suspend fun createContact(addressBookId: String, fields: ContactFields): ProtoContact = pimCall {
+        stub().createContact(createContactRequest {
+            this.addressBookId = addressBookId
+            this.contact = fields
+        })
+    }
+
+    /** [revision] 0: don't check; [paths] empty: all fields. */
+    suspend fun updateContact(contactId: String, revision: Long, fields: ContactFields, paths: Collection<String>): ProtoContact = pimCall {
+        stub().updateContact(updateContactRequest {
+            this.contactId = contactId
+            this.revision = revision
+            this.contact = fields
+            this.updateMask = FieldMask.newBuilder().addAllPaths(paths).build()
+        })
+    }
+
+    suspend fun deleteContact(contactId: String, revision: Long) {
+        pimCall {
+            stub().deleteContact(deleteContactRequest {
+                this.contactId = contactId
+                this.revision = revision
+            })
+        }
     }
 
     /** `ready` first, then changes. */

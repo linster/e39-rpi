@@ -35,7 +35,11 @@ import ca.stefanm.ibus.gui.pim.contacts.repo.AddressBook
 import ca.stefanm.ibus.gui.pim.contacts.repo.CallerId
 import ca.stefanm.ibus.gui.pim.contacts.repo.CallerIdLookup
 import ca.stefanm.ibus.gui.pim.contacts.repo.Contact
+import ca.stefanm.ibus.gui.pim.contacts.repo.ContactField
+import ca.stefanm.ibus.gui.pim.contacts.repo.ContactInput
 import ca.stefanm.ibus.gui.pim.contacts.repo.ContactList
+import ca.stefanm.ibus.gui.pim.contacts.repo.EmailAddress
+import ca.stefanm.ibus.gui.pim.contacts.repo.PhoneNumber
 import ca.stefanm.ibus.gui.pim.contacts.repo.ContactSummary
 import ca.stefanm.ibus.gui.pim.contacts.repo.ContactsRepository
 import ca.stefanm.ibus.gui.pim.contacts.repo.FakeContactsRepository
@@ -46,8 +50,8 @@ import javax.inject.Inject
 /**
  * Everything the contacts repositories can do: address books and the list
  * (live), a contact's details and picture, search, caller lookup (the
- * repository's matches and CallerIdLookup's answer), and turning contacts
- * on and off for CalDAV accounts.
+ * repository's matches and CallerIdLookup's answer), creating, editing and
+ * deleting contacts, and turning contacts on and off for CalDAV accounts.
  */
 class ContactsDebugWindow @Inject constructor(
     private val contactsRepository: ContactsRepository,
@@ -79,6 +83,7 @@ class ContactsDebugWindow @Inject constructor(
             }
             Column(Modifier.weight(0.55f).verticalScroll(rememberScrollState())) {
                 ContactPane(selectedContact.value)
+                EditPane(selectedBook.value, selectedContact.value) { selectedContact.value = it }
                 SearchPane(selectedBook.value) { selectedContact.value = it }
                 PhonePane { selectedContact.value = it }
             }
@@ -218,6 +223,121 @@ class ContactsDebugWindow @Inject constructor(
     }
 
     @Composable
+    private fun EditPane(book: AddressBook?, selected: ContactSummary?, onSaved: (ContactSummary?) -> Unit) {
+        val scope = rememberCoroutineScope()
+        // What the form was loaded from (null: a new contact).
+        val loaded = remember { mutableStateOf<Contact?>(null) }
+        val given = remember { mutableStateOf("") }
+        val family = remember { mutableStateOf("") }
+        val organization = remember { mutableStateOf("") }
+        val nickname = remember { mutableStateOf("") }
+        val phone = remember { mutableStateOf("") }
+        val phoneType = remember { mutableStateOf(PhoneNumber.Type.MOBILE) }
+        val email = remember { mutableStateOf("") }
+        val note = remember { mutableStateOf("") }
+        val result = remember { mutableStateOf("") }
+
+        fun input() = ContactInput(
+            givenName = given.value, familyName = family.value, organization = organization.value, nickname = nickname.value,
+            phones = phone.value.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                .mapIndexed { i, n -> PhoneNumber(n, "", phoneType.value, "", preferred = i == 0) },
+            emails = email.value.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                .mapIndexed { i, a -> EmailAddress(a, EmailAddress.Type.HOME, preferred = i == 0) },
+            note = note.value,
+        )
+
+        fun fill(c: Contact?) {
+            loaded.value = c
+            given.value = c?.summary?.givenName ?: ""
+            family.value = c?.summary?.familyName ?: ""
+            organization.value = c?.summary?.organization ?: ""
+            nickname.value = c?.nickname ?: ""
+            phone.value = c?.phones?.joinToString(", ") { it.number } ?: ""
+            phoneType.value = c?.phones?.firstOrNull()?.type ?: PhoneNumber.Type.MOBILE
+            email.value = c?.emails?.joinToString(", ") { it.address } ?: ""
+            note.value = c?.note ?: ""
+        }
+
+        // The fields that differ from the loaded contact: only these are sent.
+        fun changed(c: Contact): Set<ContactField> {
+            val before = ContactInput.from(c)
+            val now = input()
+            return buildSet {
+                if (now.givenName != before.givenName) add(ContactField.GIVEN_NAME)
+                if (now.familyName != before.familyName) add(ContactField.FAMILY_NAME)
+                if (now.organization != before.organization) add(ContactField.ORGANIZATION)
+                if (now.nickname != before.nickname) add(ContactField.NICKNAME)
+                if (now.phones.map { it.number to it.type } != before.phones.map { it.number to it.type }) add(ContactField.PHONES)
+                if (now.emails.map { it.address } != before.emails.map { it.address }) add(ContactField.EMAILS)
+                if (now.note != before.note) add(ContactField.NOTE)
+            }
+        }
+
+        NestingCard {
+            NestingCardHeader("createContact() / updateContact() / deleteContact()")
+            Text(loaded.value?.let { "Editing ${it.summary.displayName} (revision ${it.summary.revision})" } ?: "New contact in ${book?.name ?: "the first writable address book"}")
+            Row {
+                OutlinedTextField(given.value, { given.value = it }, label = { Text("Given name") }, singleLine = true, modifier = Modifier.weight(1f))
+                OutlinedTextField(family.value, { family.value = it }, label = { Text("Family name") }, singleLine = true, modifier = Modifier.weight(1f))
+            }
+            Row {
+                OutlinedTextField(organization.value, { organization.value = it }, label = { Text("Organization") }, singleLine = true, modifier = Modifier.weight(1f))
+                OutlinedTextField(nickname.value, { nickname.value = it }, label = { Text("Nickname") }, singleLine = true, modifier = Modifier.weight(1f))
+            }
+            OutlinedTextField(phone.value, { phone.value = it }, label = { Text("Phone numbers (comma separated)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                listOf(PhoneNumber.Type.MOBILE, PhoneNumber.Type.HOME, PhoneNumber.Type.WORK, PhoneNumber.Type.OTHER).forEach { t ->
+                    CheckBoxWithLabel(phoneType.value == t, { phoneType.value = t }, t.name)
+                }
+            }
+            OutlinedTextField(email.value, { email.value = it }, label = { Text("E-mail addresses (comma separated)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(note.value, { note.value = it }, label = { Text("Note") }, modifier = Modifier.fillMaxWidth())
+            Row {
+                Button(onClick = {
+                    scope.launch {
+                        val id = selected?.id ?: return@launch
+                        contactsRepository.getContact(id).onSuccess { fill(it) }
+                    }
+                }, enabled = selected != null) { Text("Load selected") }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = { fill(null) }) { Text("New") }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = {
+                    scope.launch {
+                        result.value = contactsRepository.createContact(input(), book?.id).fold(
+                            { onSaved(it.summary); fill(it); "Created ${it.summary.displayName} (${it.summary.id})" },
+                            { "Create failed: ${it.describe()}" })
+                    }
+                }) { Text("createContact()") }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = {
+                    val c = loaded.value ?: return@Button
+                    val fields = changed(c)
+                    if (fields.isEmpty()) {
+                        result.value = "Nothing changed"
+                        return@Button
+                    }
+                    scope.launch {
+                        result.value = contactsRepository.updateContact(c.summary, input(), fields).fold(
+                            { onSaved(it.summary); fill(it); "Changed $fields; now revision ${it.summary.revision}" },
+                            { "Update failed: ${it.describe()}" })
+                    }
+                }, enabled = loaded.value != null) { Text("updateContact() (changed fields)") }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = {
+                    val c = loaded.value ?: return@Button
+                    scope.launch {
+                        result.value = contactsRepository.deleteContact(c.summary).fold(
+                            { onSaved(null); fill(null); "Deleted ${c.summary.displayName}" },
+                            { "Delete failed: ${it.describe()}" })
+                    }
+                }, enabled = loaded.value != null) { Text("deleteContact()") }
+            }
+            if (result.value.isNotEmpty()) Text(result.value)
+        }
+    }
+
+    @Composable
     private fun SearchPane(book: AddressBook?, onSelect: (ContactSummary) -> Unit) {
         val scope = rememberCoroutineScope()
         val text = remember { mutableStateOf("") }
@@ -258,6 +378,14 @@ class ContactsDebugWindow @Inject constructor(
                 }) { Text("lookup()") }
                 Spacer(Modifier.width(8.dp))
                 Button(onClick = { callerIdLookup.clearCache() }) { Text("Clear cache") }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = {
+                    scope.launch {
+                        callerId.value = contactsRepository.createContact(ContactInput.forNumber(number.value, givenName = "Saved caller")).fold(
+                            { callerIdLookup.clearCache(); onSelect(it.summary); "Saved as ${it.summary.displayName}" },
+                            { "Save failed: ${it.describe()}" })
+                    }
+                }) { Text("Save this caller") }
             }
             callerId.value?.let { Text("CallerIdLookup: $it", fontWeight = FontWeight.Bold) }
             matches.value?.fold(
