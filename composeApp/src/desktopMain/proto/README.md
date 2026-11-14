@@ -38,20 +38,19 @@ run_grpc_server` in e39-rpi-maps) or the e39-rpi QEMU image (forwards
 `localhost:50051`); POIs are visible in its Django admin
 (`admin`/`e39rpi`).
 
-# PIM bridge API (gRPC): calendars
+# PIM bridge API (gRPC): calendars and mail
 
 `e39pim_api/v1/*.proto` is a **copy** of the PIM bridge's API (e39-rpi-pim,
 `proto/e39pim_api/v1/`: Akonadi behind it); `e39pim_api/SOURCE` says which
-commit. Change the API there, then copy and regenerate here:
+commit. Change the API there, then copy it here:
 
 ```sh
 ./makePimProtos.sh                                 # from ~/e39-rpi-pim
 E39_PIM_REPO=/path/to/e39-rpi-pim ./makePimProtos.sh
-./makePimProtos.sh --no-copy                       # regenerate from these copies
 ```
 
-Generated code in `../java/ca/stefanm/e39pim/v1/`, same tools and versions as
-the maps API above.
+The code is generated at build time like the maps API's (`generateProtos`,
+`generatedProtoApis` in `composeApp/build.gradle.kts`), not committed.
 
 ## Layers in the HMI (`ca.stefanm.ibus.gui.pim.calendar.repo`)
 
@@ -79,3 +78,19 @@ through each repository, GetEvent, the raw change stream.
 Development: run the bridge on the laptop (`scripts/run-dev.sh
 --test-calendar` in e39-rpi-pim; its test calendar is the week of
 2026-11-16).
+
+## Mail (`ca.stefanm.ibus.gui.pim.email.repo`)
+
+| Class | Layer |
+| --- | --- |
+| `MailGrpcClient` | transport: MailService calls; `watchMail()` as a `Flow` |
+| `MailChangeStream` | one WatchMail stream shared by the mail flows and the notifier, reconnecting |
+| `MailMapper`, `MailModels.kt` | protobuf ⇄ HMI types (`MailFolder`, `MailSummary`, `MailMessage`, `MailEvent`, ...) |
+| `MailRepository` | what screens and the notifier use: `RemoteMailRepository` (the bridge) or `FakeMailRepository` (sample data), picked by `E39Config.PimConfig.Mail.useFakeData` at startup (`MailModule`) |
+| `MailSettingsRepository` | quick replies and notification settings (`E39Config.PimConfig.Mail`) |
+
+Mail accounts (adding with discovered servers, removing) go through
+`calendar.repo.backend.RemoteAccountRepository` like the calendar accounts.
+`email.notifier.MailNotifierService` (platform service group "Pim") posts
+new-mail and sent/not-sent notifications. Debug: Debug Launchpad → Mail
+(PIM Bridge) Debug.
