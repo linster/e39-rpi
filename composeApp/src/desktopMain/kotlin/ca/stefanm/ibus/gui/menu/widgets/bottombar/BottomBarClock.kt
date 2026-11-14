@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.menu.widgets.bottombar
 
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
 import ca.stefanm.ibus.di.ApplicationModule
+import ca.stefanm.ibus.lib.system.TimeZoneSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,7 +16,9 @@ import javax.inject.Named
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-class BottomBarClock @Inject constructor() {
+class BottomBarClock @Inject constructor(
+    private val timeZoneSettings: TimeZoneSettings,
+) {
 
     private val _dateFlow : MutableStateFlow<String> = MutableStateFlow("")
     private val _timeFlow : MutableStateFlow<String> = MutableStateFlow("")
@@ -25,11 +28,12 @@ class BottomBarClock @Inject constructor() {
 
     suspend fun updateValues() {
         while (true) {
+            // The system's zone may have changed (Settings -> Time Zone does
+            // it in-process; the map installer or position don't).
+            timeZoneSettings.followSystemZone()
             val currentTime = Instant.now().atZone(ZoneId.systemDefault())
 
-            _timeFlow.value = currentTime.toLocalDateTime().let { localDateTime ->
-                "${localDateTime.hour.rem(12).toString(10).padStart(2, '0')}:${localDateTime.minute.toString(10).padStart(2, '0')} ${localDateTime.hour.let { if (it >= 12) "PM" else "AM" }}"
-            }
+            _timeFlow.value = clockText(currentTime.toLocalDateTime())
 
             _dateFlow.value = currentTime.let {
                 "${it.dayOfMonth}/${it.month.value}/${it.year}"
@@ -38,4 +42,10 @@ class BottomBarClock @Inject constructor() {
             yield()
         }
     }
+}
+
+/** "02:36 PM"; 12 for noon and midnight (12:05 AM), not 00. */
+internal fun clockText(time: java.time.LocalDateTime): String {
+    val hour12 = (time.hour + 11) % 12 + 1
+    return "${hour12.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')} ${if (time.hour >= 12) "PM" else "AM"}"
 }
