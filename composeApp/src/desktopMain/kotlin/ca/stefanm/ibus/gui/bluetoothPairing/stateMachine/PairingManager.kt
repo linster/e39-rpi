@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.Mutex
 import org.bluez.Agent1
 import org.bluez.AgentManager1
 import org.bluez.Device1
+import org.bluez.exceptions.BluezCanceledException
 import org.bluez.exceptions.BluezDoesNotExistException
 import org.bluez.exceptions.BluezRejectedException
 import org.freedesktop.dbus.DBusPath
@@ -47,6 +48,9 @@ class PairingManager @Inject constructor(
     private companion object {
         const val TAG = "PairingManager"
         const val agentPath = "/pairing/agent"
+
+        //BlueZ gives up on an agent request after 60 seconds.
+        const val PIN_CONFIRMATION_TIMEOUT_MS = 55_000L
     }
 
     private val pairingManagerScope = CoroutineScope(
@@ -158,29 +162,19 @@ class PairingManager @Inject constructor(
             val device = dBusConnectionOwningComponent.getSystemBusConnection().getRemoteObject("org.bluez", _device.path) as Device1
             val btDevice = BluetoothDevice(device, dBusConnectionOwningComponent.getDeviceManager().adapter, _device.path, dBusConnectionOwningComponent.getSystemBusConnection())
 
-            pinKeyApprove = {
-                logger.i("Agent1", "pinKeyApprove")
-                btDevice.isTrusted = true
-            }
-
-            pinKeyDeny = {
-                val exception = BluezRejectedException("Rejected $_device with code ${p1?.toString()}")
-                logger.e("Pairing Manager", "Rejected pairing", exception)
-                notificationHub.postNotificationBackground(
-                    Notification(
-                        image = Notification.NotificationImage.BLUETOOTH,
-                        topText = "Error, Pairing Rejected",
-                        contentText = "Phone: ${btDevice.alias}",
-                        duration = Notification.NotificationDuration.SHORT
-                    ))
-            }
-
             val pin = p1?.toInt()?.toString(10)?.padStart(6, '0') ?: "null"
+
+            //BlueZ treats returning from this method as the user confirming the pin, so we have to
+            //block here until the user has answered the pin screen. Returning straight away
+            //let the pairing finish before the pin was ever shown.
+            val decision = CompletableDeferred<Boolean>()
+            pendingConfirmation?.cancel()
+            pendingConfirmation = decision
 
             notificationHub.postNotificationBackground(Notification(
                 image = Notification.NotificationImage.BLUETOOTH,
                 topText = "Pairing Request",
-                contentText = "Pin: ${pin}, Phone: ${btDevice.alias} \n Select yes on phone, then on upcoming screen.",
+                contentText = "Pin: ${pin}, Phone: ${btDevice.alias} \n Check the pin matches, then select yes on the phone and on the screen.",
                 duration = Notification.NotificationDuration.LONG
             ))
 
@@ -192,23 +186,110 @@ class PairingManager @Inject constructor(
                 )
             )
 
+            val isApproved = try {
+                runBlocking {
+                    withTimeoutOrNull(PIN_CONFIRMATION_TIMEOUT_MS) { decision.await() }
+                }
+            } catch (e : CancellationException) {
+                //BlueZ called Cancel(), or a newer request replaced this one.
+                null
+            } finally {
+                if (pendingConfirmation === decision) {
+                    pendingConfirmation = null
+                }
+            }
+
+            when (isApproved) {
+                true -> {
+                    logger.i("Agent1", "Pin approved for ${btDevice.alias}")
+                    btDevice.isTrusted = true
+                }
+                false -> {
+                    val exception = BluezRejectedException("Rejected $_device with code $pin")
+                    logger.e("Pairing Manager", "Rejected pairing", exception)
+                    notificationHub.postNotificationBackground(
+                        Notification(
+                            image = Notification.NotificationImage.BLUETOOTH,
+                            topText = "Error, Pairing Rejected",
+                            contentText = "Phone: ${btDevice.alias}",
+                            duration = Notification.NotificationDuration.SHORT
+                        ))
+                    throw exception
+                }
+                null -> {
+                    leavePinConfirmationScreen()
+                    throw BluezCanceledException("Pin confirmation for $_device was cancelled or timed out")
+                }
+            }
         }
 
         override fun RequestAuthorization(p0: DBusPath?) {
-            TODO("Not yet implemented")
+            //Do nothing to allow authorization to everything.
         }
 
         override fun AuthorizeService(p0: DBusPath?, p1: String?) {
-            TODO("Not yet implemented")
+            //Do nothing to allow authorization to everything.
         }
 
         override fun Cancel() {
-            TODO("Not yet implemented")
+            logger.i(TAG, "Agent Cancel() called")
+            pendingConfirmation?.cancel()
         }
     }
 
-    private var pinKeyApprove : () -> Unit = {}
-    private var pinKeyDeny : () -> Unit = {}
+    @Volatile
+    private var pendingConfirmation : CompletableDeferred<Boolean>? = null
+
+    private fun leavePinConfirmationScreen() {
+        if (navigationNodeTraverser.isNodeVisible(BluetoothPinConfirmationScreen::class.java)) {
+            navigationNodeTraverser.goBack()
+        }
+    }
+
+    @Volatile
+    private var pairingInProgressFor : String? = null
+
+    private fun pairOrConnect(deviceMac : String) {
+        if (pairingInProgressFor == deviceMac) {
+            logger.w(TAG, "Already pairing with $deviceMac, ignoring request.")
+            return
+        }
+        pairingInProgressFor = deviceMac
+
+        //Pair() blocks until the pairing is finished, which includes waiting for the user
+        //on the pin screen, so it must not run on the UI thread.
+        pairingManagerScope.launch {
+            try {
+                val device = deviceListProvider.getDeviceForMac(deviceMac)
+                if (!device.isTrusted) {
+                    try {
+                        device.pair()
+                    } catch (e: DBusExecutionException) {
+                        logger.e(TAG, "RequestPairToDevice exception: $e", e)
+                        device.disconnect()
+                    }
+                } else {
+                    if (!device.isConnected) {
+                        try {
+                            device.connect()
+                        } catch (e : DBusExecutionException) {
+                            logger.e(TAG, "Request Pair to Device exception", e)
+                        }
+                    }
+                }
+            } catch (e : Throwable) {
+                logger.e(TAG, "Pair or connect failed for $deviceMac", e)
+            } finally {
+                pairingInProgressFor = null
+            }
+        }
+    }
+
+    //Called straight from the pin screen, because the screen underneath it might not be
+    //a bluetooth screen when the phone starts the pairing.
+    fun onPinConfirmationAnswered(isApproved : Boolean) {
+        pendingConfirmation?.complete(isApproved)
+    }
 
     fun onLoadEmptyBtMenu() {
         //Setup all the things
@@ -282,34 +363,7 @@ class PairingManager @Inject constructor(
                 navigationNodeTraverser.goBack()
             }
             is PairableDeviceChooser.PairableDeviceChooserResult.RequestPairToDevice -> {
-                val deviceMac = uiResult.device.address
-                val device = deviceListProvider.getDeviceForMac(deviceMac)
-                if (!device.isTrusted) {
-                    try {
-                        device.pair()
-                    } catch (e: DBusExecutionException) {
-                        logger.e(TAG, "RequestPairToDevice exception: $e", e)
-//                        if (e.message?.contains("Already Exists", ignoreCase = true) == true) {
-                            device.disconnect()
-
-//                        }
-                    }
-                } else {
-                    if (!device.isConnected) {
-                        try {
-                            device.connect()
-                        } catch (e : DBusExecutionException) {
-                            logger.e(TAG, "Request Pair to Device exception", e)
-                        }
-                    }
-                }
-            }
-            is BluetoothPinConfirmationScreen.PinConfirmationResult -> {
-                if (uiResult.isApproved) {
-                    pinKeyApprove()
-                } else {
-                    pinKeyDeny()
-                }
+                pairOrConnect(uiResult.device.address)
             }
 
             CurrentDeviceViewer.ViewResult.Cancelled -> {

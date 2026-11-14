@@ -30,9 +30,12 @@ class MainBtMenu @Inject constructor(
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { incomingResult ->
 
-        if (incomingResult != null && incomingResult.result is UiResult) {
-            logger.i("MainBtMenu", "incomingResult is ${incomingResult}")
-            pairingManager.onUiResult(incomingResult.result)
+        //Only handle each result once, not on every recomposition.
+        LaunchedEffect(incomingResult) {
+            if (incomingResult != null && incomingResult.result is UiResult) {
+                logger.i("MainBtMenu", "incomingResult is ${incomingResult}")
+                pairingManager.onUiResult(incomingResult.result)
+            }
         }
 
         val currentConfig = remember { mutableStateOf(configurablePlatform.currentConfiguration) }
