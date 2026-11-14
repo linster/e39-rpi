@@ -30,6 +30,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessageListRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessageListState
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessagePager
@@ -38,6 +39,8 @@ import ca.stefanm.ibus.gui.pim.email.views.parts.MailListItem
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailToolbar
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailToolbarButton
 import ca.stefanm.ibus.gui.pim.email.views.parts.MessageRowView
+import ca.stefanm.ibus.gui.pim.email.views.parts.SidePaneItem
+import ca.stefanm.ibus.gui.pim.email.views.parts.showMailSidePane
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -67,6 +70,7 @@ class MessageListScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
     private val messageListRepo: MessageListRepo,
+    private val composeRepo: MailComposeRepo,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -156,35 +160,28 @@ class MessageListScreen @Inject constructor(
     }
 
     private fun showMenu(scope: CoroutineScope, pager: MessagePager, state: MessageListState) {
-        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
-            SidePanelMenu.SidePanelMenu(
-                title = state.folder?.name ?: "Mail",
-                text = @Composable {
-                    InfoLabel(state.rangeLabel, FontWeight.Bold)
-                    InfoLabel("Page ${state.pageLabel}")
-                    state.folder?.let { InfoLabel("${it.unreadCount} unread of ${it.totalCount}") }
-                },
-                buttons = buildList {
-                    add(TextMenuItem(if (state.unreadOnly) "Show All Messages" else "Show Unread Only", onClicked = {
-                        modalMenuService.closeSidePaneOverlay(true)
-                        pager.setUnreadOnly(!state.unreadOnly)
-                    }))
-                    if (state.rows.any { it.unread }) {
-                        add(TextMenuItem("Mark Page as Read", onClicked = {
-                            modalMenuService.closeSidePaneOverlay(true)
-                            scope.launch { pager.markRead(state).onFailure { notifyFailure("Not marked read", it) } }
-                        }))
-                    }
-                    if (state.page.hasPrevious) {
-                        add(TextMenuItem("Newest Messages", onClicked = {
-                            modalMenuService.closeSidePaneOverlay(true)
-                            pager.firstPage()
-                        }))
-                    }
-                    add(TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true) }))
-                }
-            )
-        }
+        val info = listOfNotNull(
+            state.rangeLabel,
+            "Page ${state.pageLabel}",
+            state.folder?.let { "${it.unreadCount} unread of ${it.totalCount}" },
+        )
+        modalMenuService.showMailSidePane(logger, "$TAG menu", state.folder?.name ?: "Mail", info, buildList {
+            add(SidePaneItem("New Message") {
+                composeRepo.startNew(accountId = state.folder?.accountId)
+                MailComposeScreen.open(navigationNodeTraverser)
+            })
+            add(SidePaneItem(if (state.unreadOnly) "Show All Messages" else "Show Unread Only") {
+                pager.setUnreadOnly(!state.unreadOnly)
+            })
+            if (state.rows.any { it.unread }) {
+                add(SidePaneItem("Mark Page as Read") {
+                    scope.launch { pager.markRead(state).onFailure { notifyFailure("Not marked read", it) } }
+                })
+            }
+            if (state.page.hasPrevious) {
+                add(SidePaneItem("Newest Messages") { pager.firstPage() })
+            }
+        })
     }
 
     private fun notifyFailure(top: String, e: Throwable) {
