@@ -34,6 +34,8 @@ private static final long serialVersionUID = 0L;
     state_ = 0;
     statusMessage_ = "";
     lastError_ = "";
+    emailAddress_ = "";
+    senderName_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -353,6 +355,94 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int EMAIL_ADDRESS_FIELD_NUMBER = 11;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object emailAddress_ = "";
+  /**
+   * <pre>
+   * Mail accounts: the address mail is sent from and the sender's name
+   * (the identity's); empty for other accounts.
+   * </pre>
+   *
+   * <code>string email_address = 11;</code>
+   * @return The emailAddress.
+   */
+  @java.lang.Override
+  public java.lang.String getEmailAddress() {
+    java.lang.Object ref = emailAddress_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      emailAddress_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Mail accounts: the address mail is sent from and the sender's name
+   * (the identity's); empty for other accounts.
+   * </pre>
+   *
+   * <code>string email_address = 11;</code>
+   * @return The bytes for emailAddress.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getEmailAddressBytes() {
+    java.lang.Object ref = emailAddress_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      emailAddress_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int SENDER_NAME_FIELD_NUMBER = 12;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object senderName_ = "";
+  /**
+   * <code>string sender_name = 12;</code>
+   * @return The senderName.
+   */
+  @java.lang.Override
+  public java.lang.String getSenderName() {
+    java.lang.Object ref = senderName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      senderName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string sender_name = 12;</code>
+   * @return The bytes for senderName.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getSenderNameBytes() {
+    java.lang.Object ref = senderName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      senderName_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -396,6 +486,12 @@ private static final long serialVersionUID = 0L;
     }
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(lastError_)) {
       com.google.protobuf.GeneratedMessage.writeString(output, 10, lastError_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(emailAddress_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 11, emailAddress_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(senderName_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 12, senderName_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -441,6 +537,12 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(lastError_)) {
       size += com.google.protobuf.GeneratedMessage.computeStringSize(10, lastError_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(emailAddress_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(11, emailAddress_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(senderName_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(12, senderName_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -474,6 +576,10 @@ private static final long serialVersionUID = 0L;
         != other.getNeedsLogin()) return false;
     if (!getLastError()
         .equals(other.getLastError())) return false;
+    if (!getEmailAddress()
+        .equals(other.getEmailAddress())) return false;
+    if (!getSenderName()
+        .equals(other.getSenderName())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -507,6 +613,10 @@ private static final long serialVersionUID = 0L;
         getNeedsLogin());
     hash = (37 * hash) + LAST_ERROR_FIELD_NUMBER;
     hash = (53 * hash) + getLastError().hashCode();
+    hash = (37 * hash) + EMAIL_ADDRESS_FIELD_NUMBER;
+    hash = (53 * hash) + getEmailAddress().hashCode();
+    hash = (37 * hash) + SENDER_NAME_FIELD_NUMBER;
+    hash = (53 * hash) + getSenderName().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -648,6 +758,8 @@ private static final long serialVersionUID = 0L;
       progressPercent_ = 0;
       needsLogin_ = false;
       lastError_ = "";
+      emailAddress_ = "";
+      senderName_ = "";
       return this;
     }
 
@@ -711,6 +823,12 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000200) != 0)) {
         result.lastError_ = lastError_;
       }
+      if (((from_bitField0_ & 0x00000400) != 0)) {
+        result.emailAddress_ = emailAddress_;
+      }
+      if (((from_bitField0_ & 0x00000800) != 0)) {
+        result.senderName_ = senderName_;
+      }
     }
 
     @java.lang.Override
@@ -763,6 +881,16 @@ private static final long serialVersionUID = 0L;
       if (!other.getLastError().isEmpty()) {
         lastError_ = other.lastError_;
         bitField0_ |= 0x00000200;
+        onChanged();
+      }
+      if (!other.getEmailAddress().isEmpty()) {
+        emailAddress_ = other.emailAddress_;
+        bitField0_ |= 0x00000400;
+        onChanged();
+      }
+      if (!other.getSenderName().isEmpty()) {
+        senderName_ = other.senderName_;
+        bitField0_ |= 0x00000800;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -841,6 +969,16 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000200;
               break;
             } // case 82
+            case 90: {
+              emailAddress_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000400;
+              break;
+            } // case 90
+            case 98: {
+              senderName_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000800;
+              break;
+            } // case 98
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1520,6 +1658,175 @@ private static final long serialVersionUID = 0L;
       checkByteStringIsUtf8(value);
       lastError_ = value;
       bitField0_ |= 0x00000200;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object emailAddress_ = "";
+    /**
+     * <pre>
+     * Mail accounts: the address mail is sent from and the sender's name
+     * (the identity's); empty for other accounts.
+     * </pre>
+     *
+     * <code>string email_address = 11;</code>
+     * @return The emailAddress.
+     */
+    public java.lang.String getEmailAddress() {
+      java.lang.Object ref = emailAddress_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        emailAddress_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Mail accounts: the address mail is sent from and the sender's name
+     * (the identity's); empty for other accounts.
+     * </pre>
+     *
+     * <code>string email_address = 11;</code>
+     * @return The bytes for emailAddress.
+     */
+    public com.google.protobuf.ByteString
+        getEmailAddressBytes() {
+      java.lang.Object ref = emailAddress_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        emailAddress_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Mail accounts: the address mail is sent from and the sender's name
+     * (the identity's); empty for other accounts.
+     * </pre>
+     *
+     * <code>string email_address = 11;</code>
+     * @param value The emailAddress to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEmailAddress(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      emailAddress_ = value;
+      bitField0_ |= 0x00000400;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Mail accounts: the address mail is sent from and the sender's name
+     * (the identity's); empty for other accounts.
+     * </pre>
+     *
+     * <code>string email_address = 11;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEmailAddress() {
+      emailAddress_ = getDefaultInstance().getEmailAddress();
+      bitField0_ = (bitField0_ & ~0x00000400);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Mail accounts: the address mail is sent from and the sender's name
+     * (the identity's); empty for other accounts.
+     * </pre>
+     *
+     * <code>string email_address = 11;</code>
+     * @param value The bytes for emailAddress to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEmailAddressBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      emailAddress_ = value;
+      bitField0_ |= 0x00000400;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object senderName_ = "";
+    /**
+     * <code>string sender_name = 12;</code>
+     * @return The senderName.
+     */
+    public java.lang.String getSenderName() {
+      java.lang.Object ref = senderName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        senderName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string sender_name = 12;</code>
+     * @return The bytes for senderName.
+     */
+    public com.google.protobuf.ByteString
+        getSenderNameBytes() {
+      java.lang.Object ref = senderName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        senderName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string sender_name = 12;</code>
+     * @param value The senderName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSenderName(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      senderName_ = value;
+      bitField0_ |= 0x00000800;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string sender_name = 12;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSenderName() {
+      senderName_ = getDefaultInstance().getSenderName();
+      bitField0_ = (bitField0_ & ~0x00000800);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string sender_name = 12;</code>
+     * @param value The bytes for senderName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSenderNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      senderName_ = value;
+      bitField0_ |= 0x00000800;
       onChanged();
       return this;
     }

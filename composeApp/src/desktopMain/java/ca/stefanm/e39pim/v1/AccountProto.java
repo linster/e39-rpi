@@ -31,6 +31,16 @@ public final class AccountProto {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_e39pim_v1_Account_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_e39pim_v1_MailServer_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_e39pim_v1_MailServer_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_e39pim_v1_MailSettings_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_e39pim_v1_MailSettings_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_e39pim_v1_ListAccountsRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -55,6 +65,21 @@ public final class AccountProto {
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_e39pim_v1_AddGoogleAccountRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_e39pim_v1_DiscoverMailSettingsRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_e39pim_v1_DiscoverMailSettingsRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_e39pim_v1_DiscoverMailSettingsResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_e39pim_v1_DiscoverMailSettingsResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_e39pim_v1_AddMailAccountRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_e39pim_v1_AddMailAccountRequest_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
     internal_static_e39pim_v1_StartLoginRequest_descriptor;
   static final 
@@ -90,53 +115,87 @@ public final class AccountProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\033e39pim_api/v1/account.proto\022\te39pim.v1" +
-      "\032\033google/protobuf/empty.proto\"\357\001\n\007Accoun" +
+      "\032\033google/protobuf/empty.proto\"\233\002\n\007Accoun" +
       "t\022\n\n\002id\030\001 \001(\t\022$\n\004type\030\002 \001(\0162\026.e39pim.v1." +
       "AccountType\022\021\n\ttype_name\030\003 \001(\t\022\014\n\004name\030\004" +
       " \001(\t\022\016\n\006online\030\005 \001(\010\022&\n\005state\030\006 \001(\0162\027.e3" +
       "9pim.v1.AccountState\022\026\n\016status_message\030\007" +
       " \001(\t\022\030\n\020progress_percent\030\010 \001(\005\022\023\n\013needs_" +
-      "login\030\t \001(\010\022\022\n\nlast_error\030\n \001(\t\"\025\n\023ListA" +
-      "ccountsRequest\"<\n\024ListAccountsResponse\022$" +
-      "\n\010accounts\030\001 \003(\0132\022.e39pim.v1.Account\"\026\n\024" +
-      "WatchAccountsRequest\"z\n\027AddCalDavAccount" +
-      "Request\022\014\n\004name\030\001 \001(\t\022\013\n\003url\030\002 \001(\t\022\020\n\010us" +
-      "ername\030\003 \001(\t\022\020\n\010password\030\004 \001(\t\022 \n\030refres" +
-      "h_interval_minutes\030\005 \001(\005\";\n\027AddGoogleAcc" +
-      "ountRequest\022\014\n\004name\030\001 \001(\t\022\022\n\nlogin_hint\030" +
-      "\002 \001(\t\"\'\n\021StartLoginRequest\022\022\n\naccount_id" +
-      "\030\001 \001(\t\"R\n\022StartLoginResponse\022#\n\007account\030" +
-      "\001 \001(\0132\022.e39pim.v1.Account\022\027\n\017auth_reques" +
-      "t_id\030\002 \001(\t\"*\n\024RemoveAccountRequest\022\022\n\nac" +
-      "count_id\030\001 \001(\t\"=\n\027SetAccountOnlineReques" +
-      "t\022\022\n\naccount_id\030\001 \001(\t\022\016\n\006online\030\002 \001(\010\"$\n" +
-      "\016SyncNowRequest\022\022\n\naccount_id\030\001 \001(\t*\221\001\n\013" +
-      "AccountType\022\034\n\030ACCOUNT_TYPE_UNSPECIFIED\020" +
-      "\000\022\026\n\022ACCOUNT_TYPE_OTHER\020\001\022\027\n\023ACCOUNT_TYP" +
-      "E_CALDAV\020\002\022\027\n\023ACCOUNT_TYPE_GOOGLE\020\003\022\032\n\026A" +
-      "CCOUNT_TYPE_ICAL_FILE\020\004*\267\001\n\014AccountState" +
-      "\022\035\n\031ACCOUNT_STATE_UNSPECIFIED\020\000\022\026\n\022ACCOU" +
-      "NT_STATE_IDLE\020\001\022\031\n\025ACCOUNT_STATE_SYNCING" +
-      "\020\002\022\031\n\025ACCOUNT_STATE_OFFLINE\020\003\022 \n\034ACCOUNT" +
-      "_STATE_NOT_CONFIGURED\020\004\022\030\n\024ACCOUNT_STATE" +
-      "_BROKEN\020\0052\370\004\n\016AccountService\022O\n\014ListAcco" +
-      "unts\022\036.e39pim.v1.ListAccountsRequest\032\037.e" +
-      "39pim.v1.ListAccountsResponse\022S\n\rWatchAc" +
-      "counts\022\037.e39pim.v1.WatchAccountsRequest\032" +
-      "\037.e39pim.v1.ListAccountsResponse0\001\022J\n\020Ad" +
-      "dCalDavAccount\022\".e39pim.v1.AddCalDavAcco" +
-      "untRequest\032\022.e39pim.v1.Account\022U\n\020AddGoo" +
-      "gleAccount\022\".e39pim.v1.AddGoogleAccountR" +
-      "equest\032\035.e39pim.v1.StartLoginResponse\022I\n" +
-      "\nStartLogin\022\034.e39pim.v1.StartLoginReques" +
-      "t\032\035.e39pim.v1.StartLoginResponse\022H\n\rRemo" +
-      "veAccount\022\037.e39pim.v1.RemoveAccountReque" +
-      "st\032\026.google.protobuf.Empty\022J\n\020SetAccount" +
-      "Online\022\".e39pim.v1.SetAccountOnlineReque" +
-      "st\032\022.e39pim.v1.Account\022<\n\007SyncNow\022\031.e39p" +
-      "im.v1.SyncNowRequest\032\026.google.protobuf.E" +
-      "mptyB&\n\024ca.stefanm.e39pim.v1B\014AccountPro" +
-      "toP\001b\006proto3"
+      "login\030\t \001(\010\022\022\n\nlast_error\030\n \001(\t\022\025\n\remail" +
+      "_address\030\013 \001(\t\022\023\n\013sender_name\030\014 \001(\t\"\216\001\n\n" +
+      "MailServer\022\014\n\004host\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022)" +
+      "\n\010security\030\003 \001(\0162\027.e39pim.v1.MailSecurit" +
+      "y\022\020\n\010username\030\004 \001(\t\022\'\n\004auth\030\005 \001(\0162\031.e39p" +
+      "im.v1.MailAuthMethod\"X\n\014MailSettings\022#\n\004" +
+      "imap\030\001 \001(\0132\025.e39pim.v1.MailServer\022#\n\004smt" +
+      "p\030\002 \001(\0132\025.e39pim.v1.MailServer\"\025\n\023ListAc" +
+      "countsRequest\"<\n\024ListAccountsResponse\022$\n" +
+      "\010accounts\030\001 \003(\0132\022.e39pim.v1.Account\"\026\n\024W" +
+      "atchAccountsRequest\"z\n\027AddCalDavAccountR" +
+      "equest\022\014\n\004name\030\001 \001(\t\022\013\n\003url\030\002 \001(\t\022\020\n\010use" +
+      "rname\030\003 \001(\t\022\020\n\010password\030\004 \001(\t\022 \n\030refresh" +
+      "_interval_minutes\030\005 \001(\005\";\n\027AddGoogleAcco" +
+      "untRequest\022\014\n\004name\030\001 \001(\t\022\022\n\nlogin_hint\030\002" +
+      " \001(\t\",\n\033DiscoverMailSettingsRequest\022\r\n\005e" +
+      "mail\030\001 \001(\t\"\254\001\n\034DiscoverMailSettingsRespo" +
+      "nse\022)\n\010settings\030\001 \001(\0132\027.e39pim.v1.MailSe" +
+      "ttings\022-\n\006source\030\002 \001(\0162\035.e39pim.v1.MailS" +
+      "ettingsSource\022\025\n\rprovider_name\030\003 \001(\t\022\033\n\023" +
+      "app_password_needed\030\004 \001(\010\"\246\001\n\025AddMailAcc" +
+      "ountRequest\022\r\n\005email\030\001 \001(\t\022\020\n\010password\030\002" +
+      " \001(\t\022\023\n\013sender_name\030\003 \001(\t\022\014\n\004name\030\004 \001(\t\022" +
+      ")\n\010settings\030\005 \001(\0132\027.e39pim.v1.MailSettin" +
+      "gs\022\036\n\026check_interval_minutes\030\006 \001(\005\"\'\n\021St" +
+      "artLoginRequest\022\022\n\naccount_id\030\001 \001(\t\"R\n\022S" +
+      "tartLoginResponse\022#\n\007account\030\001 \001(\0132\022.e39" +
+      "pim.v1.Account\022\027\n\017auth_request_id\030\002 \001(\t\"" +
+      "*\n\024RemoveAccountRequest\022\022\n\naccount_id\030\001 " +
+      "\001(\t\"=\n\027SetAccountOnlineRequest\022\022\n\naccoun" +
+      "t_id\030\001 \001(\t\022\016\n\006online\030\002 \001(\010\"$\n\016SyncNowReq" +
+      "uest\022\022\n\naccount_id\030\001 \001(\t*\250\001\n\013AccountType" +
+      "\022\034\n\030ACCOUNT_TYPE_UNSPECIFIED\020\000\022\026\n\022ACCOUN" +
+      "T_TYPE_OTHER\020\001\022\027\n\023ACCOUNT_TYPE_CALDAV\020\002\022" +
+      "\027\n\023ACCOUNT_TYPE_GOOGLE\020\003\022\032\n\026ACCOUNT_TYPE" +
+      "_ICAL_FILE\020\004\022\025\n\021ACCOUNT_TYPE_IMAP\020\005*\267\001\n\014" +
+      "AccountState\022\035\n\031ACCOUNT_STATE_UNSPECIFIE" +
+      "D\020\000\022\026\n\022ACCOUNT_STATE_IDLE\020\001\022\031\n\025ACCOUNT_S" +
+      "TATE_SYNCING\020\002\022\031\n\025ACCOUNT_STATE_OFFLINE\020" +
+      "\003\022 \n\034ACCOUNT_STATE_NOT_CONFIGURED\020\004\022\030\n\024A" +
+      "CCOUNT_STATE_BROKEN\020\005*x\n\014MailSecurity\022\035\n" +
+      "\031MAIL_SECURITY_UNSPECIFIED\020\000\022\025\n\021MAIL_SEC" +
+      "URITY_TLS\020\001\022\032\n\026MAIL_SECURITY_STARTTLS\020\002\022" +
+      "\026\n\022MAIL_SECURITY_NONE\020\003*\227\001\n\016MailAuthMeth" +
+      "od\022 \n\034MAIL_AUTH_METHOD_UNSPECIFIED\020\000\022\035\n\031" +
+      "MAIL_AUTH_METHOD_PASSWORD\020\001\022\'\n#MAIL_AUTH" +
+      "_METHOD_PASSWORD_ENCRYPTED\020\002\022\033\n\027MAIL_AUT" +
+      "H_METHOD_OAUTH2\020\003*\334\001\n\022MailSettingsSource" +
+      "\022$\n MAIL_SETTINGS_SOURCE_UNSPECIFIED\020\000\022\036" +
+      "\n\032MAIL_SETTINGS_SOURCE_ISPDB\020\001\022!\n\035MAIL_S" +
+      "ETTINGS_SOURCE_PROVIDER\020\002\022\033\n\027MAIL_SETTIN" +
+      "GS_SOURCE_MX\020\003\022 \n\034MAIL_SETTINGS_SOURCE_D" +
+      "NS_SRV\020\004\022\036\n\032MAIL_SETTINGS_SOURCE_GUESS\020\005" +
+      "2\251\006\n\016AccountService\022O\n\014ListAccounts\022\036.e3" +
+      "9pim.v1.ListAccountsRequest\032\037.e39pim.v1." +
+      "ListAccountsResponse\022S\n\rWatchAccounts\022\037." +
+      "e39pim.v1.WatchAccountsRequest\032\037.e39pim." +
+      "v1.ListAccountsResponse0\001\022J\n\020AddCalDavAc" +
+      "count\022\".e39pim.v1.AddCalDavAccountReques" +
+      "t\032\022.e39pim.v1.Account\022U\n\020AddGoogleAccoun" +
+      "t\022\".e39pim.v1.AddGoogleAccountRequest\032\035." +
+      "e39pim.v1.StartLoginResponse\022g\n\024Discover" +
+      "MailSettings\022&.e39pim.v1.DiscoverMailSet" +
+      "tingsRequest\032\'.e39pim.v1.DiscoverMailSet" +
+      "tingsResponse\022F\n\016AddMailAccount\022 .e39pim" +
+      ".v1.AddMailAccountRequest\032\022.e39pim.v1.Ac" +
+      "count\022I\n\nStartLogin\022\034.e39pim.v1.StartLog" +
+      "inRequest\032\035.e39pim.v1.StartLoginResponse" +
+      "\022H\n\rRemoveAccount\022\037.e39pim.v1.RemoveAcco" +
+      "untRequest\032\026.google.protobuf.Empty\022J\n\020Se" +
+      "tAccountOnline\022\".e39pim.v1.SetAccountOnl" +
+      "ineRequest\032\022.e39pim.v1.Account\022<\n\007SyncNo" +
+      "w\022\031.e39pim.v1.SyncNowRequest\032\026.google.pr" +
+      "otobuf.EmptyB&\n\024ca.stefanm.e39pim.v1B\014Ac" +
+      "countProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -148,63 +207,93 @@ public final class AccountProto {
     internal_static_e39pim_v1_Account_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_Account_descriptor,
-        new java.lang.String[] { "Id", "Type", "TypeName", "Name", "Online", "State", "StatusMessage", "ProgressPercent", "NeedsLogin", "LastError", });
-    internal_static_e39pim_v1_ListAccountsRequest_descriptor =
+        new java.lang.String[] { "Id", "Type", "TypeName", "Name", "Online", "State", "StatusMessage", "ProgressPercent", "NeedsLogin", "LastError", "EmailAddress", "SenderName", });
+    internal_static_e39pim_v1_MailServer_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_e39pim_v1_MailServer_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_e39pim_v1_MailServer_descriptor,
+        new java.lang.String[] { "Host", "Port", "Security", "Username", "Auth", });
+    internal_static_e39pim_v1_MailSettings_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_e39pim_v1_MailSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_e39pim_v1_MailSettings_descriptor,
+        new java.lang.String[] { "Imap", "Smtp", });
+    internal_static_e39pim_v1_ListAccountsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_e39pim_v1_ListAccountsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_ListAccountsRequest_descriptor,
         new java.lang.String[] { });
     internal_static_e39pim_v1_ListAccountsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_e39pim_v1_ListAccountsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_ListAccountsResponse_descriptor,
         new java.lang.String[] { "Accounts", });
     internal_static_e39pim_v1_WatchAccountsRequest_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_e39pim_v1_WatchAccountsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_WatchAccountsRequest_descriptor,
         new java.lang.String[] { });
     internal_static_e39pim_v1_AddCalDavAccountRequest_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_e39pim_v1_AddCalDavAccountRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_AddCalDavAccountRequest_descriptor,
         new java.lang.String[] { "Name", "Url", "Username", "Password", "RefreshIntervalMinutes", });
     internal_static_e39pim_v1_AddGoogleAccountRequest_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_e39pim_v1_AddGoogleAccountRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_AddGoogleAccountRequest_descriptor,
         new java.lang.String[] { "Name", "LoginHint", });
+    internal_static_e39pim_v1_DiscoverMailSettingsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_e39pim_v1_DiscoverMailSettingsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_e39pim_v1_DiscoverMailSettingsRequest_descriptor,
+        new java.lang.String[] { "Email", });
+    internal_static_e39pim_v1_DiscoverMailSettingsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_e39pim_v1_DiscoverMailSettingsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_e39pim_v1_DiscoverMailSettingsResponse_descriptor,
+        new java.lang.String[] { "Settings", "Source", "ProviderName", "AppPasswordNeeded", });
+    internal_static_e39pim_v1_AddMailAccountRequest_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_e39pim_v1_AddMailAccountRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_e39pim_v1_AddMailAccountRequest_descriptor,
+        new java.lang.String[] { "Email", "Password", "SenderName", "Name", "Settings", "CheckIntervalMinutes", });
     internal_static_e39pim_v1_StartLoginRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_e39pim_v1_StartLoginRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_StartLoginRequest_descriptor,
         new java.lang.String[] { "AccountId", });
     internal_static_e39pim_v1_StartLoginResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_e39pim_v1_StartLoginResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_StartLoginResponse_descriptor,
         new java.lang.String[] { "Account", "AuthRequestId", });
     internal_static_e39pim_v1_RemoveAccountRequest_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_e39pim_v1_RemoveAccountRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_RemoveAccountRequest_descriptor,
         new java.lang.String[] { "AccountId", });
     internal_static_e39pim_v1_SetAccountOnlineRequest_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_e39pim_v1_SetAccountOnlineRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_SetAccountOnlineRequest_descriptor,
         new java.lang.String[] { "AccountId", "Online", });
     internal_static_e39pim_v1_SyncNowRequest_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_e39pim_v1_SyncNowRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_e39pim_v1_SyncNowRequest_descriptor,

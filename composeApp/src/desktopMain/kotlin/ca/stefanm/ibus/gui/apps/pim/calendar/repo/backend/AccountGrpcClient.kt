@@ -4,9 +4,13 @@ import ca.stefanm.e39pim.v1.Account
 import ca.stefanm.e39pim.v1.AccountServiceGrpcKt
 import ca.stefanm.e39pim.v1.AuthEvent
 import ca.stefanm.e39pim.v1.AuthServiceGrpcKt
+import ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse
+import ca.stefanm.e39pim.v1.MailSettings
 import ca.stefanm.e39pim.v1.StartLoginResponse
 import ca.stefanm.e39pim.v1.addCalDavAccountRequest
 import ca.stefanm.e39pim.v1.addGoogleAccountRequest
+import ca.stefanm.e39pim.v1.addMailAccountRequest
+import ca.stefanm.e39pim.v1.discoverMailSettingsRequest
 import ca.stefanm.e39pim.v1.cancelAuthRequest
 import ca.stefanm.e39pim.v1.listAccountsRequest
 import ca.stefanm.e39pim.v1.removeAccountRequest
@@ -33,6 +37,10 @@ class AccountGrpcClient @Inject constructor(
     companion object {
         /** Adding a CalDAV account first tries the login on the server. */
         const val ADD_ACCOUNT_TIMEOUT_SECONDS = 45L
+        /** Several lookups at once, then maybe connection attempts. */
+        const val DISCOVER_MAIL_TIMEOUT_SECONDS = 40L
+        /** Maybe discovery, then the IMAP and the SMTP login (up to 20 s each). */
+        const val ADD_MAIL_ACCOUNT_TIMEOUT_SECONDS = 90L
     }
 
     private fun accountStub() = AccountServiceGrpcKt.AccountServiceCoroutineStub(backendChannel.channel())
@@ -64,6 +72,31 @@ class AccountGrpcClient @Inject constructor(
         accountStub().withTimeout(ADD_ACCOUNT_TIMEOUT_SECONDS).addGoogleAccount(addGoogleAccountRequest {
             this.name = name
             this.loginHint = loginHint
+        })
+    }
+
+    suspend fun discoverMailSettings(email: String): DiscoverMailSettingsResponse = pimCall {
+        accountStub().withTimeout(DISCOVER_MAIL_TIMEOUT_SECONDS).discoverMailSettings(discoverMailSettingsRequest {
+            this.email = email
+        })
+    }
+
+    /** [settings] null: discovered by the bridge. */
+    suspend fun addMailAccount(
+        email: String,
+        password: String,
+        senderName: String,
+        name: String,
+        settings: MailSettings?,
+        checkIntervalMinutes: Int = 0,
+    ): Account = pimCall {
+        accountStub().withTimeout(ADD_MAIL_ACCOUNT_TIMEOUT_SECONDS).addMailAccount(addMailAccountRequest {
+            this.email = email
+            this.password = password
+            this.senderName = senderName
+            this.name = name
+            if (settings != null) this.settings = settings
+            this.checkIntervalMinutes = checkIntervalMinutes
         })
     }
 

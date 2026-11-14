@@ -136,6 +136,68 @@ public final class AccountServiceGrpc {
     return getAddGoogleAccountMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest,
+      ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse> getDiscoverMailSettingsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DiscoverMailSettings",
+      requestType = ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest.class,
+      responseType = ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest,
+      ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse> getDiscoverMailSettingsMethod() {
+    io.grpc.MethodDescriptor<ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest, ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse> getDiscoverMailSettingsMethod;
+    if ((getDiscoverMailSettingsMethod = AccountServiceGrpc.getDiscoverMailSettingsMethod) == null) {
+      synchronized (AccountServiceGrpc.class) {
+        if ((getDiscoverMailSettingsMethod = AccountServiceGrpc.getDiscoverMailSettingsMethod) == null) {
+          AccountServiceGrpc.getDiscoverMailSettingsMethod = getDiscoverMailSettingsMethod =
+              io.grpc.MethodDescriptor.<ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest, ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DiscoverMailSettings"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new AccountServiceMethodDescriptorSupplier("DiscoverMailSettings"))
+              .build();
+        }
+      }
+    }
+    return getDiscoverMailSettingsMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<ca.stefanm.e39pim.v1.AddMailAccountRequest,
+      ca.stefanm.e39pim.v1.Account> getAddMailAccountMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AddMailAccount",
+      requestType = ca.stefanm.e39pim.v1.AddMailAccountRequest.class,
+      responseType = ca.stefanm.e39pim.v1.Account.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<ca.stefanm.e39pim.v1.AddMailAccountRequest,
+      ca.stefanm.e39pim.v1.Account> getAddMailAccountMethod() {
+    io.grpc.MethodDescriptor<ca.stefanm.e39pim.v1.AddMailAccountRequest, ca.stefanm.e39pim.v1.Account> getAddMailAccountMethod;
+    if ((getAddMailAccountMethod = AccountServiceGrpc.getAddMailAccountMethod) == null) {
+      synchronized (AccountServiceGrpc.class) {
+        if ((getAddMailAccountMethod = AccountServiceGrpc.getAddMailAccountMethod) == null) {
+          AccountServiceGrpc.getAddMailAccountMethod = getAddMailAccountMethod =
+              io.grpc.MethodDescriptor.<ca.stefanm.e39pim.v1.AddMailAccountRequest, ca.stefanm.e39pim.v1.Account>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AddMailAccount"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  ca.stefanm.e39pim.v1.AddMailAccountRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  ca.stefanm.e39pim.v1.Account.getDefaultInstance()))
+              .setSchemaDescriptor(new AccountServiceMethodDescriptorSupplier("AddMailAccount"))
+              .build();
+        }
+      }
+    }
+    return getAddMailAccountMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<ca.stefanm.e39pim.v1.StartLoginRequest,
       ca.stefanm.e39pim.v1.StartLoginResponse> getStartLoginMethod;
 
@@ -372,6 +434,39 @@ public final class AccountServiceGrpc {
 
     /**
      * <pre>
+     * Finds an e-mail address's IMAP and SMTP servers, like mail programs'
+     * account wizards: the provider database (Thunderbird's ISPDB), the
+     * domain's own autoconfig file, the ISPDB entry of the domain's mail
+     * server (MX: custom domains at big providers), DNS SRV records (RFC
+     * 6186), then the usual host names (imap.&lt;domain&gt;, ...) if they answer.
+     * NOT_FOUND if nothing turned up (ask for the servers); INVALID_ARGUMENT
+     * for something that isn't an e-mail address.
+     * </pre>
+     */
+    default void discoverMailSettings(ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest request,
+        io.grpc.stub.StreamObserver<ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDiscoverMailSettingsMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Creates a mail account: IMAP account, SMTP server and identity, with
+     * the servers given or discovered (DiscoverMailSettings), and starts a
+     * first sync. Both logins are tried first: UNAUTHENTICATED if a server
+     * refuses the password, UNAVAILABLE if it can't be reached (message:
+     * which server and why); nothing is created then. Servers said to want a
+     * browser login (OAuth2) get the password too (app passwords);
+     * FAILED_PRECONDITION if they refuse it (e.g. Outlook.com). INVALID_ARGUMENT
+     * for a malformed address or missing password.
+     * </pre>
+     */
+    default void addMailAccount(ca.stefanm.e39pim.v1.AddMailAccountRequest request,
+        io.grpc.stub.StreamObserver<ca.stefanm.e39pim.v1.Account> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddMailAccountMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Starts a new login for an account that says needs_login.
      * FAILED_PRECONDITION for account types without OAuth.
      * </pre>
@@ -384,7 +479,8 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Removes the account, its stored password/tokens and its local copy of
-     * the data (nothing on the server is deleted).
+     * the data (nothing on the server is deleted). Mail accounts: also their
+     * SMTP server and identity.
      * </pre>
      */
     default void removeAccount(ca.stefanm.e39pim.v1.RemoveAccountRequest request,
@@ -494,6 +590,41 @@ public final class AccountServiceGrpc {
 
     /**
      * <pre>
+     * Finds an e-mail address's IMAP and SMTP servers, like mail programs'
+     * account wizards: the provider database (Thunderbird's ISPDB), the
+     * domain's own autoconfig file, the ISPDB entry of the domain's mail
+     * server (MX: custom domains at big providers), DNS SRV records (RFC
+     * 6186), then the usual host names (imap.&lt;domain&gt;, ...) if they answer.
+     * NOT_FOUND if nothing turned up (ask for the servers); INVALID_ARGUMENT
+     * for something that isn't an e-mail address.
+     * </pre>
+     */
+    public void discoverMailSettings(ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest request,
+        io.grpc.stub.StreamObserver<ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDiscoverMailSettingsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Creates a mail account: IMAP account, SMTP server and identity, with
+     * the servers given or discovered (DiscoverMailSettings), and starts a
+     * first sync. Both logins are tried first: UNAUTHENTICATED if a server
+     * refuses the password, UNAVAILABLE if it can't be reached (message:
+     * which server and why); nothing is created then. Servers said to want a
+     * browser login (OAuth2) get the password too (app passwords);
+     * FAILED_PRECONDITION if they refuse it (e.g. Outlook.com). INVALID_ARGUMENT
+     * for a malformed address or missing password.
+     * </pre>
+     */
+    public void addMailAccount(ca.stefanm.e39pim.v1.AddMailAccountRequest request,
+        io.grpc.stub.StreamObserver<ca.stefanm.e39pim.v1.Account> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAddMailAccountMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Starts a new login for an account that says needs_login.
      * FAILED_PRECONDITION for account types without OAuth.
      * </pre>
@@ -507,7 +638,8 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Removes the account, its stored password/tokens and its local copy of
-     * the data (nothing on the server is deleted).
+     * the data (nothing on the server is deleted). Mail accounts: also their
+     * SMTP server and identity.
      * </pre>
      */
     public void removeAccount(ca.stefanm.e39pim.v1.RemoveAccountRequest request,
@@ -607,6 +739,39 @@ public final class AccountServiceGrpc {
 
     /**
      * <pre>
+     * Finds an e-mail address's IMAP and SMTP servers, like mail programs'
+     * account wizards: the provider database (Thunderbird's ISPDB), the
+     * domain's own autoconfig file, the ISPDB entry of the domain's mail
+     * server (MX: custom domains at big providers), DNS SRV records (RFC
+     * 6186), then the usual host names (imap.&lt;domain&gt;, ...) if they answer.
+     * NOT_FOUND if nothing turned up (ask for the servers); INVALID_ARGUMENT
+     * for something that isn't an e-mail address.
+     * </pre>
+     */
+    public ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse discoverMailSettings(ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDiscoverMailSettingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a mail account: IMAP account, SMTP server and identity, with
+     * the servers given or discovered (DiscoverMailSettings), and starts a
+     * first sync. Both logins are tried first: UNAUTHENTICATED if a server
+     * refuses the password, UNAVAILABLE if it can't be reached (message:
+     * which server and why); nothing is created then. Servers said to want a
+     * browser login (OAuth2) get the password too (app passwords);
+     * FAILED_PRECONDITION if they refuse it (e.g. Outlook.com). INVALID_ARGUMENT
+     * for a malformed address or missing password.
+     * </pre>
+     */
+    public ca.stefanm.e39pim.v1.Account addMailAccount(ca.stefanm.e39pim.v1.AddMailAccountRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAddMailAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Starts a new login for an account that says needs_login.
      * FAILED_PRECONDITION for account types without OAuth.
      * </pre>
@@ -619,7 +784,8 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Removes the account, its stored password/tokens and its local copy of
-     * the data (nothing on the server is deleted).
+     * the data (nothing on the server is deleted). Mail accounts: also their
+     * SMTP server and identity.
      * </pre>
      */
     public com.google.protobuf.Empty removeAccount(ca.stefanm.e39pim.v1.RemoveAccountRequest request) throws io.grpc.StatusException {
@@ -715,6 +881,39 @@ public final class AccountServiceGrpc {
 
     /**
      * <pre>
+     * Finds an e-mail address's IMAP and SMTP servers, like mail programs'
+     * account wizards: the provider database (Thunderbird's ISPDB), the
+     * domain's own autoconfig file, the ISPDB entry of the domain's mail
+     * server (MX: custom domains at big providers), DNS SRV records (RFC
+     * 6186), then the usual host names (imap.&lt;domain&gt;, ...) if they answer.
+     * NOT_FOUND if nothing turned up (ask for the servers); INVALID_ARGUMENT
+     * for something that isn't an e-mail address.
+     * </pre>
+     */
+    public ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse discoverMailSettings(ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDiscoverMailSettingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a mail account: IMAP account, SMTP server and identity, with
+     * the servers given or discovered (DiscoverMailSettings), and starts a
+     * first sync. Both logins are tried first: UNAUTHENTICATED if a server
+     * refuses the password, UNAVAILABLE if it can't be reached (message:
+     * which server and why); nothing is created then. Servers said to want a
+     * browser login (OAuth2) get the password too (app passwords);
+     * FAILED_PRECONDITION if they refuse it (e.g. Outlook.com). INVALID_ARGUMENT
+     * for a malformed address or missing password.
+     * </pre>
+     */
+    public ca.stefanm.e39pim.v1.Account addMailAccount(ca.stefanm.e39pim.v1.AddMailAccountRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAddMailAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Starts a new login for an account that says needs_login.
      * FAILED_PRECONDITION for account types without OAuth.
      * </pre>
@@ -727,7 +926,8 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Removes the account, its stored password/tokens and its local copy of
-     * the data (nothing on the server is deleted).
+     * the data (nothing on the server is deleted). Mail accounts: also their
+     * SMTP server and identity.
      * </pre>
      */
     public com.google.protobuf.Empty removeAccount(ca.stefanm.e39pim.v1.RemoveAccountRequest request) {
@@ -814,6 +1014,41 @@ public final class AccountServiceGrpc {
 
     /**
      * <pre>
+     * Finds an e-mail address's IMAP and SMTP servers, like mail programs'
+     * account wizards: the provider database (Thunderbird's ISPDB), the
+     * domain's own autoconfig file, the ISPDB entry of the domain's mail
+     * server (MX: custom domains at big providers), DNS SRV records (RFC
+     * 6186), then the usual host names (imap.&lt;domain&gt;, ...) if they answer.
+     * NOT_FOUND if nothing turned up (ask for the servers); INVALID_ARGUMENT
+     * for something that isn't an e-mail address.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse> discoverMailSettings(
+        ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDiscoverMailSettingsMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a mail account: IMAP account, SMTP server and identity, with
+     * the servers given or discovered (DiscoverMailSettings), and starts a
+     * first sync. Both logins are tried first: UNAUTHENTICATED if a server
+     * refuses the password, UNAVAILABLE if it can't be reached (message:
+     * which server and why); nothing is created then. Servers said to want a
+     * browser login (OAuth2) get the password too (app passwords);
+     * FAILED_PRECONDITION if they refuse it (e.g. Outlook.com). INVALID_ARGUMENT
+     * for a malformed address or missing password.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<ca.stefanm.e39pim.v1.Account> addMailAccount(
+        ca.stefanm.e39pim.v1.AddMailAccountRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAddMailAccountMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Starts a new login for an account that says needs_login.
      * FAILED_PRECONDITION for account types without OAuth.
      * </pre>
@@ -827,7 +1062,8 @@ public final class AccountServiceGrpc {
     /**
      * <pre>
      * Removes the account, its stored password/tokens and its local copy of
-     * the data (nothing on the server is deleted).
+     * the data (nothing on the server is deleted). Mail accounts: also their
+     * SMTP server and identity.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.google.protobuf.Empty> removeAccount(
@@ -864,10 +1100,12 @@ public final class AccountServiceGrpc {
   private static final int METHODID_WATCH_ACCOUNTS = 1;
   private static final int METHODID_ADD_CAL_DAV_ACCOUNT = 2;
   private static final int METHODID_ADD_GOOGLE_ACCOUNT = 3;
-  private static final int METHODID_START_LOGIN = 4;
-  private static final int METHODID_REMOVE_ACCOUNT = 5;
-  private static final int METHODID_SET_ACCOUNT_ONLINE = 6;
-  private static final int METHODID_SYNC_NOW = 7;
+  private static final int METHODID_DISCOVER_MAIL_SETTINGS = 4;
+  private static final int METHODID_ADD_MAIL_ACCOUNT = 5;
+  private static final int METHODID_START_LOGIN = 6;
+  private static final int METHODID_REMOVE_ACCOUNT = 7;
+  private static final int METHODID_SET_ACCOUNT_ONLINE = 8;
+  private static final int METHODID_SYNC_NOW = 9;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -901,6 +1139,14 @@ public final class AccountServiceGrpc {
         case METHODID_ADD_GOOGLE_ACCOUNT:
           serviceImpl.addGoogleAccount((ca.stefanm.e39pim.v1.AddGoogleAccountRequest) request,
               (io.grpc.stub.StreamObserver<ca.stefanm.e39pim.v1.StartLoginResponse>) responseObserver);
+          break;
+        case METHODID_DISCOVER_MAIL_SETTINGS:
+          serviceImpl.discoverMailSettings((ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest) request,
+              (io.grpc.stub.StreamObserver<ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse>) responseObserver);
+          break;
+        case METHODID_ADD_MAIL_ACCOUNT:
+          serviceImpl.addMailAccount((ca.stefanm.e39pim.v1.AddMailAccountRequest) request,
+              (io.grpc.stub.StreamObserver<ca.stefanm.e39pim.v1.Account>) responseObserver);
           break;
         case METHODID_START_LOGIN:
           serviceImpl.startLogin((ca.stefanm.e39pim.v1.StartLoginRequest) request,
@@ -964,6 +1210,20 @@ public final class AccountServiceGrpc {
               ca.stefanm.e39pim.v1.AddGoogleAccountRequest,
               ca.stefanm.e39pim.v1.StartLoginResponse>(
                 service, METHODID_ADD_GOOGLE_ACCOUNT)))
+        .addMethod(
+          getDiscoverMailSettingsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              ca.stefanm.e39pim.v1.DiscoverMailSettingsRequest,
+              ca.stefanm.e39pim.v1.DiscoverMailSettingsResponse>(
+                service, METHODID_DISCOVER_MAIL_SETTINGS)))
+        .addMethod(
+          getAddMailAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              ca.stefanm.e39pim.v1.AddMailAccountRequest,
+              ca.stefanm.e39pim.v1.Account>(
+                service, METHODID_ADD_MAIL_ACCOUNT)))
         .addMethod(
           getStartLoginMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -1044,6 +1304,8 @@ public final class AccountServiceGrpc {
               .addMethod(getWatchAccountsMethod())
               .addMethod(getAddCalDavAccountMethod())
               .addMethod(getAddGoogleAccountMethod())
+              .addMethod(getDiscoverMailSettingsMethod())
+              .addMethod(getAddMailAccountMethod())
               .addMethod(getStartLoginMethod())
               .addMethod(getRemoveAccountMethod())
               .addMethod(getSetAccountOnlineMethod())

@@ -259,6 +259,50 @@ public object AccountKt {
     public fun clearLastError() {
       _builder.clearLastError()
     }
+
+    /**
+     * ```
+     * Mail accounts: the address mail is sent from and the sender's name
+     * (the identity's); empty for other accounts.
+     * ```
+     *
+     * `string email_address = 11;`
+     */
+    public var emailAddress: kotlin.String
+      @JvmName("getEmailAddress")
+      get() = _builder.emailAddress
+      @JvmName("setEmailAddress")
+      set(value) {
+        _builder.emailAddress = value
+      }
+    /**
+     * ```
+     * Mail accounts: the address mail is sent from and the sender's name
+     * (the identity's); empty for other accounts.
+     * ```
+     *
+     * `string email_address = 11;`
+     */
+    public fun clearEmailAddress() {
+      _builder.clearEmailAddress()
+    }
+
+    /**
+     * `string sender_name = 12;`
+     */
+    public var senderName: kotlin.String
+      @JvmName("getSenderName")
+      get() = _builder.senderName
+      @JvmName("setSenderName")
+      set(value) {
+        _builder.senderName = value
+      }
+    /**
+     * `string sender_name = 12;`
+     */
+    public fun clearSenderName() {
+      _builder.clearSenderName()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic

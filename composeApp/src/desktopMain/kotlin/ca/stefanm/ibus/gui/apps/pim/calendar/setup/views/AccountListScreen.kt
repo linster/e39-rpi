@@ -118,6 +118,7 @@ class AccountListScreen @Inject constructor(
     private fun typeLabel(account: PimAccount): String = when (account.type) {
         PimAccount.Type.CALDAV -> "CalDAV"
         PimAccount.Type.GOOGLE -> "Google"
+        PimAccount.Type.IMAP -> "Mail"
         PimAccount.Type.ICAL_FILE -> "Calendar file"
         PimAccount.Type.OTHER -> "Other"
     }

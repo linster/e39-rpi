@@ -52,6 +52,15 @@ public object AccountServiceGrpcKt {
     @JvmStatic
     get() = AccountServiceGrpc.getAddGoogleAccountMethod()
 
+  public val discoverMailSettingsMethod:
+      MethodDescriptor<DiscoverMailSettingsRequest, DiscoverMailSettingsResponse>
+    @JvmStatic
+    get() = AccountServiceGrpc.getDiscoverMailSettingsMethod()
+
+  public val addMailAccountMethod: MethodDescriptor<AddMailAccountRequest, Account>
+    @JvmStatic
+    get() = AccountServiceGrpc.getAddMailAccountMethod()
+
   public val startLoginMethod: MethodDescriptor<StartLoginRequest, StartLoginResponse>
     @JvmStatic
     get() = AccountServiceGrpc.getStartLoginMethod()
@@ -154,6 +163,46 @@ public object AccountServiceGrpcKt {
     public suspend fun addGoogleAccount(request: AddGoogleAccountRequest, headers: Metadata = Metadata()): StartLoginResponse = unaryRpc(
       channel,
       AccountServiceGrpc.getAddGoogleAccountMethod(),
+      request,
+      callOptions,
+      headers
+    )
+
+    /**
+     * Executes this RPC and returns the response message, suspending until the RPC completes
+     * with [`Status.OK`][io.grpc.Status].  If the RPC completes with another status, a corresponding
+     * [StatusException] is thrown.  If this coroutine is cancelled, the RPC is also cancelled
+     * with the corresponding exception as a cause.
+     *
+     * @param request The request message to send to the server.
+     *
+     * @param headers Metadata to attach to the request.  Most users will not need this.
+     *
+     * @return The single response from the server.
+     */
+    public suspend fun discoverMailSettings(request: DiscoverMailSettingsRequest, headers: Metadata = Metadata()): DiscoverMailSettingsResponse = unaryRpc(
+      channel,
+      AccountServiceGrpc.getDiscoverMailSettingsMethod(),
+      request,
+      callOptions,
+      headers
+    )
+
+    /**
+     * Executes this RPC and returns the response message, suspending until the RPC completes
+     * with [`Status.OK`][io.grpc.Status].  If the RPC completes with another status, a corresponding
+     * [StatusException] is thrown.  If this coroutine is cancelled, the RPC is also cancelled
+     * with the corresponding exception as a cause.
+     *
+     * @param request The request message to send to the server.
+     *
+     * @param headers Metadata to attach to the request.  Most users will not need this.
+     *
+     * @return The single response from the server.
+     */
+    public suspend fun addMailAccount(request: AddMailAccountRequest, headers: Metadata = Metadata()): Account = unaryRpc(
+      channel,
+      AccountServiceGrpc.getAddMailAccountMethod(),
       request,
       callOptions,
       headers
@@ -296,6 +345,30 @@ public object AccountServiceGrpcKt {
     public open suspend fun addGoogleAccount(request: AddGoogleAccountRequest): StartLoginResponse = throw StatusException(UNIMPLEMENTED.withDescription("Method e39pim.v1.AccountService.AddGoogleAccount is unimplemented"))
 
     /**
+     * Returns the response to an RPC for e39pim.v1.AccountService.DiscoverMailSettings.
+     *
+     * If this method fails with a [StatusException], the RPC will fail with the corresponding
+     * [io.grpc.Status].  If this method fails with a [java.util.concurrent.CancellationException], the RPC will fail
+     * with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
+     * fail with `Status.UNKNOWN` with the exception as a cause.
+     *
+     * @param request The request from the client.
+     */
+    public open suspend fun discoverMailSettings(request: DiscoverMailSettingsRequest): DiscoverMailSettingsResponse = throw StatusException(UNIMPLEMENTED.withDescription("Method e39pim.v1.AccountService.DiscoverMailSettings is unimplemented"))
+
+    /**
+     * Returns the response to an RPC for e39pim.v1.AccountService.AddMailAccount.
+     *
+     * If this method fails with a [StatusException], the RPC will fail with the corresponding
+     * [io.grpc.Status].  If this method fails with a [java.util.concurrent.CancellationException], the RPC will fail
+     * with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
+     * fail with `Status.UNKNOWN` with the exception as a cause.
+     *
+     * @param request The request from the client.
+     */
+    public open suspend fun addMailAccount(request: AddMailAccountRequest): Account = throw StatusException(UNIMPLEMENTED.withDescription("Method e39pim.v1.AccountService.AddMailAccount is unimplemented"))
+
+    /**
      * Returns the response to an RPC for e39pim.v1.AccountService.StartLogin.
      *
      * If this method fails with a [StatusException], the RPC will fail with the corresponding
@@ -363,6 +436,16 @@ public object AccountServiceGrpcKt {
       context = this.context,
       descriptor = AccountServiceGrpc.getAddGoogleAccountMethod(),
       implementation = ::addGoogleAccount
+    ))
+      .addMethod(unaryServerMethodDefinition(
+      context = this.context,
+      descriptor = AccountServiceGrpc.getDiscoverMailSettingsMethod(),
+      implementation = ::discoverMailSettings
+    ))
+      .addMethod(unaryServerMethodDefinition(
+      context = this.context,
+      descriptor = AccountServiceGrpc.getAddMailAccountMethod(),
+      implementation = ::addMailAccount
     ))
       .addMethod(unaryServerMethodDefinition(
       context = this.context,

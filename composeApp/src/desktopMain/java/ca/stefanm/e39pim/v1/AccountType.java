@@ -46,6 +46,14 @@ public enum AccountType
    * <code>ACCOUNT_TYPE_ICAL_FILE = 4;</code>
    */
   ACCOUNT_TYPE_ICAL_FILE(4),
+  /**
+   * <pre>
+   * akonadi_imap_resource (mail)
+   * </pre>
+   *
+   * <code>ACCOUNT_TYPE_IMAP = 5;</code>
+   */
+  ACCOUNT_TYPE_IMAP(5),
   UNRECOGNIZED(-1),
   ;
 
@@ -94,6 +102,14 @@ public enum AccountType
    * <code>ACCOUNT_TYPE_ICAL_FILE = 4;</code>
    */
   public static final int ACCOUNT_TYPE_ICAL_FILE_VALUE = 4;
+  /**
+   * <pre>
+   * akonadi_imap_resource (mail)
+   * </pre>
+   *
+   * <code>ACCOUNT_TYPE_IMAP = 5;</code>
+   */
+  public static final int ACCOUNT_TYPE_IMAP_VALUE = 5;
 
 
   public final int getNumber() {
@@ -125,6 +141,7 @@ public enum AccountType
       case 2: return ACCOUNT_TYPE_CALDAV;
       case 3: return ACCOUNT_TYPE_GOOGLE;
       case 4: return ACCOUNT_TYPE_ICAL_FILE;
+      case 5: return ACCOUNT_TYPE_IMAP;
       default: return null;
     }
   }

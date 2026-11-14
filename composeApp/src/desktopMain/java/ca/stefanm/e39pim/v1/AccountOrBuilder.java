@@ -148,4 +148,38 @@ public interface AccountOrBuilder extends
    */
   com.google.protobuf.ByteString
       getLastErrorBytes();
+
+  /**
+   * <pre>
+   * Mail accounts: the address mail is sent from and the sender's name
+   * (the identity's); empty for other accounts.
+   * </pre>
+   *
+   * <code>string email_address = 11;</code>
+   * @return The emailAddress.
+   */
+  java.lang.String getEmailAddress();
+  /**
+   * <pre>
+   * Mail accounts: the address mail is sent from and the sender's name
+   * (the identity's); empty for other accounts.
+   * </pre>
+   *
+   * <code>string email_address = 11;</code>
+   * @return The bytes for emailAddress.
+   */
+  com.google.protobuf.ByteString
+      getEmailAddressBytes();
+
+  /**
+   * <code>string sender_name = 12;</code>
+   * @return The senderName.
+   */
+  java.lang.String getSenderName();
+  /**
+   * <code>string sender_name = 12;</code>
+   * @return The bytes for senderName.
+   */
+  com.google.protobuf.ByteString
+      getSenderNameBytes();
 }
