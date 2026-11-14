@@ -26,6 +26,11 @@ import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendException
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendSettingsRepository
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.DiscoveredMailSettings
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.MailAccountSettings
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.MailServerSettings
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimAccount
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.RemoteAccountRepository
 import ca.stefanm.ibus.gui.pim.email.repo.FakeMailRepository
 import ca.stefanm.ibus.gui.pim.email.repo.MailAddress
 import ca.stefanm.ibus.gui.pim.email.repo.MailChangeStream
@@ -46,13 +51,14 @@ import kotlin.time.Clock
 /**
  * Everything the mail repositories can do: folders and messages (live),
  * opening a message (text and HTML), flags, moving, trash, sending (new,
- * reply, forward, quick replies), search, events and raw notices, and the
- * mail settings.
+ * reply, forward, quick replies), search, events and raw notices, the
+ * mail settings, and mail accounts (discovering servers, adding, removing).
  */
 class MailDebugWindow @Inject constructor(
     private val mailRepository: MailRepository,
     private val settingsRepository: MailSettingsRepository,
     private val backendSettingsRepository: PimBackendSettingsRepository,
+    private val accountRepository: RemoteAccountRepository,
     // Only collected when watching raw notices (it opens a stream).
     private val changeStream: Provider<MailChangeStream>,
 ) : WindowManager.E39Window {
@@ -79,6 +85,7 @@ class MailDebugWindow @Inject constructor(
         Row(Modifier.fillMaxSize()) {
             Column(Modifier.weight(0.4f).verticalScroll(rememberScrollState())) {
                 RepositoryPane()
+                MailAccountsPane()
                 FoldersPane(folders, selectedFolder.value) { selectedFolder.value = it }
                 SettingsPane(selectedFolder.value)
                 EventsPane()
@@ -113,6 +120,107 @@ class MailDebugWindow @Inject constructor(
             if (mailRepository is FakeMailRepository) {
                 Button(onClick = { mailRepository.simulateNewMail() }) { Text("simulateNewMail()") }
             }
+        }
+    }
+
+    // --- Mail accounts (RemoteAccountRepository) ---------------------------
+
+    @Composable
+    private fun MailAccountsPane() {
+        val scope = rememberCoroutineScope()
+        val accounts = remember { accountRepository.accounts }.collectAsState(null).value
+        val email = remember { mutableStateOf("") }
+        val password = remember { mutableStateOf("") }
+        val senderName = remember { mutableStateOf("") }
+        val name = remember { mutableStateOf("") }
+        val imapHost = remember { mutableStateOf("") }
+        val imapPort = remember { mutableStateOf("993") }
+        val imapSecurity = remember { mutableStateOf(MailServerSettings.Security.TLS) }
+        val smtpHost = remember { mutableStateOf("") }
+        val smtpPort = remember { mutableStateOf("465") }
+        val smtpSecurity = remember { mutableStateOf(MailServerSettings.Security.TLS) }
+        val username = remember { mutableStateOf("") }
+        val manual = remember { mutableStateOf(false) }
+        val result = remember { mutableStateOf("") }
+
+        fun fill(found: DiscoveredMailSettings) {
+            imapHost.value = found.settings.imap.host
+            imapPort.value = found.settings.imap.port.toString()
+            imapSecurity.value = found.settings.imap.security
+            smtpHost.value = found.settings.smtp.host
+            smtpPort.value = found.settings.smtp.port.toString()
+            smtpSecurity.value = found.settings.smtp.security
+            username.value = found.settings.imap.username
+        }
+
+        NestingCard {
+            NestingCardHeader("Mail accounts (RemoteAccountRepository)")
+            accounts?.filter { it.type == PimAccount.Type.IMAP }?.forEach { a ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("${a.name} <${a.emailAddress}> \"${a.senderName}\" ${a.state} ${a.progressPercent}% ${a.lastError}",
+                        fontSize = 12.sp, modifier = Modifier.weight(1f))
+                    Button(onClick = {
+                        scope.launch {
+                            result.value = accountRepository.removeAccount(a).fold({ "Removed ${a.name}" }, { "Remove failed: ${it.describe()}" })
+                        }
+                    }) { Text("Remove") }
+                }
+            }
+            if (accounts?.none { it.type == PimAccount.Type.IMAP } == true) Text("No mail accounts")
+
+            Row {
+                OutlinedTextField(email.value, { email.value = it }, label = { Text("E-mail") }, singleLine = true, modifier = Modifier.weight(1f))
+                OutlinedTextField(password.value, { password.value = it }, label = { Text("Password") }, singleLine = true, modifier = Modifier.weight(1f))
+            }
+            Row {
+                OutlinedTextField(senderName.value, { senderName.value = it }, label = { Text("Sender name") }, singleLine = true, modifier = Modifier.weight(1f))
+                OutlinedTextField(name.value, { name.value = it }, label = { Text("Account name (empty: address)") }, singleLine = true, modifier = Modifier.weight(1f))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Button(onClick = {
+                    result.value = "Discovering..."
+                    scope.launch {
+                        result.value = accountRepository.discoverMailSettings(email.value).fold(
+                            { found ->
+                                fill(found)
+                                "Found (${found.source}${if (found.providerName.isNotEmpty()) ", ${found.providerName}" else ""})" +
+                                        "${if (found.appPasswordNeeded) ": needs an app password" else ""}; " +
+                                        "IMAP auth ${found.settings.imap.auth}, SMTP auth ${found.settings.smtp.auth}"
+                            },
+                            { "Discovery failed: ${it.describe()}" }
+                        )
+                    }
+                }) { Text("discoverMailSettings()") }
+                Spacer(Modifier.width(8.dp))
+                CheckBoxWithLabel(manual.value, { manual.value = it }, "Use the servers below (else: discovered by the bridge)")
+            }
+            Row {
+                OutlinedTextField(imapHost.value, { imapHost.value = it }, label = { Text("IMAP host") }, singleLine = true, modifier = Modifier.weight(2f))
+                OutlinedTextField(imapPort.value, { imapPort.value = it }, label = { Text("Port") }, singleLine = true, modifier = Modifier.weight(1f))
+                OutlinedTextField(smtpHost.value, { smtpHost.value = it }, label = { Text("SMTP host") }, singleLine = true, modifier = Modifier.weight(2f))
+                OutlinedTextField(smtpPort.value, { smtpPort.value = it }, label = { Text("Port") }, singleLine = true, modifier = Modifier.weight(1f))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("IMAP: ")
+                MailServerSettings.Security.entries.forEach { s -> CheckBoxWithLabel(imapSecurity.value == s, { imapSecurity.value = s }, s.name) }
+                Text("  SMTP: ")
+                MailServerSettings.Security.entries.forEach { s -> CheckBoxWithLabel(smtpSecurity.value == s, { smtpSecurity.value = s }, s.name) }
+            }
+            OutlinedTextField(username.value, { username.value = it }, label = { Text("Login name (empty: the address)") }, singleLine = true)
+            Button(onClick = {
+                val settings = if (manual.value) MailAccountSettings(
+                    imap = MailServerSettings(imapHost.value.trim(), imapPort.value.trim().toIntOrNull() ?: 0, imapSecurity.value, username.value.trim()),
+                    smtp = MailServerSettings(smtpHost.value.trim(), smtpPort.value.trim().toIntOrNull() ?: 0, smtpSecurity.value, username.value.trim()),
+                ) else null
+                result.value = "Adding (checking both logins)..."
+                scope.launch {
+                    result.value = accountRepository.addMailAccount(email.value, password.value, senderName.value, name.value, settings).fold(
+                        { "Added ${it.id} (${it.emailAddress}); syncing" },
+                        { "Add failed: ${it.describe()}" }
+                    )
+                }
+            }) { Text("addMailAccount()") }
+            if (result.value.isNotEmpty()) Text(result.value)
         }
     }
 

@@ -1,8 +1,13 @@
 // Accounts: where calendars come from and sync to.
 //
 // An account is one Akonadi resource (agent instance): a CalDAV server, a
-// Google account, or (for tests) a local .ics file. The bridge creates and
-// configures them, since Akonadi's own setup dialogs need a desktop.
+// Google account, a mail account (IMAP), or (for tests) a local .ics file.
+// The bridge creates and configures them, since Akonadi's own setup dialogs
+// need a desktop.
+//
+// A mail account is three things the bridge creates and removes together:
+// the IMAP account (the resource: reading), an SMTP server (sending) and an
+// identity (the sender's name and address, which SMTP server to use).
 //
 // Accounts that log in with OAuth (Google) need a browser: adding one, or a
 // login that has expired, starts a login that the HMI shows through
@@ -35,11 +40,29 @@ service AccountService {
   // on AuthService.WatchAuthRequests. The account says needs_login until
   // the login finishes.
   rpc AddGoogleAccount(AddGoogleAccountRequest) returns (StartLoginResponse);
+  // Finds an e-mail address's IMAP and SMTP servers, like mail programs'
+  // account wizards: the provider database (Thunderbird's ISPDB), the
+  // domain's own autoconfig file, the ISPDB entry of the domain's mail
+  // server (MX: custom domains at big providers), DNS SRV records (RFC
+  // 6186), then the usual host names (imap.<domain>, ...) if they answer.
+  // NOT_FOUND if nothing turned up (ask for the servers); INVALID_ARGUMENT
+  // for something that isn't an e-mail address.
+  rpc DiscoverMailSettings(DiscoverMailSettingsRequest) returns (DiscoverMailSettingsResponse);
+  // Creates a mail account: IMAP account, SMTP server and identity, with
+  // the servers given or discovered (DiscoverMailSettings), and starts a
+  // first sync. Both logins are tried first: UNAUTHENTICATED if a server
+  // refuses the password, UNAVAILABLE if it can't be reached (message:
+  // which server and why); nothing is created then. Servers said to want a
+  // browser login (OAuth2) get the password too (app passwords);
+  // FAILED_PRECONDITION if they refuse it (e.g. Outlook.com). INVALID_ARGUMENT
+  // for a malformed address or missing password.
+  rpc AddMailAccount(AddMailAccountRequest) returns (Account);
   // Starts a new login for an account that says needs_login.
   // FAILED_PRECONDITION for account types without OAuth.
   rpc StartLogin(StartLoginRequest) returns (StartLoginResponse);
   // Removes the account, its stored password/tokens and its local copy of
-  // the data (nothing on the server is deleted).
+  // the data (nothing on the server is deleted). Mail accounts: also their
+  // SMTP server and identity.
   rpc RemoveAccount(RemoveAccountRequest) returns (google.protobuf.Empty);
   // Offline accounts don't sync (data stays readable). Akonadi also takes
   // accounts offline by itself when the network is down.
@@ -54,6 +77,7 @@ enum AccountType {
   ACCOUNT_TYPE_CALDAV = 2;     // akonadi_davgroupware_resource
   ACCOUNT_TYPE_GOOGLE = 3;     // akonadi_google_resource
   ACCOUNT_TYPE_ICAL_FILE = 4;  // akonadi_ical_resource (tests, local files)
+  ACCOUNT_TYPE_IMAP = 5;       // akonadi_imap_resource (mail)
 }
 
 enum AccountState {
@@ -85,6 +109,54 @@ message Account {
   // sync went through without errors. Errors don't always make the state
   // BROKEN: most accounts go back to IDLE and try again at the next sync.
   string last_error = 10;
+  // Mail accounts: the address mail is sent from and the sender's name
+  // (the identity's); empty for other accounts.
+  string email_address = 11;
+  string sender_name = 12;
+}
+
+// How a connection to a mail server is encrypted.
+enum MailSecurity {
+  MAIL_SECURITY_UNSPECIFIED = 0;
+  MAIL_SECURITY_TLS = 1;       // TLS from the start (IMAPS 993, SMTPS 465)
+  MAIL_SECURITY_STARTTLS = 2;  // plain, then STARTTLS (IMAP 143, submission 587)
+  MAIL_SECURITY_NONE = 3;      // no encryption (only for local test servers)
+}
+
+// How a mail server takes the login.
+enum MailAuthMethod {
+  MAIL_AUTH_METHOD_UNSPECIFIED = 0;
+  // A password, sent as is (PLAIN, LOGIN; protected by TLS).
+  MAIL_AUTH_METHOD_PASSWORD = 1;
+  // A password, hashed (CRAM-MD5).
+  MAIL_AUTH_METHOD_PASSWORD_ENCRYPTED = 2;
+  // A browser login (OAuth2): not supported for mail accounts yet;
+  // AddMailAccount tries the password (an app password) instead.
+  MAIL_AUTH_METHOD_OAUTH2 = 3;
+}
+
+message MailServer {
+  string host = 1;
+  int32 port = 2;
+  MailSecurity security = 3;
+  // The login name; empty = the e-mail address.
+  string username = 4;
+  // UNSPECIFIED = PASSWORD.
+  MailAuthMethod auth = 5;
+}
+
+message MailSettings {
+  MailServer imap = 1;
+  MailServer smtp = 2;
+}
+
+enum MailSettingsSource {
+  MAIL_SETTINGS_SOURCE_UNSPECIFIED = 0;
+  MAIL_SETTINGS_SOURCE_ISPDB = 1;        // Thunderbird's provider database
+  MAIL_SETTINGS_SOURCE_PROVIDER = 2;     // the domain's autoconfig file
+  MAIL_SETTINGS_SOURCE_MX = 3;           // the ISPDB entry of the domain's mail server
+  MAIL_SETTINGS_SOURCE_DNS_SRV = 4;      // SRV records (RFC 6186)
+  MAIL_SETTINGS_SOURCE_GUESS = 5;        // imap.<domain> and the like answered
 }
 
 message ListAccountsRequest {}
@@ -113,6 +185,35 @@ message AddGoogleAccountRequest {
   string name = 1;
   // E-mail to suggest on Google's login page; optional.
   string login_hint = 2;
+}
+
+message DiscoverMailSettingsRequest {
+  string email = 1;
+}
+
+message DiscoverMailSettingsResponse {
+  MailSettings settings = 1;
+  MailSettingsSource source = 2;
+  // The provider's name, if known (e.g. "Fastmail").
+  string provider_name = 3;
+  // True when the provider prefers a browser login (OAuth2): a password
+  // then usually has to be an app password (Gmail, iCloud, Yahoo,
+  // Fastmail). Also set when only OAuth2 is listed (auth OAUTH2): an app
+  // password may still work.
+  bool app_password_needed = 4;
+}
+
+message AddMailAccountRequest {
+  string email = 1;
+  string password = 2;
+  // The sender's name in sent mail ("Stefan Linster").
+  string sender_name = 3;
+  // Shown in the HMI; empty = the e-mail address.
+  string name = 4;
+  // The servers; unset = discovered (DiscoverMailSettings).
+  MailSettings settings = 5;
+  // How often to check for new mail, in minutes; 0 = the default (5).
+  int32 check_interval_minutes = 6;
 }
 
 message StartLoginRequest {

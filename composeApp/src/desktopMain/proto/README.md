@@ -89,6 +89,8 @@ Development: run the bridge on the laptop (`scripts/run-dev.sh
 | `MailRepository` | what screens and the notifier use: `RemoteMailRepository` (the bridge) or `FakeMailRepository` (sample data), picked by `E39Config.PimConfig.Mail.useFakeData` at startup (`MailModule`) |
 | `MailSettingsRepository` | quick replies and notification settings (`E39Config.PimConfig.Mail`) |
 
+Mail accounts (adding with discovered servers, removing) go through
+`calendar.repo.backend.RemoteAccountRepository` like the calendar accounts.
 `email.notifier.MailNotifierService` (platform service group "Pim") posts
 new-mail and sent/not-sent notifications. Debug: Debug Launchpad → Mail
 (PIM Bridge) Debug.
