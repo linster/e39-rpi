@@ -3,7 +3,8 @@
 // They come from the accounts the bridge already has: a CalDAV server's
 // address books (CardDAV; AccountService.AddCalDavAccount with contacts,
 // or SetContactsEnabled for an existing account) and Google contacts.
-// Read-only for now.
+// Contacts can be created, edited and deleted; changes go to the account's
+// server at its next sync.
 //
 // IDs are opaque strings (Akonadi's item and collection IDs today); they
 // survive restarts but not removing and adding an account again.
@@ -13,6 +14,8 @@ syntax = "proto3";
 package e39pim.v1;
 
 import "e39pim_api/v1/common.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 option java_package = "ca.stefanm.e39pim.v1";
 option java_multiple_files = true;
@@ -40,6 +43,19 @@ service ContactService {
   // `ready` first, then a notice when address books or contacts change
   // (coalesced): re-query then.
   rpc WatchContacts(WatchContactsRequest) returns (stream ContactNotice);
+
+  // Writing. INVALID_ARGUMENT for a contact with nothing to call it by (no
+  // name, organization, phone number or e-mail address) or a bad field;
+  // FAILED_PRECONDITION for a read-only address book; ABORTED if the
+  // contact changed since `revision` (re-read it and try again).
+
+  // A new contact in an address book (empty: the first writable one).
+  rpc CreateContact(CreateContactRequest) returns (Contact);
+  // Changes the fields named in update_mask (empty: all of ContactFields).
+  // What ContactFields doesn't have (pictures, custom fields, the
+  // account's own data) is kept.
+  rpc UpdateContact(UpdateContactRequest) returns (Contact);
+  rpc DeleteContact(DeleteContactRequest) returns (google.protobuf.Empty);
 }
 
 message AddressBook {
@@ -124,6 +140,9 @@ message ContactSummary {
   string primary_phone = 8;
   string primary_email = 9;
   bool has_photo = 10;
+  // Changes with every change of the contact; 1 or more. For
+  // UpdateContact and DeleteContact.
+  int64 revision = 11;
 }
 
 message Contact {
@@ -202,6 +221,48 @@ message ContactPhoto {
   bytes jpeg = 1;
   int32 width = 2;
   int32 height = 3;
+}
+
+// What can be written. Phone numbers: `number` (as entered), `type`,
+// `preferred`; e164 is ignored. PHONE_TYPE_MAIN is stored as a voice
+// number (read back as OTHER: vCard has no "main").
+message ContactFields {
+  string given_name = 1;
+  string family_name = 2;
+  string organization = 3;
+  string nickname = 4;
+  string title = 5;
+  repeated PhoneNumber phones = 6;
+  repeated EmailAddress emails = 7;
+  // `formatted` is ignored (made from the parts).
+  repeated PostalAddress addresses = 8;
+  // Unset: no birthday.
+  Date birthday = 9;
+  string note = 10;
+  repeated string urls = 11;
+}
+
+message CreateContactRequest {
+  // Empty: the first writable address book.
+  string address_book_id = 1;
+  ContactFields contact = 2;
+}
+
+message UpdateContactRequest {
+  string contact_id = 1;
+  // ContactSummary.revision this change is based on; 0 = don't check.
+  int64 revision = 2;
+  ContactFields contact = 3;
+  // Paths of ContactFields: given_name, family_name, organization,
+  // nickname, title, phones, emails, addresses, birthday, note, urls.
+  // Empty = all of them. INVALID_ARGUMENT for others.
+  google.protobuf.FieldMask update_mask = 4;
+}
+
+message DeleteContactRequest {
+  string contact_id = 1;
+  // 0 = don't check.
+  int64 revision = 2;
 }
 
 message WatchContactsRequest {}

@@ -26,6 +26,8 @@ data class ContactSummary(
     val primaryPhone: String,
     val primaryEmail: String,
     val hasPhoto: Boolean,
+    /** Changes with every change; give it back when editing (1 or more). */
+    val revision: Long = 0,
 ) {
     /** The letter for A–Z jumps ('#' for anything that isn't a letter). */
     val initial: Char get() = sortKey.firstOrNull()?.takeIf { it.isLetter() } ?: '#'
@@ -76,6 +78,61 @@ data class Contact(
     val note: String,
     val urls: List<String>,
 )
+
+/**
+ * What can be written: a new contact, or the [ContactField]s of an edit.
+ * Phone numbers as entered (their e164 is ignored); addresses' formatted is
+ * made from the parts.
+ */
+data class ContactInput(
+    val givenName: String = "",
+    val familyName: String = "",
+    val organization: String = "",
+    val nickname: String = "",
+    val title: String = "",
+    val phones: List<PhoneNumber> = emptyList(),
+    val emails: List<EmailAddress> = emptyList(),
+    val addresses: List<PostalAddress> = emptyList(),
+    val birthday: LocalDate? = null,
+    val note: String = "",
+    val urls: List<String> = emptyList(),
+) {
+    companion object {
+        /** An edit form starting from what a contact has. */
+        fun from(contact: Contact) = ContactInput(
+            givenName = contact.summary.givenName,
+            familyName = contact.summary.familyName,
+            organization = contact.summary.organization,
+            nickname = contact.nickname,
+            title = contact.title,
+            phones = contact.phones,
+            emails = contact.emails,
+            addresses = contact.addresses,
+            birthday = contact.birthday,
+            note = contact.note,
+            urls = contact.urls,
+        )
+
+        /** "Save this caller": a contact with just a number. */
+        fun forNumber(number: String, type: PhoneNumber.Type = PhoneNumber.Type.MOBILE, givenName: String = "", familyName: String = "") =
+            ContactInput(givenName = givenName, familyName = familyName, phones = listOf(PhoneNumber(number, "", type, "", preferred = true)))
+    }
+}
+
+/** The fields of an edit ([ContactsRepository.updateContact]); the protobuf field names. */
+enum class ContactField(val path: String) {
+    GIVEN_NAME("given_name"),
+    FAMILY_NAME("family_name"),
+    ORGANIZATION("organization"),
+    NICKNAME("nickname"),
+    TITLE("title"),
+    PHONES("phones"),
+    EMAILS("emails"),
+    ADDRESSES("addresses"),
+    BIRTHDAY("birthday"),
+    NOTE("note"),
+    URLS("urls"),
+}
 
 /** A page or search result: [contacts] out of [totalCount] that match. */
 data class ContactList(
