@@ -38,7 +38,7 @@ run_grpc_server` in e39-rpi-maps) or the e39-rpi QEMU image (forwards
 `localhost:50051`); POIs are visible in its Django admin
 (`admin`/`e39rpi`).
 
-# PIM bridge API (gRPC): calendars and mail
+# PIM bridge API (gRPC): calendars, mail and contacts
 
 `e39pim_api/v1/*.proto` is a **copy** of the PIM bridge's API (e39-rpi-pim,
 `proto/e39pim_api/v1/`: Akonadi behind it); `e39pim_api/SOURCE` says which
@@ -94,3 +94,18 @@ Mail accounts (adding with discovered servers, removing) go through
 `email.notifier.MailNotifierService` (platform service group "Pim") posts
 new-mail and sent/not-sent notifications. Debug: Debug Launchpad → Mail
 (PIM Bridge) Debug.
+
+## Contacts (`ca.stefanm.ibus.gui.pim.contacts.repo`)
+
+| Class | Layer |
+| --- | --- |
+| `ContactsGrpcClient` | transport: ContactService calls; `watchContacts()` as a `Flow` |
+| `ContactsChangeStream` | one WatchContacts stream shared by the contacts flows, reconnecting |
+| `ContactsMapper`, `ContactsModels.kt` | protobuf ⇄ HMI types (`AddressBook`, `ContactSummary`, `Contact`, `PhoneMatch`, ...) |
+| `ContactsRepository` | `RemoteContactsRepository` (the bridge) or `FakeContactsRepository` (sample data), picked by `E39Config.PimConfig.Contacts.useFakeData` at startup (`ContactsModule`) |
+| `CallerIdLookup` | caller names for the telephone code: a number as the phone reports it → name and which number, within 3 s, cached |
+
+Contacts come from CalDAV accounts with CardDAV turned on
+(`RemoteAccountRepository.setContactsEnabled`; new CalDAV accounts include
+contacts) and Google accounts. Debug: Debug Launchpad → Contacts (PIM
+Bridge) Debug.
