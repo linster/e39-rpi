@@ -86,6 +86,21 @@ data class MessageList(
     val hasMore: Boolean get() = messages.size < totalCount
 }
 
+/** Page [page] (from 0) of a folder's messages, newest first, [pageSize] per page. */
+data class MessagePage(
+    val messages: List<MailSummary>,
+    val totalCount: Long,
+    val page: Int,
+    val pageSize: Int,
+) {
+    /** At least 1 (an empty folder has one empty page). */
+    val pageCount: Int get() = maxOf(1, ((totalCount + pageSize - 1) / pageSize).toInt())
+    val hasPrevious: Boolean get() = page > 0
+    val hasNext: Boolean get() = page + 1 < pageCount
+    /** 1-based position of the first message on this page ("101–200 of 3 412"). */
+    val firstNumber: Long get() = page.toLong() * pageSize + 1
+}
+
 /** A message to send. Reply: [inReplyTo]; forward: [forwardOf] (attached whole). */
 data class OutgoingMail(
     val to: List<MailAddress>,
