@@ -49,6 +49,8 @@ data class PimAccount(
     val emailAddress: String = "",
     /** Mail accounts: the sender's name in sent mail. */
     val senderName: String = "",
+    /** Contacts are synced from this account (CalDAV with CardDAV turned on, Google). */
+    val contactsEnabled: Boolean = false,
 ) {
     enum class Type { CALDAV, GOOGLE, IMAP, ICAL_FILE, OTHER }
     enum class State { IDLE, SYNCING, OFFLINE, NOT_CONFIGURED, BROKEN }
@@ -171,9 +173,19 @@ class RemoteAccountRepository @Inject constructor(
      * Adds a CalDAV account; the bridge tries the login first:
      * [PimBackendException.Unauthenticated] if the server refuses it,
      * [PimBackendException.Unavailable] if it can't be reached.
+     * [contacts]: also sync the server's address books (CardDAV).
      */
-    suspend fun addCalDavAccount(name: String, url: String, username: String, password: String): Result<PimAccount> = result {
-        client.addCalDavAccount(name.trim(), url.trim(), username.trim(), password).toPimAccount()
+    suspend fun addCalDavAccount(name: String, url: String, username: String, password: String, contacts: Boolean = true): Result<PimAccount> = result {
+        client.addCalDavAccount(name.trim(), url.trim(), username.trim(), password, contacts = contacts).toPimAccount()
+    }
+
+    /**
+     * CalDAV accounts: sync the server's address books too, or stop
+     * (their contacts leave the car, not the server).
+     * [PimBackendException.FailedPrecondition] for other account types.
+     */
+    suspend fun setContactsEnabled(account: PimAccount, enabled: Boolean): Result<PimAccount> = result {
+        client.setContactsEnabled(account.id, enabled).toPimAccount()
     }
 
     /** Adds a Google account and starts its login; the page shows up in [pendingLogins]. */
@@ -273,6 +285,7 @@ class RemoteAccountRepository @Inject constructor(
         lastError = lastError,
         emailAddress = emailAddress,
         senderName = senderName,
+        contactsEnabled = contactsEnabled,
     )
 
     private fun ca.stefanm.e39pim.v1.MailServer.toServer() = MailServerSettings(

@@ -69,6 +69,11 @@ service AccountService {
   rpc SetAccountOnline(SetAccountOnlineRequest) returns (Account);
   // Sync now instead of at the next interval.
   rpc SyncNow(SyncNowRequest) returns (google.protobuf.Empty);
+  // CalDAV accounts: also sync the server's address books (CardDAV), or
+  // stop (their contacts are removed from the car, not from the server).
+  // FAILED_PRECONDITION for other account types (Google accounts always
+  // have contacts, mail accounts never).
+  rpc SetContactsEnabled(SetContactsEnabledRequest) returns (Account);
 }
 
 enum AccountType {
@@ -113,6 +118,8 @@ message Account {
   // (the identity's); empty for other accounts.
   string email_address = 11;
   string sender_name = 12;
+  // Contacts are synced from this account (ContactService).
+  bool contacts_enabled = 13;
 }
 
 // How a connection to a mail server is encrypted.
@@ -177,6 +184,9 @@ message AddCalDavAccountRequest {
   string password = 4;
   // How often to sync, in minutes; 0 = the default (5).
   int32 refresh_interval_minutes = 5;
+  // Also sync the server's address books (CardDAV, found from the same
+  // URL).
+  bool contacts = 6;
 }
 
 message AddGoogleAccountRequest {
@@ -233,6 +243,11 @@ message RemoveAccountRequest {
 message SetAccountOnlineRequest {
   string account_id = 1;
   bool online = 2;
+}
+
+message SetContactsEnabledRequest {
+  string account_id = 1;
+  bool enabled = 2;
 }
 
 message SyncNowRequest {

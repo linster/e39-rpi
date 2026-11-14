@@ -1,0 +1,224 @@
+// Contacts: address books and the people in them.
+//
+// They come from the accounts the bridge already has: a CalDAV server's
+// address books (CardDAV; AccountService.AddCalDavAccount with contacts,
+// or SetContactsEnabled for an existing account) and Google contacts.
+// Read-only for now.
+//
+// IDs are opaque strings (Akonadi's item and collection IDs today); they
+// survive restarts but not removing and adding an account again.
+
+syntax = "proto3";
+
+package e39pim.v1;
+
+import "e39pim_api/v1/common.proto";
+
+option java_package = "ca.stefanm.e39pim.v1";
+option java_multiple_files = true;
+option java_outer_classname = "ContactsProto";
+
+service ContactService {
+  // Every address book of every account, by account, then name.
+  rpc ListAddressBooks(ListAddressBooksRequest) returns (ListAddressBooksResponse);
+  // Contacts sorted by name (sort_key), paged. INVALID_ARGUMENT for a bad
+  // page size or token, NOT_FOUND for an unknown address book.
+  rpc ListContacts(ListContactsRequest) returns (ListContactsResponse);
+  // One contact with all its details. NOT_FOUND if there's no such contact.
+  rpc GetContact(GetContactRequest) returns (Contact);
+  // Contacts whose name, nickname, organization or e-mail address contains
+  // the text (case- and accent-insensitive), or whose phone number contains
+  // its digits (3 or more). Sorted by name.
+  rpc SearchContacts(SearchContactsRequest) returns (ListContactsResponse);
+  // Who's calling: contacts with this phone number, however either side
+  // wrote it ("+1 306 555 0123", "(306) 555-0123", "555-0123" for a number
+  // in the same area). Exact matches first. An empty list if nobody has it.
+  rpc FindByPhoneNumber(FindByPhoneNumberRequest) returns (FindByPhoneNumberResponse);
+  // A contact's picture, scaled down to fit max_size (JPEG). NOT_FOUND if
+  // the contact has none (ContactSummary.has_photo).
+  rpc GetContactPhoto(GetContactPhotoRequest) returns (ContactPhoto);
+  // `ready` first, then a notice when address books or contacts change
+  // (coalesced): re-query then.
+  rpc WatchContacts(WatchContactsRequest) returns (stream ContactNotice);
+}
+
+message AddressBook {
+  string id = 1;
+  string account_id = 2;
+  string account_name = 3;
+  string name = 4;
+  bool read_only = 5;
+  int64 contact_count = 6;
+}
+
+enum PhoneType {
+  PHONE_TYPE_UNSPECIFIED = 0;
+  PHONE_TYPE_MOBILE = 1;
+  PHONE_TYPE_HOME = 2;
+  PHONE_TYPE_WORK = 3;
+  PHONE_TYPE_MAIN = 4;
+  PHONE_TYPE_FAX = 5;
+  PHONE_TYPE_PAGER = 6;
+  PHONE_TYPE_CAR = 7;
+  PHONE_TYPE_OTHER = 8;
+}
+
+message PhoneNumber {
+  // As stored ("(306) 555-0123").
+  string number = 1;
+  // E.164 ("+13065550123") if it could be worked out (with the bridge's
+  // default region for numbers without a country code), else empty.
+  string e164 = 2;
+  PhoneType type = 3;
+  // The account's own label, if it has one ("Cottage").
+  string label = 4;
+  bool preferred = 5;
+}
+
+enum EmailType {
+  EMAIL_TYPE_UNSPECIFIED = 0;
+  EMAIL_TYPE_HOME = 1;
+  EMAIL_TYPE_WORK = 2;
+  EMAIL_TYPE_OTHER = 3;
+}
+
+message EmailAddress {
+  string address = 1;
+  EmailType type = 2;
+  bool preferred = 3;
+}
+
+enum AddressType {
+  ADDRESS_TYPE_UNSPECIFIED = 0;
+  ADDRESS_TYPE_HOME = 1;
+  ADDRESS_TYPE_WORK = 2;
+  ADDRESS_TYPE_OTHER = 3;
+}
+
+message PostalAddress {
+  AddressType type = 1;
+  string street = 2;
+  string locality = 3;     // city
+  string region = 4;       // province, state
+  string postal_code = 5;
+  string country = 6;
+  // The whole address on one line, for showing and for geocoding
+  // ("123 Main St, Regina SK S4P 1A1, Canada").
+  string formatted = 7;
+  string label = 8;
+}
+
+// What lists show.
+message ContactSummary {
+  string id = 1;
+  string address_book_id = 2;
+  // "Anna Kowalski", else the organization, nickname, e-mail or number.
+  string display_name = 3;
+  // For sorting and A–Z jumps: family name first, upper case, accents
+  // removed ("KOWALSKI ANNA"); the display name if there's no family name.
+  string sort_key = 4;
+  string given_name = 5;
+  string family_name = 6;
+  string organization = 7;
+  // The preferred (else first) number and address, for one-line lists.
+  string primary_phone = 8;
+  string primary_email = 9;
+  bool has_photo = 10;
+}
+
+message Contact {
+  ContactSummary summary = 1;
+  string nickname = 2;
+  string title = 3;          // job title
+  repeated PhoneNumber phones = 4;
+  repeated EmailAddress emails = 5;
+  repeated PostalAddress addresses = 6;
+  // Unset if unknown; year 0 if only the day is known.
+  Date birthday = 7;
+  string note = 8;
+  repeated string urls = 9;
+}
+
+message ListAddressBooksRequest {}
+
+message ListAddressBooksResponse {
+  repeated AddressBook address_books = 1;
+}
+
+message ListContactsRequest {
+  // Empty: all address books.
+  string address_book_id = 1;
+  // 1 .. 500; 0 = 100.
+  int32 page_size = 2;
+  // From the previous response; empty for the first page.
+  string page_token = 3;
+}
+
+message ListContactsResponse {
+  repeated ContactSummary contacts = 1;
+  // Empty on the last page.
+  string next_page_token = 2;
+  // Matching contacts in all pages.
+  int64 total_count = 3;
+}
+
+message GetContactRequest {
+  string contact_id = 1;
+}
+
+message SearchContactsRequest {
+  string text = 1;
+  // Empty: all address books.
+  string address_book_id = 2;
+  // 1 .. 500; 0 = 50.
+  int32 limit = 3;
+}
+
+message FindByPhoneNumberRequest {
+  // As the phone reported it.
+  string number = 1;
+}
+
+message PhoneMatch {
+  ContactSummary contact = 1;
+  // The contact's number that matched.
+  PhoneNumber phone = 2;
+  // True if both numbers are the same E.164 number; false for weaker
+  // matches (the same national number, or a number without its area code).
+  bool exact = 3;
+}
+
+message FindByPhoneNumberResponse {
+  repeated PhoneMatch matches = 1;
+}
+
+message GetContactPhotoRequest {
+  string contact_id = 1;
+  // The longer side, in pixels: 16 .. 1024; 0 = 128.
+  int32 max_size = 2;
+}
+
+message ContactPhoto {
+  bytes jpeg = 1;
+  int32 width = 2;
+  int32 height = 3;
+}
+
+message WatchContactsRequest {}
+
+message ContactNotice {
+  oneof notice {
+    // First message on every stream.
+    Ready ready = 1;
+    // Address books were added, removed or renamed: re-run ListAddressBooks.
+    AddressBooksChanged address_books_changed = 2;
+    // Contacts in this address book were added, changed or removed.
+    ContactsChanged contacts_changed = 3;
+  }
+
+  message Ready {}
+  message AddressBooksChanged {}
+  message ContactsChanged {
+    string address_book_id = 1;
+  }
+}
