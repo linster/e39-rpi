@@ -57,6 +57,18 @@ class FakeMailRepository @Inject constructor() : MailRepository {
         }.distinctUntilChanged()
     }
 
+    override fun messagePage(folderId: String, page: Int, pageSize: Int, unreadOnly: Boolean): Flow<MessagePage> {
+        require(page >= 0) { "page $page is negative" }
+        require(pageSize in 1..MailRepository.MAX_MESSAGES) { "pageSize $pageSize not in 1..${MailRepository.MAX_MESSAGES}" }
+        return store.map { s ->
+            val all = s.messages.map { it.summary }
+                .filter { it.folderId == folderId && (!unreadOnly || !it.seen) }
+                .sortedByDescending { it.date }
+            val p = minOf(page, maxOf(0, (all.size - 1) / pageSize))
+            MessagePage(all.drop(p * pageSize).take(pageSize), all.size.toLong(), p, pageSize)
+        }.distinctUntilChanged()
+    }
+
     override fun unreadInboxCount(): Flow<Long> = folders()
         .map { folders -> folders.filter { it.role == MailFolderRole.INBOX }.sumOf { it.unreadCount } }
         .distinctUntilChanged()
@@ -209,6 +221,7 @@ class FakeMailRepository @Inject constructor() : MailRepository {
             folder("3", "fake_home", "Home", listOf("Sent"), MailFolderRole.SENT),
             folder("4", "fake_home", "Home", listOf("Drafts"), MailFolderRole.DRAFTS),
             folder("5", "fake_home", "Home", listOf("Trash"), MailFolderRole.TRASH),
+            folder("6", "fake_home", "Home", listOf("E39 list"), MailFolderRole.OTHER),
             folder("11", "fake_work", "Work", listOf("Inbox"), MailFolderRole.INBOX),
             folder("12", "fake_work", "Work", listOf("Sent Items"), MailFolderRole.SENT),
             folder("13", "fake_work", "Work", listOf("Deleted Items"), MailFolderRole.TRASH),
@@ -263,6 +276,13 @@ class FakeMailRepository @Inject constructor() : MailRepository {
             msg("12", 1.days, MailAddress(ME_NAME, "stefan@work.example.com"), "Re: Q3 report draft",
                 "Looks good. Two small comments inline.", to = listOf(boss)),
         )
-        return Store(folders, messages)
+        // A busy mailing list: more than one page (MailRepository.PAGE_SIZE).
+        val topics = listOf("M54 cooling system", "VANOS seals", "Window regulator", "Nav screen pixels", "Rear subframe", "DISA valve")
+        val list = MailAddress("E39 list", "e39@lists.example.org")
+        val listMessages = (1..250).map { n ->
+            msg("6", (n * 3).hours, list, "[e39] ${topics[n % topics.size]} (#${251 - n})",
+                "Message ${251 - n} of the E39 mailing list.", seen = n > 3)
+        }
+        return Store(folders, messages + listMessages)
     }
 }

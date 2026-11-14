@@ -30,6 +30,9 @@ import ca.stefanm.ibus.gui.networkSetup.debug.ui.NetworkManagerDebugLaunchpad
 import ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
+import ca.stefanm.ibus.gui.pim.email.views.MailScreen
+import ca.stefanm.ibus.gui.pim.email.views.MessageListScreen
+import ca.stefanm.ibus.gui.pim.email.views.MessageReaderScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.LoginScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.NotificationPreferencesScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.VerificationSetupScreen
@@ -214,7 +217,10 @@ class NavigationModule {
         smoothScrollToolbarTest: SmoothScrollToolbarTest,
         weatherAppHomeScreen: WeatherAppHomeScreen,
         weatherAppSettingsScreen: WeatherAppSettingsScreen,
-        multiCityListEditorScreen: MultiCityListEditorScreen
+        multiCityListEditorScreen: MultiCityListEditorScreen,
+        mailScreen: MailScreen,
+        messageListScreen: MessageListScreen,
+        messageReaderScreen: MessageReaderScreen,
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -315,7 +321,10 @@ class NavigationModule {
         smoothScrollToolbarTest,
         weatherAppHomeScreen,
         weatherAppSettingsScreen,
-        multiCityListEditorScreen
+        multiCityListEditorScreen,
+        mailScreen,
+        messageListScreen,
+        messageReaderScreen,
     )
 }
 
