@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailFormat
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailboxListRepo
+import ca.stefanm.ibus.gui.pim.contacts.views.ContactsScreen
 import ca.stefanm.ibus.gui.pim.email.views.MailScreen
 import ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
@@ -80,6 +81,10 @@ class BMWMainMenu @Inject constructor(
                 TextMenuItem(
                     title = if (unreadMail > 0) "Mail (${MailFormat.unreadBadge(unreadMail)})" else "Mail",
                     onClicked = { navigationNodeTraverser.navigateToNode(MailScreen::class.java) }
+                ),
+                TextMenuItem(
+                    title = "Contacts",
+                    onClicked = { navigationNodeTraverser.navigateToNode(ContactsScreen::class.java) }
                 )
             )
             val neItems = listOf<MenuItem>(

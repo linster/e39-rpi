@@ -42,6 +42,9 @@ CONFIG = """e39Config {{
         mail {{
             useFakeData={fake_mail}
         }}
+        contacts {{
+            useFakeData={fake_mail}
+        }}
     }}
 }}
 """
@@ -51,6 +54,20 @@ THEME = """themeConfig {
     themeName=BmwBlueDoubledPixels
 }
 """
+
+
+def wait_window_settled(hmi, still_s=1.0, timeout_s=20):
+    """Waits until the HMI window has stayed put for still_s (it moves once after opening)."""
+    deadline = time.time() + timeout_s
+    last, since = None, time.time()
+    while time.time() < deadline:
+        s = hmi.state()
+        where = (s.window_x, s.window_y)
+        if where != last:
+            last, since = where, time.time()
+        elif time.time() - since >= still_s:
+            return
+        time.sleep(0.2)
 
 
 def free_port():
@@ -145,6 +162,7 @@ class LocalTarget:
             except Exception:
                 return False
         self._wait(ready, "the HMI window", self.startup_timeout_s)
+        wait_window_settled(hmi)
 
     def _start_xvfb(self):
         r, w = os.pipe()

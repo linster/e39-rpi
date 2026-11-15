@@ -38,6 +38,15 @@ device-side items (Yocto layers) are in e39-rpi-yocto's TODO.md.
       Found by uitest/ `test_00_screens_registered` (known there; register
       it, then drop it from `KNOWN_UNREGISTERED`).
 
+- [ ] **SmoothScroll doesn't scroll to a row behind the footer.** Its
+      page size is its `BoxWithConstraints` height, which reaches under
+      the window's footer (the clock bar, drawn over the content): a row
+      that ends under the footer counts as on screen, so selecting it
+      doesn't scroll, and half of it (and its knob frame) stays hidden.
+      Seen on the contact details screen (the e-mail row; found by the UI
+      tests). Fix: take the footer's height off the viewport (or pad the
+      list's bottom by it).
+
 ## KnobListenerService: dropped knob events
 
 Turns and presses get lost while screens change (QEMU: turns 0.25 s

@@ -27,7 +27,7 @@ def pytest_addoption(parser):
                 help="probe: input through the test probe (default, waits for the HMI between events); "
                      "ibus: real IBus packets (a pty locally, QEMU's IBus socket)")
     g.addoption("--mail", choices=["fake", "bridge"], default="fake",
-                help="local target: sample mail (default) or the PIM bridge's (--bridge)")
+                help="local target: sample mail and contacts (default) or the PIM bridge's (--bridge)")
     g.addoption("--bridge", default="localhost:50052", help="the PIM bridge for --mail bridge (host:port)")
     g.addoption("--bridge-maildir", default=None,
                 help="--mail bridge: the bridge's Local Folders maildir on this machine (e.g. "
@@ -45,6 +45,7 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     config.addinivalue_line("markers", "fake_mail: needs sample mail (skipped otherwise)")
     config.addinivalue_line("markers", "bridge_mail: needs the PIM bridge's mail (skipped otherwise)")
+    config.addinivalue_line("markers", "fake_contacts: needs sample contacts (skipped otherwise)")
 
 
 @pytest.fixture(scope="session")
@@ -120,9 +121,12 @@ def hmi(request, hmi_session, out_dir):
         pytest.skip("needs sample mail (useFakeData)")
     if request.node.get_closest_marker("bridge_mail") and state.fake_mail:
         pytest.skip("needs the PIM bridge's mail (--mail bridge)")
+    if request.node.get_closest_marker("fake_contacts") and not state.fake_contacts:
+        pytest.skip("needs sample contacts (useFakeData)")
     h.close_overlays()
-    h.reset_mail_app()
     h.go_root()
+    h.reset_mail_app()
+    h.reset_contacts_app()
     yield h
     rep = getattr(request.node, "rep_call", None)
     if rep is not None and rep.failed:

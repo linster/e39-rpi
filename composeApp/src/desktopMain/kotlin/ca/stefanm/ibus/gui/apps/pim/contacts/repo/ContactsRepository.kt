@@ -28,6 +28,13 @@ interface ContactsRepository {
      */
     fun contacts(limit: Int, addressBookId: String? = null): Flow<ContactList>
 
+    /**
+     * Every contact of one address book or all, by name (the bridge's order):
+     * for lists that page and jump by letter themselves. Address books are
+     * small (hundreds, a few thousand summaries). Re-emits on changes.
+     */
+    fun allContacts(addressBookId: String? = null): Flow<ContactList>
+
     suspend fun getContact(contactId: String): Result<Contact>
 
     /** Names, nickname, organization, e-mail; or phone digits if [text] is a number. Sorted by name. */

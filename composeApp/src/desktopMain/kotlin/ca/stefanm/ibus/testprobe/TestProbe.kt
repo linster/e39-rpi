@@ -22,6 +22,9 @@ import ca.stefanm.e39hmi.test.v1.NavigateRequest
 import ca.stefanm.e39hmi.test.v1.ResetFakeMailRequest
 import ca.stefanm.e39hmi.test.v1.ResetFakeMailResponse
 import ca.stefanm.e39hmi.test.v1.ResetMailAppRequest
+import ca.stefanm.e39hmi.test.v1.ResetContactsAppRequest
+import ca.stefanm.e39hmi.test.v1.ResetContactsAppResponse
+import ca.stefanm.e39hmi.test.v1.resetContactsAppResponse
 import ca.stefanm.e39hmi.test.v1.ResetMailAppResponse
 import ca.stefanm.e39hmi.test.v1.resetMailAppResponse
 import ca.stefanm.e39hmi.test.v1.ScreenshotRequest
@@ -47,6 +50,9 @@ import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
+import ca.stefanm.ibus.gui.pim.contacts.repo.ContactsRepository
+import ca.stefanm.ibus.gui.pim.contacts.repo.FakeContactsRepository
+import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactListRepo
 import ca.stefanm.ibus.gui.pim.email.repo.FakeMailRepository
 import ca.stefanm.ibus.gui.pim.email.repo.MailAddress
 import ca.stefanm.ibus.gui.pim.email.repo.MailRepository
@@ -99,6 +105,8 @@ class TestProbe @Inject constructor(
     private val mailSettings: Provider<MailSettingsRepository>,
     private val mailCompose: Provider<MailComposeRepo>,
     private val messageLists: Provider<MessageListRepo>,
+    private val contactsRepository: Provider<ContactsRepository>,
+    private val contactLists: Provider<ContactListRepo>,
     private val logger: Logger,
 ) {
     companion object {
@@ -172,8 +180,14 @@ class TestProbe @Inject constructor(
             uiChanges = this@TestProbe.uiChanges.get()
             quietMs = System.currentTimeMillis() - lastChangeAt.get()
             droppedInputs = this@TestProbe.droppedInputs.get()
-            hmiWindowOpen = hmiWindow() != null
+            val window = hmiWindow()
+            hmiWindowOpen = window != null
+            window?.let { w -> runCatching { w.locationOnScreen }.getOrNull() }?.let { p ->
+                windowX = p.x
+                windowY = p.y
+            }
             fakeMail = mailRepository.get() is FakeMailRepository
+            fakeContacts = contactsRepository.get() is FakeContactsRepository
         }
     }
 
@@ -290,7 +304,18 @@ class TestProbe @Inject constructor(
         val cutBottom = t.y + t.height > image.height - edge
         val top = cutTop || (y0 until y0 + band).any(::isLine)
         val bottom = cutBottom || (y1 - band until y1).any(::isLine)
-        return top && bottom && !(cutTop && cutBottom)
+        if (top && bottom && !(cutTop && cutBottom)) return true
+        // Its bottom hidden (e.g. behind the footer, drawn over the list):
+        // the frame's top line and its right edge (an unselected row's chip
+        // is on the left; a neighbour's frame only reaches in from above or
+        // below).
+        val reachesFooter = t.y + t.height > image.height - 64
+        if (reachesFooter && !cutTop && (y0 until y0 + band).any(::isLine)) {
+            val rightEdge = (maxOf(x0, x1 - 24) until x1)
+            val rows = (y0 until y1).count { y -> rightEdge.any { matches(image.getRGB(it, y)) } }
+            if (rows * 10 >= (y1 - y0) * 5) return true
+        }
+        return false
     }
 
     private fun toInputEvents(e: ca.stefanm.e39hmi.test.v1.InputEvent): List<InputEvent> = when (e.eventCase) {
@@ -419,6 +444,14 @@ class TestProbe @Inject constructor(
                 (mailRepository.get() as? FakeMailRepository)?.reset()
             }
             return resetMailAppResponse { }
+        }
+
+        override suspend fun resetContactsApp(request: ResetContactsAppRequest): ResetContactsAppResponse {
+            withContext(Dispatchers.Main) {
+                contactLists.get().clearPositions()
+                (contactsRepository.get() as? FakeContactsRepository)?.reset()
+            }
+            return resetContactsAppResponse { }
         }
 
         override suspend fun resetFakeMail(request: ResetFakeMailRequest): ResetFakeMailResponse {

@@ -58,6 +58,27 @@ class RemoteContactsRepository @Inject constructor(
         )
     }
 
+    override fun allContacts(addressBookId: String?): Flow<ContactList> = reloading(
+        what = "All contacts",
+        affects = {
+            it.hasReady() || it.hasAddressBooksChanged() ||
+                (it.hasContactsChanged() && (addressBookId == null || it.contactsChanged.addressBookId == addressBookId))
+        },
+        load = {
+            val contacts = mutableListOf<ContactSummary>()
+            var token = ""
+            var total: Long
+            do {
+                val page = client.listContacts(addressBookId ?: "", ContactsRepository.MAX_CONTACTS, token)
+                contacts += page.contactsList.map { it.toContactSummary() }
+                total = page.totalCount
+                token = page.nextPageToken
+            } while (token.isNotEmpty())
+            ContactList(contacts, total)
+        },
+        onNotFound = { ContactList(emptyList(), 0) },
+    )
+
     override suspend fun getContact(contactId: String): Result<Contact> = result {
         client.getContact(contactId).toContact()
     }

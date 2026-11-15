@@ -25,16 +25,24 @@ internal class FakeContactsRepositoryTest {
     @Test
     fun addressBooksAndOrder() = runBlocking {
         val books = repo.addressBooks().first()
-        assertEquals(listOf(4L, 4L, 1L), books.map { it.contactCount })
+        assertEquals(listOf(4L, 4L, 1L, 250L), books.map { it.contactCount })
         assertTrue(books[2].readOnly)
-        val all = repo.contacts(100).first()
-        assertEquals(9L, all.totalCount)
+        val all = repo.allContacts().first()
+        assertEquals(259L, all.totalCount)
+        assertEquals(259, all.contacts.size)
+        // The sample people, by name (the club's members in between).
         assertEquals(
             listOf("Zoë Adams", "Carl Carlson", "IT Help Desk", "Anna Kowalski", "René Lévesque", "Bob Ng",
                 "Prairie Euro Garage", "someone@example.org", "Dana Whitford"),
-            all.contacts.map { it.displayName },
+            all.contacts.filter { it.addressBookId != "b4" }.map { it.displayName },
         )
         assertEquals('A', all.contacts.first().initial)
+        assertEquals(all.contacts.sortedBy { it.sortKey }, all.contacts)
+        // The club: 250 different members, family names A to Y.
+        val club = repo.allContacts(books[3].id).first().contacts
+        assertEquals(250, club.map { it.displayName }.distinct().size)
+        assertEquals(('A'..'Y').toList(), club.map { it.initial }.distinct())
+        assertEquals(100, repo.contacts(100).first().contacts.size)
         val page = repo.contacts(3, books[0].id).first()
         assertEquals(3, page.contacts.size)
         assertEquals(4L, page.totalCount)
@@ -88,7 +96,7 @@ internal class FakeContactsRepositoryTest {
         assertEquals("+13065550144", saved.phones.single().e164)
         assertEquals(1L, saved.summary.revision)
         assertEquals("Tow Truck", repo.findByPhoneNumber("306 555 0144").getOrThrow().single().contact.displayName)
-        assertEquals(10L, repo.contacts(100).first().totalCount)
+        assertEquals(260L, repo.contacts(100).first().totalCount)
 
         // Only the nickname; the number stays.
         val edited = repo.updateContact(saved.summary, ContactInput(nickname = "Tow guy", givenName = "ignored"), setOf(ContactField.NICKNAME)).getOrThrow()
