@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Placeable
@@ -143,10 +144,12 @@ object SmoothScroll {
         }
 
         val scrollState = rememberScrollState(0)
-        val childIndexToPixelsFromTop = mutableMapOf<Int, Int>()
-
-        val childIndexToPage = mutableMapOf<Int, Int>()
-        var previousPage = 0
+        // Per row (by its index in the list): where it's laid out. Kept across
+        // recompositions: a row's LaunchedEffect may outlive the composition
+        // it started in.
+        val childIndexToPixelsFromTop = remember { mutableMapOf<Int, Int>() }
+        val childIndexToPage = remember { mutableMapOf<Int, Int>() }
+        val previousPage = remember { intArrayOf(0) }
 
         BoxWithConstraints() {
             val viewPortHeight = maxHeight
@@ -165,8 +168,6 @@ object SmoothScroll {
                     )
                     .then(modifier)
             ) { constraints ->
-                /** The max allocated index in the knobState, which may be >0 if there's a toolbar above us */
-                val maxAllocatedIndex = knobState.getMaxAllocatedIndex()
                 //https://medium.com/@olivervicente/subcomposition-in-jetpack-compose-how-to-use-measurement-phase-data-in-other-children-3965d700af8b
                 val measurables = items.let {
                     if (prependGoBackEntry) {
@@ -186,31 +187,36 @@ object SmoothScroll {
                         it
                     }
                 }.flatMapIndexed { index, item ->
-                    subcompose(slotId = index + maxAllocatedIndex) {
+                    // A row keeps its slot (and with it its knob ID and click
+                    // handler) however often this is measured. The slot used to
+                    // be index + knobState.getMaxAllocatedIndex(), read at every
+                    // measure: after the first layout that maximum includes the
+                    // rows, so a later measure (a notification, a changed label)
+                    // gave every row a new slot, a reused one of another row
+                    // among them: no item highlighted, or a press doing another
+                    // row's action. Rows are told apart by their index here, not
+                    // by knob ID (a toolbar above may have taken the first IDs).
+                    subcompose(slotId = index) {
                         KnobObserverBuilder(knobState) { allocatedIndex, currentIndex ->
                             item(allocatedIndex, currentIndex)
                             LaunchedEffect(allocatedIndex, currentIndex) {
 
                                 if (allocatedIndex == currentIndex) {
                                     if (
-                                        childIndexToPage[currentIndex] != previousPage /* We've moved a page */
-                                        && childIndexToPixelsFromTop.containsKey(currentIndex)
+                                        childIndexToPage[index] != previousPage[0] /* We've moved a page */
+                                        && childIndexToPixelsFromTop.containsKey(index)
                                     ) {
-                                        childIndexToPixelsFromTop[currentIndex]?.let {
-                                            //Scrolls to the item that happens to be on the next page
-                                            //scrollState.scrollTo(it)
-                                            //What we actually want is to scroll to the page.
-                                            scrollState.scrollTo(
-                                                childIndexToPixelsFromTop[
-                                                    childIndexToPage
-                                                        .filterValues { it == childIndexToPage[currentIndex] ?: 0 }
-                                                        .keys
-                                                        .min()
-                                                    ] ?: 0
-                                            )
-                                        }
+                                        //Scroll to the page the item is on (its first item).
+                                        scrollState.scrollTo(
+                                            childIndexToPixelsFromTop[
+                                                childIndexToPage
+                                                    .filterValues { it == childIndexToPage[index] ?: 0 }
+                                                    .keys
+                                                    .min()
+                                                ] ?: 0
+                                        )
                                         //Update the page we were on before
-                                        previousPage = childIndexToPage[currentIndex] ?: -1
+                                        previousPage[0] = childIndexToPage[index] ?: -1
                                     }
                                 }
                             }
@@ -226,11 +232,7 @@ object SmoothScroll {
 
                 layout(width = layoutWidth, height = layoutHeight) {
                     var y = 0
-                    // Offset the child index by the maxAllocatedIndex from before we lay these out
-                    // so that scrolling works when there's a toolbar above us.
-                    placeables.mapIndexed { index, placeable ->
-                        (index + maxAllocatedIndex) to placeable
-                    }.forEach { (index, item) ->
+                    placeables.forEachIndexed { index, item ->
                         item.placeRelative(x = 0, y = y)
                         childIndexToPixelsFromTop[index] = y
                         childIndexToPage[index] = if (y == 0 || viewPortHeight.value.toInt() == 0) {

@@ -51,26 +51,29 @@ class AllocatedIdManager @Inject constructor(
         //Make the first allocated id be 0 if there isn't one allocated,
         //otherwise add the newId
         val newId = (allocatedIds.maxOrNull()?.let { it + 1 }) ?: 0
+        val currentWasGone = currentId.value !in allocatedIds
         allocatedIds.add(newId)
+        // The current item went away (e.g. its list was rebuilt): the first
+        // item that comes is the current one.
+        if (currentWasGone) {
+            currentId.value = newId
+        }
         return newId
     }
 
     fun removeId(id : AllocatedId) {
-        if (true) {
-            logger.d(TAG, "Removing the current selected id. Setting the current id to minimum allowed first.")
-            var proposedCurrentId = allocatedIds.minOrNull()
-            if (proposedCurrentId == null) {
-                logger.w(TAG, "We removed an ID $id and now there is no valid id to be the current Id because allocatedIDs is empty: $allocatedIds")
-                if (allocatedIds.isEmpty()) {
-                    logger.w(TAG, "allocatedIDs was empty, adding an entry so that there's something for the pointer to point at.")
-                    proposedCurrentId = addId()
-                }
-            }
-            currentId.value = proposedCurrentId!!
-        }
-        val result = allocatedIds.remove(id)
-        if (!result) {
+        val index = allocatedIds.indexOf(id)
+        if (index < 0) {
             logger.d(TAG, "Tried to remove an allocatedId $id which wasn't allocated")
+            return
+        }
+        allocatedIds.removeAt(index)
+        // Only when the current item goes does the pointer move: to the item
+        // that took its place in the order (or the last one). It used to go
+        // to the lowest ID first, before removing: removing several items in
+        // turn left it on an ID that was gone (no item highlighted).
+        if (currentId.value == id && allocatedIds.isNotEmpty()) {
+            currentId.value = allocatedIds[minOf(index, allocatedIds.size - 1)]
         }
     }
 

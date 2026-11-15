@@ -109,9 +109,6 @@ def hmi(request, hmi_session, out_dir):
     h.reset_mail_app()
     h.go_root()
     yield h
-    if h.lost_highlights:
-        with open(os.path.join(h.out_dir, "lost-highlights.txt"), "w") as f:
-            f.write("No item was highlighted (TODO.md, SmoothScroll) on: " + ", ".join(h.lost_highlights) + "\n")
     rep = getattr(request.node, "rep_call", None)
     if rep is not None and rep.failed:
         try:

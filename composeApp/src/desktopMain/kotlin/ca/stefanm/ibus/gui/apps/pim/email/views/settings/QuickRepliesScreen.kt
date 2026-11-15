@@ -55,8 +55,9 @@ class QuickRepliesScreen @Inject constructor(
             }
         }
 
-        // Rebuilt when a label changes (TODO.md: SmoothScroll and the knob).
-        key(replies) {
+        // SmoothScroll allocates knob positions once per row: rebuild it when
+        // the number of rows changes. Labels update in place (the knob stays).
+        key(items.size) {
             SmoothScroll.MenuWindowSmoothScrollContext(TAG).OneColumnSmoothScreen(
                 header = "Quick Replies",
                 prependGoBackEntry = true,
