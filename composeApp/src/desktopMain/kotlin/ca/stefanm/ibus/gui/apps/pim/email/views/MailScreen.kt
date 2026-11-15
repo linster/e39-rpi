@@ -16,6 +16,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailAccountGroup
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
 import ca.stefanm.ibus.gui.pim.email.views.parts.ComposeFieldRow
+import ca.stefanm.ibus.gui.pim.email.views.settings.MailSettingsScreen
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailFormat
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailboxListRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessageListRepo
@@ -35,6 +36,7 @@ import javax.inject.Inject
     navigatesTo = [
         ScreenDoc.NavigateTo(MessageListScreen::class),
         ScreenDoc.NavigateTo(MailComposeScreen::class),
+        ScreenDoc.NavigateTo(MailSettingsScreen::class),
     ]
 )
 @ScreenDoc.AllowsGoBack
@@ -59,7 +61,7 @@ class MailScreen @Inject constructor(
             accounts == null -> listOf(info("Asking the PIM bridge..."))
             accounts.isEmpty() -> listOf(info("No mail accounts yet"))
             else -> listOf(newMessage()) + accounts.flatMap { folderItems(it) }
-        }
+        } + settingsItem()
 
         // SmoothScroll allocates knob positions once: rebuild it when the
         // number of rows changes. Counts update in place.
@@ -97,6 +99,17 @@ class MailScreen @Inject constructor(
             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                 composeRepo.startNew()
                 MailComposeScreen.open(navigationNodeTraverser)
+            },
+        )
+    }
+
+    private fun settingsItem(): MailListItem = { allocatedIndex, currentIndex ->
+        ComposeFieldRow(
+            label = "⚙ Mail Settings",
+            value = "",
+            isSelected = allocatedIndex == currentIndex,
+            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                navigationNodeTraverser.navigateToNode(MailSettingsScreen::class.java)
             },
         )
     }

@@ -164,6 +164,25 @@ internal class MailViewsRender {
                 ComposeFieldRow("Type an Address", "e.g. anna@example.com", isSelected = false, onClicked = {}, dim = true)
                 people.forEachIndexed { i, p -> PersonRow(p.name.ifBlank { p.email }, if (p.name.isBlank()) "" else p.email, isSelected = i == 0, onClicked = {}) }
             }
+            // Settings screens: their MenuItems as OneColumnSmoothScreen shows them.
+            fun menu(name: String, header: String, items: List<ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem>) = shot(name) {
+                BmwSingleLineHeader(header)
+                (listOf(TextMenuItem("Go Back", onClicked = {})) + items).forEachIndexed { i, item ->
+                    item.copyAndSetIsSelected(i == 1).toView(chipOrientation = ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation.W)()
+                }
+            }
+            menu("settings", "Mail Settings", listOf(
+                ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem("Notify About New Mail", true, onCheckChanged = {}),
+                ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem("Notify When Mail Is Sent or Fails", true, onCheckChanged = {}),
+                TextMenuItem("Muted Accounts... (1)", onClicked = {}),
+                TextMenuItem("Quick Replies... (6)", onClicked = {}),
+                ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem("Sample Mail Instead of the Bridge (After Restart)", false, onCheckChanged = {}),
+            ))
+            menu("mute", "Notify About New Mail In", accounts.map {
+                ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem(it.accountName, it.accountName == "Home", onCheckChanged = {})
+            })
+            menu("quick-replies", "Quick Replies", listOf(TextMenuItem("Add Quick Reply...", onClicked = {})) +
+                listOf("I'm driving, I'll reply later.", "On my way.", "Running late, sorry.", "Yes.", "No.", "Thanks!").map { TextMenuItem(it, onClicked = {}) })
             for ((name, state) in listOf("inbox" to inboxRows, "list" to listRows)) {
                 shot(name) {
                     val knobState = KnobObserverBuilderState(service, logger)
