@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem
@@ -94,8 +95,12 @@ interface KnobObserverBuilderScope {
 
     @Composable
     fun CallWhen(currentIndexIs: Int, call: () -> Unit): () -> Unit {
+        // The knob calls the latest `call`: the effect below runs once per
+        // index, and the row's action can change while its index stays (a
+        // recomposed row, a SmoothScroll slot showing another row).
+        val latest = rememberUpdatedState(call)
         DisposableEffect(currentIndexIs) {
-            getState().registerCallback(currentIndexIs, call)
+            getState().registerCallback(currentIndexIs) { latest.value() }
             onDispose {
                 getState().unregisterCallback(currentIndexIs)
             }
