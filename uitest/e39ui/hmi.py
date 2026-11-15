@@ -33,9 +33,6 @@ class Hmi:
         self.timeout_s = timeout_s
         self.out_dir = None
         self._shots = 0
-        # Screens where no item was highlighted (TODO.md: SmoothScroll loses the
-        # knob's item when it lays out again); select() recovered by turning.
-        self.lost_highlights = []
 
     # --- state -----------------------------------------------------------
 
@@ -180,18 +177,9 @@ class Hmi:
                     raise HmiError(f"No item is highlighted on {state.screen}: a notification "
                                    f"({state.notification.top_text!r}) covers the screen (wait_for_notification "
                                    f"or clear_notification first); items: {names}")
-                if not recovered:
-                    # The known bug (TODO.md): the knob points at a row that's gone;
-                    # a turn brings it to the first one. Note it and go on.
-                    recovered.append(state.screen)
-                    self.lost_highlights.append(state.screen)
-                    warnings.warn(f"No item highlighted on {state.screen} (TODO.md: SmoothScroll); turning to recover")
-                    self.right()
-                    return where()
                 raise HmiError(f"No item is highlighted on {state.screen}; items: {names}")
             return items, target, current
 
-        recovered = []
 
         items, target, current = where()
         if current != target:
@@ -284,7 +272,6 @@ class Hmi:
     def start_test(self, out_dir):
         self.out_dir = out_dir
         self._shots = 0
-        self.lost_highlights = []
         os.makedirs(out_dir, exist_ok=True)
 
     def close(self):

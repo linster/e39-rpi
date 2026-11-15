@@ -23,9 +23,10 @@ def test_cancel_asks(hmi):
 
 
 @pytest.mark.fake_mail
-@pytest.mark.xfail(strict=True, reason="after the question closes, the highlighted row and the row a press acts "
-                                       "on differ: Cancel highlighted, Send runs (TODO.md, SmoothScroll)")
 def test_cancel_again_after_keep_writing(hmi):
+    # Once, closing the question made SmoothScroll lay out again: the knob
+    # showed no item, and after a turn "Cancel" was highlighted but a press
+    # ran "Send".
     hmi.go("MailScreen")
     hmi.select(r"^✉ New Message$")
     hmi.wait_for_screen("MailComposeScreen")
@@ -34,9 +35,9 @@ def test_cancel_again_after_keep_writing(hmi):
     hmi.select(r"^Cancel$")
     hmi.select(r"^Keep Writing$")
     hmi.wait_for(lambda s: not s.side_pane_open, "the question to close")
-    # The knob shows no item now; a turn shows Cancel highlighted...
+    assert hmi.selected() is not None, "the knob shows an item"
     hmi.select(r"^Cancel$")
-    # ...and the press should ask again.
+    # The press asks again (doesn't send).
     hmi.wait_for(lambda s: s.side_pane_open, "the question", timeout_s=3)
     hmi.select(r"^Throw Away$")
     hmi.wait_for_screen("MailScreen")

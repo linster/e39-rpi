@@ -91,14 +91,12 @@ hmi.shot("name")                        # screenshot into the test's folder
 
 Mark tests that need sample mail `@pytest.mark.fake_mail`.
 
-## Known HMI bugs the tests show (TODO.md)
+## HMI bugs the tests found
 
-- After a list screen lays out again (a notification, changed text, a
-  closed side pane), **no item is highlighted**, and a press can do
-  **another row's action** (`SmoothScroll` slot IDs, `CallWhen`).
-  `select()` recovers from a lost highlight with one turn and notes it in
-  `lost-highlights.txt`; tests that show the wrong action are marked
-  `xfail(strict=True)` (`test_10`, `test_14`): once fixed they pass
-  unexpectedly and fail the run, so the marker gets removed.
-- `EditConnectionScreen` isn't registered with the navigator
-  (`test_00`, known there).
+- After a list screen laid out again (a notification, changed text, a
+  closed side pane), no item was highlighted, and a press could run another
+  row's action (`SmoothScroll` slot IDs, `CallWhen`, `AllocatedIdManager`):
+  `test_10`, `test_14`. Fixed; `select()` fails when no item is highlighted.
+- `EditConnectionScreen` wasn't registered with the navigator (`test_00`).
+- The main menu's Mail count, sample mail and notification settings in the
+  car platform's services (see the PR that added these tests).

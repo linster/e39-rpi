@@ -63,9 +63,9 @@ class MailScreen @Inject constructor(
             else -> listOf(newMessage()) + accounts.flatMap { folderItems(it) }
         } + settingsItem()
 
-        // Rebuilt when the rows change (counts too): in place, SmoothScroll
-        // recreates its rows and the knob loses its item (TODO.md).
-        key(accounts) {
+        // SmoothScroll allocates knob positions once per row: rebuild it when
+        // the number of rows changes. Labels update in place (the knob stays).
+        key(items.size) {
             SmoothScroll.MenuWindowSmoothScrollContext(TAG).OneColumnSmoothScreenCustomViews(
                 header = if (total > 0) "Mail · ${MailFormat.unreadBadge(total)} unread" else "Mail",
                 prependGoBackEntry = true,

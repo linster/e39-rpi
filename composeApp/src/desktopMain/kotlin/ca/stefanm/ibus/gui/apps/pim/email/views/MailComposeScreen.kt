@@ -127,9 +127,9 @@ class MailComposeScreen @Inject constructor(
             })
         }
 
-        // Rebuilt when a label changes: in place, SmoothScroll recreates its
-        // rows and the knob loses its item (TODO.md, KnobListenerService).
-        key(draft, senders, quickReplies, sending.value) {
+        // SmoothScroll allocates knob positions once per row: rebuild it when
+        // the number of rows changes. Labels update in place (the knob stays).
+        key(items.size) {
             SmoothScroll.MenuWindowSmoothScrollContext(TAG).OneColumnSmoothScreenCustomViews(
                 header = title(draft),
                 prependGoBackEntry = false,

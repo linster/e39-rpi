@@ -32,7 +32,7 @@ device-side items (Yocto layers) are in e39-rpi-yocto's TODO.md.
       guidance debug window haven't been seen in the running HMI yet (only
       rendered off-screen and unit/integration tested).
 
-- [ ] **`EditConnectionScreen` isn't registered** in `Navigator.kt`
+- [x] **`EditConnectionScreen` wasn't registered** in `Navigator.kt`
       (network setup; it's `@AutoDiscover`, so the HMI Navigator Debug
       window lists it as unregistered, and navigating to it does nothing).
       Found by uitest/ `test_00_screens_registered` (known there; register
@@ -84,7 +84,7 @@ someone is listening again. Where they get lost:
       every event is delivered exactly once, in order.
 - [ ] Not a drop: the Griffin Powermate reader skips turns on purpose
       (its "desensitize" setting).
-- [ ] **SmoothScroll loses the knob's item when it lays out again** (found
+- [x] **SmoothScroll lost the knob's item when it laid out again** (found
       by the UI tests, uitest/ test_14). `SmoothScroll` subcomposes each row
       with `slotId = index + knobState.getMaxAllocatedIndex()`, read at every
       measure. After the first layout the maximum includes the rows
@@ -102,7 +102,10 @@ someone is listening again. Where they get lost:
       neighbour). Workaround in the mail screens until then: `key()` on the
       rows' content, so a change rebuilds the list (the knob goes back to the
       first row) — doesn't help when a notification arrives.
-- [ ] **Worse: after such a re-layout a press can do another row's
+      Fixed: SmoothScroll uses the row's index as its slot, CallWhen calls
+      the latest action, removeId moves the pointer only if its item went;
+      the mail screens' workaround is gone.
+- [x] **Worse: after such a re-layout a press could do another row's
       action.** The new slot IDs overlap the old ones, so an old row's slot
       is reused for another row: e.g. slot 7 (the compose screen's "Send")
       becomes row 0 ("Cancel"). The reused slot keeps its remembered knob ID

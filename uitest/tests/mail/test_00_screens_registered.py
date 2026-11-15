@@ -13,16 +13,9 @@ MAIL_SCREENS = [
 ]
 
 
-# Already missing when these tests were written (not mail screens): see TODO.md.
-KNOWN_UNREGISTERED = {
-    "ca.stefanm.ibus.gui.networkSetup.editConnection.screens.EditConnectionScreen",
-}
-
-
 def test_screens_registered(hmi):
     registered, unregistered = hmi.list_screens()
-    new = sorted(set(unregistered) - KNOWN_UNREGISTERED)
-    assert new == [], f"@AutoDiscover screens missing from Navigator.kt: {new}"
+    assert unregistered == [], f"@AutoDiscover screens missing from Navigator.kt: {unregistered}"
     missing = [s for s in MAIL_SCREENS if s not in registered]
     assert missing == [], missing
 

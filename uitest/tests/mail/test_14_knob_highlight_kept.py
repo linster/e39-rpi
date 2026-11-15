@@ -1,31 +1,33 @@
 """The knob's item stays highlighted when a SmoothScroll screen changes while it's shown
 (a notification, new counts, a toggled label).
 
-Known to fail: SmoothScroll numbers its rows from the highest knob ID allocated so far,
-re-read at every layout, so a second layout recreates every row; AllocatedIdManager.removeId
-then leaves the knob on an ID that's gone (TODO.md, "KnobListenerService"). Strict: once
-fixed, this passes unexpectedly and fails the run; remove the xfail then.
+This used to fail: SmoothScroll numbered its rows from the highest knob ID allocated so far,
+re-read at every layout, so a second layout recreated every row, and
+AllocatedIdManager.removeId left the knob on an ID that was gone.
 """
 
 import pytest
 
 
 @pytest.mark.fake_mail
-@pytest.mark.xfail(strict=True, reason="SmoothScroll relayout loses the knob's item (TODO.md)")
 def test_highlight_survives_new_mail(hmi):
     hmi.go("MailScreen")
-    hmi.right(2)
+    hmi.right(3)
     before = hmi.selected()
-    assert before is not None
+    assert before == "📁 Car club, 1", before
     hmi.deliver_mail(subject="While you look")
     hmi.wait_for_notification(r"^New mail from")
-    assert hmi.selected() is not None, "no item highlighted after new mail arrived"
+    # Same row (the inbox count above it changed).
+    assert hmi.selected() == "📁 Car club, 1", hmi.selected()
+    # And a press acts on it.
+    hmi.press()
+    hmi.wait_for_screen("MessageListScreen")
+    hmi.expect_text(r"Inbox / Car club")
 
 
 @pytest.mark.fake_mail
 def test_highlight_survives_toggle(hmi):
-    # Passes thanks to the mail screens' workaround (key() on the rows: a
-    # changed label rebuilds the list, the knob back on its first row).
     hmi.go("MailSettingsScreen")
     hmi.select(r"Notify About New Mail$")
-    assert hmi.selected() is not None, "no item highlighted after toggling a setting"
+    # The knob stays on the toggled row.
+    assert hmi.selected() == "[ ] Notify About New Mail", hmi.selected()

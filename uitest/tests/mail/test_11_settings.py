@@ -16,8 +16,8 @@ def test_settings(hmi):
     hmi.select(r"Notify About New Mail$")
     hmi.expect_text(r"\[ \] Notify About New Mail$")
     # The knob stays on the row it toggled.
-    # (The knob goes back to the first row: the screen rebuilds, see TODO.md.)
-    assert hmi.selected() is not None
+    # The knob stays on the row it toggled.
+    assert hmi.selected() == "[ ] Notify About New Mail", hmi.selected()
     hmi.select(r"Notify About New Mail$")
     hmi.expect_text(r"\[X\] Notify About New Mail$")
 
