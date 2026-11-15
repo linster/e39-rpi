@@ -23,6 +23,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.contacts.repo.AddressBook
+import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactEditRepo
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactListRepo
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactListState
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactPager
@@ -47,6 +48,7 @@ import javax.inject.Named
     description = "Contacts: the list, by name, with an A–Z index",
     navigatesTo = [
         ScreenDoc.NavigateTo(ContactDetailsScreen::class),
+        ScreenDoc.NavigateTo(ContactEditScreen::class),
     ]
 )
 @ScreenDoc.AllowsGoBack
@@ -58,6 +60,7 @@ class ContactsScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
     private val contactListRepo: ContactListRepo,
+    private val editRepo: ContactEditRepo,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -135,6 +138,10 @@ class ContactsScreen @Inject constructor(
     private fun showMenu(pager: ContactPager, state: ContactListState, books: List<AddressBook>) {
         val total = books.sumOf { it.contactCount }
         modalMenuService.showMailSidePane(logger, "$TAG menu", "Contacts", listOf(state.bookLabel, state.rangeLabel), buildList {
+            add(SidePaneItem("New Contact") {
+                editRepo.startNew(state.addressBook?.takeIf { !it.readOnly }?.id)
+                ContactEditScreen.open(navigationNodeTraverser)
+            })
             add(SidePaneItem("All Address Books · $total") { contactListRepo.selectAddressBook(null) })
             books.forEach { book ->
                 add(SidePaneItem("${book.name} (${book.accountName}) · ${book.contactCount}") { contactListRepo.selectAddressBook(book.id) })

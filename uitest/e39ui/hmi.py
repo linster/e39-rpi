@@ -199,7 +199,8 @@ class Hmi:
         return self.press() if press else self.state()
 
     def type_text(self, text, submit=True):
-        """Types `text` on the open on-screen keyboard with the knob, then Return (`submit`).
+        """Types `text` on the open on-screen keyboard (QWERTY, or a grid like the telephone
+        keyboard's) with the knob, then Return (`submit`).
 
         Starts from an empty or prefilled field: clear it first with clear_text() if needed."""
         from .keyboard import key_for
@@ -210,8 +211,13 @@ class Hmi:
                 # The space bar has no label.
                 self.select(r"^$", ignore_case=False)
                 continue
+            keys = self.items()
+            if any(t.text == c for t in keys):
+                # A key shows exactly this (digits, the telephone keyboard's keys).
+                self.select("^" + re.escape(c) + "$", ignore_case=False)
+                continue
             label, upper = key_for(c)
-            showing_upper = any(t.text == "Q" for t in self.items())
+            showing_upper = any(t.text == "Q" for t in keys)
             if upper != showing_upper:
                 self.select(r"^Shift$", ignore_case=False)
             self.select("^" + re.escape(label) + "$", ignore_case=False)

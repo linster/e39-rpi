@@ -17,6 +17,15 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoot
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactDetails
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactDetailsRepo
+import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactEditRepo
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.DetailRow
 import ca.stefanm.ibus.gui.pim.contacts.views.parts.ContactHeaderView
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
@@ -42,6 +51,7 @@ import javax.inject.Inject
     description = "Contacts: one contact's details",
     navigatesTo = [
         ScreenDoc.NavigateTo(MailComposeScreen::class),
+        ScreenDoc.NavigateTo(ContactEditScreen::class),
     ]
 )
 @ScreenDoc.AllowsGoBack
@@ -52,6 +62,8 @@ class ContactDetailsScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val detailsRepo: ContactDetailsRepo,
     private val composeRepo: MailComposeRepo,
+    private val editRepo: ContactEditRepo,
+    private val notificationHub: NotificationHub,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -91,8 +103,11 @@ class ContactDetailsScreen @Inject constructor(
         }
 
         val d = details.value
+        val scope = rememberCoroutineScope()
         val items: List<MailListItem> = when {
-            d != null -> listOf(header(d, photo.value)) + d.rows.map { row(d, it) }
+            d != null -> listOf(header(d, photo.value)) + d.rows.map { row(d, it) } +
+                if (d.addressBook?.readOnly == false) listOf(action("✎ Edit Contact") { edit(scope, d) }, action("🗑 Delete Contact...") { confirmDelete(scope, d) })
+                else emptyList()
             error.value != null -> listOf(info("Couldn't open this contact: ${error.value}"))
             else -> listOf(info("Loading..."))
         }
@@ -119,6 +134,54 @@ class ContactDetailsScreen @Inject constructor(
                 if (row.kind == DetailRow.Kind.EMAIL && row.email != null) showEmailActions(d, row)
             },
         )
+    }
+
+    private fun action(label: String, onClicked: () -> Unit): MailListItem = { allocatedIndex, currentIndex ->
+        ComposeFieldRow(label, "", isSelected = allocatedIndex == currentIndex, onClicked = CallWhen(currentIndexIs = allocatedIndex) { onClicked() })
+    }
+
+    private fun edit(scope: CoroutineScope, d: ContactDetails) {
+        scope.launch {
+            editRepo.startEdit(d.contact.summary.id).fold(
+                onSuccess = { ContactEditScreen.open(navigationNodeTraverser) },
+                onFailure = { notifyFailure("Can't edit", it) },
+            )
+        }
+    }
+
+    private fun confirmDelete(scope: CoroutineScope, d: ContactDetails) {
+        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
+            SidePanelMenu.SidePanelMenu(
+                title = "Delete ${d.name}?",
+                text = @Composable {
+                    InfoLabel("From ${d.addressBook?.name ?: "the address book"} (${d.addressBook?.accountName ?: ""}),")
+                    InfoLabel("and from its server at the next sync.")
+                },
+                buttons = listOf(
+                    TextMenuItem("Keep It", onClicked = { modalMenuService.closeSidePaneOverlay(true) }),
+                    TextMenuItem("Delete", onClicked = {
+                        modalMenuService.closeSidePaneOverlay(true)
+                        scope.launch {
+                            editRepo.delete(d.contact.summary).fold(
+                                onSuccess = {
+                                    notificationHub.postNotificationBackground(
+                                        Notification(Notification.NotificationImage.MESSAGE_CIRCLE, "Contact deleted", d.name))
+                                    navigationNodeTraverser.goBack()
+                                },
+                                onFailure = { notifyFailure("Not deleted", it) },
+                            )
+                        }
+                    }),
+                )
+            )
+        }
+    }
+
+    private fun notifyFailure(top: String, e: Throwable) {
+        logger.w(TAG, "$top: ${e.message}")
+        notificationHub.postNotificationBackground(Notification(Notification.NotificationImage.ALERT_TRIANGLE, top,
+            if (e is ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendException.Conflict) "It changed meanwhile: open it again"
+            else e.message ?: e.toString()))
     }
 
     private fun showEmailActions(d: ContactDetails, row: DetailRow) {

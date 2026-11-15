@@ -52,6 +52,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.gui.pim.contacts.repo.ContactsRepository
 import ca.stefanm.ibus.gui.pim.contacts.repo.FakeContactsRepository
+import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactEditRepo
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactListRepo
 import ca.stefanm.ibus.gui.pim.email.repo.FakeMailRepository
 import ca.stefanm.ibus.gui.pim.email.repo.MailAddress
@@ -107,6 +108,7 @@ class TestProbe @Inject constructor(
     private val messageLists: Provider<MessageListRepo>,
     private val contactsRepository: Provider<ContactsRepository>,
     private val contactLists: Provider<ContactListRepo>,
+    private val contactEdit: Provider<ContactEditRepo>,
     private val logger: Logger,
 ) {
     companion object {
@@ -449,6 +451,7 @@ class TestProbe @Inject constructor(
         override suspend fun resetContactsApp(request: ResetContactsAppRequest): ResetContactsAppResponse {
             withContext(Dispatchers.Main) {
                 contactLists.get().clearPositions()
+                contactEdit.get().discard()
                 (contactsRepository.get() as? FakeContactsRepository)?.reset()
             }
             return resetContactsAppResponse { }

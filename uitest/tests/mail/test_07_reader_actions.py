@@ -20,7 +20,7 @@ def test_actions(hmi):
     open_actions(hmi)
     names = [t.text for t in hmi.items()]
     # One recipient: no Reply All.
-    assert names == ["Go Back", "Forward", "Mark Unread", "Flag", "Move to Folder...", "Delete"], names
+    assert names == ["Go Back", "Forward", "Save Sender as Contact", "Mark Unread", "Flag", "Move to Folder...", "Delete"], names
     hmi.shot("actions")
     hmi.select(r"^Mark Unread$")
     hmi.expect_text(r"● Unread")

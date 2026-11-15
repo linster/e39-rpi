@@ -46,6 +46,8 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.email.repo.MailFolder
+import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactEditRepo
+import ca.stefanm.ibus.gui.pim.contacts.views.ContactEditScreen
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessageReaderRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.ReaderContent
@@ -89,6 +91,7 @@ class MessageReaderScreen @Inject constructor(
     private val notificationHub: NotificationHub,
     private val readerRepo: MessageReaderRepo,
     private val composeRepo: MailComposeRepo,
+    private val contactEditRepo: ContactEditRepo,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -239,6 +242,10 @@ class MessageReaderScreen @Inject constructor(
             }.takeIf { summary.to.size + content.message.cc.size > 1 },
             SidePaneItem("Forward") {
                 write(scope) { composeRepo.startForward(content.message) }
+            },
+            SidePaneItem("Save Sender as Contact") {
+                contactEditRepo.startFromMail(summary.from.name, summary.from.email)
+                ContactEditScreen.open(navigationNodeTraverser)
             },
             SidePaneItem(if (summary.seen) "Mark Unread" else "Mark Read") {
                 scope.launch { readerRepo.setSeen(summary, !summary.seen).update(state, content, "Not changed") }
