@@ -46,6 +46,9 @@ service HmiTestProbe {
   // The contacts app as on a fresh start: all address books, every list at
   // its start; with sample contacts, the sample data again.
   rpc ResetContactsApp(ResetContactsAppRequest) returns (ResetContactsAppResponse);
+  // The accounts screens as on a fresh start (no form open); with sample
+  // accounts, the sample accounts again.
+  rpc ResetAccounts(ResetAccountsRequest) returns (ResetAccountsResponse);
 
   // Sample mail (E39Config.PimConfig.Mail.useFakeData) only;
   // FAILED_PRECONDITION with the bridge's mail.
@@ -104,6 +107,8 @@ message HmiState {
   bool fake_mail = 17;
   // The contacts app shows sample contacts (PimConfig.Contacts.useFakeData).
   bool fake_contacts = 19;
+  // The accounts screen shows sample accounts (PimConfig.Accounts.useFakeData).
+  bool fake_accounts = 22;
   // The HMI window's position on the screen (it may move once after
   // opening: wait for it to settle before screenshots).
   int32 window_x = 20;
@@ -226,6 +231,9 @@ message ResetMailAppResponse {}
 
 message ResetContactsAppRequest {}
 message ResetContactsAppResponse {}
+
+message ResetAccountsRequest {}
+message ResetAccountsResponse {}
 
 message ResetFakeMailRequest {}
 message ResetFakeMailResponse {}

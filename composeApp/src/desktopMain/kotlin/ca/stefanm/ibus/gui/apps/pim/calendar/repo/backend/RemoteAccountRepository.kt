@@ -26,7 +26,13 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import javax.inject.Inject
+import kotlin.time.toJavaDuration
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -111,10 +117,11 @@ class RemoteAccountRepository @Inject constructor(
     private val settingsRepository: PimBackendSettingsRepository,
     coroutineScope: CoroutineScope,
     private val logger: Logger,
-) {
+) : AccountRepository {
     companion object {
         const val TAG = "RemoteAccountRepository"
         val RETRY_INTERVAL: Duration = 10.seconds
+        val LOGIN_FORWARD_TIMEOUT: Duration = 15.seconds
     }
 
     /** Reconnects [stream] (to the current settings) after it ends or fails. */
@@ -138,7 +145,7 @@ class RemoteAccountRepository @Inject constructor(
         .flowOn(Dispatchers.IO)
 
     /** Every account, by name; null until the bridge has answered. */
-    val accounts: StateFlow<List<PimAccount>?> = reconnecting("Accounts") { client.watchAccounts() }
+    override val accounts: StateFlow<List<PimAccount>?> = reconnecting("Accounts") { client.watchAccounts() }
         .map { list -> list.map { it.toPimAccount() } }
         .stateIn(coroutineScope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000), null)
 
@@ -146,7 +153,7 @@ class RemoteAccountRepository @Inject constructor(
         .shareIn(coroutineScope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000))
 
     /** Logins waiting for the user, oldest first. */
-    val pendingLogins: Flow<List<PendingLogin>> = flow {
+    override val pendingLogins: Flow<List<PendingLogin>> = flow {
         val open = linkedMapOf<String, PendingLogin>()
         emit(emptyList())
         authEvents.collect { event ->
@@ -161,7 +168,7 @@ class RemoteAccountRepository @Inject constructor(
     }
 
     /** Logins as they end. */
-    val loginResults: Flow<LoginResult> = flow {
+    override val loginResults: Flow<LoginResult> = flow {
         authEvents.collect { event ->
             if (event.hasFinished()) {
                 event.finished.let { emit(LoginResult(it.id, it.accountId, it.success, it.message)) }
@@ -175,7 +182,7 @@ class RemoteAccountRepository @Inject constructor(
      * [PimBackendException.Unavailable] if it can't be reached.
      * [contacts]: also sync the server's address books (CardDAV).
      */
-    suspend fun addCalDavAccount(name: String, url: String, username: String, password: String, contacts: Boolean = true): Result<PimAccount> = result {
+    override suspend fun addCalDavAccount(name: String, url: String, username: String, password: String, contacts: Boolean): Result<PimAccount> = result {
         client.addCalDavAccount(name.trim(), url.trim(), username.trim(), password, contacts = contacts).toPimAccount()
     }
 
@@ -184,12 +191,12 @@ class RemoteAccountRepository @Inject constructor(
      * (their contacts leave the car, not the server).
      * [PimBackendException.FailedPrecondition] for other account types.
      */
-    suspend fun setContactsEnabled(account: PimAccount, enabled: Boolean): Result<PimAccount> = result {
+    override suspend fun setContactsEnabled(account: PimAccount, enabled: Boolean): Result<PimAccount> = result {
         client.setContactsEnabled(account.id, enabled).toPimAccount()
     }
 
     /** Adds a Google account and starts its login; the page shows up in [pendingLogins]. */
-    suspend fun addGoogleAccount(loginHint: String = ""): Result<PimAccount> = result {
+    override suspend fun addGoogleAccount(loginHint: String): Result<PimAccount> = result {
         client.addGoogleAccount("", loginHint.trim()).account.toPimAccount()
     }
 
@@ -197,7 +204,7 @@ class RemoteAccountRepository @Inject constructor(
      * Finds [email]'s IMAP and SMTP servers. [PimBackendException.NotFound]:
      * nothing found (ask for them); InvalidArgument: not an address.
      */
-    suspend fun discoverMailSettings(email: String): Result<DiscoveredMailSettings> = result {
+    override suspend fun discoverMailSettings(email: String): Result<DiscoveredMailSettings> = result {
         val found = client.discoverMailSettings(email.trim())
         DiscoveredMailSettings(
             settings = MailAccountSettings(found.settings.imap.toServer(), found.settings.smtp.toServer()),
@@ -221,12 +228,12 @@ class RemoteAccountRepository @Inject constructor(
      * password, Unavailable if it can't be reached, FailedPrecondition if
      * it only takes a browser login. [name] empty: the address.
      */
-    suspend fun addMailAccount(
+    override suspend fun addMailAccount(
         email: String,
         password: String,
         senderName: String,
-        name: String = "",
-        settings: MailAccountSettings? = null,
+        name: String,
+        settings: MailAccountSettings?,
     ): Result<PimAccount> = result {
         client.addMailAccount(
             email = email.trim(),
@@ -240,19 +247,48 @@ class RemoteAccountRepository @Inject constructor(
         ).toPimAccount()
     }
 
-    suspend fun startLogin(account: PimAccount): Result<Unit> = result { client.startLogin(account.id) }
+    override suspend fun startLogin(account: PimAccount): Result<Unit> = result { client.startLogin(account.id) }
 
-    suspend fun cancelLogin(login: PendingLogin): Result<Unit> = result { client.cancelAuth(login.id) }
+    override suspend fun cancelLogin(login: PendingLogin): Result<Unit> = result { client.cancelAuth(login.id) }
+
+    /**
+     * The listener (libkgapi's, in the bridge) is on the bridge's 127.0.0.1,
+     * so this works when the HMI runs next to the bridge (the Pi; the laptop
+     * with scripts/run-dev.sh).
+     */
+    override suspend fun finishLogin(login: PendingLogin, pastedAddress: String): Result<Unit> {
+        val address = LoginRedirect.extract(pastedAddress, login.redirectPrefix)
+            ?: return Result.failure(PimBackendException.InvalidArgument("That's not the address Google's last page ended on", null))
+        val host = settingsRepository.settings.value.host.trim().lowercase()
+        if (host !in setOf("", "localhost", "127.0.0.1", "::1", "[::1]")) {
+            return Result.failure(PimBackendException.FailedPrecondition(
+                "The PIM bridge runs on $host, not here: finish the login in a browser there", null))
+        }
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = HttpClient.newBuilder().connectTimeout(LOGIN_FORWARD_TIMEOUT.toJavaDuration())
+                    .followRedirects(HttpClient.Redirect.NEVER).build()
+                    .send(HttpRequest.newBuilder(URI(address)).timeout(LOGIN_FORWARD_TIMEOUT.toJavaDuration()).GET().build(),
+                        HttpResponse.BodyHandlers.discarding())
+                logger.d(TAG, "Login ${login.id}: the listener answered ${response.statusCode()}")
+                Result.success(Unit)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Result.failure(PimBackendException.Unavailable("The login has ended (nothing is waiting at ${login.redirectPrefix})", e))
+            }
+        }
+    }
 
     /** Also deletes its password and its local copy of the calendars (not the server's). */
-    suspend fun removeAccount(account: PimAccount): Result<Unit> = result { client.removeAccount(account.id) }
+    override suspend fun removeAccount(account: PimAccount): Result<Unit> = result { client.removeAccount(account.id) }
 
-    suspend fun setOnline(account: PimAccount, online: Boolean): Result<Unit> = result {
+    override suspend fun setOnline(account: PimAccount, online: Boolean): Result<Unit> = result {
         client.setAccountOnline(account.id, online)
     }
 
     /** [account] null: all accounts. */
-    suspend fun syncNow(account: PimAccount? = null): Result<Unit> = result { client.syncNow(account?.id ?: "") }
+    override suspend fun syncNow(account: PimAccount?): Result<Unit> = result { client.syncNow(account?.id ?: "") }
 
     private suspend fun <T> result(block: suspend () -> T): Result<T> = try {
         Result.success(block())

@@ -28,7 +28,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendException
-import ca.stefanm.ibus.gui.pim.calendar.repo.backend.RemoteAccountRepository
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.AccountRepository
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -53,7 +53,7 @@ class AddCalDavAccountScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
-    private val accountRepository: RemoteAccountRepository,
+    private val accountRepository: AccountRepository,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 

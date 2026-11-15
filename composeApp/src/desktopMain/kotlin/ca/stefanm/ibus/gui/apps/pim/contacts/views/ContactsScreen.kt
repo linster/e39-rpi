@@ -22,6 +22,7 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import ca.stefanm.ibus.gui.pim.accounts.views.PimAccountsScreen
 import ca.stefanm.ibus.gui.pim.contacts.repo.AddressBook
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactEditRepo
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactListRepo
@@ -147,6 +148,7 @@ class ContactsScreen @Inject constructor(
                 add(SidePaneItem("${book.name} (${book.accountName}) · ${book.contactCount}") { contactListRepo.selectAddressBook(book.id) })
             }
             if (state.hasPrevious) add(SidePaneItem("Back to the Start") { pager.firstPage() })
+            add(SidePaneItem("Accounts...") { navigationNodeTraverser.navigateToNode(PimAccountsScreen::class.java) })
         })
     }
 }

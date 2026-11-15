@@ -31,6 +31,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.CompositeLogger
 import ca.stefanm.ibus.lib.logging.LogDistributionHub
 import dagger.Component
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.AccountModule
 import ca.stefanm.ibus.gui.pim.contacts.repo.ContactsModule
 import ca.stefanm.ibus.gui.pim.email.repo.MailModule
 import dagger.Module
@@ -58,6 +59,7 @@ annotation class ApplicationScope
     MapModule::class,
     MailModule::class,
     ContactsModule::class,
+    AccountModule::class,
 ])
 @ApplicationScope
 interface ApplicationComponent {

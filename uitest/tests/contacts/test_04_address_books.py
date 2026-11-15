@@ -10,7 +10,7 @@ def test_address_books(hmi):
     hmi.wait_for(lambda s: s.side_pane_open, "the menu")
     books = [t.text for t in hmi.items()]
     assert books == ["Go Back", "New Contact", "All Address Books · 259", "Personal (Home server) · 4", "Contacts (Google) · 4",
-                     "Company (Work directory) · 1", "Members (Car club) · 250"], books
+                     "Company (Work directory) · 1", "Members (Car club) · 250", "Accounts..."], books
     hmi.select(r"^Personal")
     hmi.expect_text(r"^Contacts · Personal · 1–4 of 4$")
     rows = [t.text for t in hmi.items()][5:]

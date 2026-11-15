@@ -128,6 +128,9 @@ kotlin {
 
             implementation("com.ginsberg:cirkle:1.0.1")
 
+            // QR codes (PIM logins on a phone: PhoneLoginScreen).
+            implementation("com.google.zxing:core:3.5.3")
+
             // Only the HOCON format is used. The "konf" umbrella artifact also
             // pulls in konf-xml -> dom4j -> XPP, whose SAXParserFactory service
             // entry replaces the JDK's XML parser and breaks logback.xml parsing.

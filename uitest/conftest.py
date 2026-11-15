@@ -46,6 +46,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "fake_mail: needs sample mail (skipped otherwise)")
     config.addinivalue_line("markers", "bridge_mail: needs the PIM bridge's mail (skipped otherwise)")
     config.addinivalue_line("markers", "fake_contacts: needs sample contacts (skipped otherwise)")
+    config.addinivalue_line("markers", "fake_accounts: needs sample accounts (skipped otherwise)")
 
 
 @pytest.fixture(scope="session")
@@ -123,10 +124,13 @@ def hmi(request, hmi_session, out_dir):
         pytest.skip("needs the PIM bridge's mail (--mail bridge)")
     if request.node.get_closest_marker("fake_contacts") and not state.fake_contacts:
         pytest.skip("needs sample contacts (useFakeData)")
+    if request.node.get_closest_marker("fake_accounts") and not state.fake_accounts:
+        pytest.skip("needs sample accounts (useFakeData)")
     h.close_overlays()
     h.go_root()
     h.reset_mail_app()
     h.reset_contacts_app()
+    h.reset_accounts()
     yield h
     rep = getattr(request.node, "rep_call", None)
     if rep is not None and rep.failed:

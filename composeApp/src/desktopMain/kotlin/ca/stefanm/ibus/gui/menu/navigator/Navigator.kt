@@ -88,7 +88,9 @@ import ca.stefanm.ibus.gui.map.settings.MapTileDownloaderScreen
 import ca.stefanm.ibus.gui.menu.*
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ALL_NODES
 import ca.stefanm.ibus.gui.menu.navigator.NavigationModule.Companion.ROOT_NODE
-import ca.stefanm.ibus.gui.pim.calendar.setup.views.AccountListScreen
+import ca.stefanm.ibus.gui.pim.accounts.views.AddMailAccountScreen
+import ca.stefanm.ibus.gui.pim.accounts.views.PimAccountsScreen
+import ca.stefanm.ibus.gui.pim.accounts.views.PhoneLoginScreen
 import ca.stefanm.ibus.gui.pim.calendar.setup.views.AddCalDavAccountScreen
 import ca.stefanm.ibus.gui.pim.calendar.setup.views.CalendarSetupRootScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.MonthScreen
@@ -197,7 +199,9 @@ class NavigationModule {
         todoListScreen: TodoListScreen,
         twoWeekScreen: TwoWeekScreen,
         calendarSetupRootScreen : CalendarSetupRootScreen,
-        accountListScreen: AccountListScreen,
+        pimAccountsScreen: PimAccountsScreen,
+        addMailAccountScreen: AddMailAccountScreen,
+        phoneLoginScreen: PhoneLoginScreen,
         addCalDavAccountScreen: AddCalDavAccountScreen,
         calendarEventEditScreen: CalendarEventEditScreen,
         todoItemEditorScreen: TodoItemEditorScreen,
@@ -313,7 +317,9 @@ class NavigationModule {
         todoListScreen,
         twoWeekScreen,
         calendarSetupRootScreen,
-        accountListScreen,
+        pimAccountsScreen,
+        addMailAccountScreen,
+        phoneLoginScreen,
         addCalDavAccountScreen,
         calendarEventEditScreen,
         todoItemEditorScreen,

@@ -15,6 +15,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoot
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.pim.accounts.views.PimAccountsScreen
 import ca.stefanm.ibus.gui.pim.email.repo.MailSettingsRepository
 import javax.inject.Inject
 
@@ -28,6 +29,7 @@ import javax.inject.Inject
     navigatesTo = [
         ScreenDoc.NavigateTo(MailMuteScreen::class),
         ScreenDoc.NavigateTo(QuickRepliesScreen::class),
+        ScreenDoc.NavigateTo(PimAccountsScreen::class),
     ]
 )
 @ScreenDoc.AllowsGoBack
@@ -66,6 +68,10 @@ class MailSettingsScreen @Inject constructor(
             TextMenuItem(
                 title = "Quick Replies... (${quickReplies.size})",
                 onClicked = { navigationNodeTraverser.navigateToNode(QuickRepliesScreen::class.java) },
+            ),
+            TextMenuItem(
+                title = "Mail Accounts...",
+                onClicked = { navigationNodeTraverser.navigateToNode(PimAccountsScreen::class.java) },
             ),
             CheckBoxMenuItem(
                 title = "Sample Mail Instead of the Bridge (After Restart)",
