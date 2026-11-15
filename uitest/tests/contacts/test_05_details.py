@@ -20,6 +20,8 @@ def test_details(hmi):
         "HOME ADDRESS, 123 Main St\nRegina SK S4P 1A1\nCanada",
         "BIRTHDAY, May 17, 1990",
         "NICKNAME, Annie",
+        "✎ Edit Contact",
+        "🗑 Delete Contact...",
     ], rows
     hmi.shot("anna")
 
