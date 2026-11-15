@@ -25,10 +25,22 @@ class MailSettingsRepository @Inject constructor(
 ) {
     private val config get() = configurationStorage.config
 
-    private val _quickReplies = MutableStateFlow(config[E39Config.PimConfig.Mail.quickReplies])
+    companion object {
+        // One state for the whole process: the car platform's services
+        // (MailNotifierService) get their own Dagger component and with it
+        // their own instance, which must see settings changed on screen.
+        private var shared: Pair<MutableStateFlow<List<String>>, MutableStateFlow<MailNotificationSettings>>? = null
+    }
+
+    private val state = synchronized(Companion) {
+        shared ?: (MutableStateFlow(config[E39Config.PimConfig.Mail.quickReplies]) to MutableStateFlow(readNotifications()))
+            .also { shared = it }
+    }
+
+    private val _quickReplies = state.first
     val quickReplies: StateFlow<List<String>> = _quickReplies.asStateFlow()
 
-    private val _notifications = MutableStateFlow(readNotifications())
+    private val _notifications = state.second
     val notifications: StateFlow<MailNotificationSettings> = _notifications.asStateFlow()
 
     /** Fake or remote data: takes effect after a restart (MailModule). */
@@ -51,6 +63,16 @@ class MailSettingsRepository @Inject constructor(
     fun setQuickReplies(replies: List<String>) {
         config[E39Config.PimConfig.Mail.quickReplies] = replies
         _quickReplies.value = replies
+    }
+
+    /** Notifications on, nothing muted, the default quick replies (UI tests). */
+    fun resetToDefaults() {
+        setQuickReplies(E39Config.PimConfig.Mail.quickReplies.default)
+        config[E39Config.PimConfig.Mail.notificationsEnabled] = true
+        config[E39Config.PimConfig.Mail.sentNotificationsEnabled] = true
+        config[E39Config.PimConfig.Mail.mutedAccountIds] = emptyList()
+        config[E39Config.PimConfig.Mail.mutedFolderIds] = emptyList()
+        _notifications.value = readNotifications()
     }
 
     fun setNewMailNotifications(enabled: Boolean) {

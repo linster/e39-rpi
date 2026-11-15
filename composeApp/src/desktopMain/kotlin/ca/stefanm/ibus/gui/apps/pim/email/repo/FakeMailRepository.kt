@@ -168,6 +168,11 @@ class FakeMailRepository @Inject constructor() : MailRepository {
     }
 
     /** A new unread message in the first account's inbox, with a [MailEvent.NewMail]. */
+    /** Back to the sample data (the UI test probe, between tests). */
+    fun reset() {
+        store.value = sampleData()
+    }
+
     fun simulateNewMail(
         from: MailAddress = MailAddress("Anna Kowalski", "anna@example.com"),
         subject: String = "Are you close?",

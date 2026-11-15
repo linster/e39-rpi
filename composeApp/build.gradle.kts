@@ -255,12 +255,22 @@ tasks.matching { it.name in setOf("packageUberJarForCurrentOS", "packageReleaseU
                     }
             }
         }
+        // Libraries' signature files (e.g. Eclipse's ECLIPSE_.SF) don't match
+        // the merged jar: java -jar refuses it ("Invalid signature file
+        // digest"). The image's recipe also deletes them (zip -d).
+        var unsigned = 0
         FileSystems.newFileSystem(uberJar.toPath()).use { fs ->
             merged.forEach { (name, providers) ->
                 Files.write(fs.getPath(name), (providers.joinToString("\n") + "\n").toByteArray())
             }
+            Files.list(fs.getPath("META-INF")).use { entries ->
+                entries.filter { Regex("[^/]+\\.(SF|RSA|DSA|EC)").matches(it.fileName.toString()) }.toList()
+            }.forEach {
+                Files.delete(it)
+                unsigned++
+            }
         }
-        logger.lifecycle("Merged ${merged.size} META-INF/services lists into ${uberJar.name}")
+        logger.lifecycle("Merged ${merged.size} META-INF/services lists into ${uberJar.name}; removed $unsigned signature files")
     }
 }
 
@@ -286,6 +296,8 @@ val generatedProtoApis = mapOf(
     // The Pi <-> Pico messages (also used by the Pico firmware): import
     // each other as "ConfigProto.proto".
     "pico" to "pico",
+    // The HMI's own UI test probe (uitest/ drives the HMI through it).
+    "e39hmi_test" to ".",
 )
 val protobufVersion = "4.28.2"     // = com.google.protobuf:protobuf-java
 val grpcJavaVersion = "1.85.1"     // = io.grpc:grpc-*

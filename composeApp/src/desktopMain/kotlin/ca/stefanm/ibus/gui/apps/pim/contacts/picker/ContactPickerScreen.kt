@@ -115,7 +115,8 @@ class ContactPickerScreen @Inject constructor(
             }
         }
 
-        key(items.size) {
+        // Rebuilt when the rows change (TODO.md: SmoothScroll and the knob).
+        key(query.value, found.value) {
             SmoothScroll.MenuWindowSmoothScrollContext(TAG).OneColumnSmoothScreenCustomViews(
                 header = if (query.value.isBlank()) title else "$title · \"${query.value}\"",
                 prependGoBackEntry = false,

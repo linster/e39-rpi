@@ -32,6 +32,100 @@ device-side items (Yocto layers) are in e39-rpi-yocto's TODO.md.
       guidance debug window haven't been seen in the running HMI yet (only
       rendered off-screen and unit/integration tested).
 
+- [ ] **`EditConnectionScreen` isn't registered** in `Navigator.kt`
+      (network setup; it's `@AutoDiscover`, so the HMI Navigator Debug
+      window lists it as unregistered, and navigating to it does nothing).
+      Found by uitest/ `test_00_screens_registered` (known there; register
+      it, then drop it from `KNOWN_UNREGISTERED`).
+
+## KnobListenerService: dropped knob events
+
+Turns and presses get lost while screens change (QEMU: turns 0.25 s
+apart while a screen composes; see the bug above). Knowing when a screen
+has finished drawing is hard and isn't needed: the events can wait until
+someone is listening again. Where they get lost:
+
+- [ ] **No one subscribed = event gone.** `ApplicationModule`'s
+      `inputEventsWriter` is a `MutableSharedFlow()` (no replay, no
+      buffer). `emit` with zero subscribers returns at once and the event
+      is dropped; `extraBufferCapacity` doesn't help (it only buffers for
+      slow subscribers). Every screen change has such a gap: the old
+      screen's collectors are cancelled before the new screen's
+      `LaunchedEffect`s subscribe.
+- [ ] **`takeWhile(listenerEnabled)` eats an event.** In
+      `KnobListenerService.knobTurnEvents`, the first event after
+      `disableListener()` fails the predicate: it's consumed (lost) and
+      the flow completes. The next subscription only starts when the
+      composable recomposes (`KnobObserverBuilderState.setupListener`'s
+      `LaunchedEffect(listenerEnabled)`), and events in between are lost
+      too (the gap above). Filtering instead of `takeWhile`, with the
+      collector kept, would avoid both.
+- [ ] **Resubscribing per screen state.** Each `KnobObserverBuilderState`
+      (and every `key()` that recreates one, e.g. a SmoothScroll rebuilt
+      when its row count changes) subscribes anew, so each rebuild opens a
+      gap.
+- [ ] **A possible design: one long-lived dispatcher.** An app-scoped
+      collector of INPUT_EVENTS, started once, routes events to the
+      current owner (main, main aux or modal listener, whichever is
+      enabled, then its registered handler). Events that arrive while
+      nobody is registered are queued briefly (e.g. up to 1 s, in order)
+      and handed to the next handler that registers, then dropped if
+      stale. "A handler registered" stands in for "the screen is ready";
+      no drawing detection needed. `KnobListenerService` keeps its API
+      (`knobTurnEvents()`, `enableListener()`), so screens don't change.
+- [ ] **Measure first.** Count drops: in the writer path,
+      `inputEventsWriter.subscriptionCount.value == 0` at emit time means
+      the event is lost; log it with the event and the current screen. The
+      UI test probe (uitest/) can report the count, and the runner's
+      `--input ibus` mode (real IBus packets, short gaps) can then show
+      whether a fix works.
+- [ ] **Tests.** A unit test that emits events while listeners are
+      enabled/disabled and screens' collectors come and go, asserting
+      every event is delivered exactly once, in order.
+- [ ] Not a drop: the Griffin Powermate reader skips turns on purpose
+      (its "desensitize" setting).
+- [ ] **SmoothScroll loses the knob's item when it lays out again** (found
+      by the UI tests, uitest/ test_14). `SmoothScroll` subcomposes each row
+      with `slotId = index + knobState.getMaxAllocatedIndex()`, read at every
+      measure. After the first layout the maximum includes the rows
+      themselves, so any later measure (a notification, a count or label
+      changing, a row changing size) gets new slot IDs: every row is
+      composed anew and allocates new knob IDs, and the old ones are
+      deallocated. `AllocatedIdManager.removeId` sets the current ID to the
+      lowest allocated ID *before* removing the one asked for, so after the
+      old rows go one by one the current ID is one that no longer exists:
+      nothing is highlighted, and the next turn lands on the first row. In
+      the car: every notification on a list screen leaves the knob without
+      an item. Fixes: take the toolbar offset once (or key rows by their own
+      index and map positions by allocated ID), and in `removeId` remove
+      first, then move the current ID only if it was the removed one (to its
+      neighbour). Workaround in the mail screens until then: `key()` on the
+      rows' content, so a change rebuilds the list (the knob goes back to the
+      first row) — doesn't help when a notification arrives.
+- [ ] **Worse: after such a re-layout a press can do another row's
+      action.** The new slot IDs overlap the old ones, so an old row's slot
+      is reused for another row: e.g. slot 7 (the compose screen's "Send")
+      becomes row 0 ("Cancel"). The reused slot keeps its remembered knob ID
+      (`KnobObserverBuilder`'s `remember(Unit) { allocateIndex() }`) and
+      `CallWhen` keeps the click handler it registered for that ID (its
+      `DisposableEffect` is keyed on the ID only, the lambda isn't updated).
+      The screen highlights "Cancel"; pressing runs "Send". Reproduced by
+      uitest/ `test_10_cancel` (compose: quick reply, Cancel, Keep Writing,
+      one turn, press: "Not sent: Add a recipient first"). Fixes: in
+      SmoothScroll `subcompose(slotId = index)` (the toolbar offset only for
+      mapping rows to knob IDs, taken from the IDs the rows got); in
+      `CallWhen`, `rememberUpdatedState(call)` and register a lambda that
+      calls its current value.
+- [ ] **The car platform's services have their own Dagger component**
+      (`ConfigurablePlatform` builds `DaggerApplicationComponent.create()`):
+      every `@ApplicationScope` object exists twice, once for the screens
+      and once for the services, each with its own `ConfigurationStorage`
+      (config.conf read into memory twice; a change on screen isn't seen by
+      the services). `NotificationHub` is static for this reason; the mail
+      app's sample data and notification settings now are too. Other
+      services that read settings changed on screen may have the same
+      problem.
+
 ## Fixed on this branch (for the record)
 
 - Uber jar dropped `META-INF/services` providers (first library's copy
