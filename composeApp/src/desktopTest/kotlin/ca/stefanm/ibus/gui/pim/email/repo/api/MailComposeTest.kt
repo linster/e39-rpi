@@ -26,7 +26,9 @@ internal class MailComposeTest {
     private val mail = FakeMailRepository()
     private val mailbox = MailboxListRepo(mail)
     private val senders = FakeMailSenders(mail)
-    private val suggestions = RecentCorrespondents(mail, senders)
+    private val recent = RecentCorrespondents(mail, senders)
+    private val suggestions = ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactRecipientSuggestions(
+        ca.stefanm.ibus.gui.pim.contacts.repo.FakeContactsRepository(), recent)
 
     private val me = MailAddress("Stefan", "stefan@example.com")
     private val anna = MailAddress("Anna Kowalski", "anna@example.com")
@@ -79,12 +81,12 @@ internal class MailComposeTest {
 
     @Test
     fun suggestionsFromRecentMail() = runBlocking {
-        val all = suggestions.suggest()
+        val all = recent.recent()
         assertTrue(all.any { it.email == "anna@example.com" })
         assertTrue(all.none { it.email == FakeMailRepository.ME_EMAIL || it.email == FakeMailRepository.WORK_EMAIL })
         assertEquals(all.size, all.map { it.email.lowercase() }.distinct().size)
-        assertEquals(listOf("Dana Whitford"), suggestions.suggest("dana").map { it.name })
-        assertEquals(listOf("anna@example.com"), suggestions.suggest("KOWAL").map { it.email })
+        assertEquals(listOf("Dana Whitford"), recent.recent("dana").map { it.name })
+        assertEquals(listOf("anna@example.com"), recent.recent("KOWAL").map { it.email })
     }
 
     @Test

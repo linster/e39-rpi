@@ -15,7 +15,7 @@ def test_new_message(hmi):
     hmi.select(r"^Add from Contacts\.\.\.$")
     hmi.wait_for_screen("ContactPickerScreen")
     hmi.shot("picker")
-    hmi.select(r"^Anna Kowalski, anna@example\.com$")  # (not "Type an Address, e.g. anna@...")
+    hmi.select(r"^Anna Kowalski, anna@example\.com · Recent")  # (not "Type an Address, e.g. anna@...")
     hmi.wait_for_screen("MailComposeScreen")
     hmi.expect_text(r"^TO, Anna Kowalski$")
 

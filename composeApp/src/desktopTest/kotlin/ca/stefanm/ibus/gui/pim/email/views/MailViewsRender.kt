@@ -141,7 +141,9 @@ internal class MailViewsRender {
                     }
                 }
             }
-            val compose = MailComposeRepo(mail, mailbox, FakeMailSenders(mail), MutableStateFlow(listOf("On my way.")), RecentCorrespondents(mail, FakeMailSenders(mail)))
+            val compose = MailComposeRepo(mail, mailbox, FakeMailSenders(mail), MutableStateFlow(listOf("On my way.")),
+                ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactRecipientSuggestions(
+                    ca.stefanm.ibus.gui.pim.contacts.repo.FakeContactsRepository(), RecentCorrespondents(mail, FakeMailSenders(mail))))
             compose.startReply(trip.message, all = false)
             compose.setText("Sounds good, I'll bring the cooler and the maps. See you at 8!")
             val draft = compose.draft.value!!
@@ -156,7 +158,7 @@ internal class MailViewsRender {
                     ComposeFieldRow(label, value, isSelected = i == 5, onClicked = {}, valueLines = if (label == "Message") 3 else 1, dim = dim)
                 }
             }
-            val people = RecentCorrespondents(mail, FakeMailSenders(mail)).suggest()
+            val people = RecentCorrespondents(mail, FakeMailSenders(mail)).recent()
             shot("picker") {
                 BmwSingleLineHeader("To: Choose Recipient")
                 ComposeFieldRow("Cancel", "", isSelected = false, onClicked = {})
