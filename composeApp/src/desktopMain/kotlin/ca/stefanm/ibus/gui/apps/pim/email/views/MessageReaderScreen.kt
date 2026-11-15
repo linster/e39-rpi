@@ -46,13 +46,16 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import ca.stefanm.ibus.gui.pim.email.repo.MailFolder
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessageReaderRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.ReaderContent
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailToolbar
 import ca.stefanm.ibus.gui.pim.email.views.parts.MessageBodyText
 import ca.stefanm.ibus.gui.pim.email.views.parts.MessageBodyView
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailToolbarButton
+import ca.stefanm.ibus.gui.pim.email.views.parts.SidePaneItem
 import ca.stefanm.ibus.gui.pim.email.views.parts.folderIcon
+import ca.stefanm.ibus.gui.pim.email.views.parts.showMailSidePane
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -69,7 +72,9 @@ import javax.inject.Named
 @ScreenDoc(
     screenName = "MessageReaderScreen",
     description = "Mail: reading a message",
-    navigatesTo = []
+    navigatesTo = [
+        ScreenDoc.NavigateTo(MailComposeScreen::class),
+    ]
 )
 @ScreenDoc.AllowsGoBack
 @AutoDiscover
@@ -83,6 +88,7 @@ class MessageReaderScreen @Inject constructor(
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
     private val readerRepo: MessageReaderRepo,
+    private val composeRepo: MailComposeRepo,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -175,7 +181,7 @@ class MessageReaderScreen @Inject constructor(
                 highlightNone = state.scrolling.value,
                 buttons = listOf(
                     MailToolbarButton("Back") { navigationNodeTraverser.goBack() },
-                    MailToolbarButton(if (state.scrolling.value) "↕ Press: menu" else "↕ Scroll", 2f) {
+                    MailToolbarButton(if (state.scrolling.value) "↕ Press: menu" else "↕ Scroll", 1.8f) {
                         state.scrolling.value = !state.scrolling.value
                     },
                     MailToolbarButton(if (state.neighbour(false) != null) "▲ Newer" else "▲", 1.3f) {
@@ -184,7 +190,11 @@ class MessageReaderScreen @Inject constructor(
                     MailToolbarButton(if (state.neighbour(true) != null) "▼ Older" else "▼", 1.3f) {
                         state.neighbour(true)?.let { state.messageId.value = it }
                     },
-                    MailToolbarButton("☰") {
+                    MailToolbarButton("↩ Reply", 1.3f) {
+                        state.scrolling.value = false
+                        state.content.value?.let { write(scope) { composeRepo.startReply(it.message, all = false) } }
+                    },
+                    MailToolbarButton("☰", 0.7f) {
                         state.scrolling.value = false
                         state.content.value?.let { showActions(scope, state, it) }
                     },
@@ -223,66 +233,52 @@ class MessageReaderScreen @Inject constructor(
 
     private fun showActions(scope: CoroutineScope, state: ReaderState, content: ReaderContent) {
         val summary = content.summary
-        modalMenuService.showSidePaneOverlay(darkenBackground = true) {
-            SidePanelMenu.SidePanelMenu(
-                title = content.subject,
-                text = @Composable {
-                    InfoLabel(summary.from.display, FontWeight.Bold)
-                    content.folder?.let { InfoLabel("In ${it.accountName}: ${it.name}") }
-                },
-                buttons = listOf(
-                    TextMenuItem(if (summary.seen) "Mark Unread" else "Mark Read", onClicked = {
-                        modalMenuService.closeSidePaneOverlay(true)
-                        scope.launch { readerRepo.setSeen(summary, !summary.seen).update(state, content, "Not changed") }
-                    }),
-                    TextMenuItem(if (summary.flagged) "Remove Flag" else "Flag", onClicked = {
-                        modalMenuService.closeSidePaneOverlay(true)
-                        scope.launch { readerRepo.setFlagged(summary, !summary.flagged).update(state, content, "Not changed") }
-                    }),
-                    TextMenuItem("Move to Folder...", onClicked = {
-                        modalMenuService.closeSidePaneOverlay(true)
-                        scope.launch { showMovePane(scope, state, content, readerRepo.moveTargets(summary)) }
-                    }),
-                    TextMenuItem(if (content.inTrash) "Delete for Good" else "Delete", onClicked = {
-                        modalMenuService.closeSidePaneOverlay(true)
-                        scope.launch {
-                            readerRepo.delete(summary).fold(
-                                onSuccess = { gone(state, if (content.inTrash) "Deleted" else "Moved to the trash") },
-                                onFailure = { notifyFailure("Not deleted", it) },
-                            )
-                        }
-                    }),
-                    TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true) }),
-                )
-            )
+        modalMenuService.showMailSidePane(logger, "$TAG actions", content.subject, listOf(summary.from.display), listOfNotNull(
+            SidePaneItem("Reply All") {
+                write(scope) { composeRepo.startReply(content.message, all = true) }
+            }.takeIf { summary.to.size + content.message.cc.size > 1 },
+            SidePaneItem("Forward") {
+                write(scope) { composeRepo.startForward(content.message) }
+            },
+            SidePaneItem(if (summary.seen) "Mark Unread" else "Mark Read") {
+                scope.launch { readerRepo.setSeen(summary, !summary.seen).update(state, content, "Not changed") }
+            },
+            SidePaneItem(if (summary.flagged) "Remove Flag" else "Flag") {
+                scope.launch { readerRepo.setFlagged(summary, !summary.flagged).update(state, content, "Not changed") }
+            },
+            SidePaneItem("Move to Folder...") {
+                scope.launch { showMovePane(scope, state, content, readerRepo.moveTargets(summary)) }
+            },
+            SidePaneItem(if (content.inTrash) "Delete for Good" else "Delete") {
+                scope.launch {
+                    readerRepo.delete(summary).fold(
+                        onSuccess = { gone(state, if (content.inTrash) "Deleted" else "Moved to the trash") },
+                        onFailure = { notifyFailure("Not deleted", it) },
+                    )
+                }
+            },
+        ))
+    }
+
+    /** Starts a draft, then shows it. */
+    private fun write(scope: CoroutineScope, start: suspend () -> Unit) {
+        scope.launch {
+            start()
+            MailComposeScreen.open(navigationNodeTraverser)
         }
     }
 
     private fun showMovePane(scope: CoroutineScope, state: ReaderState, content: ReaderContent, targets: List<MailFolder>) {
-        modalMenuService.showSidePaneOverlayWithKnobListener(darkenBackground = true) { knobListenerServiceModal ->
-            SidePanelMenu.SidePanelMenu(title = "Move to") {
-                SmoothScroll.SmoothScroll(
-                    modifier = Modifier.fillMaxWidth(),
-                    knobListenerService = knobListenerServiceModal,
-                    tag = "$TAG move",
-                    logger = logger,
-                    items = buildList {
-                        add(TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true) }).toDynamicLambda())
-                        targets.forEach { folder ->
-                            add(TextMenuItem("${folderIcon(folder.role)} ${folder.path.joinToString(" / ")}", onClicked = {
-                                modalMenuService.closeSidePaneOverlay(true)
-                                scope.launch {
-                                    readerRepo.move(content.summary, folder).fold(
-                                        onSuccess = { gone(state, "Moved to ${folder.name}") },
-                                        onFailure = { notifyFailure("Not moved", it) },
-                                    )
-                                }
-                            }).toDynamicLambda())
-                        }
-                    },
-                )
+        modalMenuService.showMailSidePane(logger, "$TAG move", "Move to", items = targets.map { folder ->
+            SidePaneItem("${folderIcon(folder.role)} ${folder.path.joinToString(" / ")}") {
+                scope.launch {
+                    readerRepo.move(content.summary, folder).fold(
+                        onSuccess = { gone(state, "Moved to ${folder.name}") },
+                        onFailure = { notifyFailure("Not moved", it) },
+                    )
+                }
             }
-        }
+        })
     }
 
     private fun Result<ca.stefanm.ibus.gui.pim.email.repo.MailSummary>.update(state: ReaderState, content: ReaderContent, failure: String) {

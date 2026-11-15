@@ -31,6 +31,7 @@ class FakeMailRepository @Inject constructor() : MailRepository {
         val SEND_DELAY: Duration = 2.seconds
         const val ME_NAME = "Stefan"
         const val ME_EMAIL = "stefan@example.com"
+        const val WORK_EMAIL = "stefan@work.example.com"
     }
 
     private data class Store(val folders: List<MailFolder>, val messages: List<StoredMessage>)
@@ -140,7 +141,7 @@ class FakeMailRepository @Inject constructor() : MailRepository {
         val outboxId = newId()
         val summary = MailSummary(
             id = outboxId, folderId = sent.id, subject = mail.subject,
-            from = MailAddress(ME_NAME, ME_EMAIL), to = mail.to, date = Clock.System.now(),
+            from = MailAddress(ME_NAME, if (accountId == "fake_work") WORK_EMAIL else ME_EMAIL), to = mail.to, date = Clock.System.now(),
             seen = true, flagged = false, answered = false, forwarded = false,
             hasAttachments = mail.forwardOf != null, sizeBytes = mail.text.length.toLong() + 400,
         )
@@ -229,7 +230,7 @@ class FakeMailRepository @Inject constructor() : MailRepository {
 
         val now = Clock.System.now()
         val me = listOf(MailAddress(ME_NAME, ME_EMAIL))
-        val workMe = listOf(MailAddress(ME_NAME, "stefan@work.example.com"))
+        val workMe = listOf(MailAddress(ME_NAME, WORK_EMAIL))
         var id = 1
         fun msg(
             folderId: String, ago: Duration, from: MailAddress, subject: String, text: String,
@@ -273,7 +274,7 @@ class FakeMailRepository @Inject constructor() : MailRepository {
                 "Standup is at 10:30 tomorrow; the room is booked until then.", seen = false, to = workMe),
             msg("11", 1.days + 5.hours, boss, "Q3 report draft",
                 "Draft attached. Comments by Thursday please.", attachment = true, to = workMe),
-            msg("12", 1.days, MailAddress(ME_NAME, "stefan@work.example.com"), "Re: Q3 report draft",
+            msg("12", 1.days, MailAddress(ME_NAME, WORK_EMAIL), "Re: Q3 report draft",
                 "Looks good. Two small comments inline.", to = listOf(boss)),
         )
         // A busy mailing list: more than one page (MailRepository.PAGE_SIZE).

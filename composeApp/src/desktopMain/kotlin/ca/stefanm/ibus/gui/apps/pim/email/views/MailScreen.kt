@@ -14,6 +14,8 @@ import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoothScreenCustomViews
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailAccountGroup
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
+import ca.stefanm.ibus.gui.pim.email.views.parts.ComposeFieldRow
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailFormat
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailboxListRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessageListRepo
@@ -32,6 +34,7 @@ import javax.inject.Inject
     description = "Mail: accounts and folders with unread counts",
     navigatesTo = [
         ScreenDoc.NavigateTo(MessageListScreen::class),
+        ScreenDoc.NavigateTo(MailComposeScreen::class),
     ]
 )
 @ScreenDoc.AllowsGoBack
@@ -40,6 +43,7 @@ class MailScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val mailboxListRepo: MailboxListRepo,
     private val messageListRepo: MessageListRepo,
+    private val composeRepo: MailComposeRepo,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -54,7 +58,7 @@ class MailScreen @Inject constructor(
         val items: List<MailListItem> = when {
             accounts == null -> listOf(info("Asking the PIM bridge..."))
             accounts.isEmpty() -> listOf(info("No mail accounts yet"))
-            else -> accounts.flatMap { folderItems(it) }
+            else -> listOf(newMessage()) + accounts.flatMap { folderItems(it) }
         }
 
         // SmoothScroll allocates knob positions once: rebuild it when the
@@ -83,6 +87,18 @@ class MailScreen @Inject constructor(
                 },
             )
         }
+    }
+
+    private fun newMessage(): MailListItem = { allocatedIndex, currentIndex ->
+        ComposeFieldRow(
+            label = "✉ New Message",
+            value = "",
+            isSelected = allocatedIndex == currentIndex,
+            onClicked = CallWhen(currentIndexIs = allocatedIndex) {
+                composeRepo.startNew()
+                MailComposeScreen.open(navigationNodeTraverser)
+            },
+        )
     }
 
     private fun info(text: String): MailListItem = { allocatedIndex, currentIndex ->

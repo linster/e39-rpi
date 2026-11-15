@@ -21,11 +21,28 @@ import ca.stefanm.ibus.gui.pim.email.views.parts.FolderRowView
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailToolbar
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailToolbarButton
 import ca.stefanm.ibus.gui.pim.email.views.parts.MessageBodyView
+import ca.stefanm.ibus.gui.pim.email.views.parts.ComposeFieldRow
+import ca.stefanm.ibus.gui.pim.email.views.parts.PersonRow
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
+import ca.stefanm.ibus.gui.pim.email.repo.api.FakeMailSenders
+import ca.stefanm.ibus.gui.pim.email.repo.api.RecentCorrespondents
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailFormat
+import ca.stefanm.ibus.gui.menu.MenuWindow
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambda
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.text.font.FontWeight
 import ca.stefanm.ibus.gui.pim.email.views.parts.MessageRowView
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.skia.EncodedImageFormat
@@ -72,7 +89,7 @@ internal class MailViewsRender {
         )) {
             fun shot(name: String, content: @androidx.compose.runtime.Composable () -> Unit) {
                 ImageComposeScene(w, h, Density(1F)) {
-                    CompositionLocalProvider(ThemeWrapper.ThemeHandle provides theme) {
+                    CompositionLocalProvider(ThemeWrapper.ThemeHandle provides theme, MenuWindow.MenuWindowKnobListener provides service) {
                         Column(Modifier.fillMaxSize().background(theme.colors.menuBackground)) { content() }
                     }
                 }.use { scene ->
@@ -96,13 +113,56 @@ internal class MailViewsRender {
                     BmwSingleLineHeader(content.subject)
                     MailToolbar(knobState, highlightNone = true, buttons = listOf(
                         MailToolbarButton("Back") {},
-                        MailToolbarButton("↕ Press: menu", 2f) {},
+                        MailToolbarButton("↕ Press: menu", 1.8f) {},
                         MailToolbarButton("▲ Newer", 1.3f) {},
                         MailToolbarButton("▼ Older", 1.3f) {},
-                        MailToolbarButton("☰") {},
+                        MailToolbarButton("↩ Reply", 1.3f) {},
+                        MailToolbarButton("☰", 0.7f) {},
                     ))
                     Column(Modifier.padding(horizontal = 8.dp)) { MessageBodyView(content) }
                 }
+            }
+            // The reader's actions, in a side pane over the right half.
+            shot("reader-actions") {
+                Row(Modifier.fillMaxSize()) {
+                    Box(Modifier.weight(1f))
+                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                        // As showMailSidePane lays it out.
+                        SidePanelMenu.SidePanelMenu(title = sgi.subject) {
+                            Column(Modifier.padding(10.dp)) { SidePanelMenu.InfoLabel(sgi.summary.from.display, FontWeight.Bold) }
+                            SmoothScroll.SmoothScroll(
+                                modifier = Modifier.fillMaxWidth(),
+                                knobListenerService = service,
+                                logger = logger,
+                                items = listOf("Go Back", "Reply All", "Forward", "Mark Unread", "Remove Flag", "Move to Folder...", "Delete")
+                                    .map { TextMenuItem(it, onClicked = {}).toDynamicLambda() },
+                            )
+                        }
+                    }
+                }
+            }
+            val compose = MailComposeRepo(mail, mailbox, FakeMailSenders(mail), MutableStateFlow(listOf("On my way.")), RecentCorrespondents(mail, FakeMailSenders(mail)))
+            compose.startReply(trip.message, all = false)
+            compose.setText("Sounds good, I'll bring the cooler and the maps. See you at 8!")
+            val draft = compose.draft.value!!
+            shot("compose") {
+                BmwSingleLineHeader("Reply")
+                listOf(
+                    Triple("Cancel", "", false), Triple("From", "Home <${FakeMailRepository.ME_EMAIL}>", false),
+                    Triple("To", MailFormat.addresses(draft.to), false), Triple("Cc", "Add...", true),
+                    Triple("Subject", draft.subject, false), Triple("Message", draft.text, false),
+                    Triple("Quick Reply...", "", false), Triple("Original Message", "Quoted below the text", false), Triple("Send", "", false),
+                ).forEachIndexed { i, (label, value, dim) ->
+                    ComposeFieldRow(label, value, isSelected = i == 5, onClicked = {}, valueLines = if (label == "Message") 3 else 1, dim = dim)
+                }
+            }
+            val people = RecentCorrespondents(mail, FakeMailSenders(mail)).suggest()
+            shot("picker") {
+                BmwSingleLineHeader("To: Choose Recipient")
+                ComposeFieldRow("Cancel", "", isSelected = false, onClicked = {})
+                ComposeFieldRow("Search", "Type a name or address...", isSelected = false, onClicked = {}, dim = true)
+                ComposeFieldRow("Type an Address", "e.g. anna@example.com", isSelected = false, onClicked = {}, dim = true)
+                people.forEachIndexed { i, p -> PersonRow(p.name.ifBlank { p.email }, if (p.name.isBlank()) "" else p.email, isSelected = i == 0, onClicked = {}) }
             }
             for ((name, state) in listOf("inbox" to inboxRows, "list" to listRows)) {
                 shot(name) {
