@@ -38,19 +38,15 @@ class MailSettingsRepository @Inject constructor(
         config[E39Config.PimConfig.Mail.useFakeData] = fake
     }
 
-    fun addQuickReply(text: String) {
-        val cleaned = text.trim()
-        require(cleaned.isNotEmpty()) { "Empty reply" }
-        if (cleaned !in _quickReplies.value) setQuickReplies(_quickReplies.value + cleaned)
-    }
+    /** IllegalArgumentException for an empty one; nothing changes for one that's there already. */
+    fun addQuickReply(text: String) = setQuickReplies(QuickReplyEdits.add(_quickReplies.value, text))
+
+    /** The reply at [index] becomes [text]; IllegalArgumentException for an empty one or a duplicate. */
+    fun replaceQuickReply(index: Int, text: String) = setQuickReplies(QuickReplyEdits.replace(_quickReplies.value, index, text))
 
     fun removeQuickReply(text: String) = setQuickReplies(_quickReplies.value - text)
 
-    fun moveQuickReply(from: Int, to: Int) {
-        val list = _quickReplies.value.toMutableList()
-        list.add(to.coerceIn(0, list.size - 1), list.removeAt(from))
-        setQuickReplies(list)
-    }
+    fun moveQuickReply(from: Int, to: Int) = setQuickReplies(QuickReplyEdits.move(_quickReplies.value, from, to))
 
     fun setQuickReplies(replies: List<String>) {
         config[E39Config.PimConfig.Mail.quickReplies] = replies
@@ -85,4 +81,29 @@ class MailSettingsRepository @Inject constructor(
         mutedAccountIds = config[E39Config.PimConfig.Mail.mutedAccountIds].toSet(),
         mutedFolderIds = config[E39Config.PimConfig.Mail.mutedFolderIds].toSet(),
     )
+}
+
+/** Editing the quick replies list (no duplicates, no empty ones). */
+object QuickReplyEdits {
+    fun add(list: List<String>, text: String): List<String> {
+        val cleaned = text.trim()
+        require(cleaned.isNotEmpty()) { "Empty reply" }
+        return if (cleaned in list) list else list + cleaned
+    }
+
+    fun replace(list: List<String>, index: Int, text: String): List<String> {
+        val cleaned = text.trim()
+        require(cleaned.isNotEmpty()) { "Empty reply" }
+        require(index in list.indices) { "No reply $index" }
+        require(list.withIndex().none { (i, r) -> i != index && r == cleaned }) { "\"$cleaned\" is there already" }
+        return list.toMutableList().also { it[index] = cleaned }
+    }
+
+    /** [to] is clamped to the list; moving off an end does nothing. */
+    fun move(list: List<String>, from: Int, to: Int): List<String> {
+        if (from !in list.indices) return list
+        val l = list.toMutableList()
+        l.add(to.coerceIn(0, l.size - 1), l.removeAt(from))
+        return l
+    }
 }
