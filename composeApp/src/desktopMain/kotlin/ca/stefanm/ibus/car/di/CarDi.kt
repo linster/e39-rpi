@@ -30,6 +30,7 @@ import ca.stefanm.ibus.stefane39.TelephoneButtonVideoSwitcherService
 import dagger.*
 import kotlinx.coroutines.*
 import ca.stefanm.ibus.gui.pim.email.notifier.MailNotifierService
+import ca.stefanm.ibus.lib.system.FirstBootNotifierService
 import javax.inject.Named
 import javax.inject.Scope
 import kotlin.coroutines.CoroutineContext
@@ -84,6 +85,7 @@ interface ConfiguredCarComponent {
     fun discoveredServiceSlideshowService() : SlideshowService
 
     fun discoveredServiceMailNotifierService() : MailNotifierService
+    fun discoveredServiceFirstBootNotifierService() : FirstBootNotifierService
 }
 
 @Module
