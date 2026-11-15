@@ -27,7 +27,17 @@ class MailModule {
         remote: Provider<RemoteMailRepository>,
         fake: Provider<FakeMailRepository>,
     ): MailRepository =
-        if (configurationStorage.config[E39Config.PimConfig.Mail.useFakeData]) fake.get() else remote.get()
+        if (configurationStorage.config[E39Config.PimConfig.Mail.useFakeData]) sharedFake(fake) else remote.get()
+
+    companion object {
+        // The sample mail is one for the whole process: the car platform's
+        // services (MailNotifierService) get their own Dagger component, and
+        // must see the mail the screens send and get.
+        private var fakeInstance: FakeMailRepository? = null
+
+        private fun sharedFake(fake: Provider<FakeMailRepository>): FakeMailRepository =
+            synchronized(this) { fakeInstance ?: fake.get().also { fakeInstance = it } }
+    }
 
     @Provides
     @ApplicationScope

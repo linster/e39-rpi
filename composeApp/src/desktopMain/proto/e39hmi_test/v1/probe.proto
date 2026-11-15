@@ -1,0 +1,229 @@
+// The HMI's UI test probe: lets a test runner (uitest/, pytest) drive the
+// HMI with knob input and see what it shows. Off unless the HMI is started
+// with E39_TEST_PROBE=<port>; listens on 127.0.0.1 only (reach a Pi or a
+// QEMU guest through an ssh tunnel).
+syntax = "proto3";
+
+package e39hmi.test.v1;
+
+option java_package = "ca.stefanm.e39hmi.test.v1";
+option java_multiple_files = true;
+
+service HmiTestProbe {
+  // What's on screen now.
+  rpc GetState(GetStateRequest) returns (HmiState);
+  // Waits until the HMI has settled (no UI state changes for quiet_ms, and
+  // something listens for input), then returns the state. DEADLINE_EXCEEDED
+  // after timeout_ms.
+  rpc WaitForIdle(WaitForIdleRequest) returns (HmiState);
+  // Puts input events into the HMI's input stream (as the IBus parser
+  // would), one at a time; with wait_for_idle, waits for the HMI to settle
+  // before each event and after the last.
+  rpc SendInput(SendInputRequest) returns (SendInputResponse);
+  // A PNG of the HMI window.
+  rpc Screenshot(ScreenshotRequest) returns (ScreenshotResponse);
+  // The texts on screen (from Compose's accessibility tree), top to
+  // bottom, with where they are in the window. Clickable items without
+  // text (e.g. the keyboard's space bar) are included with text "".
+  rpc GetTexts(GetTextsRequest) returns (GetTextsResponse);
+  // Goes to a screen, the root, or back.
+  rpc Navigate(NavigateRequest) returns (HmiState);
+  // The screens the navigator knows, and @AutoDiscover screens it doesn't
+  // (missing from Navigator.kt), as the HMI Navigator Debug window shows.
+  rpc ListScreens(ListScreensRequest) returns (ListScreensResponse);
+  // Closes a side pane, modal menu or on-screen keyboard left open, and
+  // the notification.
+  rpc CloseOverlays(CloseOverlaysRequest) returns (HmiState);
+  // Hides the notification (it covers the top of the screen until it
+  // times out).
+  rpc ClearNotification(ClearNotificationRequest) returns (HmiState);
+
+  // The mail app as on a fresh start: settings back to their defaults
+  // (notifications on, nothing muted, the default quick replies), no
+  // draft, every folder's list on its first page; with sample mail, the
+  // sample data again.
+  rpc ResetMailApp(ResetMailAppRequest) returns (ResetMailAppResponse);
+
+  // Sample mail (E39Config.PimConfig.Mail.useFakeData) only;
+  // FAILED_PRECONDITION with the bridge's mail.
+  // Back to the sample data.
+  rpc ResetFakeMail(ResetFakeMailRequest) returns (ResetFakeMailResponse);
+  // A new message in the first inbox, with a new-mail event.
+  rpc DeliverFakeMail(DeliverFakeMailRequest) returns (DeliverFakeMailResponse);
+}
+
+message GetStateRequest {}
+
+message WaitForIdleRequest {
+  // 0 = 300.
+  int32 quiet_ms = 1;
+  // 0 = 10000.
+  int32 timeout_ms = 2;
+  // Count the quiet time from this call, not from the last change: after
+  // input sent some other way (IBus), which the HMI reacts to a frame or
+  // more later.
+  bool from_now = 3;
+}
+
+message HmiState {
+  // The current screen's class: simple name ("MessageListScreen") and full.
+  string screen = 1;
+  string screen_class = 2;
+  // Its parameters (toString), if it got any.
+  string screen_parameters = 3;
+  // Below the current screen, nearest first (simple class names).
+  repeated string back_stack = 4;
+  // The same with what each was given, nearest first.
+  repeated BackStackEntry back_stack_entries = 18;
+
+  Notification notification = 5;
+  // An overlay is open: side pane, modal menu, on-screen keyboard.
+  bool side_pane_open = 6;
+  bool modal_menu_open = 7;
+  bool keyboard_open = 8;
+
+  // Which knob listeners take input.
+  bool main_knob_listener = 9;
+  bool main_aux_knob_listener = 10;
+  bool modal_knob_listener = 11;
+  // Collectors of the input stream now; 0 = an input sent now is lost.
+  int32 input_subscribers = 12;
+
+  // Counts UI state changes (Compose snapshot applies) since start.
+  int64 ui_changes = 13;
+  // Since the last UI state change.
+  int64 quiet_ms = 14;
+  // Inputs sent through the probe while nothing listened (lost).
+  int64 dropped_inputs = 15;
+  // Whether the HMI window is open (it opens after the loading window).
+  bool hmi_window_open = 16;
+  // The mail app shows sample mail (E39Config.PimConfig.Mail.useFakeData).
+  bool fake_mail = 17;
+}
+
+message BackStackEntry {
+  string screen = 1;
+  // toString() of its parameters and of the result it got back, if any.
+  string parameters = 2;
+  string result = 3;
+}
+
+message ListScreensRequest {}
+
+message ListScreensResponse {
+  // Full class names, sorted.
+  repeated string registered = 1;
+  repeated string unregistered = 2;
+}
+
+message Notification {
+  bool visible = 1;
+  string top_text = 2;
+  string content_text = 3;
+  // NotificationImage name, e.g. "ALERT_TRIANGLE".
+  string image = 4;
+}
+
+message InputEvent {
+  oneof event {
+    KnobTurn knob_turn = 1;
+    Empty knob_press = 2;
+    Empty next_track = 3;
+    Empty prev_track = 4;
+    // The BMBT's Menu button.
+    Empty menu = 5;
+    Empty phone = 6;
+    Empty rt = 7;
+    // The radio's preset buttons (1..6).
+    int32 index_select = 8;
+  }
+}
+
+message KnobTurn {
+  enum Direction {
+    DIRECTION_UNSPECIFIED = 0;
+    LEFT = 1;
+    RIGHT = 2;
+  }
+  Direction direction = 1;
+  // 1..9 (0 = 1); sent as that many single clicks.
+  int32 clicks = 2;
+}
+
+message Empty {}
+
+message SendInputRequest {
+  repeated InputEvent events = 1;
+  bool wait_for_idle = 2;
+  // For wait_for_idle; 0 = 300 / 10000.
+  int32 quiet_ms = 3;
+  int32 timeout_ms = 4;
+}
+
+message SendInputResponse {
+  // Of the events sent, how many found nobody listening (lost).
+  int32 dropped = 1;
+  HmiState state = 2;
+}
+
+message GetTextsRequest {}
+
+message ScreenText {
+  string text = 1;
+  // In window pixels.
+  int32 x = 2;
+  int32 y = 3;
+  int32 width = 4;
+  int32 height = 5;
+  // The accessibility role, e.g. "label", "push button".
+  string role = 6;
+  // It can be clicked: a menu row or toolbar button (a knob position).
+  bool clickable = 7;
+  // Clickable and drawn as the knob's current item (the theme's selection
+  // colour inside its bounds, from a screenshot). Only for what's on screen.
+  bool selected = 8;
+  // Which layer of the window it's in: the screen is drawn first, then
+  // overlays (notification, side pane, modal menu, keyboard) on top, each a
+  // later (higher) layer. Compare within one GetTexts.
+  int32 layer = 9;
+}
+
+message GetTextsResponse {
+  repeated ScreenText texts = 1;
+}
+
+message ScreenshotRequest {}
+
+message ScreenshotResponse {
+  bytes png = 1;
+  int32 width = 2;
+  int32 height = 3;
+}
+
+message NavigateRequest {
+  oneof to {
+    // A registered screen's class name, simple ("MailScreen") or full.
+    string screen = 1;
+    Empty root = 2;
+    Empty back = 3;
+  }
+}
+
+message CloseOverlaysRequest {}
+message ClearNotificationRequest {}
+
+message ResetMailAppRequest {}
+message ResetMailAppResponse {}
+
+message ResetFakeMailRequest {}
+message ResetFakeMailResponse {}
+
+message DeliverFakeMailRequest {
+  // Empty: Anna Kowalski <anna@example.com>.
+  string from_name = 1;
+  string from_email = 2;
+  string subject = 3;
+  string text = 4;
+}
+
+message DeliverFakeMailResponse {}
