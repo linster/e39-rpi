@@ -54,7 +54,7 @@ class TimeZoneSettings @Inject constructor(
         val MODE = File(STATE, "mode")
         private val LOCALTIME = File("/etc/localtime")
         private val ZONE_TABS = listOf(File("/usr/share/zoneinfo/zone1970.tab"), File("/usr/share/zoneinfo/zone.tab"))
-        private const val RESULT_TIMEOUT_MS = 15_000L
+        private const val RESULT_TIMEOUT_MS = 30_000L
     }
 
     enum class Mode { AUTOMATIC, MANUAL }
@@ -94,11 +94,23 @@ class TimeZoneSettings @Inject constructor(
     /** Follow what the system names (the installed map's zone). */
     suspend fun automatic(): Result<ZoneId> = request("auto")
 
-    private suspend fun request(line: String): Result<ZoneId> = withContext(Dispatchers.IO) {
+    private suspend fun request(line: String): Result<ZoneId> =
+        helperRequest(line).mapCatching { zone ->
+            // The JVM read the zone at start-up: switch it too, so the
+            // clock and everything else in the HMI follow.
+            ZoneId.of(zone).also { TimeZone.setDefault(TimeZone.getTimeZone(it)) }
+        }
+
+    /**
+     * Sends one request to the image's root helper (e39rpi-timezone: zones,
+     * and for ClockSettings internet time and the clock) and waits for its
+     * result. Success: what follows "ok ".
+     */
+    suspend fun helperRequest(line: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             check(canChange()) { "this system can't (no ${REQUEST.parent}: the image's e39rpi-timezone helper)" }
             val before = RESULT.lastModified()
-            logger.i(TAG, "Time zone request: $line")
+            logger.i(TAG, "Request: $line")
             REQUEST.writeText("$line\n")
             val waitedUntil = System.currentTimeMillis() + RESULT_TIMEOUT_MS
             while (RESULT.lastModified() == before) {
@@ -107,9 +119,7 @@ class TimeZoneSettings @Inject constructor(
             }
             val result = RESULT.readText().trim()
             check(result.startsWith("ok ")) { result.removePrefix("error ") }
-            // The JVM read the zone at start-up: switch it too, so the
-            // clock and everything else in the HMI follow.
-            ZoneId.of(result.removePrefix("ok ")).also { TimeZone.setDefault(TimeZone.getTimeZone(it)) }
-        }.onFailure { logger.w(TAG, "Time zone request '$line' failed: ${it.message}") }
+            result.removePrefix("ok ")
+        }.onFailure { logger.w(TAG, "Request '$line' failed: ${it.message}") }
     }
 }
