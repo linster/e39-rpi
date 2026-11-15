@@ -58,8 +58,28 @@ class KnobListenerService @Inject constructor(
     val tag
         get() = identifier.getNameFromHashcode(this.hashCode())
 
+    /** The input events, only while this listener is enabled.
+     *
+     * Disabling unsubscribes from the input stream and enabling subscribes
+     * again, so a collector lasts through a modal menu (or other overlay)
+     * taking the knob. The old takeWhile gate completed the flow on the first
+     * event while disabled, and the screen never got the knob back.
+     *
+     * Subscribing anew on enable (instead of filtering on the flag) also means
+     * the press that closes a modal is not seen by the screen underneath: the
+     * modal's click handler re-enables this listener while that press is
+     * still being delivered. inputEvents has no replay, so only later events
+     * reach it. The filter covers the other edge: flatMapLatest switches
+     * asynchronously, so an event delivered just after disableListener()
+     * is dropped here.
+     */
+    fun enabledInputEvents() : Flow<InputEvent> =
+        listenerEnabled.flatMapLatest { enabled ->
+            if (enabled) inputEvents.filter { listenerEnabled.value } else emptyFlow()
+        }
+
     fun knobTurnEvents(filterEvents : Boolean = true) : Flow<InputEvent> {
-        return inputEvents.filter {
+        return enabledInputEvents().filter {
             if (filterEvents) {
                 it is InputEvent.NavKnobPressed || it is InputEvent.NavKnobTurned
             } else {
@@ -68,9 +88,6 @@ class KnobListenerService @Inject constructor(
         }.onEach {
             logger.d(tag, "I am ${tag} and enable is ${listenerEnabled.value}")
         }
-            .takeWhile {
-                listenerEnabled.value
-            }
             .transform {
             if (it is InputEvent.NavKnobPressed) {
                 emit(it)
@@ -146,10 +163,11 @@ class KnobListenerService @Inject constructor(
                 }
             }
 
-            inputEvents
-                .takeWhile {
+            // See enabledInputEvents(): the old takeWhile gate ended this
+            // menu's knob handling for good the first time it was disabled.
+            enabledInputEvents()
+                .onEach {
                     logger.d("WAT", "I am ${tag} and enable is ${listenerEnabled.value}")
-                    listenerEnabled.value
                 }
                 .collect { event ->
 
