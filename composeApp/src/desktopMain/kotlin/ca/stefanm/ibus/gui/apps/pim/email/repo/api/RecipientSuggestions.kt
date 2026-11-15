@@ -6,22 +6,33 @@ import ca.stefanm.ibus.gui.pim.email.repo.MailRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
+/** Someone to send to, as the contact picker lists them. */
+data class Recipient(
+    val address: MailAddress,
+    /** Where they're from: "Recent", the address book ("Personal"), or both ("Recent · Personal"). */
+    val detail: String,
+    val recent: Boolean,
+)
+
+/** [recipients], and how many more matched than are listed. */
+data class Suggestions(val recipients: List<Recipient>, val more: Int = 0)
+
 /**
- * Who a message could go to, for the contact picker. A stub for now
- * ([RecentCorrespondents]); the contacts app replaces it with the address
- * book (MailModule provides it).
+ * Who a message could go to, for the contact picker. MailModule provides
+ * ContactRecipientSuggestions (the address book and recent mail).
  */
 interface RecipientSuggestions {
-    /** Matching [query] in name or address (all if blank), best first. */
-    suspend fun suggest(query: String = "", limit: Int = 50): List<MailAddress>
+    /** Matching [query] in name or address (all if blank), best first, at most [limit]. */
+    suspend fun suggest(query: String = "", limit: Int = 100): Suggestions
 }
 
 /** The people in recent mail: senders in the inboxes, recipients in sent mail; newest first, without the user. */
 class RecentCorrespondents @Inject constructor(
     private val mail: MailRepository,
     private val senders: MailSenders,
-) : RecipientSuggestions {
-    override suspend fun suggest(query: String, limit: Int): List<MailAddress> {
+) {
+    /** Matching [query] in name or address (all if blank), newest first. */
+    suspend fun recent(query: String = "", limit: Int = 50): List<MailAddress> {
         val own = senders.ownAddresses()
         val folders = mail.folders().first().filter { it.role == MailFolderRole.INBOX || it.role == MailFolderRole.SENT }
         val dated = folders.flatMap { folder ->

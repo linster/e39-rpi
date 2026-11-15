@@ -6,7 +6,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.pim.email.repo.api.AccountMailSenders
 import ca.stefanm.ibus.gui.pim.email.repo.api.FakeMailSenders
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailSenders
-import ca.stefanm.ibus.gui.pim.email.repo.api.RecentCorrespondents
+import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactRecipientSuggestions
 import ca.stefanm.ibus.gui.pim.email.repo.api.RecipientSuggestions
 import dagger.Module
 import dagger.Provides
@@ -48,8 +48,8 @@ class MailModule {
     ): MailSenders =
         if (configurationStorage.config[E39Config.PimConfig.Mail.useFakeData]) fake.get() else remote.get()
 
-    /** A stub: people from recent mail. The contacts app replaces it with the address book. */
+    /** The contact picker's people: the address book and recent mail. */
     @Provides
     @ApplicationScope
-    fun provideRecipientSuggestions(recent: RecentCorrespondents): RecipientSuggestions = recent
+    fun provideRecipientSuggestions(suggestions: ContactRecipientSuggestions): RecipientSuggestions = suggestions
 }

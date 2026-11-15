@@ -268,7 +268,7 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
             contact("b3", "", "", organization = "IT Help Desk", phones = listOf("+1 403 555 0100" to PhoneNumber.Type.WORK)),
         ) + clubMembers().map { (given, family, n) ->
             contact("b4", given, family, phones = listOf("+1 306 555 %04d".format(1000 + n) to PhoneNumber.Type.MOBILE),
-                email = "${'$'}{fold(given)}.${'$'}{fold(family)}@club.example.org".replace(" ", ""))
+                email = "${fold(given)}.${fold(family)}@club.example.org".replace(" ", ""))
         }
     }
 

@@ -19,6 +19,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.pim.email.repo.MailAddress
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailAddresses
 import ca.stefanm.ibus.gui.pim.email.repo.api.RecipientSuggestions
+import ca.stefanm.ibus.gui.pim.email.repo.api.Suggestions
 import ca.stefanm.ibus.gui.pim.email.views.parts.ComposeFieldRow
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailListItem
 import ca.stefanm.ibus.gui.pim.email.views.parts.PersonRow
@@ -27,18 +28,16 @@ import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 
 /**
- * Picks someone to send mail to. A stub until the contacts app: it offers
- * [RecipientSuggestions] (people from recent mail for now), a search by
- * keyboard, and typing an address. Returns [Result.Picked] with
- * setResultAndGoBack; going back picks no one.
- *
- * TODO contacts app (e39-rpi-pim TODO.md phase 11): the address book,
- *  A–Z with knob jumps, a contact's several addresses (and phone numbers,
- *  for other callers).
+ * Picks someone to send mail to: [RecipientSuggestions] (people from recent
+ * mail first, then the address book's contacts with an e-mail address), a
+ * search by keyboard (names and addresses; every address of the contacts
+ * found), and typing an address. A long address book is cut off with a
+ * hint to search. Returns [Result.Picked] with setResultAndGoBack; going
+ * back picks no one.
  */
 @ScreenDoc(
     screenName = "ContactPickerScreen",
-    description = "Choose a recipient (stub: people from recent mail)",
+    description = "Choose a recipient: recent mail and the address book",
     navigatesTo = []
 )
 @ScreenDoc.AllowsGoBack
@@ -71,13 +70,13 @@ class ContactPickerScreen @Inject constructor(
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = { incoming ->
         val title = (incoming?.requestParameters as? Request)?.title ?: "Choose Recipient"
         val query = remember { mutableStateOf("") }
-        val found = remember { mutableStateOf<List<MailAddress>?>(null) }
+        val found = remember { mutableStateOf<Suggestions?>(null) }
         LaunchedEffect(query.value) {
             found.value = try {
                 suggestions.suggest(query.value)
             } catch (e: Exception) {
                 logger.w(TAG, "Suggestions: ${e.message}")
-                emptyList()
+                Suggestions(emptyList())
             }
         }
 
@@ -101,15 +100,24 @@ class ContactPickerScreen @Inject constructor(
             val list = found.value
             when {
                 list == null -> add(row("Looking...", "") {})
-                list.isEmpty() -> add(row(if (query.value.isBlank()) "No one in recent mail" else "No one matches", "") {})
-                else -> list.forEach { address ->
-                    add { allocatedIndex, currentIndex ->
-                        PersonRow(
-                            name = address.name.ifBlank { address.email },
-                            detail = if (address.name.isBlank()) "" else address.email,
-                            isSelected = allocatedIndex == currentIndex,
-                            onClicked = CallWhen(currentIndexIs = allocatedIndex) { pick(address) },
-                        )
+                list.recipients.isEmpty() -> add(row(if (query.value.isBlank()) "No one with an e-mail address" else "No one matches", "") {})
+                else -> {
+                    list.recipients.forEach { recipient ->
+                        val address = recipient.address
+                        add { allocatedIndex, currentIndex ->
+                            PersonRow(
+                                name = address.name.ifBlank { address.email },
+                                detail = listOfNotNull(address.email.takeIf { address.name.isNotBlank() }, recipient.detail.takeIf { it.isNotBlank() })
+                                    .joinToString(" · "),
+                                isSelected = allocatedIndex == currentIndex,
+                                onClicked = CallWhen(currentIndexIs = allocatedIndex) { pick(address) },
+                            )
+                        }
+                    }
+                    if (list.more > 0) {
+                        add(row("${list.more} more: search to find them", "") {
+                            modalMenuService.showKeyboard(Keyboard.KeyboardType.FULL, query.value) { query.value = it.trim() }
+                        })
                     }
                 }
             }
