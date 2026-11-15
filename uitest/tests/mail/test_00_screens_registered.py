@@ -1,3 +1,5 @@
+import pytest
+
 """Every screen is registered with the navigator (as the HMI Navigator Debug window checks),
 including the mail app's."""
 
@@ -20,6 +22,7 @@ def test_screens_registered(hmi):
     assert missing == [], missing
 
 
+@pytest.mark.fake_mail
 def test_back_stack(hmi):
     hmi.go("MailScreen")
     hmi.select(r"E39 list")

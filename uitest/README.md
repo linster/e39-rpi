@@ -37,7 +37,7 @@ pytest tests/mail/test_03_paging.py                          # one test
 pytest -k reader                                             # by name
 pytest --show                                                # on your display instead of a hidden one
 pytest --input ibus                                          # knob input as real IBus packets
-pytest --mail bridge --bridge localhost:50052                # the PIM bridge's mail (e39-rpi-pim scripts/run-dev.sh)
+pytest --mail bridge                                         # the PIM bridge's mail (see "Bridge mode")
 pytest --target qemu                                         # a running e39-rpi-yocto scripts/run-qemu.sh
 pytest --target device --device e39-rpi.local                # a Pi
 ```
@@ -60,6 +60,31 @@ Results: screenshots of each step (`NN-name.png`), on failure
   mail tests are skipped unless the device's config has
   `pimConfig.mail.useFakeData=true`. `--input ibus` on QEMU uses its IBus
   socket (close scripts/qemu-utility.py first: one client at a time).
+
+### Bridge mode
+
+`--mail bridge` (`--bridge host:port`, default `localhost:50052`) runs the
+tests marked `bridge_mail` (`test_2x_bridge_*`) against a PIM bridge;
+sample-mail tests are skipped. They expect the dev bridge's "Local
+Folders" (e39-rpi-pim `scripts/run-dev.sh`: an inbox with six messages)
+plus an "e39-list" folder of 250 messages for paging, written by:
+
+```sh
+uitest/tools/make-bridge-testmail.py ~/.local/share/e39pim-dev/share/local-mail --sync e39pim-dev
+```
+
+(`--sync` asks the bridge container's maildir resource to fetch the new
+folder: the bridge only lists what Akonadi has fetched.) The tests undo
+what they change (flags, moves), so they can run again. The dev bridge has
+no sending account and no trash folder: the tests check that sending and
+deleting are refused cleanly. `--bridge-maildir
+~/.local/share/e39pim-dev/share/local-mail` also runs `test_24`, which
+drops a message into the inbox and waits (the bridge reports new mail after
+30 s of quiet) for the notification.
+
+```sh
+pytest -m bridge_mail --mail bridge --bridge-maildir ~/.local/share/e39pim-dev/share/local-mail
+```
 
 ### Input
 

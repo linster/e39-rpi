@@ -29,6 +29,9 @@ def pytest_addoption(parser):
     g.addoption("--mail", choices=["fake", "bridge"], default="fake",
                 help="local target: sample mail (default) or the PIM bridge's (--bridge)")
     g.addoption("--bridge", default="localhost:50052", help="the PIM bridge for --mail bridge (host:port)")
+    g.addoption("--bridge-maildir", default=None,
+                help="--mail bridge: the bridge's Local Folders maildir on this machine (e.g. "
+                     "~/.local/share/e39pim-dev/share/local-mail), for tests that deliver mail into it")
     g.addoption("--jar", default=None, help="local target: the HMI uber jar (default: the newest in composeApp/build/compose/jars)")
     g.addoption("--show", action="store_true", help="local target: on this display instead of a hidden one")
     g.addoption("--qemu-state", default=None, help="qemu target: run-qemu.sh's state file (default: the only one)")
@@ -50,6 +53,18 @@ def out_dir(pytestconfig):
         UITEST, "out", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
     os.makedirs(out, exist_ok=True)
     return out
+
+
+@pytest.fixture(scope="session")
+def bridge_maildir(pytestconfig):
+    """The bridge's Local Folders maildir (--bridge-maildir), or the test is skipped."""
+    path = pytestconfig.getoption("--bridge-maildir")
+    if not path:
+        pytest.skip("needs --bridge-maildir")
+    path = os.path.expanduser(path)
+    if not os.path.isdir(os.path.join(path, "inbox")):
+        pytest.fail(f"--bridge-maildir {path}: no inbox/ there")
+    return path
 
 
 @pytest.fixture(scope="session")
