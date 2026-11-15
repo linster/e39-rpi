@@ -33,6 +33,7 @@ import javax.inject.Named
     description = "The Root menu for visible settings",
     navigatesTo = [
         ScreenDoc.NavigateTo(BluetoothPairingMenu::class),
+        ScreenDoc.NavigateTo(AudioSettingsScreen::class),
         ScreenDoc.NavigateTo(MapSettingsMainScreen::class),
         ScreenDoc.NavigateTo(CarPlatformConfigScreen::class),
         ScreenDoc.NavigateTo(ThemeSelectorScreen::class),
@@ -67,6 +68,7 @@ class SettingsRootMenu @Inject constructor(
             prependGoBackEntry = true,
             items = listOf(
                 "Bluetooth"     to  { navigateToNode(BluetoothPairingMenu::class.java) },
+                "Audio"         to  { navigateToNode(AudioSettingsScreen::class.java) },
                 "Map Settings"  to { navigateToNode(MapSettingsMainScreen::class.java) },
                 "Car Platform Config" to  { navigateToNode(CarPlatformConfigScreen::class.java) },
                 "Theme"         to  { navigateToNode(ThemeSelectorScreen::class.java) },
