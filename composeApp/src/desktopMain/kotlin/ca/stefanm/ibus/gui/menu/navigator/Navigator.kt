@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
 import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerScreen
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.PromptSecretScreen
 import ca.stefanm.ibus.gui.generalSettings.GriffinPowermateConfigScreen
+import ca.stefanm.ibus.gui.generalSettings.DateTimeScreen
 import ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
 import ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
@@ -137,6 +138,7 @@ class NavigationModule {
         mapScreen: MapScreen,
         aboutScreen: AboutScreen,
         timeZoneScreen: TimeZoneScreen,
+        dateTimeScreen: DateTimeScreen,
         carServiceConfigScreen: CarServiceConfigScreen,
         carPlatformConfigScreen: CarPlatformConfigScreen,
         hmiLogViewerScreen: HmiLogViewerScreen,
@@ -238,6 +240,7 @@ class NavigationModule {
         mapScreen,
         aboutScreen,
         timeZoneScreen,
+        dateTimeScreen,
         carServiceConfigScreen,
         carPlatformConfigScreen,
         hmiLogViewerScreen,
