@@ -21,6 +21,7 @@ import ca.stefanm.ibus.gui.generalSettings.DateTimeScreen
 import ca.stefanm.ibus.gui.generalSettings.AudioSettingsScreen
 import ca.stefanm.ibus.gui.generalSettings.AudioOutputsScreen
 import ca.stefanm.ibus.gui.networkSetup.NetworkSetupMenu
+import ca.stefanm.ibus.gui.networkSetup.editConnection.screens.EditConnectionScreen
 import ca.stefanm.ibus.gui.networkSetup.debug.ui.DummyConnectionListScreen
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.ActivateConnectionScreen
 import ca.stefanm.ibus.gui.networkSetup.activateConnection.screens.debug.FilterConnectionsListForDevicesUseCaseDebugScreen
@@ -237,6 +238,7 @@ class NavigationModule {
         mailSettingsScreen: MailSettingsScreen,
         mailMuteScreen: MailMuteScreen,
         quickRepliesScreen: QuickRepliesScreen,
+        editConnectionScreen: EditConnectionScreen,
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -349,6 +351,7 @@ class NavigationModule {
         mailSettingsScreen,
         mailMuteScreen,
         quickRepliesScreen,
+        editConnectionScreen,
     )
 }
 
