@@ -12,7 +12,7 @@ import os
 import subprocess
 import time
 
-from .local import free_port
+from .local import free_port, wait_window_settled
 
 ENV_FILE = "/etc/default/e39rpi-hmi"
 RESTART = ("runuser -u hmi -- env XDG_RUNTIME_DIR=/run/user/$(id -u hmi) "
@@ -61,6 +61,7 @@ class RemoteTarget:
         while True:
             try:
                 if hmi.state().hmi_window_open:
+                    wait_window_settled(hmi)
                     return
             except Exception:
                 pass

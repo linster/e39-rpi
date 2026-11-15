@@ -114,7 +114,10 @@ hmi.wait_for_notification(r"^Mail sent$")   # then hides it (it covers the top o
 hmi.shot("name")                        # screenshot into the test's folder
 ```
 
-Mark tests that need sample mail `@pytest.mark.fake_mail`.
+Mark tests that need sample mail `@pytest.mark.fake_mail`, sample contacts
+`@pytest.mark.fake_contacts` (`--mail` chooses both: sample mail and
+contacts, or the bridge's). Tests live by app: `tests/mail/`,
+`tests/contacts/`.
 
 ## HMI bugs the tests found
 

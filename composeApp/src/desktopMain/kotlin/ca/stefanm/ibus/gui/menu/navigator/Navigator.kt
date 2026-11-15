@@ -35,6 +35,8 @@ import ca.stefanm.ibus.gui.networkSetup.ui.SetHostnameScreen
 import ca.stefanm.ibus.gui.pim.calendar.views.editor.TodoItemEditorScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
 import ca.stefanm.ibus.gui.pim.contacts.picker.ContactPickerScreen
+import ca.stefanm.ibus.gui.pim.contacts.views.ContactDetailsScreen
+import ca.stefanm.ibus.gui.pim.contacts.views.ContactsScreen
 import ca.stefanm.ibus.gui.pim.email.views.MailComposeScreen
 import ca.stefanm.ibus.gui.pim.email.views.MailScreen
 import ca.stefanm.ibus.gui.pim.email.views.settings.MailMuteScreen
@@ -239,6 +241,8 @@ class NavigationModule {
         mailMuteScreen: MailMuteScreen,
         quickRepliesScreen: QuickRepliesScreen,
         editConnectionScreen: EditConnectionScreen,
+        contactsScreen: ContactsScreen,
+        contactDetailsScreen: ContactDetailsScreen,
     ) : Set<NavigationNode<*>> = setOf(
         bluetoothpairingmenu,
         bluetoothPinConfirmationScreen,
@@ -352,6 +356,8 @@ class NavigationModule {
         mailMuteScreen,
         quickRepliesScreen,
         editConnectionScreen,
+        contactsScreen,
+        contactDetailsScreen,
     )
 }
 

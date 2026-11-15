@@ -30,10 +30,16 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
         AddressBook("b1", "fake_home", "Home server", "Personal", readOnly = false, contactCount = 0),
         AddressBook("b2", "fake_google", "Google", "Contacts", readOnly = false, contactCount = 0),
         AddressBook("b3", "fake_work", "Work directory", "Company", readOnly = true, contactCount = 0),
+        AddressBook("b4", "fake_club", "Car club", "Members", readOnly = false, contactCount = 0),
     )
     private var nextId = 1000
 
     private val all = MutableStateFlow(sampleContacts())
+
+    /** Back to the sample contacts (the UI test probe, between tests). */
+    fun reset() {
+        all.value = sampleContacts()
+    }
 
     override fun addressBooks(): Flow<List<AddressBook>> = all.map { contacts ->
         books.map { b -> b.copy(contactCount = contacts.count { it.summary.addressBookId == b.id }.toLong()) }
@@ -45,6 +51,11 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
             val matching = sorted(contacts).filter { addressBookId == null || it.summary.addressBookId == addressBookId }
             ContactList(matching.take(limit).map { it.summary }, matching.size.toLong())
         }
+    }
+
+    override fun allContacts(addressBookId: String?): Flow<ContactList> = all.map { contacts ->
+        val matching = sorted(contacts).filter { addressBookId == null || it.summary.addressBookId == addressBookId }
+        ContactList(matching.map { it.summary }, matching.size.toLong())
     }
 
     override suspend fun getContact(contactId: String): Result<Contact> = attempt { find(contactId) }
@@ -255,6 +266,19 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
                 address = home("9 Jasper Ave", "Edmonton", "AB", "T5J 0A1")),
             contact("b2", "", "", email = "someone@example.org"),
             contact("b3", "", "", organization = "IT Help Desk", phones = listOf("+1 403 555 0100" to PhoneNumber.Type.WORK)),
-        )
+        ) + clubMembers().map { (given, family, n) ->
+            contact("b4", given, family, phones = listOf("+1 306 555 %04d".format(1000 + n) to PhoneNumber.Type.MOBILE),
+                email = "${'$'}{fold(given)}.${'$'}{fold(family)}@club.example.org".replace(" ", ""))
+        }
+    }
+
+    /** A big address book (more than a page of a list screen): 250 members, family names A to Y. */
+    private fun clubMembers(): List<Triple<String, String, Int>> {
+        val given = listOf("Alex", "Brooke", "Chris", "Dale", "Erin", "Frank", "Gail", "Hugo", "Iris", "Jon")
+        val family = listOf("Abbott", "Baker", "Chen", "Dubois", "Evans", "Fischer", "Gill", "Hughes", "Ito", "Jansen",
+            "Klein", "Lam", "Moreau", "Nakamura", "Olsen", "Patel", "Quinn", "Roy", "Singh", "Tran",
+            "Usher", "Vance", "Wong", "Xu", "Young", "Zimmer")
+        // Every first name with each family name in turn: 250 different names.
+        return (0 until 250).map { n -> Triple(given[n % given.size], family[(n / given.size) % family.size], n) }
     }
 }

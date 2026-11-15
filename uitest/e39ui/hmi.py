@@ -252,6 +252,9 @@ class Hmi:
     def reset_mail_app(self):
         self.stub.ResetMailApp(pb2.ResetMailAppRequest(), timeout=self.timeout_s)
 
+    def reset_contacts_app(self):
+        self.stub.ResetContactsApp(pb2.ResetContactsAppRequest(), timeout=self.timeout_s)
+
     def deliver_mail(self, subject="", text="", from_name="", from_email=""):
         self.stub.DeliverFakeMail(pb2.DeliverFakeMailRequest(
             subject=subject, text=text, from_name=from_name, from_email=from_email), timeout=self.timeout_s)
