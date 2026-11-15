@@ -77,8 +77,9 @@ class MailSettingsScreen @Inject constructor(
             ),
         )
 
-        // Labels update in place; the rows never change in number.
-        key(items.size) {
+        // Rebuilt when a label changes: in place, SmoothScroll recreates its
+        // rows and the knob loses its item (TODO.md, KnobListenerService).
+        key(notifications, quickReplies.size, fake.value) {
             SmoothScroll.MenuWindowSmoothScrollContext(TAG).OneColumnSmoothScreen(
                 header = "Mail Settings",
                 prependGoBackEntry = true,

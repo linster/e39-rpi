@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -147,13 +148,17 @@ class BMWMainMenu @Inject constructor(
                 )
             )
 
-            Box(Modifier.wrapContentWidth().fillMaxSize()) {
-                FullScreenMenu.TwoColumnFillFromCorners(
-                    nw = nwItems,
-                    ne = neItems,
-                    sw = swItems,
-                    se = seItems
-                )
+            // The knob's menu keeps the labels it started with (listenForKnob):
+            // rebuild it when the unread count changes.
+            key(unreadMail) {
+                Box(Modifier.wrapContentWidth().fillMaxSize()) {
+                    FullScreenMenu.TwoColumnFillFromCorners(
+                        nw = nwItems,
+                        ne = neItems,
+                        sw = swItems,
+                        se = seItems
+                    )
+                }
             }
         }
     }

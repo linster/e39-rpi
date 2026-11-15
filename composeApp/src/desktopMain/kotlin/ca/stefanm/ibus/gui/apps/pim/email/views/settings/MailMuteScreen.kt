@@ -59,7 +59,8 @@ class MailMuteScreen @Inject constructor(
             }
         }
 
-        key(items.size) {
+        // Rebuilt when a label changes (TODO.md: SmoothScroll and the knob).
+        key(notifications, accounts) {
             SmoothScroll.MenuWindowSmoothScrollContext(TAG).OneColumnSmoothScreen(
                 header = "Notify About New Mail In",
                 prependGoBackEntry = true,

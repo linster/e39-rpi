@@ -100,7 +100,7 @@ class MessageListScreen @Inject constructor(
         // A new page (or filter, or row count) is a new screen for the knob:
         // fresh positions for the toolbar and the rows, in step with
         // SmoothScroll's (it counts rows after the toolbar's buttons).
-        key(folderId, state?.page?.page, state?.unreadOnly, state?.rows?.size) {
+        key(folderId, state?.page?.page, state?.unreadOnly, state?.rows) {
             val knobState = KnobObserverBuilderState.setupListener(knobListenerServiceMain, logger, TAG)
             Column(
                 Modifier

@@ -72,6 +72,9 @@ class MessageListRepo @Inject constructor(
             positions[folderId] = it
         }
 
+    /** Every folder back to its first page, unfiltered (UI tests). */
+    fun clearPositions() = positions.clear()
+
     /** Back to the first page (e.g. on opening a folder from the folder list). */
     fun resetPosition(folderId: String) {
         positions[folderId] = (positions[folderId] ?: Position()).copy(page = 0)

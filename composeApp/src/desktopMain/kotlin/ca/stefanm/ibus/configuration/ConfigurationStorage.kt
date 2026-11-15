@@ -40,7 +40,8 @@ class ConfigurationStorage @Inject constructor(
     companion object {
 //        val homeFolder = System.getProperty("user.home")
 //        val e39BaseFolder = File(homeFolder, ".e39")
-        val e39BaseFolder = File("/var/lib/", "e39")
+        /** /var/lib/e39, or E39_CONFIG_DIR (e.g. a scratch folder for UI tests). */
+        val e39BaseFolder = File(System.getenv("E39_CONFIG_DIR")?.takeIf { it.isNotBlank() } ?: "/var/lib/e39")
     }
 
     private val configFile = File(e39BaseFolder, "config.conf")
