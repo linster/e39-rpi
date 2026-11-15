@@ -183,6 +183,33 @@ object E39Config : ConfigSpec() {
             )
         }
 
+        /**
+         * Logging in to an account (Google) on a phone: the HMI shows a QR
+         * code for a small page it serves on the car's network, and the
+         * phone sends Google's last address back through it.
+         */
+        object LoginRelay : ConfigSpec() {
+            val host by optional(
+                "",
+                "host",
+                "The address the phone uses to reach the HMI (in the QR code). Empty: this computer's Wi-Fi/LAN address."
+            )
+            val port by optional(
+                8095,
+                "port",
+                "Port of the login page for phones. 0: any free port."
+            )
+        }
+
+        /** The accounts screen (calendars, contacts, mail). */
+        object Accounts : ConfigSpec() {
+            val useFakeData by optional(
+                false,
+                "useFakeData",
+                "Show sample accounts instead of the PIM bridge's (for working on the screens). Takes effect after a restart."
+            )
+        }
+
         /** The contacts app and caller names. */
         object Contacts : ConfigSpec() {
             val useFakeData by optional(

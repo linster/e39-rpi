@@ -258,6 +258,9 @@ class Hmi:
     def reset_mail_app(self):
         self.stub.ResetMailApp(pb2.ResetMailAppRequest(), timeout=self.timeout_s)
 
+    def reset_accounts(self):
+        self.stub.ResetAccounts(pb2.ResetAccountsRequest(), timeout=self.timeout_s)
+
     def reset_contacts_app(self):
         self.stub.ResetContactsApp(pb2.ResetContactsAppRequest(), timeout=self.timeout_s)
 

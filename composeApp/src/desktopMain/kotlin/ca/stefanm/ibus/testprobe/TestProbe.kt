@@ -23,6 +23,9 @@ import ca.stefanm.e39hmi.test.v1.ResetFakeMailRequest
 import ca.stefanm.e39hmi.test.v1.ResetFakeMailResponse
 import ca.stefanm.e39hmi.test.v1.ResetMailAppRequest
 import ca.stefanm.e39hmi.test.v1.ResetContactsAppRequest
+import ca.stefanm.e39hmi.test.v1.ResetAccountsRequest
+import ca.stefanm.e39hmi.test.v1.ResetAccountsResponse
+import ca.stefanm.e39hmi.test.v1.resetAccountsResponse
 import ca.stefanm.e39hmi.test.v1.ResetContactsAppResponse
 import ca.stefanm.e39hmi.test.v1.resetContactsAppResponse
 import ca.stefanm.e39hmi.test.v1.ResetMailAppResponse
@@ -51,6 +54,9 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
 import ca.stefanm.ibus.gui.pim.contacts.repo.ContactsRepository
+import ca.stefanm.ibus.gui.pim.accounts.repo.api.AddMailAccountRepo
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.AccountRepository
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.FakeAccountRepository
 import ca.stefanm.ibus.gui.pim.contacts.repo.FakeContactsRepository
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactEditRepo
 import ca.stefanm.ibus.gui.pim.contacts.repo.api.ContactListRepo
@@ -109,6 +115,8 @@ class TestProbe @Inject constructor(
     private val contactsRepository: Provider<ContactsRepository>,
     private val contactLists: Provider<ContactListRepo>,
     private val contactEdit: Provider<ContactEditRepo>,
+    private val accountRepository: Provider<AccountRepository>,
+    private val addMailAccount: Provider<AddMailAccountRepo>,
     private val logger: Logger,
 ) {
     companion object {
@@ -190,6 +198,7 @@ class TestProbe @Inject constructor(
             }
             fakeMail = mailRepository.get() is FakeMailRepository
             fakeContacts = contactsRepository.get() is FakeContactsRepository
+            fakeAccounts = accountRepository.get() is FakeAccountRepository
         }
     }
 
@@ -455,6 +464,14 @@ class TestProbe @Inject constructor(
                 (contactsRepository.get() as? FakeContactsRepository)?.reset()
             }
             return resetContactsAppResponse { }
+        }
+
+        override suspend fun resetAccounts(request: ResetAccountsRequest): ResetAccountsResponse {
+            withContext(Dispatchers.Main) {
+                addMailAccount.get().discard()
+                (accountRepository.get() as? FakeAccountRepository)?.reset()
+            }
+            return resetAccountsResponse { }
         }
 
         override suspend fun resetFakeMail(request: ResetFakeMailRequest): ResetFakeMailResponse {

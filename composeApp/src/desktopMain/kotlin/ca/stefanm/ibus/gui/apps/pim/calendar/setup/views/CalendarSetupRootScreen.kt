@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.gui.pim.calendar.setup.views
 
+import ca.stefanm.ibus.gui.pim.accounts.views.PimAccountsScreen
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,7 +38,7 @@ import javax.inject.Inject
 /**
  * Calendar setup: where the PIM bridge (e39-rpi-pim) is, whether it and
  * Akonadi behind it are running, and which calendars it has; the accounts
- * the calendars come from are on [AccountListScreen].
+ * the calendars come from are on the shared accounts screen (PimAccountsScreen).
  */
 @AutoDiscover
 class CalendarSetupRootScreen @Inject constructor(
@@ -126,7 +128,7 @@ class CalendarSetupRootScreen @Inject constructor(
                         rightItems = listOf(
                             TextMenuItem(
                                 title = "Accounts...",
-                                onClicked = { navigationNodeTraverser.navigateToNode(AccountListScreen::class.java) }
+                                onClicked = { navigationNodeTraverser.navigateToNode(PimAccountsScreen::class.java) }
                             ),
                             TextMenuItem(
                                 title = "Test Connection",

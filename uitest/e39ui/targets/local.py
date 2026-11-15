@@ -45,6 +45,13 @@ CONFIG = """e39Config {{
         contacts {{
             useFakeData={fake_mail}
         }}
+        accounts {{
+            useFakeData={fake_mail}
+        }}
+        loginRelay {{
+            host="127.0.0.1"
+            port=0
+        }}
     }}
 }}
 """

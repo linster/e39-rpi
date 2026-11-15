@@ -115,9 +115,15 @@ hmi.shot("name")                        # screenshot into the test's folder
 ```
 
 Mark tests that need sample mail `@pytest.mark.fake_mail`, sample contacts
-`@pytest.mark.fake_contacts` (`--mail` chooses both: sample mail and
-contacts, or the bridge's). Tests live by app: `tests/mail/`,
-`tests/contacts/`.
+`@pytest.mark.fake_contacts`, sample accounts `@pytest.mark.fake_accounts`
+(`--mail` chooses all three: samples, or the bridge's). Tests live by app:
+`tests/mail/`, `tests/contacts/`, `tests/accounts/`. The local HMI's phone
+login page (`PhoneLoginRelay`) listens on 127.0.0.1 and a free port; the
+accounts tests play the phone with plain HTTP requests.
+
+Highlight detection needs the HMI's window drawn: keep the screen unlocked
+while the tests run (a locked screen fails every test with "No item is
+highlighted").
 
 ## HMI bugs the tests found
 

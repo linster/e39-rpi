@@ -1,7 +1,7 @@
 package ca.stefanm.ibus.gui.pim.email.repo.api
 
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimAccount
-import ca.stefanm.ibus.gui.pim.calendar.repo.backend.RemoteAccountRepository
+import ca.stefanm.ibus.gui.pim.calendar.repo.backend.AccountRepository
 import ca.stefanm.ibus.gui.pim.email.repo.FakeMailRepository
 import ca.stefanm.ibus.gui.pim.email.repo.MailAddress
 import ca.stefanm.ibus.gui.pim.email.repo.MailRepository
@@ -31,7 +31,7 @@ interface MailSenders {
 /** Accounts from the mail folders; addresses from the bridge's account list (IMAP accounts). */
 class AccountMailSenders @Inject constructor(
     private val mail: MailRepository,
-    private val accountRepository: RemoteAccountRepository,
+    private val accountRepository: AccountRepository,
 ) : MailSenders {
     override suspend fun senders(): List<MailSender> {
         val accounts = withTimeoutOrNull(3_000) { accountRepository.accounts.filterNotNull().first() }.orEmpty()
