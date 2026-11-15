@@ -38,4 +38,19 @@ interface ContactsRepository {
 
     /** The picture scaled to fit [maxSize] (16..1024); fails with NotFound if there's none. */
     suspend fun getPhoto(contactId: String, maxSize: Int = 128): Result<ContactPhoto>
+
+    // Writing. Failures: InvalidArgument (nothing to call the contact by, a
+    // bad number/e-mail/URL), FailedPrecondition (read-only address book),
+    // Conflict (it changed since [ContactSummary.revision]: reload, retry).
+
+    /** In [addressBookId] (null: the first writable one). */
+    suspend fun createContact(input: ContactInput, addressBookId: String? = null): Result<Contact>
+
+    /**
+     * Changes [fields] of [contact] (empty: all) to [input]'s; the rest of
+     * the contact (also what the HMI doesn't show) stays.
+     */
+    suspend fun updateContact(contact: ContactSummary, input: ContactInput, fields: Set<ContactField> = emptySet()): Result<Contact>
+
+    suspend fun deleteContact(contact: ContactSummary): Result<Unit>
 }

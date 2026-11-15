@@ -17,9 +17,10 @@ import javax.inject.Inject
 
 /**
  * Sample contacts in memory, for building screens without the PIM bridge
- * (E39Config.PimConfig.Contacts.useFakeData). Two address books; search and
- * caller lookup work like the bridge's (phone numbers compared by digits:
- * the same 10 = exact, the same last 7 = weak). Pictures are drawn
+ * (E39Config.PimConfig.Contacts.useFakeData). Three address books (one
+ * read-only); search and caller lookup work like the bridge's (phone
+ * numbers compared by digits: the same 10 = exact, the same last 7 =
+ * weak); writing too, until the HMI restarts. Pictures are drawn
  * initials.
  */
 @ApplicationScope
@@ -28,7 +29,9 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
     private val books = listOf(
         AddressBook("b1", "fake_home", "Home server", "Personal", readOnly = false, contactCount = 0),
         AddressBook("b2", "fake_google", "Google", "Contacts", readOnly = false, contactCount = 0),
+        AddressBook("b3", "fake_work", "Work directory", "Company", readOnly = true, contactCount = 0),
     )
+    private var nextId = 1000
 
     private val all = MutableStateFlow(sampleContacts())
 
@@ -98,6 +101,90 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
         ContactPhoto(out.toByteArray(), maxSize, maxSize)
     }
 
+    override suspend fun createContact(input: ContactInput, addressBookId: String?): Result<Contact> = attempt {
+        val book = if (addressBookId == null) books.first { !it.readOnly } else
+            books.firstOrNull { it.id == addressBookId } ?: throw PimBackendException.NotFound("No address book $addressBookId", null)
+        if (book.readOnly) throw PimBackendException.FailedPrecondition("${book.name} is read-only", null)
+        val contact = toContact("c${nextId++}", book.id, input, revision = 1, photo = false)
+        all.value = all.value + contact
+        contact
+    }
+
+    override suspend fun updateContact(contact: ContactSummary, input: ContactInput, fields: Set<ContactField>): Result<Contact> = attempt {
+        val current = writable(contact)
+        val f = fields.ifEmpty { ContactField.entries.toSet() }
+        val old = ContactInput.from(current)
+        val merged = ContactInput(
+            givenName = if (ContactField.GIVEN_NAME in f) input.givenName else old.givenName,
+            familyName = if (ContactField.FAMILY_NAME in f) input.familyName else old.familyName,
+            organization = if (ContactField.ORGANIZATION in f) input.organization else old.organization,
+            nickname = if (ContactField.NICKNAME in f) input.nickname else old.nickname,
+            title = if (ContactField.TITLE in f) input.title else old.title,
+            phones = if (ContactField.PHONES in f) input.phones else old.phones,
+            emails = if (ContactField.EMAILS in f) input.emails else old.emails,
+            addresses = if (ContactField.ADDRESSES in f) input.addresses else old.addresses,
+            birthday = if (ContactField.BIRTHDAY in f) input.birthday else old.birthday,
+            note = if (ContactField.NOTE in f) input.note else old.note,
+            urls = if (ContactField.URLS in f) input.urls else old.urls,
+        )
+        val updated = toContact(current.summary.id, current.summary.addressBookId, merged, current.summary.revision + 1, current.summary.hasPhoto)
+        all.value = all.value.map { if (it.summary.id == updated.summary.id) updated else it }
+        updated
+    }
+
+    override suspend fun deleteContact(contact: ContactSummary): Result<Unit> = attempt {
+        writable(contact)
+        all.value = all.value.filterNot { it.summary.id == contact.id }
+    }
+
+    /** The stored contact, if it can be written with [summary]'s revision. */
+    private fun writable(summary: ContactSummary): Contact {
+        val current = find(summary.id)
+        if (books.first { it.id == current.summary.addressBookId }.readOnly) {
+            throw PimBackendException.FailedPrecondition("${current.summary.displayName} is in a read-only address book", null)
+        }
+        if (summary.revision != 0L && summary.revision != current.summary.revision) {
+            throw PimBackendException.Conflict("${current.summary.displayName} changed meanwhile", null)
+        }
+        return current
+    }
+
+    private fun toContact(id: String, book: String, input: ContactInput, revision: Long, photo: Boolean): Contact {
+        val given = input.givenName.trim()
+        val family = input.familyName.trim()
+        val name = "$given $family".trim().ifEmpty {
+            listOf(input.organization, input.nickname, input.emails.firstOrNull()?.address ?: "", input.phones.firstOrNull()?.number ?: "")
+                .map { it.trim() }.firstOrNull { it.isNotEmpty() } ?: ""
+        }
+        require(name.isNotEmpty()) { "A contact needs a name, organization, phone number or e-mail address" }
+        input.phones.forEach { require(it.number.any { c -> c.isDigit() }) { "Not a phone number: ${it.number}" } }
+        input.emails.forEach { require('@' in it.address) { "Not an e-mail address: ${it.address}" } }
+        val phones = input.phones.map { p ->
+            val digits = digitsOf(p.number)
+            p.copy(e164 = when {
+                p.number.trim().startsWith("+") -> "+$digits"
+                digits.length == 10 -> "+1$digits"
+                digits.length == 11 && digits.startsWith("1") -> "+$digits"
+                else -> ""
+            })
+        }
+        return Contact(
+            summary = ContactSummary(
+                id = id, addressBookId = book, displayName = name,
+                sortKey = fold(if (family.isEmpty()) name else "$family $given").uppercase().trim(),
+                givenName = given, familyName = family, organization = input.organization.trim(),
+                primaryPhone = (phones.firstOrNull { it.preferred } ?: phones.firstOrNull())?.number ?: "",
+                primaryEmail = (input.emails.firstOrNull { it.preferred } ?: input.emails.firstOrNull())?.address ?: "",
+                hasPhoto = photo, revision = revision,
+            ),
+            nickname = input.nickname.trim(), title = input.title.trim(), phones = phones, emails = input.emails,
+            addresses = input.addresses.map { a ->
+                a.copy(formatted = listOf(a.street, a.locality, a.region, a.postalCode, a.country).filter { it.isNotBlank() }.joinToString(", "))
+            },
+            birthday = input.birthday, note = input.note, urls = input.urls,
+        )
+    }
+
     private fun find(contactId: String): Contact =
         all.value.firstOrNull { it.summary.id == contactId } ?: throw PimBackendException.NotFound("No contact $contactId", null)
 
@@ -142,6 +229,7 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
                     id = "c${++id}", addressBookId = book, displayName = name, sortKey = sortKey,
                     givenName = given, familyName = family, organization = organization,
                     primaryPhone = phoneNumbers.firstOrNull()?.number ?: "", primaryEmail = email, hasPhoto = photo,
+                    revision = 1,
                 ),
                 nickname = nickname, title = title, phones = phoneNumbers,
                 emails = if (email.isEmpty()) emptyList() else listOf(EmailAddress(email, EmailAddress.Type.HOME, true)),
@@ -166,6 +254,7 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
             contact("b2", "Carl", "Carlson", phones = listOf("+1 780 555 0161" to PhoneNumber.Type.MOBILE),
                 address = home("9 Jasper Ave", "Edmonton", "AB", "T5J 0A1")),
             contact("b2", "", "", email = "someone@example.org"),
+            contact("b3", "", "", organization = "IT Help Desk", phones = listOf("+1 403 555 0100" to PhoneNumber.Type.WORK)),
         )
     }
 }
