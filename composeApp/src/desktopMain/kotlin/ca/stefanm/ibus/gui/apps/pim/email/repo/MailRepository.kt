@@ -16,6 +16,8 @@ interface MailRepository {
     companion object {
         /** The bridge's largest page; [messages] lists at most this many. */
         const val MAX_MESSAGES = 500
+        /** A page of [messagePage]: what a screen lists at once. */
+        const val PAGE_SIZE = 100
     }
 
     /** Every account's folders: per account the inbox first, then the folder tree. */
@@ -26,6 +28,13 @@ interface MailRepository {
      * more, collect again with a bigger limit ([MessageList.hasMore]).
      */
     fun messages(folderId: String, limit: Int, unreadOnly: Boolean = false): Flow<MessageList>
+
+    /**
+     * Page [page] (from 0) of [folderId], [pageSize] (1..[MAX_MESSAGES]) per
+     * page: for folders too long to list at once. A page past the end gives
+     * the last one (the folder shrank). Re-emits when the folder changes.
+     */
+    fun messagePage(folderId: String, page: Int, pageSize: Int = PAGE_SIZE, unreadOnly: Boolean = false): Flow<MessagePage>
 
     /** Unread messages in all inboxes (for a badge). */
     fun unreadInboxCount(): Flow<Long>

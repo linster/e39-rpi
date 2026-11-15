@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -12,6 +14,9 @@ import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailFormat
+import ca.stefanm.ibus.gui.pim.email.repo.api.MailboxListRepo
+import ca.stefanm.ibus.gui.pim.email.views.MailScreen
 import ca.stefanm.ibus.car.bordmonitor.screenControl.ScreenPowerWriter
 import ca.stefanm.ibus.gui.audio.NowPlayingMenu
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
@@ -44,7 +49,8 @@ import javax.inject.Inject
 class BMWMainMenu @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val picoScreenStatusManager: PicoScreenStatusManager,
-    private val screenPowerWriter: ScreenPowerWriter
+    private val screenPowerWriter: ScreenPowerWriter,
+    private val mailboxListRepo: MailboxListRepo,
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -54,6 +60,8 @@ class BMWMainMenu @Inject constructor(
         Column(modifier = Modifier.fillMaxSize()) {
 
             BmwSingleLineHeader("Main Menu")
+
+            val unreadMail = remember { mailboxListRepo.unreadInboxCount() }.collectAsState(0L).value
 
             val nwItems = listOf(
                 TextMenuItem(
@@ -67,6 +75,10 @@ class BMWMainMenu @Inject constructor(
                 TextMenuItem(
                     title = "Calendar",
                     onClicked = { navigationNodeTraverser.navigateToNode(CalendarScreen::class.java)}
+                ),
+                TextMenuItem(
+                    title = if (unreadMail > 0) "Mail (${MailFormat.unreadBadge(unreadMail)})" else "Mail",
+                    onClicked = { navigationNodeTraverser.navigateToNode(MailScreen::class.java) }
                 )
             )
             val neItems = listOf<MenuItem>(

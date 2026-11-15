@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.pim.email.repo
 
+import ca.stefanm.e39pim.v1.ListMessagesResponse
 import ca.stefanm.e39pim.v1.MailNotice
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.PimBackendChannel
@@ -39,6 +40,32 @@ class RemoteMailRepository @Inject constructor(
     companion object {
         const val TAG = "RemoteMailRepository"
         val RETRY_INTERVAL: Duration = 10.seconds
+
+        /**
+         * Fetches page [page] (or the last one there is) with [fetch], using
+         * and extending [tokens] (each page's token; [0] is ""). Returns the
+         * page's number and response. A known page that's now past the end
+         * (the folder shrank) is dropped, back to the last one with messages.
+         */
+        internal suspend fun walkToPage(
+            tokens: MutableList<String>,
+            page: Int,
+            fetch: suspend (token: String) -> ListMessagesResponse,
+        ): Pair<Int, ListMessagesResponse> {
+            var index = minOf(page, tokens.lastIndex)
+            var response = fetch(tokens[index])
+            while (index < page && response.nextPageToken.isNotEmpty()) {
+                index++
+                if (tokens.size == index) tokens.add(response.nextPageToken) else tokens[index] = response.nextPageToken
+                response = fetch(tokens[index])
+            }
+            while (response.messagesCount == 0 && index > 0) {
+                while (tokens.size > index) tokens.removeAt(tokens.lastIndex)
+                index--
+                response = fetch(tokens[index])
+            }
+            return index to response
+        }
     }
 
     override fun folders(): Flow<List<MailFolder>> = reloading(
@@ -56,6 +83,31 @@ class RemoteMailRepository @Inject constructor(
             // The folder is gone: nothing to retry until the folders change.
             onNotFound = { MessageList(emptyList(), 0) },
         )
+    }
+
+    // Page tokens are the bridge's (opaque): each page's is learned from the
+    // page before it, and kept, so going back or forward is one call.
+    private data class PagingKey(val folderId: String, val pageSize: Int, val unreadOnly: Boolean)
+    private val pageTokens = mutableMapOf<PagingKey, MutableList<String>>()
+
+    override fun messagePage(folderId: String, page: Int, pageSize: Int, unreadOnly: Boolean): Flow<MessagePage> {
+        require(page >= 0) { "page $page is negative" }
+        require(pageSize in 1..MailRepository.MAX_MESSAGES) { "pageSize $pageSize not in 1..${MailRepository.MAX_MESSAGES}" }
+        return reloading(
+            what = "Messages of $folderId (page $page)",
+            affects = { it.hasReady() || it.hasFoldersChanged() || (it.hasMessagesChanged() && it.messagesChanged.folderId == folderId) },
+            load = { loadPage(PagingKey(folderId, pageSize, unreadOnly), page) },
+            onNotFound = { MessagePage(emptyList(), 0, 0, pageSize) },
+        )
+    }
+
+    private suspend fun loadPage(key: PagingKey, page: Int): MessagePage {
+        val tokens = synchronized(pageTokens) { pageTokens.getOrPut(key) { mutableListOf("") }.toMutableList() }
+        val (index, response) = walkToPage(tokens, page) { token ->
+            client.listMessages(key.folderId, key.pageSize, token, key.unreadOnly)
+        }
+        synchronized(pageTokens) { pageTokens[key] = tokens }
+        return MessagePage(response.messagesList.map { it.toMailSummary() }, response.totalCount, index, key.pageSize)
     }
 
     override fun unreadInboxCount(): Flow<Long> = folders()

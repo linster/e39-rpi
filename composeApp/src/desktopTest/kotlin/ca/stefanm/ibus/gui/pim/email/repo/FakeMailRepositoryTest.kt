@@ -47,6 +47,30 @@ internal class FakeMailRepositoryTest {
     }
 
     @Test
+    fun paging() = runBlocking {
+        val list = repo.folders().first().first { it.name == "E39 list" }
+        assertEquals(250L, list.totalCount)
+        val first = repo.messagePage(list.id, 0).first()
+        assertEquals(100, first.messages.size)
+        assertEquals(3, first.pageCount)
+        assertFalse(first.hasPrevious)
+        assertTrue(first.hasNext)
+        assertEquals("[e39] VANOS seals (#250)", first.messages.first().subject)
+        val last = repo.messagePage(list.id, 2).first()
+        assertEquals(50, last.messages.size)
+        assertEquals(201L, last.firstNumber)
+        assertFalse(last.hasNext)
+        // Past the end: the last page.
+        assertEquals(2, repo.messagePage(list.id, 7).first().page)
+        assertEquals(3, repo.messagePage(list.id, 0, unreadOnly = true).first().messages.size)
+        // Empty folder: one empty page.
+        val drafts = folder("Home", MailFolderRole.DRAFTS)
+        val empty = repo.messagePage(drafts.id, 0).first()
+        assertEquals(1, empty.pageCount)
+        assertTrue(empty.messages.isEmpty())
+    }
+
+    @Test
     fun openingMarksRead() = runBlocking {
         val inbox = folder("Home", MailFolderRole.INBOX)
         val trip = repo.messages(inbox.id, 10).first().messages.first { it.subject == "Road trip plans" }
