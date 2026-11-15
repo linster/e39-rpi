@@ -316,4 +316,11 @@ object E39Config : ConfigSpec() {
         val normalSkip by optional<Int>(PowermateSensitivityConfig.DefaultSkip, "normalSkip")
         val mapSkip by optional<Int>(PowermateSensitivityConfig.DefaultSkip, "mapSkip")
     }
+
+    object AudioConfig : ConfigSpec() {
+        // ca.stefanm.ibus.lib.audio.BluetoothAudioRole: "sink" (phones play
+        // to the device: the E39) or "source" (the device plays to a
+        // Bluetooth speaker). Applied at start-up by BluetoothAudioRoleService.
+        val bluetoothRole by optional("sink", "bluetoothRole", "Bluetooth audio role: sink or source")
+    }
 }

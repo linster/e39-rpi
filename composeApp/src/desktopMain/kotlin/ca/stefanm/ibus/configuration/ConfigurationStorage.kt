@@ -124,6 +124,10 @@ class ConfigurationStorage @Inject constructor(
         config[E39Config.WindowManagerConfig.brightnessCompensation] = tint
     }
 
+    fun setBluetoothAudioRole(role : String) {
+        config[E39Config.AudioConfig.bluetoothRole] = role
+    }
+
     fun fwVersionAsFlow() : Flow<String> {
 
         val sharedFlow = MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 20, onBufferOverflow = BufferOverflow.DROP_OLDEST)
