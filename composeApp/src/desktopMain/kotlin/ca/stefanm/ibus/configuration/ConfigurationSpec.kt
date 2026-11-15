@@ -183,6 +183,15 @@ object E39Config : ConfigSpec() {
             )
         }
 
+        /** The contacts app and caller names. */
+        object Contacts : ConfigSpec() {
+            val useFakeData by optional(
+                false,
+                "useFakeData",
+                "Show sample contacts instead of the PIM bridge's (for working on the screens). Takes effect after a restart."
+            )
+        }
+
         /** The mail app and new-mail notifications. */
         object Mail : ConfigSpec() {
             val useFakeData by optional(

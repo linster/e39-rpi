@@ -17,6 +17,7 @@ import ca.stefanm.ibus.gui.map.guidance.GuidanceDebugWindow
 import ca.stefanm.ibus.gui.map.MapDebug
 import ca.stefanm.ibus.gui.pim.calendar.debug.CalendarDebugWindow
 import ca.stefanm.ibus.gui.pim.email.debug.MailDebugWindow
+import ca.stefanm.ibus.gui.pim.contacts.debug.ContactsDebugWindow
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import javax.inject.Inject
 
@@ -43,6 +44,7 @@ class DebugLaunchpad @Inject constructor(
 
     private val calendarDebugWindow: CalendarDebugWindow,
     private val mailDebugWindow: MailDebugWindow,
+    private val contactsDebugWindow: ContactsDebugWindow,
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -101,6 +103,10 @@ class DebugLaunchpad @Inject constructor(
 
             Button(onClick = { windowManager.openDebugWindow(mailDebugWindow)}) {
                 Text("Mail (PIM Bridge) Debug")
+            }
+
+            Button(onClick = { windowManager.openDebugWindow(contactsDebugWindow)}) {
+                Text("Contacts (PIM Bridge) Debug")
             }
         }
     }
