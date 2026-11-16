@@ -25,7 +25,7 @@ import javax.inject.Named
  * new platform configuration) doesn't switch again: that would take the user off the Pi's screen
  * while they're using it.
  *
- * Only on the Pi talking to the Pico (isPi and the Pico's 115200 8N1 link), and only while the
+ * Only on the Pi talking to the Pico (isPi and IBusConnection = PICO), and only while the
  * SwitchVideoToBmwOnHmiStart setting is on (the default). The packet is queued on the IBus output
  * channel, which SerialPublisherService (same service group) sends.
  */
@@ -55,9 +55,9 @@ class VideoToBmwOnHmiStartService @Inject constructor(
             return
         }
         if (!deviceConfiguration.isPi ||
-            deviceConfiguration.serialPortBaudRate != CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_115200_8N1) {
+            deviceConfiguration.iBusConnection != CarPlatformConfiguration.IBusConnection.PICO) {
             logger.d(TAG, "Not switching the video input to BMW: no Pico on this platform " +
-                    "(isPi=${deviceConfiguration.isPi}, ${deviceConfiguration.serialPortBaudRate})")
+                    "(isPi=${deviceConfiguration.isPi}, IBusConnection=${deviceConfiguration.iBusConnection})")
             return
         }
         if (!sentThisProcess.compareAndSet(false, true)) {
