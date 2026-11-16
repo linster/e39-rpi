@@ -42,9 +42,10 @@ class JSerialCommsAdapter @Inject constructor(
             CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING -> nonBlockingWriter
         }
 
-    /** At 9600 8E1 we're on the car bus itself (a USB IBus interface); at 115200 8N1, on the Pico's link. */
+    /** On the car bus itself (a USB IBus interface), or on the Pico's point-to-point link. This can't
+     *  be told from the baud rate: the Pico's CAR_WITH_PI firmware also runs its Pi link at 9600 8E1. */
     private val transmitter = IBusTransmitter(
-        directOnBus = deviceConfiguration.serialPortBaudRate == CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_9600_8E1,
+        directOnBus = deviceConfiguration.iBusConnection == CarPlatformConfiguration.IBusConnection.DIRECT_BUS,
         monitor = lineMonitor,
         bytesAvailable = { serialPortProvider.serialPort.bytesAvailable() },
         write = { rawWriter.writeRawBytes(it) },

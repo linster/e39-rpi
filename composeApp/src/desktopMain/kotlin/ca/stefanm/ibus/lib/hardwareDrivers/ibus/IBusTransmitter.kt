@@ -47,13 +47,13 @@ class IBusLineMonitor internal constructor(private val nanoTime: () -> Long) {
 /**
  * Sends IBus packets with I/K-bus etiquette (linster/e39-rpi#53).
  *
- * On the car bus directly ([directOnBus], a USB IBus interface at 9600 8E1) the Pi is one of several
+ * On the car bus directly ([directOnBus]: setting IBusConnection = DIRECT_BUS, a USB IBus interface) the Pi is one of several
  * talkers on a single wire. Like the modules, it only starts after the bus has been idle for
  * [BUS_IDLE_NANOS], keeps [MIN_GAP_NANOS] between its own packets, and checks the echo (the
  * transceiver feeds the bus back to RX). On a mismatch (a collision) it backs off for a random 10-20 ms
  * and resends, up to [MAX_ATTEMPTS].
  *
- * Through the Pico (115200 8N1) the link is point to point: there's no other talker and no echo, and
+ * Through the Pico (IBusConnection = PICO, the default) the link is point to point: no other talker and no echo, and
  * the Pico does the bus etiquette when it forwards to the car. Packets are only paced by
  * [MIN_GAP_NANOS], because the Pico can't send to the car faster than the bus allows and its queue
  * (32 packets) drops new packets when full.
