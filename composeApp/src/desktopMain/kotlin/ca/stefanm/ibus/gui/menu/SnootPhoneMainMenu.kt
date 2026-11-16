@@ -20,6 +20,8 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.pim.calendar.CalendarScreen
+import ca.stefanm.ibus.gui.pim.contacts.views.ContactsScreen
+import ca.stefanm.ibus.gui.pim.email.views.MailScreen
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 import javax.inject.Named
@@ -52,6 +54,8 @@ class SnootPhoneMainMenu @Inject constructor(
                 "GPS-Navigation" to { navigateToNode(MapScreen::class.java) },
                 "Matrix Chat" to { navigateToNode(ChatAppHomeScreen::class.java) },
                 "Calendar" to { navigateToNode(CalendarScreen::class.java) },
+                "Mail" to { navigateToNode(MailScreen::class.java) },
+                "Contacts" to { navigateToNode(ContactsScreen::class.java) },
                 "Now Playing" to { navigateToNode(NowPlayingMenu::class.java) },
                 "PDF Viewer" to { navigateToNode(PdfViewerScreen::class.java) },
                 "File Manager" to { FileManagerScreen.openForBrowsing(navigationNodeTraverser) },
