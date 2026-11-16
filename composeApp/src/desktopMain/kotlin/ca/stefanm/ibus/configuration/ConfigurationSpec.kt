@@ -84,6 +84,10 @@ object E39Config : ConfigSpec() {
             "TrackInfoPrinter",
             "Which trackInfoPrinter to use?"
         )
+        val _switchVideoToBmwOnHmiStart by optional(true,
+            "SwitchVideoToBmwOnHmiStart",
+            "On the Pi (talking to the Pico), switch the screen's video input to the BMW picture every time the HMI starts (linster/e39-rpi#56).")
+
         val _listOfServiceGroupsOnStartup by optional(
             emptyList<String>(),
             "ServiceGroupsOnStartup",

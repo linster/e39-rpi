@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.car.di
 
+import ca.stefanm.ibus.lib.hardwareDrivers.pico.VideoToBmwOnHmiStartService
 import ca.stefanm.ibus.car.desktop.input.griffinPowermate.GriffinPowermateReader
 import ca.stefanm.ibus.car.ExceptionHandler
 import ca.stefanm.ibus.car.audio.nowPlayingReader.RadioTextFieldReaderService
@@ -57,6 +58,7 @@ interface ConfiguredCarComponent {
     fun discoveredServiceCoolingFanController() : CoolingFanController
     fun discoveredServiceSerialListenerService() : SerialListenerService
     fun discoveredServiceSerialPublisherService() : SerialPublisherService
+    fun discoveredServiceVideoToBmwOnHmiStart() : VideoToBmwOnHmiStartService
     fun discoveredServicePlatformMetronomeLogger() : PlatformMetronomeLogger
     fun discoveredServiceIbusInputEventCliPrinter() : IbusInputEventCliPrinter
     fun discoveredServiceIncomingIbusMessageCliPrinter() : IncomingIbusMessageCliPrinter
