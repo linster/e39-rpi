@@ -27,17 +27,48 @@ interface SerialPortWriter {
 @ExperimentalCoroutinesApi
 @ConfiguredCarScope
 class JSerialCommsAdapter @Inject constructor(
+    private val logger: Logger,
     private val deviceConfiguration: CarPlatformConfiguration,
     private val blockingWriter : BlockingJSerialCommsWriter,
     private val nonBlockingWriter : NonBlockingJSerialCommsWriter,
-    private val blockingReader : BlockingJSerialCommsReader
+    private val blockingReader : BlockingJSerialCommsReader,
+    private val serialPortProvider: JSerialCommsSerialPortProvider,
+    private val lineMonitor: IBusLineMonitor,
 ) : SerialPortWriter, SerialPortReader {
 
-    override suspend fun writeRawBytes(bytes: ByteArray) {
-        when (deviceConfiguration.serialPortWriteMode) {
+    private val rawWriter : SerialPortWriter
+        get() = when (deviceConfiguration.serialPortWriteMode) {
             CarPlatformConfiguration.SerialPortWriteMode.BLOCKING -> blockingWriter
             CarPlatformConfiguration.SerialPortWriteMode.NON_BLOCKING -> nonBlockingWriter
-        }.writeRawBytes(bytes)
+        }
+
+    /** At 9600 8E1 we're on the car bus itself (a USB IBus interface); at 115200 8N1, on the Pico's link. */
+    private val transmitter = IBusTransmitter(
+        directOnBus = deviceConfiguration.serialPortBaudRate == CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_9600_8E1,
+        monitor = lineMonitor,
+        bytesAvailable = { serialPortProvider.serialPort.bytesAvailable() },
+        write = { rawWriter.writeRawBytes(it) },
+    )
+
+    // Called by SerialPublisherService only, one packet at a time.
+    override suspend fun writeRawBytes(bytes: ByteArray) {
+        if (deviceConfiguration.serialPortWriteMode == CarPlatformConfiguration.SerialPortWriteMode.BLOCKING) {
+            //Experimentally found to give the BMBT enough time to respond to long packets. (Was in
+            //BlockingJSerialCommsWriter; it has to come before the transmitter's wait for an idle bus.)
+            delay((bytes.size * 8).toLong())
+        }
+        when (transmitter.send(bytes)) {
+            IBusTransmitter.Outcome.SENT -> Unit
+            IBusTransmitter.Outcome.DROPPED_BUS_BUSY -> logger.w(TAG,
+                "Dropped packet: the bus never went idle (${transmitter.droppedBusBusy} so far)")
+            IBusTransmitter.Outcome.DROPPED_COLLISIONS -> logger.w(TAG,
+                "Dropped packet after ${IBusTransmitter.MAX_ATTEMPTS} collisions " +
+                        "(${transmitter.droppedAfterRetries} dropped, ${transmitter.collisions} collisions so far)")
+        }
+    }
+
+    private companion object {
+        const val TAG = "JSerialCommsAdapter"
     }
 
     override fun readMessages(): Flow<IBusMessage> {
@@ -53,6 +84,7 @@ class JSerialCommsAdapter @Inject constructor(
 class BlockingJSerialCommsReader @Inject constructor(
     private val logger: Logger,
     private val serialPortProvider: JSerialCommsSerialPortProvider,
+    private val lineMonitor: IBusLineMonitor,
     private val coroutineScope: CoroutineScope,
     private val flowDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val readerDispatcher : CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -107,6 +139,7 @@ class BlockingJSerialCommsReader @Inject constructor(
                 val readBytes = ByteArray(bytesAvailable)
 //                port.readBytes(readBytes, bytesAvailable.toLong())
                 port.readBytes(readBytes, bytesAvailable)
+                lineMonitor.onBytesReceived(readBytes) //bus activity + echo check for IBusTransmitter
 
                 if (bytesAvailable > 0) {
 //                    logger.v("BYTE READER", "Read $bytesAvailable bytes from serial port.")
@@ -325,10 +358,8 @@ class BlockingJSerialCommsWriter @Inject constructor(
 
     override suspend fun writeRawBytes(bytes: ByteArray) {
         withContext(coroutineScope.coroutineContext + serialOutCoroutineDispatcher) {
-            //Wait 2ms to ensure previous message send went out. Realistically we only need to wait 1.2ms.
-//            delay(200)
-            delay((bytes.size * 8).toLong()) //Experimentally found to give the BMBT enough time to respond to long packets.
-
+            //(The bytes.size * 8 ms delay that was here is now in JSerialCommsAdapter, before the
+            //IBusTransmitter's wait for an idle bus.)
             port.writeBytes(bytes, bytes.size)
 
             logger.d("TAG", "Awaiting write: ${port.bytesAwaitingWrite()}")
