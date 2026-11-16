@@ -26,7 +26,8 @@ interface CarPlatformConfiguration {
                 "isPi: $isPi," +
                 "hasBrowser: $hasBrowser," +
                 "iBusInterfaceUri: $iBusInterfaceUri," +
-                "baudRate: $serialPortBaudRate" +
+                "baudRate: $serialPortBaudRate, " +
+                "iBusConnection: $iBusConnection, " +
                 "displayDriver: $displayDriver," +
                 "pairedPhone : $pairedPhone"
     }
@@ -44,6 +45,18 @@ interface CarPlatformConfiguration {
         SERIAL_9600_8E1
     }
     val serialPortBaudRate : PicoSerialBaudRate
+
+    /**
+     * What the serial port ([iBusInterfaceUri]) is connected to. Not derivable from the baud rate:
+     * the Pico's CAR_WITH_PI firmware talks to the Pi at 9600 8E1, the same as the car bus.
+     */
+    enum class IBusConnection {
+        /** The Pico's UART link (point to point): the Pico forwards to and from the car bus. */
+        PICO,
+        /** The car's I/K-bus itself, through a USB IBus interface: the Pi is one of several talkers. */
+        DIRECT_BUS
+    }
+    val iBusConnection : IBusConnection get() = IBusConnection.PICO
 
     enum class TrackInfoPrinterType { BMBT, CLI } //Do we stub out track info printing to the cli?
 

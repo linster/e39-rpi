@@ -43,6 +43,7 @@ object E39Config : ConfigSpec() {
                 override val serialPortReadMode get() = config[_serialPortReadMode]
                 override val serialPortWriteMode get() = config[_serialPortWriteMode]
                 override val serialPortBaudRate get() = config[_serialPortBaudRate]
+                override val iBusConnection get() = config[_iBusConnection]
                 override val trackInfoPrinter get() = config[_trackInfoPrinter]
                 override val listOfServiceGroupsOnStartup: List<String> = config[_listOfServiceGroupsOnStartup]
             }
@@ -78,6 +79,12 @@ object E39Config : ConfigSpec() {
             CarPlatformConfiguration.PicoSerialBaudRate.SERIAL_115200_8N1,
             "SerialPortBaudRate",
             "SERIAL_115200_8N1 or SERIAL_9600_8E1. Depends on bus topology."
+        )
+        val _iBusConnection by optional(
+            CarPlatformConfiguration.IBusConnection.PICO,
+            "IBusConnection",
+            "PICO (the Pico's UART link) or DIRECT_BUS (a USB IBus interface on the car bus). " +
+                    "Not the same as the baud rate: the Pico's car firmware uses 9600 8E1 too."
         )
         val _trackInfoPrinter by optional(
             CarPlatformConfiguration.TrackInfoPrinterType.BMBT,
