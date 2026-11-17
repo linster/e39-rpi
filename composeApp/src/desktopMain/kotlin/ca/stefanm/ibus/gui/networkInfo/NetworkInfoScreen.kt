@@ -18,6 +18,7 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.lib.logging.Logger
 import com.pi4j.system.NetworkInfo
 import com.pi4j.system.NetworkInterface
 import com.pi4j.system.SystemInfo
@@ -31,7 +32,8 @@ import javax.inject.Inject
 @AutoDiscover
 class NetworkInfoScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val configurationStorage: ConfigurationStorage
+    private val configurationStorage: ConfigurationStorage,
+    private val logger: Logger
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = NetworkInfoScreen::class.java
@@ -43,7 +45,12 @@ class NetworkInfoScreen @Inject constructor(
 
         LaunchedEffect(Unit) {
             if (configurationStorage.config[E39Config.CarPlatformConfigSpec._isPi]) {
-                ipAddress.value = NetworkInfo.getIPAddresses()[0]
+                ipAddress.value = try {
+                    NetworkInfo.getIPAddresses()?.contentToString() ?: "<null>"
+                } catch (t : Throwable) {
+                    logger.e("NetworkInfoScreen", "Could not get ipAddress", t)
+                    "<Error>"
+                }
             } else {
                 navigationNodeTraverser.navigateToNode(NetworkSetupMenu::class.java)
             }
@@ -55,16 +62,19 @@ class NetworkInfoScreen @Inject constructor(
             FullScreenMenu.OneColumn(
                 listOf(
                     TextMenuItem(
-                        title = "IP Address: ${ipAddress.value}",
-                        isSelectable = false,
-                        onClicked = {}
-                    ),
-
-                    TextMenuItem(
                         title = "Go Back",
                         onClicked = {
                             navigationNodeTraverser.goBack()
                         }
+                    ),
+                    TextMenuItem(
+                        title = "IP Address: ${ipAddress.value}",
+                        isSelectable = false,
+                        onClicked = {}
+                    ),
+                    TextMenuItem(
+                        title = "Network Setup Menu",
+                        onClicked = { navigationNodeTraverser.navigateToNode(NetworkSetupMenu::class.java)}
                     ),
                 )
             )
