@@ -4,7 +4,6 @@ import ca.stefanm.ibus.car.di.ConfiguredCarScope
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.lib.messages.IBusMessage
 import ca.stefanm.ibus.lib.messages.IBusMessage.Companion.toIbusMessage
-import ca.stefanm.ibus.lib.messages.toDeviceIdString
 import ca.stefanm.ibus.configuration.CarPlatformConfiguration
 import ca.stefanm.ibus.car.platform.ForegroundPlatform
 import com.fazecast.jSerialComm.SerialPort
@@ -12,7 +11,6 @@ import com.fazecast.jSerialComm.SerialPortInvalidPortException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import okio.Buffer
 import java.util.concurrent.Executors
 import javax.inject.Inject
 
@@ -87,24 +85,29 @@ class BlockingJSerialCommsReader @Inject constructor(
     private val serialPortProvider: JSerialCommsSerialPortProvider,
     private val lineMonitor: IBusLineMonitor,
     private val coroutineScope: CoroutineScope,
-    private val flowDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val readerDispatcher : CoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 ) : SerialPortReader{
 
     private companion object {
-        const val MAX_MESSAGE_LEGNTH = 128 //Max length of an IBUS Message Packet
-        const val MAX_MESSAGES_TO_BUFFER = 24 //Max number of messages to buffer from the serial port before processing.
+        const val TAG = "SerialReader"
+        /** Nothing to read: wait this long before asking again. At 9600 baud that's under 2 bytes. */
+        const val IDLE_POLL_MS = 2L
+        const val READ_CHUNK = 512
     }
+
+    // Its own thread, made here rather than injected: Dagger ignores Kotlin
+    // default arguments, so a `readerDispatcher: CoroutineDispatcher = ...`
+    // parameter got the app's Dispatchers.IO, and this loop's yield() then
+    // spun across the shared pool (~3 cores and constant allocation, idle).
+    private val readerDispatcher = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "ibus-serial-reader").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
 
     // The provider's current port: it's replaced when reopened.
     private val port get() = serialPortProvider.serialPort
 
-    //readtimeout should be set to 75ms
-    private val TAG = "OKIO"
-
     override fun readMessages(): Flow<IBusMessage> {
         return rawSerialPackets.consumeAsFlow()
-            .flowOn(flowDispatcher)
+            .flowOn(Dispatchers.IO)
             .mapNotNull { it.toIbusMessage() }
             .onStart { setupJSerialComm() }
             .onCompletion {
@@ -115,120 +118,44 @@ class BlockingJSerialCommsReader @Inject constructor(
 
     private val rawSerialPackets = Channel<UByteArray>()
 
-    private val rawBuffer = Buffer()
+    private val packetizer = IBusPacketizer()
 
     private var readerJob : Job? = null
 
-    private suspend fun setupJSerialComm() {
-        logger.v(TAG, "Setting up jSerialComm read coroutine.")
+    private fun setupJSerialComm() {
+        logger.v(TAG, "Setting up the serial read loop.")
 
         readerJob = coroutineScope.launch(readerDispatcher) {
+            val chunk = ByteArray(READ_CHUNK)
+            var reportedDropped = 0L
             while (true) {
-                val bytesAvailable = port.bytesAvailable()
-                if (bytesAvailable == 0) { yield() }
-                if (bytesAvailable == -1) {
+                val available = port.bytesAvailable()
+                if (available == -1) {
                     // Not open (yet, or any more: unplugged, a USB glitch,
                     // another process had it): a new port object, opened.
-                    // Nothing to read this round (ByteArray(-1) would end
-                    // this reader for good); try again shortly.
                     logger.w(TAG, "Port not open")
                     serialPortProvider.reopen().let { logger.d(TAG, "Port opening was successful: ${it.isOpen}") }
                     delay(500)
                     continue
                 }
-
-                val readBytes = ByteArray(bytesAvailable)
-//                port.readBytes(readBytes, bytesAvailable.toLong())
-                port.readBytes(readBytes, bytesAvailable)
-                lineMonitor.onBytesReceived(readBytes) //bus activity + echo check for IBusTransmitter
-
-                if (bytesAvailable > 0) {
-//                    logger.v("BYTE READER", "Read $bytesAvailable bytes from serial port.")
+                if (available == 0) {
+                    delay(IDLE_POLL_MS)
+                    continue
                 }
-                rawBuffer.write(readBytes)
 
-                breakBufferIntoPackets(rawBuffer).collect { packet -> rawSerialPackets.send(packet)}
-            }
-        }
-    }
+                val read = port.readBytes(chunk, minOf(available, chunk.size))
+                if (read <= 0) continue
+                lineMonitor.onBytesReceived(chunk.copyOf(read)) //bus activity + echo check for IBusTransmitter
 
-
-
-
-    @ExperimentalUnsignedTypes
-    private fun breakBufferIntoPackets(buffer: Buffer) : Flow<UByteArray> = flow {
-        val debugBuffer = buffer.copy()
-        while (!buffer.exhausted()) {
-            if (buffer.size < 4) {
-                //No source, len, dest, xor checksum
-                return@flow
-            }
-
-            if (buffer.size < buffer.get(1) + 2) { //Need the +2 to get source + length bytes.
-                //We haven't collected the amount of data this packet says it should have.
-                //logger.v(TAG, "Buffer underrun -- waiting for more bytes. Expected ${buffer.get(1)} got ${buffer.size}")
-                return@flow
-            }
-
-            val sourceDevice = buffer.readByte().toUByte()
-            val packetLength = buffer.readByte().toUByte().toInt()
-            val destDevice = buffer.readByte().toUByte()
-
-            val data = if (packetLength <= 2) {
-                ubyteArrayOf()
-            } else {
-                try {
-                    // subtract 2 because length includes checksum and dest address
-                    buffer.readByteArray(packetLength.toLong() - 2).toUByteArray()
-                } catch (e : Exception) {
-                    logger.e("BYTE READER", "Malformed packet", e)
-                    logger.e(
-                        "BYTE READER",
-                        "Data from malformed packet read so far: " +
-                                "[src = ${sourceDevice.toDeviceIdString()}] " +
-                                "[src_16 = ${sourceDevice.toString(16)}] " +
-                                "[len_10 = ${packetLength.toString(10)}] " +
-                                "[len_16 = ${packetLength.toString(16)}] " +
-                                "[dest = ${destDevice.toDeviceIdString()}] "
-                    )
-                    ubyteArrayOf()
-                    return@flow
+                for (packet in packetizer.add(chunk, read)) {
+                    rawSerialPackets.send(packet)
                 }
-            }
-            val givenCrc = buffer.readByte().toUByte()
-
-            var actualCrc = 0x00
-            ubyteArrayOf(sourceDevice, packetLength.toUByte(), destDevice, *data).forEach { byte -> actualCrc = actualCrc xor byte.toInt() }
-
-            val reAssembledPacket = ubyteArrayOf(sourceDevice, packetLength.toUByte(), destDevice, *data, givenCrc)
-
-            if (false) {
-                logger.v(
-                    "BYTE READER",
-                    "Read raw packet : " +
-                            "[src = ${sourceDevice.toDeviceIdString()}] " +
-                            "[src_16 = ${sourceDevice.toString(16)}] " +
-                            "[len_10 = ${packetLength.toString(10)}] " +
-                            "[len_16 = ${packetLength.toString(16)}] " +
-                            "[dest = ${destDevice.toDeviceIdString()}] " +
-                            "<${data.size} bytes data> " +
-                            "[data_10 = ${data}] " +
-                            "[CRC_10 g/a : $givenCrc / $actualCrc ]" +
-                            "[CRC_16 g/a : ${givenCrc.toString(16)} / ${actualCrc.toString(radix = 16)} ]"
-                )
-                logger.v(
-                    "BYTE READER",
-                    "Total Packet: " +
-                    "reassembled_packet : ${reAssembledPacket}" +
-                    "reassembled_packet_size : ${reAssembledPacket.size}"
-                )
-            }
-
-            if (packetLength != data.size + 2) {
-                logger.w("BYTE READER", "Data size mismatch. [e/a] ${packetLength - 2}/${data.size}")
-            }
-            if (givenCrc == actualCrc.toUByte()) {
-                emit(reAssembledPacket)
+                if (packetizer.droppedBytes - reportedDropped >= 1000) {
+                    // E.g. the wrong SerialPortBaudRate for the Pico's bus topology.
+                    logger.w(TAG, "Dropped ${packetizer.droppedBytes} bytes that weren't IBus packets so far " +
+                            "(line noise, or the wrong SerialPortBaudRate for the link?)")
+                    reportedDropped = packetizer.droppedBytes
+                }
             }
         }
     }
