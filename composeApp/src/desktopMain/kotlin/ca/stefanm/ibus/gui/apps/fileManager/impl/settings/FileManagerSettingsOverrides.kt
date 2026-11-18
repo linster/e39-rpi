@@ -31,6 +31,11 @@ object FileManagerSettings : ConfigSpec() {
         default =false,
         name = "showHiddenFiles"
     )
+
+    val showHiddenFolders by optional(
+        default =false,
+        name = "showHiddenFolders"
+    )
 }
 
 object FileManagerSettingsOverridesRepo {

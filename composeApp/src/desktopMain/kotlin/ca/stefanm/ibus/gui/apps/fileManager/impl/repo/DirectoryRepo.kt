@@ -107,8 +107,8 @@ class DirectoryRepo @Inject constructor(
     fun getDirectoryFlow(
         showFakeSelectThisDirectoryEntry : Boolean,
         filter: FilerPickerParameters.Filter,
-        showHiddenFiles : Boolean = false,
-        showHiddenFolders : Boolean = false,
+        showHiddenFiles : Boolean,
+        showHiddenFolders : Boolean,
     ) : Flow<List<DirectoryEntry>> {
 
 
@@ -142,7 +142,13 @@ class DirectoryRepo @Inject constructor(
                 awaitClose {}
             }.map { upstream ->
                 val (directories, files) = upstream.partition { it.isDirectory }
-                val decoratedDirectories = directories.map {
+                val decoratedDirectories = directories.filter {
+                    if (showHiddenFolders) {
+                        true
+                    } else {
+                        !it.isHidden
+                    }
+                }.map {
                     DirectoryEntry.Directory(it)
                 }.let {
                     if (showFakeSelectThisDirectoryEntry) {
@@ -151,7 +157,13 @@ class DirectoryRepo @Inject constructor(
                         it
                     }
                 }
-                val decoratedFiles = files.map {
+                val decoratedFiles = files.filter {
+                    if (showHiddenFiles) {
+                        true
+                    } else {
+                        !it.isHidden
+                    }
+                }.map {
                     DirectoryEntry.DirectoryFile(it)
                 }
                 decoratedDirectories + decoratedFiles
