@@ -8,7 +8,6 @@ import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MODAL
 import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MAIN
 import ca.stefanm.ibus.di.ApplicationModule.Companion.KNOB_LISTENER_MAIN_AUX
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.di.DaggerApplicationComponent
 import ca.stefanm.ibus.lib.logging.Logger
 import co.touchlab.stately.concurrency.value
 import com.ginsberg.cirkle.circular
@@ -52,7 +51,8 @@ class KnobListenerServiceIdentifier @Inject constructor(
 class KnobListenerService @Inject constructor(
     @Named(ApplicationModule.INPUT_EVENTS) val inputEvents : SharedFlow<InputEvent>,
     private val identifier: KnobListenerServiceIdentifier,
-    private val logger: Logger
+    //Used by the inline listenForKnob, so it can't be private.
+    @PublishedApi internal val logger: Logger
 ) {
 
     val tag
@@ -142,8 +142,6 @@ class KnobListenerService @Inject constructor(
 
         ) : State<SnapshotStateList<T>> {
 
-        val logger = DaggerApplicationComponent.create().logger()
-
         val stateListOf = mutableStateListOf(*listData.toTypedArray())
 
         return produceState(initialValue = stateListOf, listData) {
@@ -152,15 +150,21 @@ class KnobListenerService @Inject constructor(
                 .filter { isSelectableAdapter(it.second) }
                 .map { it.first }
                 .circular()
+            //Position in selectedListIndices (the selectable rows), not in stateListOf.
             var selectedIndex : Int = 0
 
-            //Pre-select the first selectable item
-            stateListOf.indexOfFirst { isSelectableAdapter(it) }.let { index ->
-                if (index != -1) {
-                    selectedIndex = index
-                    stateListOf[index] = onSelectAdapter(stateListOf[index], true)
-                    value = stateListOf
-                }
+            //Pre-select the first selectable item. It is selectedListIndices[0];
+            //selectedIndex stays 0. Setting it to the row's position in the
+            //whole list made the knob act on a different row than the
+            //highlighted one whenever non-selectable rows came first.
+            if (selectedListIndices.isEmpty()) {
+                //Nothing to select: ignore the knob. Indexing the empty
+                //circular list on the first knob event would throw.
+                return@produceState
+            }
+            selectedListIndices[0].let { index ->
+                stateListOf[index] = onSelectAdapter(stateListOf[index], true)
+                value = stateListOf
             }
 
             // See enabledInputEvents(): the old takeWhile gate ended this

@@ -45,6 +45,12 @@ kotlin {
         val desktopTest by getting {
             dependencies {
                 implementation("junit:junit:4.13.2")
+                // Compose UI tests (runComposeUiTest). Not compose.uiTest: that is
+                // ui-test 1.9.3, but another dependency resolves compose ui to
+                // 1.10.3, and mismatched versions fail with NoSuchFieldError.
+                // Keep this on the version the app resolves.
+                implementation("org.jetbrains.compose.ui:ui-test:1.10.3")
+                implementation(compose.desktop.currentOs)
             }
         }
 
