@@ -109,6 +109,13 @@ class FileManagerSettingsScreen @Inject constructor(
                             }
                         ),
                         CheckBoxMenuItem(
+                            title = "Show Hidden Folders?",
+                            isChecked = FileManagerSettingsOverridesRepo.config[FileManagerSettings.showHiddenFolders],
+                            onCheckChanged = {
+                                FileManagerSettingsOverridesRepo.config[FileManagerSettings.showHiddenFolders] = it
+                            }
+                        ),
+                        CheckBoxMenuItem(
                             title = "Allow filesystem modification?",
                             isChecked = FileManagerSettingsOverridesRepo.config[FileManagerSettings.allowFilesystemModification],
                             onCheckChanged = {

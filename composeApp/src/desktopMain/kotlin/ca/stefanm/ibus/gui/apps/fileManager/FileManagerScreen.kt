@@ -192,7 +192,9 @@ class FileManagerScreen @Inject constructor(
 
             val entries = directoryRepo.getDirectoryFlow(
                 showFakeSelectThisDirectoryEntry = openParams.showSelectThisFolderEntries,
-                filter = openParams.fileFilter
+                filter = openParams.fileFilter,
+                showHiddenFiles = FileManagerSettingsOverridesRepo.config[FileManagerSettings.showHiddenFiles],
+                showHiddenFolders = FileManagerSettingsOverridesRepo.config[FileManagerSettings.showHiddenFolders]
             ).collectAsState(emptyList())
 
             Column(Modifier
