@@ -186,7 +186,7 @@ class ConfiguredCarModule(
 //ERROR : CarServiceUncaughtExceptionHandler / java.lang.UnsatisfiedLinkError:
 // 'int com.pi4j.jni.I2C.i2cOpen(java.lang.String)' exception: {java.lang.UnsatisfiedLinkError:
 // 'int com.pi4j.jni.I2C.i2cOpen(java.lang.String)'} 'int com.pi4j.jni.I2C.i2cOpen(java.lang.String)' kotlin.Unit
-//        return if (deviceConfiguration.isPi) {
+//        return if (deviceConfiguration.isPi) {   // isPi: now MachineType + other settings (linster/e39-rpi#66)
 //            rpiRelayReaderWriter
 //        } else {
 //            cliRelayReaderWriter

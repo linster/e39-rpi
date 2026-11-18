@@ -11,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.apps.fileManager.FileManagerScreen
 import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.apps.videoPlayer.VideoPlayerAppHomeScreen
@@ -53,6 +55,7 @@ class BMWMainMenu @Inject constructor(
     private val picoScreenStatusManager: PicoScreenStatusManager,
     private val screenPowerWriter: ScreenPowerWriter,
     private val mailboxListRepo: MailboxListRepo,
+    private val configurationStorage: ConfigurationStorage,
 ) : NavigationNode<Nothing> {
 
     override val thisClass: Class<out NavigationNode<Nothing>>
@@ -65,6 +68,12 @@ class BMWMainMenu @Inject constructor(
 
             val unreadMail = remember { mailboxListRepo.unreadInboxCount() }.collectAsState(0L).value
 
+            // What this machine type has (MachineType): no PIM items without the
+            // PIM bridge, no "Back to BMW" without a Pico.
+            val platform = remember {
+                E39Config.CarPlatformConfigSpec.toCarPlatformConfiguration(configurationStorage.config)
+            }
+
             val nwItems = listOf(
                 TextMenuItem(
                     title = "GPS-Navigation",
@@ -74,6 +83,7 @@ class BMWMainMenu @Inject constructor(
                     title = "Matrix Chat",
                     onClicked = { navigationNodeTraverser.navigateToNode(ChatAppHomeScreen::class.java)}
                 ),
+            ) + if (!platform.machineType.hasPim) emptyList() else listOf(
                 TextMenuItem(
                     title = "Calendar",
                     onClicked = { navigationNodeTraverser.navigateToNode(CalendarScreen::class.java)}
@@ -143,6 +153,7 @@ class BMWMainMenu @Inject constructor(
 //                        }
 //                    }
 //                ),
+            ) + if (!platform.hasPico) emptyList() else listOf(
                 TextMenuItem(
                     title = "Back to BMW",
                     onClicked = {

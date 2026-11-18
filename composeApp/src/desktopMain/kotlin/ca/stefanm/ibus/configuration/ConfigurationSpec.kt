@@ -22,20 +22,9 @@ object E39Config : ConfigSpec() {
 
     object CarPlatformConfigSpec : ConfigSpec() {
 
-        enum class InitialCarPlatformConfiguration {
-            LAPTOP,
-            RPI
-        }
-
-        val initialCarPlatformConfiguration by optional(
-            InitialCarPlatformConfiguration.LAPTOP,
-            "initialCarPlatformConfiguration",
-            "If we start the platform without a configuration, do we start it as the laptop or the pi?"
-        )
-
         fun toCarPlatformConfiguration(config: Config) : CarPlatformConfiguration {
             return object : CarPlatformConfiguration {
-                override val isPi: Boolean get() = config[_isPi]
+                override val machineType get() = config[_machineType]
                 override val hasBrowser: Boolean get() = config[_hasBrowser]
                 override val iBusInterfaceUri: String get() = config[_iBusInterfaceUri]
                 override val displayDriver get() = config[_displayDriver]
@@ -50,11 +39,24 @@ object E39Config : ConfigSpec() {
         }
 
 
-        val _isPi by optional(false,
-            "isPi", description = "Is E39 running on the RPi or a laptop?")
+        val _machineType by optional(
+            CarPlatformConfiguration.MachineType.E39,
+            "MachineType",
+            "Which product the HMI is built into: E39, VOLVO_P2 or CARDPUTER_ZERO. Chooses the features " +
+                    "that need hardware (BMW IBus and screen, PIM). Set by the image (e39-rpi-yocto's E39_PRODUCT)."
+        )
+
+        /**
+         * The old "running on the Pi" setting (linster/e39-rpi#66), split into
+         * [MachineType][_machineType], [WindowManagerConfig.kioskWindows] and others.
+         * Only read as the default of kioskWindows, for config files from
+         * before the split.
+         */
+        val _legacyIsPi by optional(false,
+            "isPi", description = "Replaced (linster/e39-rpi#66): only the default for KioskWindows in old config files.")
 
         val _hasBrowser by optional(false,
-            "hasBrowser", description = "Does the HMI have its own web browser (OAuth logins, captive portals)? Independent of isPi.")
+            "hasBrowser", description = "Does the HMI have its own web browser (OAuth logins, captive portals)?")
 
         val _iBusInterfaceUri by optional("/dev/ttyUSB0",
             name = "iBusInterfaceUri", description = "Device file for the LIN transceiver"
@@ -104,22 +106,25 @@ object E39Config : ConfigSpec() {
 
     object WindowManagerConfig : ConfigSpec() {
 
-        val mainWindowUndecorated by optional(
-            false,
-            "DEBUG_MAIN_DECORATION",
-            "Open Main Window with titlebar chrome. False for debug."
+        /**
+         * Windows that fill the screen, with no title bar, not resizable: the
+         * HMI as the machine's only program. Off: ordinary windows, for
+         * development on a laptop. Unset (null): the old isPi setting
+         * ([isKiosk] resolves it).
+         */
+        val kioskWindows by optional<Boolean?>(
+            null,
+            "KioskWindows",
+            "Full-screen windows without a title bar (the HMI on its own machine) rather than ordinary windows (development)."
         )
+
+        fun isKiosk(config: Config) : Boolean =
+            config[kioskWindows] ?: config[CarPlatformConfigSpec._legacyIsPi]
 
         val hmiShiftRight by optional(
             false,
             "DEBUG_HMI_SHIFT_RIGHT",
             "Open HMI window shifted to the right. True for debug."
-        )
-
-        val hmiWindowUndecorated by optional(
-            true,
-            "DEBUG_HMI_DECORATION",
-            "Open Main Window with titlebar chrome. False for debug."
         )
 
         val hmiWindowSize by optional(

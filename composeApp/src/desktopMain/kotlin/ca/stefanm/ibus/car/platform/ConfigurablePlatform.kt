@@ -87,10 +87,11 @@ class ConfigurablePlatform @Inject constructor(
             configuredCarComponent?.configurablePlatformServiceRunner()
 
         val startupServiceList = configurationStorage.get().config[E39Config.CarPlatformConfigSpec._listOfServiceGroupsOnStartup]
+        val unavailable = configuration.machineType.unavailableServiceGroups
         if (startupServiceList.isEmpty()) {
-            configurablePlatformServiceRunner?.runAll()
+            configurablePlatformServiceRunner?.runAllExcept(unavailable)
         } else {
-            configurablePlatformServiceRunner?.startGroups(startupServiceList)
+            configurablePlatformServiceRunner?.startGroups(startupServiceList - unavailable)
         }
 
         currentConfiguration = configuration
@@ -121,8 +122,8 @@ class ConfigurablePlatform @Inject constructor(
 class ConfigurablePlatformServiceRunner @Inject constructor(
     private val list: PlatformServiceList
 ) {
-    fun runAll() {
-        list.list.forEach { group ->
+    fun runAllExcept(serviceGroupNames : Set<String>) {
+        list.list.filter { it.name !in serviceGroupNames }.forEach { group ->
             group.children.forEach { service ->
                 service.onCreate()
             }

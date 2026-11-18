@@ -65,7 +65,9 @@ class DeviceConfigurationViewerWindow @Inject constructor(
     private fun CarPlatformConfiguration?.parseConfiguration() : List<ConfigurationItem> {
         if (this == null) return listOf()
         return listOf(
-            ConfigurationItem("isPi", isPi.toString()),
+            ConfigurationItem("machineType", machineType.toString()),
+            ConfigurationItem("hasPico", hasPico.toString()),
+            ConfigurationItem("iBusConnection", iBusConnection.toString()),
             ConfigurationItem("hasBrowser", hasBrowser.toString()),
             ConfigurationItem("iBusInterfaceUri", iBusInterfaceUri),
             ConfigurationItem("displayDriver", displayDriver.toString()),

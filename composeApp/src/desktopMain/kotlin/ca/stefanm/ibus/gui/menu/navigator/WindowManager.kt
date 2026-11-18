@@ -102,11 +102,11 @@ class WindowManager @Inject constructor(
         }
 
 
-        val isPi = configurationStorage.config[E39Config.CarPlatformConfigSpec._isPi]
+        val kiosk = E39Config.WindowManagerConfig.isKiosk(configurationStorage.config)
 
         val mainWindowState = rememberWindowState(
             size = DEFAULT_SIZE,
-            placement = if (isPi) {
+            placement = if (kiosk) {
                 WindowPlacement.Maximized
             } else {
                 WindowPlacement.Floating
@@ -123,7 +123,7 @@ class WindowManager @Inject constructor(
             },
             resizable = false,
             visible = true,
-            undecorated = isPi
+            undecorated = kiosk
         ) {
             loadingWindow.get().contents()()
         }
@@ -148,15 +148,15 @@ class WindowManager @Inject constructor(
                         }
                     },
                     size = hmiWindow.size,
-                    placement = if (isPi) {
+                    placement = if (kiosk) {
                         WindowPlacement.Maximized
                     } else {
                         WindowPlacement.Floating
                     }
                 ),
                 title = "E39 Menu",
-                undecorated = isPi,
-                resizable = !isPi,
+                undecorated = kiosk,
+                resizable = !kiosk,
                 alwaysOnTop = true,
                 enabled = true,
                 onCloseRequest = {

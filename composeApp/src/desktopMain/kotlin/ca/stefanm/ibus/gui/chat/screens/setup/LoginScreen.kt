@@ -15,8 +15,6 @@ import androidx.compose.ui.unit.sp
 import ca.stefanm.ibus.gui.chat.service.MatrixService
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
-import ca.stefanm.ibus.configuration.ConfigurationStorage
-import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.chat.screens.ChatAppHomeScreen
 import ca.stefanm.ibus.gui.chat.screens.setup.ChatSetupMenuRoot
 import ca.stefanm.ibus.gui.menu.Notification
@@ -38,6 +36,7 @@ import ca.stefanm.ibus.resources.*
 import com.ginsberg.cirkle.circular
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import net.folivo.trixnity.client.MatrixClient
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -60,7 +59,6 @@ class LoginScreen @Inject constructor(
     private val matrixService: MatrixService,
     private val modalMenuService: ModalMenuService,
     private val notificationHub: NotificationHub,
-    private val configurationStorage: ConfigurationStorage
 ) : NavigationNode<LoginScreen.LoginScreenResult>{
 
     // Should return a result if the login is okay so that we don't have
@@ -74,6 +72,11 @@ class LoginScreen @Inject constructor(
 
     override val thisClass: Class<out NavigationNode<LoginScreenResult>>
         get() = LoginScreen::class.java
+
+    private companion object {
+        /** How long a stored login may take to show up (it was 8 s on the Pi, 4 s on a laptop). */
+        const val LOGIN_STATE_TIMEOUT_MS = 8000L
+    }
 
     enum class ScreenState {
         LOADING,
@@ -155,16 +158,16 @@ class LoginScreen @Inject constructor(
         LaunchedEffect(Unit) {
 
             //Check if we have stored credentials and can login.
-            // We'll do this by just starting the matrix service and seeing if it has a login
-            // state after a few seconds.
-        // If not, go to prompt the user.
+            // We'll do this by just starting the matrix service and waiting (up to
+            // LOGIN_STATE_TIMEOUT_MS) for its client to have a login state.
+            // If not, go to prompt the user.
 
             scope.launch {
                 matrixService.start()
-                if (configurationStorage.config[E39Config.CarPlatformConfigSpec._isPi]) {
-                    delay(8000)
-                } else {
-                    delay(4000)
+                withTimeoutOrNull(LOGIN_STATE_TIMEOUT_MS) {
+                    while (matrixService.getMatrixClient()?.loginState?.value == null) {
+                        delay(250)
+                    }
                 }
                 when (matrixService.getMatrixClient()?.loginState?.value) {
                     MatrixClient.LoginState.LOGGED_IN -> onRequestScreenStateUpdate(ScreenState.SUCCESS)
