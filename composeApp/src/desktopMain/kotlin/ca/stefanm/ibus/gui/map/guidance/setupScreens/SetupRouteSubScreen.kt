@@ -5,6 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
@@ -99,6 +103,18 @@ class SetupRouteSubScreen @Inject constructor(
         val currentSession = guidanceService.getCurrentSession().collectAsState(GuidanceSession())
         val sessionState = guidanceService.getGuidanceSessionState().collectAsState(null)
 
+        val startPointIsSet by remember {
+            derivedStateOf {
+                currentSession.value.startPoint != null
+            }
+        }
+
+        val endPointIsSet by remember {
+            derivedStateOf {
+                currentSession.value.endPoint != null
+            }
+        }
+
         LaunchedEffect(sessionState.value) {
             logger.d(TAG, "Session state is : ${sessionState.value}")
         }
@@ -106,7 +122,11 @@ class SetupRouteSubScreen @Inject constructor(
         when (sessionState.value) {
             GuidanceSession.SessionState.SETTING_UP,
             GuidanceSession.SessionState.READY_TO_CALCULATE,
-            GuidanceSession.SessionState.ROUTE_CALCULATED -> SetupRouteScreen(currentSession.value)
+            GuidanceSession.SessionState.ROUTE_CALCULATED -> {
+                key(startPointIsSet, endPointIsSet) {
+                    SetupRouteScreen(currentSession.value)
+                }
+            }
             GuidanceSession.SessionState.IN_GUIDANCE,
             GuidanceSession.SessionState.TERMINATED -> {
                 navigationNodeTraverser.setResultAndGoBack(
