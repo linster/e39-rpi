@@ -236,6 +236,7 @@ class MapScreen @Inject constructor(
             }
         }
 
+        val routeLatLng by guidanceService.getSessionRoute().collectAsState(null)
 
 
         MapViewer(
@@ -264,26 +265,12 @@ class MapScreen @Inject constructor(
                         }
                     )
                 },
-                route = let {
-                    null
-//                    //TODO this block infinte loops and I'm not sure why yet.
-//                    val sessionState = guidanceService.getGuidanceSessionState().collectAsState(GuidanceSession.SessionState.SETTING_UP)
-//                    logger.d(TAG, "Guidance session state: $sessionState")
-//                    if (sessionState.value == GuidanceSession.SessionState.IN_GUIDANCE) {
-//                        val session = guidanceService.getCurrentSessionInstantaneous()
-//                        val route = session.route ?: listOf()
-//                        LaunchedEffect(route) {
-//                            logger.d(TAG, "Route changed: ${route.size}")
-//                        }
-//                        Route(
-//                            path = route,
-//                            color = Color.Magenta,
-//                            stroke = Stroke(8F)
-//                        )
-//                        null
-//                    } else {
-//                        null //Don't draw a route
-//                    }
+                route = routeLatLng?.let { path ->
+                    Route(
+                        path = path,
+                        color = Color.Magenta,
+                        stroke = Stroke(8F)
+                    )
                 }
             ),
             extents = extents.value,
