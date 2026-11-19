@@ -189,6 +189,7 @@ class GuidanceService @Inject constructor(
         }
     }
 
+    //TODO this needs to be fed from gpsd.
     /** The car is at [position]: show, update or hide instructions (in guidance only). */
     fun updatePosition(position: LatLng) {
         coroutineScope.launch(guidanceThread) {
