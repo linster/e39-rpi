@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import ca.stefanm.ibus.car.desktop.input.griffinPowermate.NavigatorMapScreenListener
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
@@ -26,7 +27,8 @@ class WindowManager @Inject constructor(
     private val loadingWindow: Provider<LoadingWindow>,
     private val hmiWindow : MenuWindow,
     private val configurablePlatform: ConfigurablePlatform,
-    private val configurationStorage: ConfigurationStorage
+    private val configurationStorage: ConfigurationStorage,
+    private val navigatorMapScreenListener: NavigatorMapScreenListener
 ) {
 
     companion object {
@@ -169,8 +171,15 @@ class WindowManager @Inject constructor(
 
                 Box {
                     hmiWindow.content()()
+                    // TODO don't do this once the board is fixed and we don't need tint.
+                    val isOnMapScreen by navigatorMapScreenListener.isOnMapScreenFlow().collectAsState(false)
+                    val calculatedTint = if (!isOnMapScreen) {
+                        tint
+                    } else {
+                        (tint + 0.3F).coerceIn(0.5F, 0.95F)
+                    }
                     Box(Modifier.fillMaxSize().background(
-                        color = Color(0F, 0F, 0F, tint)
+                        color = Color(0F, 0F, 0F, calculatedTint)
                     ))
                 }
             }
