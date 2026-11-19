@@ -37,6 +37,7 @@ import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import org.jxmapviewer.viewer.GeoPosition
@@ -236,8 +237,19 @@ class MapScreen @Inject constructor(
             }
         }
 
-        val routeLatLng by guidanceService.getSessionRoute().collectAsState(null)
+        val poiList by poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList())
 
+        val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = guidanceService.position.map { latLng ->
+            if (latLng != null) {
+                PoiOverlay.PoiOverlayItem(
+                    label = "GPS Location",
+                    position = latLng,
+                    icon = { PoiOverlay.PoiOverlayItem.CIRCLE_COLOR.invoke(Color.Green) }
+                )
+            } else { null }
+        }.collectAsState(null)
+
+        val routeLatLng by guidanceService.getSessionRoute().collectAsState(null)
 
         MapViewer(
             overlayProperties = OverlayProperties(
@@ -246,7 +258,7 @@ class MapScreen @Inject constructor(
                     currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
                 gpsReceptionIconVisible = false,
-                poiOverlay = (poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList()).value + parameters.markers).let { list ->
+                poiOverlay = (poiList + parameters.markers).let { list ->
                     logger.d("POI LIST", list.toString())
                     PoiOverlay(
                         pois = list.map { poi ->
@@ -262,6 +274,13 @@ class MapScreen @Inject constructor(
                                 }
                                 }
                             )
+                        }.let { list : List<PoiOverlay.PoiOverlayItem> ->
+                            val marker = gpsMarker.value
+                            if (marker != null) {
+                                list + listOf(marker)
+                            } else {
+                                list
+                            }
                         }
                     )
                 },
