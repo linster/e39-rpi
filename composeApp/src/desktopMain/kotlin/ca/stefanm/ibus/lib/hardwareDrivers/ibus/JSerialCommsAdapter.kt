@@ -73,7 +73,7 @@ class JSerialCommsAdapter @Inject constructor(
     override fun readMessages(): Flow<IBusMessage> {
         return when (deviceConfiguration.serialPortReadMode) {
             CarPlatformConfiguration.SerialPortReadMode.BLOCKING -> blockingReader.readMessages()
-            else -> error("Not supported")
+            else -> error("Not supported : ${deviceConfiguration.serialPortReadMode.name}")
         }
     }
 }
