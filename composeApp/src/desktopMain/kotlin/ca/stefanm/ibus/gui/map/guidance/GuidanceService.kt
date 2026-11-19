@@ -83,7 +83,7 @@ class GuidanceService @Inject constructor(
             notificationHub.postNotification(Notification(
                 Notification.NotificationImage.MAP_GENERAL,
                 "Calculated Route",
-                "Start Navigation and have a safe trip."
+                "Start Navigation."
             ))
         }
     }
