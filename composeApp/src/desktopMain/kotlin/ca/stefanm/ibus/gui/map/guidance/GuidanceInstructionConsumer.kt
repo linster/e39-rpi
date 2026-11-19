@@ -1,6 +1,7 @@
 package ca.stefanm.ibus.gui.map.guidance
 
 import androidx.compose.runtime.collectAsState
+import ca.stefanm.ibus.car.desktop.input.griffinPowermate.NavigatorMapScreenListener
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.configuration.E39Config.GuidanceConfig.SidePanelInstructionEnablementState
@@ -40,12 +41,15 @@ interface GuidanceInstructionConsumer {
 class NotificationGuidanceInstructionConsumer @Inject constructor(
     private val notificationHub: NotificationHub,
     private val configurationStorage: ConfigurationStorage,
+    private val navigatorMapScreenListener : NavigatorMapScreenListener,
 ) : GuidanceInstructionConsumer {
 
     private var posted: Notification? = null
 
     private val enabled: Boolean
-        get() = configurationStorage.config[E39Config.GuidanceConfig.notificationInstructionConsumerIsEnabled]
+        get() =
+            configurationStorage.config[E39Config.GuidanceConfig.notificationInstructionConsumerIsEnabled] &&
+                    !navigatorMapScreenListener.isOnMapScreen() && (configurationStorage.config[E39Config.GuidanceConfig.sidePanelScreenInstructionConsumerIsEnabled] != SidePanelInstructionEnablementState.NEVER)
 
     override suspend fun notifyInstruction(instruction: GuidanceInstruction, distanceMeters: Double) {
         if (!enabled) return
