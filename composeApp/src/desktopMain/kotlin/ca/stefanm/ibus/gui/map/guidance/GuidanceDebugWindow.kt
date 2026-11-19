@@ -120,8 +120,11 @@ class GuidanceDebugWindow @Inject constructor(
             OutlinedTextField(end.value, { end.value = it }, label = { Text("End (lat, lng)") })
             presets.forEach { preset ->
                 Button(onClick = {
+                    // TODO this should modify the stored session too.
                     start.value = format(preset.start)
                     end.value = format(preset.end)
+                    guidanceService.setStartPoint(preset.start)
+                    guidanceService.setEndPoint(preset.end)
                 }) { Text(preset.name) }
             }
             Row {
