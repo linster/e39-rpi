@@ -96,7 +96,7 @@ class MapScreen @Inject constructor(
             )
         }
 
-        if (parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection) {
+        if (parameters.openMode is MapScreenParameters.MapScreenOpenMode.BrowsingMode) {
             LaunchedEffect(shouldFollowGps) {
                 if (shouldFollowGps) {
                     gpsMapCenterProvider.center.collect { gpsCenter ->
@@ -156,7 +156,9 @@ class MapScreen @Inject constructor(
                             scales[currentIndex + change]
                         }.let { newZoom ->
                             extents.mapScaleState = newZoom
-                            //gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
+                            // This is the only spot the onUserMapCenterChanged learns about new zooms. It learns about
+                            // new centers through the map widget's callback.
+                            gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
                         }
                     }
                 }
