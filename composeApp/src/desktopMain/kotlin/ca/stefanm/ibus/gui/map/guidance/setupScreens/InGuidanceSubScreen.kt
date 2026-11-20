@@ -22,7 +22,6 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
-import ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
@@ -109,46 +108,56 @@ class InGuidanceSubScreen @Inject constructor(
             }
 
             val scope = rememberCoroutineScope()
-            key(gpsMapCenterProvider.followGps.value) {
-                HalfScreenMenu.BottomHalfTwoColumn(
-                    leftItems = listOf(
-                        TextMenuItem(
-                            title = "View Map",
-                            onClicked = {
-                                navigationNodeTraverser.setResultAndGoBack(
-                                    this@InGuidanceSubScreen,
-                                    GuidanceSetupScreen.SubScreenResult.GO_BACK
-                                )
-                            }
-                        ),
-                        TextMenuItem(
-                            title = "Repeat current instruction",
-                            onClicked = {
-                                scope.launch {
-                                    guidanceInstructionConsumer.current.value?.let { (instruction, distance) ->
-                                        guidanceInstructionConsumer.notifyInstruction(instruction, distance)
-                                    }
-                                }
-
-                            }
-                        ),
-                        TextMenuItem(
-                            title = "Preview next instruction",
-                            onClicked = {
-                                scope.launch { previewNextInstruction() }
-                            }
-                        ),
-                        CheckBoxMenuItem(
-                            title = "Center map on current location?",
-                            isChecked = gpsMapCenterProvider.followGps.value,
-                            onCheckChanged = { gpsMapCenterProvider.followGps(it) }
-                        ),
+            HalfScreenMenu.BottomHalfTwoColumn(
+                leftItems = listOf(
+                    TextMenuItem(
+                        title = "View Map",
+                        onClicked = {
+                            navigationNodeTraverser.setResultAndGoBack(
+                                this@InGuidanceSubScreen,
+                                GuidanceSetupScreen.SubScreenResult.GO_BACK
+                            )
+                        }
                     ),
-                    rightItems = listOf()
-                )
-            }
+                    TextMenuItem(
+                        title = "Repeat current instruction",
+                        onClicked = {
+                            scope.launch {
+                                guidanceInstructionConsumer.current.value?.let { (instruction, distance) ->
+                                    guidanceInstructionConsumer.notifyInstruction(instruction, distance)
+                                }
+                            }
+
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "Preview next instruction",
+                        onClicked = {
+                            scope.launch { previewNextInstruction() }
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "Re-center map on current location",
+                        onClicked = { recenterOnCurrentLocation() }
+                    ),
+                ),
+                rightItems = listOf()
+            )
         }
 
+    }
+
+    /** The map centred on the car, following it; back to the map to see it. */
+    private fun recenterOnCurrentLocation() {
+        if (!gpsMapCenterProvider.followGps(true)) {
+            notificationHub.postNotificationBackground(Notification(
+                Notification.NotificationImage.MAP_GENERAL,
+                "No GPS position",
+                "There's no GPS fix to centre the map on yet."
+            ))
+            return
+        }
+        navigationNodeTraverser.setResultAndGoBack(this, GuidanceSetupScreen.SubScreenResult.GO_BACK)
     }
 
     /** The coming maneuver in the side panel, titled "Next"; until guidance's next update replaces it. */
