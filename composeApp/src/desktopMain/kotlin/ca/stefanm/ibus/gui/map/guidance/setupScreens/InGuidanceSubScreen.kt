@@ -17,10 +17,12 @@ import ca.stefanm.ibus.gui.map.guidance.SideBarGuidanceInstructionConsumer
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import androidx.compose.runtime.DisposableEffect
+import ca.stefanm.ibus.gui.map.mapScreen.GpsMapCenterProvider
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.CheckBoxMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
@@ -47,6 +49,7 @@ class InGuidanceSubScreen @Inject constructor(
     private val guidanceInstructionConsumer: GuidanceSetupScreenInstructionConsumer,
     private val sideBarGuidanceInstructionConsumer: SideBarGuidanceInstructionConsumer,
     private val notificationHub: NotificationHub,
+    private val gpsMapCenterProvider: GpsMapCenterProvider
 ) : NavigationNode<GuidanceSetupScreen.SubScreenResult> {
     override val thisClass: Class<out NavigationNode<GuidanceSetupScreen.SubScreenResult>> = InGuidanceSubScreen::class.java
 
@@ -106,43 +109,44 @@ class InGuidanceSubScreen @Inject constructor(
             }
 
             val scope = rememberCoroutineScope()
-            HalfScreenMenu.BottomHalfTwoColumn(
-                leftItems = listOf(
-                    TextMenuItem(
-                        title = "Go Back",
-                        onClicked = {
-                            navigationNodeTraverser.setResultAndGoBack(
-                                this@InGuidanceSubScreen,
-                                GuidanceSetupScreen.SubScreenResult.GO_BACK
-                            )
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Repeat current instruction",
-                        onClicked = {
-                            scope.launch {
-                                guidanceInstructionConsumer.current.value?.let { (instruction, distance) ->
-                                    guidanceInstructionConsumer.notifyInstruction(instruction, distance)
-                                }
+            key(gpsMapCenterProvider.followGps.value) {
+                HalfScreenMenu.BottomHalfTwoColumn(
+                    leftItems = listOf(
+                        TextMenuItem(
+                            title = "View Map",
+                            onClicked = {
+                                navigationNodeTraverser.setResultAndGoBack(
+                                    this@InGuidanceSubScreen,
+                                    GuidanceSetupScreen.SubScreenResult.GO_BACK
+                                )
                             }
+                        ),
+                        TextMenuItem(
+                            title = "Repeat current instruction",
+                            onClicked = {
+                                scope.launch {
+                                    guidanceInstructionConsumer.current.value?.let { (instruction, distance) ->
+                                        guidanceInstructionConsumer.notifyInstruction(instruction, distance)
+                                    }
+                                }
 
-                        }
+                            }
+                        ),
+                        TextMenuItem(
+                            title = "Preview next instruction",
+                            onClicked = {
+                                scope.launch { previewNextInstruction() }
+                            }
+                        ),
+                        CheckBoxMenuItem(
+                            title = "Center map on current location?",
+                            isChecked = gpsMapCenterProvider.followGps.value,
+                            onCheckChanged = { gpsMapCenterProvider.followGps(it) }
+                        ),
                     ),
-                    TextMenuItem(
-                        title = "Preview next instruction",
-                        onClicked = {
-                            scope.launch { previewNextInstruction() }
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Center map on current location",
-                        onClicked = {
-                            TODO()
-                        }
-                    ),
-                ),
-                rightItems = listOf()
-            )
+                    rightItems = listOf()
+                )
+            }
         }
 
     }
