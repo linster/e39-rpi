@@ -27,7 +27,7 @@ def test_end_guidance_keeps_route(hmi):
     hmi.shot("in-guidance")
 
     # Back to the map, and end guidance from its guidance menu.
-    hmi.select(r"^Go Back$")
+    hmi.select(r"^View Map$")
     hmi.wait_for_screen("MapScreen")
     open_guidance_menu(hmi)
     hmi.select(r"^Terminate Guidance$")

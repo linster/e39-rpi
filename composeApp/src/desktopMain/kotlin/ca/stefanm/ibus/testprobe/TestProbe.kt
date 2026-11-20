@@ -246,7 +246,9 @@ class TestProbe @Inject constructor(
      * them share (the screen, then overlays drawn on top of it).
      */
     private fun screenTexts(window: Window): List<ScreenText> {
-        val origin = window.locationOnScreen
+        // The content's corner, as capture() takes it: a window manager's
+        // frame and title bar (insets; none on Xvfb) aren't in screenshots.
+        val origin = window.locationOnScreen.let { java.awt.Point(it.x + window.insets.left, it.y + window.insets.top) }
         val found = mutableListOf<Pair<List<Int>, ScreenText>>()
         fun walk(a: javax.accessibility.Accessible?, path: List<Int>) {
             if (a == null || path.size > 60) return

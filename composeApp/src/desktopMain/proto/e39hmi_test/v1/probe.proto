@@ -194,7 +194,8 @@ message GetTextsRequest {}
 
 message ScreenText {
   string text = 1;
-  // In window pixels.
+  // In the window's content pixels (the screenshot's: without a window
+  // manager's frame and title bar).
   int32 x = 2;
   int32 y = 3;
   int32 width = 4;

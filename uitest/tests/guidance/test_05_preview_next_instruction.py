@@ -158,7 +158,7 @@ def test_preview_side_panel_always(hmi):
         preview(hmi)
         expect_preview_of(hmi, target)
         clear_notifications(hmi)
-        hmi.select(r"^Go Back$")
+        hmi.select(r"^View Map$")
         hmi.wait_for_screen("MapScreen")
         expect_guidance_panel_of(hmi, target)
         hmi.shot("map-after-leaving")

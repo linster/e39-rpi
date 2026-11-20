@@ -56,9 +56,9 @@ class GpsMapCenterProvider internal constructor(
 
     companion object {
         const val TAG = "GpsMapCenterProvider"
-        /** MapViewer's size. */
+        /** MapViewer's size on screen: 800 x 468 asked for, the status bar below it takes 41. */
         const val MAP_WIDTH_DP = 800.0
-        const val MAP_HEIGHT_DP = 468.0
+        const val MAP_HEIGHT_DP = 427.0
         /** Following, a GPS point this close to an edge re-centres the map on it. */
         const val EDGE_MARGIN_DP = 40.0
         /** A reported centre within this of [center] isn't a pan (rounding). */

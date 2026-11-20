@@ -178,6 +178,9 @@ fun MapViewer(
 
             val stateVertical = rememberScrollState(0)
             val stateHorizontal = rememberScrollState(0)
+            // Until the first scroll to the centre, the scroll position (0, 0)
+            // isn't where the map is: its centre isn't reported.
+            var scrolledToCenter by remember { mutableStateOf(false) }
 
             // The tiles: the viewport's, plus one tile on each side. (Was six
             // viewport widths each way, square: 81 tiles for a 400x234 map,
@@ -222,11 +225,15 @@ fun MapViewer(
                     val center = latLngToPixels(extents.centerState, extents, startX, endX, startY, endY, zoom, scaling)
                     stateVertical.scrollTo((center.fromTop - viewportHeightPx / 2).roundToInt())
                     stateHorizontal.scrollTo((center.fromLeft - viewportWidthPx / 2).roundToInt())
+                    scrolledToCenter = true
                 }
 
                 // The map's centre now (the middle of the viewport), for
                 // "New POI on Center", Places Nearby, location selection.
-                LaunchedEffect(stateHorizontal.value, stateVertical.value) {
+                // Keyed on scrolledToCenter too: a centre already in the
+                // middle doesn't scroll, but is reported once scrolled to.
+                LaunchedEffect(stateHorizontal.value, stateVertical.value, scrolledToCenter) {
+                    if (!scrolledToCenter) return@LaunchedEffect
                     onCenterPositionUpdated(
                         pixelsToLatLng(
                             stateHorizontal.value + viewportWidthPx / 2.0,
