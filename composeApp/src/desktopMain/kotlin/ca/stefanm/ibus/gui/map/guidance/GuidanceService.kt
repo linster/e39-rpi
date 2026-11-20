@@ -217,15 +217,6 @@ class GuidanceService @Inject constructor(
             guidanceSetupScreenInstructionConsumer,
         )
 
-    /**
-     * Guide along [route] (computed from [start] to [end] by the maps
-     * backend): a new session with its path and instructions. Start it with
-     * [startGuidance].
-     */
-    fun useRoute(start: LatLng, end: LatLng, route: RemoteRouteRepository.ComputedRoute) {
-        coroutineScope.launch(guidanceThread) { loadRoute(start, end, route) }
-    }
-
     /** On [guidanceThread]: a new session with [route]'s path, its instructions and a fresh tracker. */
     private suspend fun loadRoute(start: LatLng, end: LatLng, route: RemoteRouteRepository.ComputedRoute) {
         if (guidanceSessionStorage.currentSession.sessionState == GuidanceSession.SessionState.IN_GUIDANCE) {

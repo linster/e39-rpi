@@ -32,6 +32,8 @@ data class GuidanceInstruction(
     val durationAfterSeconds: Double,
     /** Roundabouts: which exit (1 = first); 0 otherwise. */
     val roundaboutExit: Int,
+    /** Where the maneuver starts in the route's path (index of its point), if known. */
+    val pathIndex: Int? = null,
 ) {
     val isDestination: Boolean
         get() = kind in setOf(ManeuverKind.DESTINATION, ManeuverKind.DESTINATION_LEFT, ManeuverKind.DESTINATION_RIGHT)
@@ -57,6 +59,7 @@ data class GuidanceInstruction(
                         lengthAfterMeters = m.lengthMeters,
                         durationAfterSeconds = m.durationSeconds,
                         roundaboutExit = m.roundaboutExit,
+                        pathIndex = m.pathIndexRange.first,
                     )
                 }
             }

@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowScope
-import ca.stefanm.gui.map.guidance.GuidanceSessionStorage
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.configuration.E39Config.GuidanceConfig.SidePanelInstructionEnablementState
@@ -39,26 +38,26 @@ import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.map.Kanata_path
 import ca.stefanm.ibus.gui.map.places.MapPoiLabels
-import ca.stefanm.ibus.gui.map.repo.RemoteRouteRepository
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
 
 /**
- * Guidance debug window (Debug launchpad): pick a route (start and end),
- * compute it with the maps backend, guide along it, and feed fake GPS
- * positions: drive along the route, or jump to a maneuver's approach (its
- * trigger radius), the maneuver itself or just past it; dismiss instructions.
- * The instruction consumers (notification, side panel) react as they would
- * in the car; the event log says what the tracker decided.
+ * Guidance debug window (Debug launchpad): drives the app's GuidanceService
+ * the way the HMI's guidance screens do (set start and end, calculate the
+ * route, start and stop guidance, clear the session), so what it shows is
+ * what the HMI gets. It shares the session with the HMI's screens: a route
+ * set up in either shows in both. Then it feeds fake GPS positions: drive
+ * along the session's route, or jump to a maneuver's approach (its trigger
+ * radius), the maneuver itself or just past it; dismiss instructions. The
+ * instruction consumers (notification, side panel) react as they would in
+ * the car; the event log says what the tracker decided.
  */
 class GuidanceDebugWindow @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val guidanceService: GuidanceService,
-    private val guidanceSessionStorage: GuidanceSessionStorage,
-    private val routeRepository: RemoteRouteRepository,
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -82,13 +81,21 @@ class GuidanceDebugWindow @Inject constructor(
     // The window's route: survives closing and reopening the window.
     private val start = mutableStateOf("45.4236, -75.7009")
     private val end = mutableStateOf("45.3089, -75.9128")
-    private val route = mutableStateOf<RemoteRouteRepository.ComputedRoute?>(null)
-    private val routeStatus = mutableStateOf("No route yet.")
+    private val pointsError = mutableStateOf("")
+    /** The session's route (GuidanceService.getSessionRoute()), for the fake GPS. */
+    private val routePath = mutableStateOf<RoutePath?>(null)
     private val alongMeters = mutableStateOf(0.0)
     private val speedKmh = mutableStateOf("50")
     private val driving = mutableStateOf(false)
 
     override fun content(): @Composable WindowScope.() -> Unit = {
+        LaunchedEffect(Unit) {
+            guidanceService.getSessionRoute().distinctUntilChanged().collect { path ->
+                routePath.value = path?.takeIf { it.size >= 2 }?.let { RoutePath(it) }
+                alongMeters.value = 0.0
+                driving.value = false
+            }
+        }
         Row(Modifier.fillMaxHeight()) {
             Column(Modifier.width(430.dp)) {
                 RouteCard()
@@ -111,68 +118,76 @@ class GuidanceDebugWindow @Inject constructor(
 
     private fun format(p: LatLng) = "%.5f, %.5f".format(p.latitude, p.longitude)
 
+    /** The start and end fields into the session, as the HMI's Set Start/End Location. */
+    private fun setPoints() {
+        val from = parse(start.value)
+        val to = parse(end.value)
+        if (from == null || to == null) {
+            pointsError.value = "Start and end must be \"lat, lng\"."
+            return
+        }
+        pointsError.value = ""
+        guidanceService.setStartPoint(from)
+        guidanceService.setEndPoint(to)
+    }
+
+    private fun describe(calculation: GuidanceService.RouteCalculation): String = when (calculation) {
+        GuidanceService.RouteCalculation.Idle -> "No route calculated."
+        GuidanceService.RouteCalculation.Calculating -> "Calculating..."
+        is GuidanceService.RouteCalculation.Calculated -> calculation.route.let {
+            "%.1f km, %d min, %d maneuvers, %d points".format(
+                it.lengthMeters / 1000, (it.durationSeconds / 60).toInt(), it.maneuvers.size, it.path.size)
+        }
+        is GuidanceService.RouteCalculation.Failed -> "Failed: ${calculation.message}"
+    }
+
     @Composable
     private fun RouteCard() {
-        val scope = rememberCoroutineScope()
+        val state = guidanceService.getGuidanceSessionState().collectAsState(null).value
+        val calculation = guidanceService.routeCalculation.collectAsState().value
+        // The session takes points only while SETTING_UP (GuidanceSession), as in the HMI.
+        val canSetPoints = state == GuidanceSession.SessionState.SETTING_UP
         NestingCard {
             NestingCardHeader("Route")
             OutlinedTextField(start.value, { start.value = it }, label = { Text("Start (lat, lng)") })
             OutlinedTextField(end.value, { end.value = it }, label = { Text("End (lat, lng)") })
             presets.forEach { preset ->
                 Button(onClick = {
-                    // TODO this should modify the stored session too.
                     start.value = format(preset.start)
                     end.value = format(preset.end)
-                    guidanceService.setStartPoint(preset.start)
-                    guidanceService.setEndPoint(preset.end)
+                    if (canSetPoints) setPoints()
                 }) { Text(preset.name) }
             }
-            Row {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Button(onClick = { val s = start.value; start.value = end.value; end.value = s }) { Text("Swap") }
-                Button(onClick = {
-                    val from = parse(start.value)
-                    val to = parse(end.value)
-                    if (from == null || to == null) {
-                        routeStatus.value = "Start and end must be \"lat, lng\"."
-                        return@Button
-                    }
-                    routeStatus.value = "Computing..."
-                    scope.launch {
-                        routeRepository.computeRoute(from, to).fold(
-                            onSuccess = {
-                                route.value = it
-                                alongMeters.value = 0.0
-                                routeStatus.value = "%.1f km, %d min, %d maneuvers, %d points".format(
-                                    it.lengthMeters / 1000, (it.durationSeconds / 60).toInt(),
-                                    it.maneuvers.size, it.path.size)
-                            },
-                            onFailure = { routeStatus.value = "Failed: ${it.message}" },
-                        )
-                    }
-                }) { Text("Compute route (maps backend)") }
+                Button(enabled = canSetPoints, onClick = { setPoints() }) { Text("Set start and end") }
+                Button(
+                    enabled = state == GuidanceSession.SessionState.READY_TO_CALCULATE &&
+                            calculation != GuidanceService.RouteCalculation.Calculating,
+                    onClick = { guidanceService.calculateRoute() },
+                ) { Text("Calculate route") }
             }
-            Text(routeStatus.value)
+            if (!canSetPoints) Text("The session has its points: clear it to set new ones.", fontSize = 12.sp)
+            if (pointsError.value.isNotEmpty()) Text(pointsError.value)
+            Text(describe(calculation))
         }
     }
 
     @Composable
     private fun SessionCard() {
-        val state = guidanceService.getGuidanceSessionState().collectAsState(null).value
+        val session = guidanceService.getCurrentSession().collectAsState(null).value
+        val state = session?.sessionState
         NestingCard {
             NestingCardHeader("Guidance session: $state")
-            Button(enabled = route.value != null, onClick = {
-                val r = route.value ?: return@Button
-                // startGuidance() returns at once if a session is running.
-                if (guidanceService.getInstantaneousGuidanceSessionState() == GuidanceSession.SessionState.IN_GUIDANCE) {
-                    guidanceService.stopGuidance()
-                }
-                guidanceService.useRoute(parse(start.value)!!, parse(end.value)!!, r)
-                guidanceService.startGuidance()
-                feed(alongMeters.value)
-            }) { Text("Guide along this route (from the fake position)") }
-            Row {
-                Button(onClick = { guidanceService.startGuidance() }) { Text("Start") }
-                Button(onClick = { guidanceService.stopGuidance() }) { Text("Stop") }
+            Text("Start: ${session?.startPoint?.let(::format) ?: "-"}   End: ${session?.endPoint?.let(::format) ?: "-"}", fontSize = 12.sp)
+            Text("Route: ${session?.route?.size?.let { "$it points" } ?: "none"}", fontSize = 12.sp)
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Button(enabled = state == GuidanceSession.SessionState.ROUTE_CALCULATED, onClick = {
+                    guidanceService.startGuidance()
+                    feed(alongMeters.value)
+                }) { Text("Start guidance") }
+                Button(enabled = state == GuidanceSession.SessionState.IN_GUIDANCE,
+                    onClick = { guidanceService.stopGuidance() }) { Text("Stop guidance") }
                 Button(onClick = { guidanceService.clearCurrentSession() }) { Text("Clear session") }
                 Button(onClick = { guidanceService.repeatLastDirection() }) { Text("Repeat") }
             }
@@ -209,17 +224,15 @@ class GuidanceDebugWindow @Inject constructor(
     }
 
     /** Meters along the route of the maneuver behind [instruction]. */
-    private fun maneuverMeters(path: RoutePath, instruction: GuidanceInstruction): Double {
-        val maneuver = route.value?.maneuvers?.getOrNull(instruction.index)
-        return maneuver?.pathIndexRange?.first?.let { path.metersAt(it) }
+    private fun maneuverMeters(path: RoutePath, instruction: GuidanceInstruction): Double =
+        instruction.pathIndex?.takeIf { it in path.points.indices }?.let { path.metersAt(it) }
             ?: path.distances[path.points.indices.minBy { GuidanceInstructionTracker.meters(path.points[it], instruction.location) }]
-    }
 
     @Composable
     private fun ManeuversCard() {
         val instructions = guidanceService.instructions.collectAsState().value
         val tracker = guidanceService.trackerState.collectAsState().value
-        val path = route.value?.let { RoutePath(it.path) }
+        val path = routePath.value
         NestingCard(Modifier.fillMaxHeight()) {
             NestingCardHeader("Instructions (${instructions.size}) - the guided route's")
             LazyColumn {
@@ -249,12 +262,12 @@ class GuidanceDebugWindow @Inject constructor(
     }
 
     private fun feed(meters: Double) {
-        val path = route.value?.let { RoutePath(it.path) } ?: return
+        val path = routePath.value ?: return
         guidanceService.updatePosition(path.at(meters))
     }
 
     private fun jump(meters: Double) {
-        val path = route.value?.let { RoutePath(it.path) } ?: return
+        val path = routePath.value ?: return
         alongMeters.value = meters.coerceIn(0.0, path.lengthMeters)
         feed(alongMeters.value)
     }
@@ -264,7 +277,7 @@ class GuidanceDebugWindow @Inject constructor(
         val position = guidanceService.position.collectAsState().value
         val tracker = guidanceService.trackerState.collectAsState().value
         val instructions = guidanceService.instructions.collectAsState().value
-        val path = route.value?.let { remember(it) { RoutePath(it.path) } }
+        val path = routePath.value
         NestingCard {
             NestingCardHeader("Fake GPS")
             Text("Position: ${position?.let(::format) ?: "none"}")
@@ -272,7 +285,7 @@ class GuidanceDebugWindow @Inject constructor(
                     (tracker.shownIndex?.let { "#${instructions.getOrNull(it)?.index}" } ?: "none") +
                     (tracker.distanceMeters?.let { ", ${MapPoiLabels.distance(it)}" } ?: ""))
             if (path == null) {
-                Text("Compute a route first.")
+                Text("Calculate a route first.")
                 return@NestingCard
             }
             Text("Along the route: ${MapPoiLabels.distance(alongMeters.value)} of ${MapPoiLabels.distance(path.lengthMeters)}")
