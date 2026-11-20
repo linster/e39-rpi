@@ -72,7 +72,9 @@ import ca.stefanm.e39hmi.test.v1.GuidanceSessionInfo
 import ca.stefanm.e39hmi.test.v1.GuidanceState
 import ca.stefanm.e39hmi.test.v1.ResetGuidanceRequest
 import ca.stefanm.e39hmi.test.v1.ResetGuidanceResponse
+import ca.stefanm.e39hmi.test.v1.SetPositionRequest
 import ca.stefanm.e39hmi.test.v1.geoPoint
+import ca.stefanm.e39hmi.test.v1.guidanceInstructionInfo
 import ca.stefanm.e39hmi.test.v1.guidanceSessionInfo
 import ca.stefanm.e39hmi.test.v1.guidanceState
 import ca.stefanm.e39hmi.test.v1.resetGuidanceResponse
@@ -532,7 +534,29 @@ class TestProbe @Inject constructor(
                     else -> {}
                 }
                 instructions = service.instructions.value.size
+                instructionList.addAll(service.instructions.value.map { i ->
+                    guidanceInstructionInfo {
+                        index = i.index
+                        kind = i.kind.name
+                        text = i.text
+                        location = geoPoint { latitude = i.location.latitude; longitude = i.location.longitude }
+                        triggerRadiusMeters = i.triggerRadiusMeters
+                        pathIndex = i.pathIndex ?: -1
+                    }
+                })
+                service.trackerState.value.let {
+                    nextIndex = it.nextIndex
+                    shownIndex = it.shownIndex ?: -1
+                }
             }
+        }
+
+        override suspend fun setPosition(request: SetPositionRequest): GuidanceState {
+            val service = guidanceService.get()
+            service.updatePosition(LatLng(request.position.latitude, request.position.longitude))
+            // Runs on the guidance thread after the position's handling (one thread, in order).
+            service.nextInstruction()
+            return getGuidance(GetGuidanceRequest.getDefaultInstance())
         }
 
         override suspend fun resetFakeMail(request: ResetFakeMailRequest): ResetFakeMailResponse {

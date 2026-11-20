@@ -55,6 +55,10 @@ service HmiTestProbe {
   rpc ResetGuidance(ResetGuidanceRequest) returns (ResetGuidanceResponse);
   // The guidance session and the last route calculation (GuidanceService).
   rpc GetGuidance(GetGuidanceRequest) returns (GuidanceState);
+  // The car is here: GuidanceService.updatePosition(), as gpsd (or the
+  // guidance debug window's fake GPS) would. Returns once guidance has
+  // handled it (instructions shown, updated or passed).
+  rpc SetPosition(SetPositionRequest) returns (GuidanceState);
 
   // Sample mail (E39Config.PimConfig.Mail.useFakeData) only;
   // FAILED_PRECONDITION with the bridge's mail.
@@ -279,6 +283,28 @@ message GuidanceState {
   double route_duration_seconds = 6;
   // GuidanceService.instructions.
   int32 instructions = 7;
+  // The instructions themselves, in order.
+  repeated GuidanceInstructionInfo instruction_list = 8;
+  // The tracker (GuidanceService.trackerState): positions in instruction_list
+  // of the coming instruction and of the one shown (-1: none).
+  int32 next_index = 9;
+  int32 shown_index = 10;
+}
+
+message GuidanceInstructionInfo {
+  // The maneuver's index in the route (GuidanceInstruction.index).
+  int32 index = 1;
+  // RemoteRouteRepository.ManeuverKind, e.g. RIGHT, DESTINATION.
+  string kind = 2;
+  string text = 3;
+  GeoPoint location = 4;
+  double trigger_radius_meters = 5;
+  // Where the maneuver starts in the session's route; -1: unknown.
+  int32 path_index = 6;
+}
+
+message SetPositionRequest {
+  GeoPoint position = 1;
 }
 
 message ResetFakeMailRequest {}

@@ -273,6 +273,12 @@ class Hmi:
         and the last route calculation (GuidanceState in probe.proto)."""
         return self.stub.GetGuidance(pb2.GetGuidanceRequest(), timeout=self.timeout_s)
 
+    def set_position(self, lat, lng):
+        """The car is at (lat, lng) (GuidanceService.updatePosition(), as GPS would); returns the
+        guidance state once guidance has handled it."""
+        return self.stub.SetPosition(pb2.SetPositionRequest(position=pb2.GeoPoint(latitude=lat, longitude=lng)),
+                                     timeout=self.timeout_s)
+
     def deliver_mail(self, subject="", text="", from_name="", from_email=""):
         self.stub.DeliverFakeMail(pb2.DeliverFakeMailRequest(
             subject=subject, text=text, from_name=from_name, from_email=from_email), timeout=self.timeout_s)

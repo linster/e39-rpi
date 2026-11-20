@@ -180,6 +180,36 @@ class GuidanceService @Inject constructor(
         ))
     }
 
+    /**
+     * The coming instruction (the next maneuver, shown or not) and its
+     * distance along the route from the car (from the route's start without
+     * a position); null outside guidance and past the last instruction.
+     */
+    suspend fun nextInstruction(): Pair<GuidanceInstruction, Double>? = withContext(guidanceThread) {
+        if (guidanceSessionStorage.currentSession.sessionState != GuidanceSession.SessionState.IN_GUIDANCE) {
+            return@withContext null
+        }
+        val instruction = tracker.next ?: return@withContext null
+        instruction to metersAlongRoute(instruction)
+    }
+
+    /** On [guidanceThread]: how far along the session's route [instruction] is from the car. */
+    private fun metersAlongRoute(instruction: GuidanceInstruction): Double {
+        val position = _position.value
+        val points = guidanceSessionStorage.currentSession.route
+        val target = instruction.pathIndex
+        if (points == null || points.size < 2 || target == null) {
+            return position?.let { GuidanceInstructionTracker.meters(it, instruction.location) } ?: 0.0
+        }
+        val path = RoutePath(points)
+        if (position == null) return path.metersAt(target)
+        // The car is on the stretch between the last passed maneuver and the coming one.
+        val from = (tracker.instructions.getOrNull(tracker.nextIndex - 1)?.pathIndex ?: 0).coerceIn(path.points.indices)
+        val to = (tracker.next?.pathIndex ?: path.points.lastIndex).coerceIn(from, path.points.lastIndex)
+        val here = (from..to).minBy { GuidanceInstructionTracker.meters(path.points[it], position) }
+        return (path.metersAt(target) - path.metersAt(here)).coerceAtLeast(0.0)
+    }
+
     fun repeatLastDirection() {
         coroutineScope.launch(guidanceThread) {
             val shown = tracker.shown ?: tracker.next ?: return@launch

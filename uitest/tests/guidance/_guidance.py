@@ -133,3 +133,64 @@ def assert_stored_matches(g):
     if g.session.route:
         assert meters(ll(g.stored.route[0]), ll(g.session.route[0])) < 1
         assert meters(ll(g.stored.route[-1]), ll(g.session.route[-1])) < 1
+
+
+# --- driving along the route (the probe's SetPosition, as GPS would) ----------------------
+
+class Route:
+    """The session's route with distances along it, for feeding positions."""
+
+    def __init__(self, guidance_state):
+        self.points = [ll(p) for p in guidance_state.session.route]
+        self.cum = [0.0]
+        for a, b in zip(self.points, self.points[1:]):
+            self.cum.append(self.cum[-1] + meters(a, b))
+        self.length = self.cum[-1]
+
+    def at(self, d):
+        """The point d meters along the route."""
+        d = max(0.0, min(d, self.length))
+        for i in range(1, len(self.points)):
+            if self.cum[i] >= d:
+                seg = self.cum[i] - self.cum[i - 1]
+                f = (d - self.cum[i - 1]) / seg if seg > 0 else 0.0
+                (lat1, lng1), (lat2, lng2) = self.points[i - 1], self.points[i]
+                return (lat1 + (lat2 - lat1) * f, lng1 + (lng2 - lng1) * f)
+        return self.points[-1]
+
+    def meters_at(self, instruction):
+        """How far along the route a maneuver is (its path index)."""
+        return self.cum[instruction.path_index]
+
+    def last_outside(self, instruction, margin=40.0):
+        """The furthest distance along the route before the maneuver that's still outside its
+        trigger radius (straight line), by margin."""
+        d = self.meters_at(instruction)
+        while d > 0 and meters(self.at(d), ll(instruction.location)) <= instruction.trigger_radius_meters + margin:
+            d -= 10.0
+        return d
+
+
+def drive(hmi, route, from_m, to_m, step_m=20.0):
+    """Feeds positions from from_m to to_m along the route; returns the last guidance state."""
+    g = None
+    d = from_m
+    while True:
+        g = hmi.set_position(*route.at(d))
+        if d >= to_m:
+            return g
+        d = min(d + step_m, to_m)
+
+
+def clear_notifications(hmi):
+    """Guidance's instruction notifications cover the screen's top: hide whatever shows."""
+    if hmi.state().notification.visible:
+        hmi.clear_notification()
+
+
+def panel_titles(hmi):
+    """The side panel's header texts: "Next  n/N" (a preview), "Guidance  n/N" or "Destination"."""
+    import re
+    # Drawn in capitals (the header style); matched ignoring case.
+    return [t.text for t in hmi.texts()
+            if re.fullmatch(r"(Next|Guidance)\s+\d+/\d+|Next: Destination|Destination", t.text, re.I)]

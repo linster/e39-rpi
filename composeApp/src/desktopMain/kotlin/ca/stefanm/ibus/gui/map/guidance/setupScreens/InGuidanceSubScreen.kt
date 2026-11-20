@@ -13,6 +13,10 @@ import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSetupScreenInstructionConsumer
+import ca.stefanm.ibus.gui.map.guidance.SideBarGuidanceInstructionConsumer
+import ca.stefanm.ibus.gui.menu.Notification
+import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
+import androidx.compose.runtime.DisposableEffect
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -40,7 +44,9 @@ import javax.inject.Inject
 class InGuidanceSubScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
     private val guidanceService : GuidanceService,
-    private val guidanceInstructionConsumer: GuidanceSetupScreenInstructionConsumer
+    private val guidanceInstructionConsumer: GuidanceSetupScreenInstructionConsumer,
+    private val sideBarGuidanceInstructionConsumer: SideBarGuidanceInstructionConsumer,
+    private val notificationHub: NotificationHub,
 ) : NavigationNode<GuidanceSetupScreen.SubScreenResult> {
     override val thisClass: Class<out NavigationNode<GuidanceSetupScreen.SubScreenResult>> = InGuidanceSubScreen::class.java
 
@@ -94,6 +100,10 @@ class InGuidanceSubScreen @Inject constructor(
 
             val instruction = guidanceInstructionConsumer.instructionFlow.collectAsState(null)
 
+            // A preview is only for this screen: leaving it gives the side panel back to guidance.
+            DisposableEffect(Unit) {
+                onDispose { sideBarGuidanceInstructionConsumer.showCurrent() }
+            }
 
             val scope = rememberCoroutineScope()
             HalfScreenMenu.BottomHalfTwoColumn(
@@ -121,7 +131,7 @@ class InGuidanceSubScreen @Inject constructor(
                     TextMenuItem(
                         title = "Preview next instruction",
                         onClicked = {
-                            TODO("get the next instruction from somewhere and show it here by calling the sidebar consumer directly.")
+                            scope.launch { previewNextInstruction() }
                         }
                     ),
                     TextMenuItem(
@@ -137,5 +147,17 @@ class InGuidanceSubScreen @Inject constructor(
 
     }
 
-
+    /** The coming maneuver in the side panel, titled "Next"; until guidance's next update replaces it. */
+    private suspend fun previewNextInstruction() {
+        val (next, meters) = guidanceService.nextInstruction() ?: run {
+            notificationHub.postNotificationBackground(Notification(
+                Notification.NotificationImage.MAP_GENERAL,
+                "No more instructions",
+                "The destination was the last one."
+            ))
+            return
+        }
+        val title = if (next.isDestination) "Next: Destination" else "Next  ${next.index + 1}/${next.count}"
+        sideBarGuidanceInstructionConsumer.show(next, meters, title)
+    }
 }
