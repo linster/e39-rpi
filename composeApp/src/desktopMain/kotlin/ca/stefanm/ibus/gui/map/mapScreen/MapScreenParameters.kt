@@ -24,6 +24,15 @@ data class MapScreenParameters(
             override val center : LatLng,
             val persistedState: MapScreen.BrowsingState? = null,
         ) : MapScreenOpenMode(center = center)
+
+        /* Select one point on a map */
         data class LocationSelection(override val center : LatLng) : MapScreenOpenMode(center = center)
+
+        /* Give the map a list of POIs to select from, with each POI optionally having information about it */
+        data class PoiBrowser(
+            val pois : List<PoiRepository.Poi>
+        ) {
+
+        }
     }
 }

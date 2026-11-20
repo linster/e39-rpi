@@ -5,6 +5,7 @@ import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.widget.MapScale
+import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,19 +36,24 @@ class GpsMapCenterProvider internal constructor(
     coroutineScope: CoroutineScope,
     initialCenter: LatLng,
     initialZoom: MapScale,
+    private val logger: Logger
 ) {
+
     @Inject constructor(
         guidanceService: GuidanceService,
         configurationStorage: ConfigurationStorage,
         coroutineScope: CoroutineScope,
+        logger: Logger
     ) : this(
         guidanceService.position,
         coroutineScope,
         configurationStorage.config[E39Config.MapConfig.defaultMapCenter].let { LatLng(it.first, it.second) },
         MapScale.KILOMETERS_1_6,
+        logger
     )
 
     companion object {
+        const val TAG = "GpsMapCenterProvider"
         /** MapViewer's size. */
         const val MAP_WIDTH_DP = 800.0
         const val MAP_HEIGHT_DP = 468.0
@@ -58,6 +64,7 @@ class GpsMapCenterProvider internal constructor(
         private const val TILE_DP = 256.0
 
         /** [point]'s offset from [center] on the map at [zoom], in dp: (right, down). */
+        //TODO this should be moved to one of the calculator classes. latlngtopixels??
         fun offsetDp(center: LatLng, point: LatLng, zoom: MapScale): Pair<Double, Double> {
             val worldDp = TILE_DP * 2.0.pow(zoom.mapZoomLevel)
             fun x(p: LatLng) = (p.longitude + 180.0) / 360.0 * worldDp
@@ -113,6 +120,7 @@ class GpsMapCenterProvider internal constructor(
      * change) without a GPS position yet. Not [follow]: stop following.
      */
     fun followGps(follow: Boolean): Boolean = synchronized(lock) {
+        logger.d(TAG, "Setting followGps($follow")
         if (!follow) {
             _followGps.value = false
             return@synchronized true
