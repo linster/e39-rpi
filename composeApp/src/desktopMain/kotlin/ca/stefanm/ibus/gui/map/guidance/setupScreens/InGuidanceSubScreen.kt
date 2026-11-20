@@ -1,8 +1,11 @@
 package ca.stefanm.ibus.gui.map.guidance.setupScreens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -16,6 +19,9 @@ import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @ScreenDoc(
@@ -67,12 +73,29 @@ class InGuidanceSubScreen @Inject constructor(
         //TODO have a button here to temrinate guidance
         //TODO also put one in the guidance menu on the map.
 
-        Column {
-            BmwSingleLineHeader("InGuidance")
+        //TODO STEFAN 11-18-2026, need to finish this so that guidance works.
+        // I also want to have an option to see the map with the route.
+
+        // I want to see
+        // the current instruction,
+        // preview the next/prev instructions
+
+
+        // Options to:
+        // Center map on current GPS point
+        // Terminate Guidance
+        //
+        Column(
+            Modifier.background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+        ) {
+
+            BmwSingleLineHeader("In Guidance")
 
 
             val instruction = guidanceInstructionConsumer.instructionFlow.collectAsState(null)
 
+
+            val scope = rememberCoroutineScope()
             HalfScreenMenu.BottomHalfTwoColumn(
                 leftItems = listOf(
                     TextMenuItem(
@@ -83,11 +106,33 @@ class InGuidanceSubScreen @Inject constructor(
                                 GuidanceSetupScreen.SubScreenResult.GO_BACK
                             )
                         }
-                    )
+                    ),
+                    TextMenuItem(
+                        title = "Repeat current instruction",
+                        onClicked = {
+                            scope.launch {
+                                guidanceInstructionConsumer.current.value?.let { (instruction, distance) ->
+                                    guidanceInstructionConsumer.notifyInstruction(instruction, distance)
+                                }
+                            }
+
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "Preview next instruction",
+                        onClicked = {
+                            TODO("get the next instruction from somewhere and show it here by calling the sidebar consumer directly.")
+                        }
+                    ),
+                    TextMenuItem(
+                        title = "Center map on current location",
+                        onClicked = {
+                            TODO()
+                        }
+                    ),
                 ),
                 rightItems = listOf()
             )
-
         }
 
     }

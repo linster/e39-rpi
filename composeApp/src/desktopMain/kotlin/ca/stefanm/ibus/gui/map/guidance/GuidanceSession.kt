@@ -51,6 +51,7 @@ class GuidanceSession {
                 sessionState = SessionState.ROUTE_CALCULATED
             } else {
                 if (route != null) {
+                    //TODO claude did a shitty job of this.
                     StdOutLogger().d("GuidanceSession", "Incorrect state ${sessionState} for setting route $route.")
                 }
             }

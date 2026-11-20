@@ -244,7 +244,7 @@ class MapScreen @Inject constructor(
                 PoiOverlay.PoiOverlayItem(
                     label = "GPS Location",
                     position = latLng,
-                    icon = { PoiOverlay.PoiOverlayItem.CIRCLE_COLOR.invoke(Color.Green) }
+                    icon = { PoiOverlay.PoiOverlayItem.CIRCLE_COLOR.invoke(Color.Cyan) }
                 )
             } else { null }
         }.collectAsState(null)
