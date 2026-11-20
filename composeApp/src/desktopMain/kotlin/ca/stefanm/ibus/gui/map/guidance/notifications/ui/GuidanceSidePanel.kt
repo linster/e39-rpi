@@ -50,11 +50,11 @@ object GuidanceSidePanel {
         if (instruction.isDestination) "Destination" else "Guidance  ${instruction.index + 1}/${instruction.count}"
 
     @Composable
-    fun Panel(instruction: GuidanceInstruction, distanceMeters: Double) {
+    fun Panel(instruction: GuidanceInstruction, distanceMeters: Double, title: String = headerLabel(instruction)) {
         val theme = ThemeWrapper.ThemeHandle.current
         fun size(doubled: Int): TextUnit = if (theme.isPixelDoubled) doubled.sp else (doubled / 2).sp
 
-        SidePanelMenu.SidePanelMenu(title = headerLabel(instruction)) {
+        SidePanelMenu.SidePanelMenu(title = title) {
             Column(
                 Modifier.fillMaxSize().padding(10.dp.halveIfNotPixelDoubled()),
                 horizontalAlignment = Alignment.CenterHorizontally,

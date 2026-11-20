@@ -53,6 +53,12 @@ CONFIG = """e39Config {{
             port=0
         }}
     }}
+    mapConfig {{
+        backend {{
+            host="{maps_host}"
+            port={maps_port}
+        }}
+    }}
 }}
 """
 
@@ -105,7 +111,7 @@ class LocalTarget:
     the runner writes to."""
 
     def __init__(self, out_dir, jar=None, fake_mail=True, bridge="localhost:50052", ibus=False,
-                 show=False, startup_timeout_s=120):
+                 show=False, startup_timeout_s=120, maps_backend="localhost:50051"):
         self.out_dir = out_dir
         self.jar = jar or default_jar()
         if not self.jar or not os.path.exists(self.jar):
@@ -114,6 +120,7 @@ class LocalTarget:
                                "or pass --jar")
         self.fake_mail = fake_mail
         self.bridge = bridge
+        self.maps_backend = maps_backend
         self.want_ibus = ibus
         self.show = show
         self.startup_timeout_s = startup_timeout_s
@@ -142,9 +149,11 @@ class LocalTarget:
             groups.append("SerialInterface")
 
         host, _, port = self.bridge.partition(":")
+        maps_host, _, maps_port = self.maps_backend.partition(":")
         with open(os.path.join(config_dir, "config.conf"), "w") as f:
             f.write(CONFIG.format(ibus_uri=ibus_uri, service_groups=", ".join(groups), bridge_host=host,
-                                  bridge_port=int(port or 50052), fake_mail="true" if self.fake_mail else "false"))
+                                  bridge_port=int(port or 50052), fake_mail="true" if self.fake_mail else "false",
+                                  maps_host=maps_host, maps_port=int(maps_port or 50051)))
         with open(os.path.join(config_dir, "theme.conf"), "w") as f:
             f.write(THEME)
 

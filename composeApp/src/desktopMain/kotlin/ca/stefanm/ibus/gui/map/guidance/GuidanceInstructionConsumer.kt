@@ -1,6 +1,6 @@
 package ca.stefanm.ibus.gui.map.guidance
 
-import androidx.compose.runtime.collectAsState
+import ca.stefanm.ibus.car.desktop.input.griffinPowermate.NavigatorMapScreenListener
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.configuration.E39Config.GuidanceConfig.SidePanelInstructionEnablementState
@@ -40,12 +40,15 @@ interface GuidanceInstructionConsumer {
 class NotificationGuidanceInstructionConsumer @Inject constructor(
     private val notificationHub: NotificationHub,
     private val configurationStorage: ConfigurationStorage,
+    private val navigatorMapScreenListener : NavigatorMapScreenListener,
 ) : GuidanceInstructionConsumer {
 
     private var posted: Notification? = null
 
     private val enabled: Boolean
-        get() = configurationStorage.config[E39Config.GuidanceConfig.notificationInstructionConsumerIsEnabled]
+        get() =
+            configurationStorage.config[E39Config.GuidanceConfig.notificationInstructionConsumerIsEnabled] &&
+                    !navigatorMapScreenListener.isOnMapScreen() && (configurationStorage.config[E39Config.GuidanceConfig.sidePanelScreenInstructionConsumerIsEnabled] != SidePanelInstructionEnablementState.NEVER)
 
     override suspend fun notifyInstruction(instruction: GuidanceInstruction, distanceMeters: Double) {
         if (!enabled) return
@@ -124,18 +127,38 @@ class SideBarGuidanceInstructionConsumer @Inject constructor(
         modalMenuService.closeSidePaneOverlayIfTagged(PANE_TAG)
     }
 
+    /**
+     * Shows [instruction] in the side panel, whatever the setting (the user
+     * asked for it, e.g. InGuidanceSubScreen's preview), titled [title]
+     * (default: the usual "Guidance 3/12"). It stays until guidance's next
+     * update, which shows the coming instruction again (or closes the
+     * panel), or [showCurrent]. Not over a side pane the user opened.
+     */
+    fun show(instruction: GuidanceInstruction, distanceMeters: Double, title: String? = null) {
+        modalMenuService.showPassiveSidePaneOverlay(PANE_TAG) {
+            GuidanceSidePanel.Panel(instruction, distanceMeters, title ?: GuidanceSidePanel.headerLabel(instruction))
+        }
+    }
+
+    /**
+     * Back to what guidance shows: the coming instruction if there is one
+     * and the setting allows it here, else the panel closes (only ours).
+     */
+    fun showCurrent() = showOrHide()
+
+    // Draws the current instruction every time, over whatever the panel
+    // showed (e.g. a show()): the panel holds no state of its own.
     private fun showOrHide() {
-        if (current.value == null || !allowed()) {
+        val (instruction, meters) = current.value ?: run {
             modalMenuService.closeSidePaneOverlayIfTagged(PANE_TAG)
             return
         }
-        if (modalMenuService.isSidePaneOverlayTagged(PANE_TAG)) {
-            return   // shown; it follows `current`
+        if (!allowed()) {
+            modalMenuService.closeSidePaneOverlayIfTagged(PANE_TAG)
+            return
         }
         modalMenuService.showPassiveSidePaneOverlay(PANE_TAG) {
-            current.collectAsState().value?.let { (instruction, meters) ->
-                GuidanceSidePanel.Panel(instruction, meters)
-            }
+            GuidanceSidePanel.Panel(instruction, meters)
         }
     }
 }

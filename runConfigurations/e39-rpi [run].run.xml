@@ -1,6 +1,13 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="e39-rpi [run]" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
+      <option name="env">
+        <map>
+          <!-- IntelliJ started from the desktop inherits JOURNAL_STREAM from
+               systemd, which would send the logs to the journal (Journald.kt). -->
+          <entry key="E39_LOG_TARGET" value="stdout" />
+        </map>
+      </option>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />

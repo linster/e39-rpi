@@ -25,7 +25,7 @@ import javax.inject.Inject
 @ApplicationScope
 class GuidanceService @Inject constructor(
     private val guidanceSessionStorage: GuidanceSessionStorage,
-    private val routeCalculator: RouteCalculator,
+    private val routeRepository: RemoteRouteRepository,
     private val notificationHub: NotificationHub,
     private val notificationGuidanceInstructionConsumer: NotificationGuidanceInstructionConsumer,
     private val sideBarGuidanceInstructionConsumer: SideBarGuidanceInstructionConsumer,
@@ -53,6 +53,12 @@ class GuidanceService @Inject constructor(
     fun clearCurrentSession() {
         guidanceSessionStorage.currentSession = GuidanceSession()
         guidanceSessionStorage.updateWithCurrent()
+        coroutineScope.launch(guidanceThread) {
+            _instructions.value = emptyList()
+            tracker = GuidanceInstructionTracker(emptyList())
+            publishTrackerState()
+            _routeCalculation.value = RouteCalculation.Idle
+        }
     }
 
     fun setStartPoint(start : LatLng) {
@@ -64,9 +70,35 @@ class GuidanceService @Inject constructor(
         guidanceSessionStorage.updateWithCurrent()
     }
 
+    /** Where the last [calculateRoute] got to. */
+    sealed interface RouteCalculation {
+        data object Idle : RouteCalculation
+        data object Calculating : RouteCalculation
+        data class Calculated(val route: RemoteRouteRepository.ComputedRoute) : RouteCalculation
+        data class Failed(val message: String) : RouteCalculation
+    }
+
+    val routeCalculation: StateFlow<RouteCalculation> get() = _routeCalculation.asStateFlow()
+    private val _routeCalculation = MutableStateFlow<RouteCalculation>(RouteCalculation.Idle)
+
     private val routeCalculatorDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
+    /**
+     * Compute the route between the session's start and end points with the
+     * maps backend (RouteService, Valhalla) and make it the session's route,
+     * with its instructions. The session must be READY_TO_CALCULATE.
+     */
     fun calculateRoute() {
         coroutineScope.launch(routeCalculatorDispatcher) {
+            val session = guidanceSessionStorage.currentSession
+            val start = session.startPoint
+            val end = session.endPoint
+            if (session.sessionState != GuidanceSession.SessionState.READY_TO_CALCULATE || start == null || end == null) {
+                logger.w(TAG, "Not calculating a route: session is ${session.sessionState}")
+                return@launch
+            }
+
+            _routeCalculation.value = RouteCalculation.Calculating
             notificationHub.postNotification(
                 Notification(
                     Notification.NotificationImage.MAP_GENERAL,
@@ -75,16 +107,34 @@ class GuidanceService @Inject constructor(
                 )
             )
 
-            guidanceSessionStorage.currentSession = routeCalculator
-                .calculateRoute(guidanceSessionStorage.currentSession)
-
-            guidanceSessionStorage.updateWithCurrent()
-
-            notificationHub.postNotification(Notification(
-                Notification.NotificationImage.MAP_GENERAL,
-                "Calculated Route",
-                "Start Navigation and have a safe trip."
-            ))
+            routeRepository.computeRoute(start, end).fold(
+                onSuccess = { route ->
+                    // The session was cleared or replaced while the backend worked.
+                    if (guidanceSessionStorage.currentSession !== session ||
+                        session.sessionState != GuidanceSession.SessionState.READY_TO_CALCULATE) {
+                        logger.d(TAG, "Dropping the calculated route: the session changed meanwhile.")
+                        _routeCalculation.value = RouteCalculation.Idle
+                        return@fold
+                    }
+                    withContext(guidanceThread) { loadRoute(start, end, route) }
+                    _routeCalculation.value = RouteCalculation.Calculated(route)
+                    notificationHub.postNotification(Notification(
+                        Notification.NotificationImage.MAP_GENERAL,
+                        "Calculated Route",
+                        "%.0f km, %d min. Start Navigation.".format(
+                            route.lengthMeters / 1000, (route.durationSeconds / 60).toInt())
+                    ))
+                },
+                onFailure = { error ->
+                    logger.e(TAG, "Route calculation failed", error)
+                    _routeCalculation.value = RouteCalculation.Failed(error.message ?: error.toString())
+                    notificationHub.postNotification(Notification(
+                        Notification.NotificationImage.ALERT_CIRCLE,
+                        "Route Failed",
+                        error.message ?: "Maps backend unavailable."
+                    ))
+                },
+            )
         }
     }
 
@@ -130,6 +180,36 @@ class GuidanceService @Inject constructor(
         ))
     }
 
+    /**
+     * The coming instruction (the next maneuver, shown or not) and its
+     * distance along the route from the car (from the route's start without
+     * a position); null outside guidance and past the last instruction.
+     */
+    suspend fun nextInstruction(): Pair<GuidanceInstruction, Double>? = withContext(guidanceThread) {
+        if (guidanceSessionStorage.currentSession.sessionState != GuidanceSession.SessionState.IN_GUIDANCE) {
+            return@withContext null
+        }
+        val instruction = tracker.next ?: return@withContext null
+        instruction to metersAlongRoute(instruction)
+    }
+
+    /** On [guidanceThread]: how far along the session's route [instruction] is from the car. */
+    private fun metersAlongRoute(instruction: GuidanceInstruction): Double {
+        val position = _position.value
+        val points = guidanceSessionStorage.currentSession.route
+        val target = instruction.pathIndex
+        if (points == null || points.size < 2 || target == null) {
+            return position?.let { GuidanceInstructionTracker.meters(it, instruction.location) } ?: 0.0
+        }
+        val path = RoutePath(points)
+        if (position == null) return path.metersAt(target)
+        // The car is on the stretch between the last passed maneuver and the coming one.
+        val from = (tracker.instructions.getOrNull(tracker.nextIndex - 1)?.pathIndex ?: 0).coerceIn(path.points.indices)
+        val to = (tracker.next?.pathIndex ?: path.points.lastIndex).coerceIn(from, path.points.lastIndex)
+        val here = (from..to).minBy { GuidanceInstructionTracker.meters(path.points[it], position) }
+        return (path.metersAt(target) - path.metersAt(here)).coerceAtLeast(0.0)
+    }
+
     fun repeatLastDirection() {
         coroutineScope.launch(guidanceThread) {
             val shown = tracker.shown ?: tracker.next ?: return@launch
@@ -167,28 +247,23 @@ class GuidanceService @Inject constructor(
             guidanceSetupScreenInstructionConsumer,
         )
 
-    /**
-     * Guide along [route] (computed from [start] to [end] by the maps
-     * backend): a new session with its path and instructions. Start it with
-     * [startGuidance].
-     */
-    fun useRoute(start: LatLng, end: LatLng, route: RemoteRouteRepository.ComputedRoute) {
-        coroutineScope.launch(guidanceThread) {
-            if (guidanceSessionStorage.currentSession.sessionState == GuidanceSession.SessionState.IN_GUIDANCE) {
-                consumers.forEach { it.guidanceEnded() }
-            }
-            guidanceSessionStorage.currentSession = GuidanceSession().apply {
-                startPoint = start
-                endPoint = end
-                this.route = route.path
-            }
-            _instructions.value = GuidanceInstruction.fromRoute(route.maneuvers)
-            tracker = GuidanceInstructionTracker(_instructions.value)
-            publishTrackerState()
-            log("Route: ${_instructions.value.size} instructions, ${(route.lengthMeters / 1000).toInt()} km")
+    /** On [guidanceThread]: a new session with [route]'s path, its instructions and a fresh tracker. */
+    private suspend fun loadRoute(start: LatLng, end: LatLng, route: RemoteRouteRepository.ComputedRoute) {
+        if (guidanceSessionStorage.currentSession.sessionState == GuidanceSession.SessionState.IN_GUIDANCE) {
+            consumers.forEach { it.guidanceEnded() }
         }
+        guidanceSessionStorage.currentSession = GuidanceSession().apply {
+            startPoint = start
+            endPoint = end
+            this.route = route.path
+        }
+        _instructions.value = GuidanceInstruction.fromRoute(route.maneuvers)
+        tracker = GuidanceInstructionTracker(_instructions.value)
+        publishTrackerState()
+        log("Route: ${_instructions.value.size} instructions, ${(route.lengthMeters / 1000).toInt()} km")
     }
 
+    //TODO this needs to be fed from gpsd.
     /** The car is at [position]: show, update or hide instructions (in guidance only). */
     fun updatePosition(position: LatLng) {
         coroutineScope.launch(guidanceThread) {

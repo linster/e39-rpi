@@ -8,6 +8,7 @@ out/<run>/<test>/.
 import datetime
 import os
 import re
+import socket
 
 import pytest
 
@@ -32,6 +33,8 @@ def pytest_addoption(parser):
     g.addoption("--bridge-maildir", default=None,
                 help="--mail bridge: the bridge's Local Folders maildir on this machine (e.g. "
                      "~/.local/share/e39pim-dev/share/local-mail), for tests that deliver mail into it")
+    g.addoption("--maps-backend", default="localhost:50051",
+                help="local target: the maps backend's gRPC API (e39-rpi-maps run_grpc_server), for routes and POIs")
     g.addoption("--jar", default=None, help="local target: the HMI uber jar (default: the newest in composeApp/build/compose/jars)")
     g.addoption("--show", action="store_true", help="local target: on this display instead of a hidden one")
     g.addoption("--qemu-state", default=None, help="qemu target: run-qemu.sh's state file (default: the only one)")
@@ -47,6 +50,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "bridge_mail: needs the PIM bridge's mail (skipped otherwise)")
     config.addinivalue_line("markers", "fake_contacts: needs sample contacts (skipped otherwise)")
     config.addinivalue_line("markers", "fake_accounts: needs sample accounts (skipped otherwise)")
+    config.addinivalue_line("markers", "maps_backend: needs the maps backend (local target: --maps-backend reachable)")
 
 
 @pytest.fixture(scope="session")
@@ -75,7 +79,7 @@ def target(pytestconfig, out_dir):
     kind = opt("--target")
     if kind == "local":
         t = LocalTarget(out_dir, jar=opt("--jar"), fake_mail=opt("--mail") == "fake", bridge=opt("--bridge"),
-                        ibus=opt("--input") == "ibus", show=opt("--show"))
+                        ibus=opt("--input") == "ibus", show=opt("--show"), maps_backend=opt("--maps-backend"))
     elif kind == "qemu":
         state = qemu_state(opt("--qemu-state"))
         t = RemoteTarget(out_dir, "localhost", ssh_port=opt("--ssh-port") or 2222, probe_port=opt("--probe-port"),
@@ -126,6 +130,12 @@ def hmi(request, hmi_session, out_dir):
         pytest.skip("needs sample contacts (useFakeData)")
     if request.node.get_closest_marker("fake_accounts") and not state.fake_accounts:
         pytest.skip("needs sample accounts (useFakeData)")
+    if request.node.get_closest_marker("maps_backend") and request.config.getoption("--target") == "local":
+        host, _, port = request.config.getoption("--maps-backend").partition(":")
+        try:
+            socket.create_connection((host, int(port or 50051)), timeout=2).close()
+        except OSError as e:
+            pytest.skip(f"needs the maps backend at {host}:{port} ({e}): e39-rpi-maps scripts/run-backend.sh")
     h.close_overlays()
     h.go_root()
     h.reset_mail_app()

@@ -51,10 +51,14 @@ data class OverlayProperties(
 )
 
 //Defines how much of the world we can see
-data class Extents(
-    val center : LatLng,
-    val mapScale: MapScale
-)
+@Stable
+class Extents(
+    center : LatLng,
+    mapScale: MapScale
+) {
+    var centerState : LatLng by mutableStateOf(center)
+    var mapScaleState : MapScale by mutableStateOf(mapScale)
+}
 
 //This is the driving route we want to draw on the map.
 data class Route(
@@ -97,6 +101,9 @@ data class PoiOverlay(
         val icon : @Composable () -> Unit = @Composable {}
     ) {
         companion object Icons {
+
+            //TODO selectable POI overlay item with a hint string box
+
             val ICON_BLUE_CIRCLE = @Composable {
                 Canvas(Modifier.size(16.dp)){
                     drawCircle(
@@ -176,10 +183,10 @@ fun MapViewer(
             // viewport widths each way, square: 81 tiles for a 400x234 map,
             // 361 at 800x468, where about 2x1 / 4x2 are on the screen.) Panning
             // moves the centre and rebuilds the grid around it.
-            val zoom = extents.mapScale.mapZoomLevel
+            val zoom = extents.mapScaleState.mapZoomLevel
             val centerContainingTile = ExtentCalculator.getTileNumber(
-                extents.center.latitude,
-                extents.center.longitude,
+                extents.centerState.latitude,
+                extents.centerState.longitude,
                 zoom
             )
             val tilesEachSideX = ceil(viewportWidth.value / 2 / 256).toInt() + 1
@@ -210,9 +217,9 @@ fun MapViewer(
                 // pixel on the grid, minus half the viewport. (Was a fraction
                 // of the scroll range, exact only for a point in the middle
                 // of a large grid.)
-                LaunchedEffect(extents.center, extents.mapScale, viewportWidthPx, viewportHeightPx) {
+                LaunchedEffect(extents.centerState, extents.mapScaleState, viewportWidthPx, viewportHeightPx) {
                     withFrameNanos { }   // the grid is laid out: the scroll range is known
-                    val center = latLngToPixels(extents.center, extents, startX, endX, startY, endY, zoom, scaling)
+                    val center = latLngToPixels(extents.centerState, extents, startX, endX, startY, endY, zoom, scaling)
                     stateVertical.scrollTo((center.fromTop - viewportHeightPx / 2).roundToInt())
                     stateHorizontal.scrollTo((center.fromLeft - viewportWidthPx / 2).roundToInt())
                 }
@@ -255,8 +262,8 @@ fun MapViewer(
                 .padding(start = 16.dp, bottom = 16.dp)
             ) {
                 MapScaleWidget(
-                    extents.mapScale,
-                    extents.center,
+                    extents.mapScaleState,
+                    extents.centerState,
                     isSelected = false
                 )
             }
