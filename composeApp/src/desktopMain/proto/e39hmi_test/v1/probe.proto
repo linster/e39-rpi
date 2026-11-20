@@ -50,6 +50,12 @@ service HmiTestProbe {
   // accounts, the sample accounts again.
   rpc ResetAccounts(ResetAccountsRequest) returns (ResetAccountsResponse);
 
+  // Guidance with no route: stops guidance if it runs, then clears the
+  // session (GuidanceService.clearCurrentSession(), as "Clear Route").
+  rpc ResetGuidance(ResetGuidanceRequest) returns (ResetGuidanceResponse);
+  // The guidance session and the last route calculation (GuidanceService).
+  rpc GetGuidance(GetGuidanceRequest) returns (GuidanceState);
+
   // Sample mail (E39Config.PimConfig.Mail.useFakeData) only;
   // FAILED_PRECONDITION with the bridge's mail.
   // Back to the sample data.
@@ -234,6 +240,46 @@ message ResetContactsAppResponse {}
 
 message ResetAccountsRequest {}
 message ResetAccountsResponse {}
+
+message ResetGuidanceRequest {}
+message ResetGuidanceResponse {}
+
+message GetGuidanceRequest {}
+
+message GeoPoint {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+// A guidance session (GuidanceSession).
+message GuidanceSessionInfo {
+  // GuidanceSession.SessionState: SETTING_UP, READY_TO_CALCULATE,
+  // ROUTE_CALCULATED, IN_GUIDANCE, TERMINATED.
+  string state = 1;
+  // Unset: no point chosen.
+  GeoPoint start = 2;
+  GeoPoint end = 3;
+  bool has_route = 4;
+  repeated GeoPoint route = 5;
+}
+
+message GuidanceState {
+  // The session in memory (GuidanceSessionStorage.currentSession).
+  GuidanceSessionInfo session = 1;
+  // The session as saved in the configuration and read back: what the
+  // storage's flow gives the screens after each save (the map's route),
+  // and what the HMI loads at start.
+  GuidanceSessionInfo stored = 2;
+  // GuidanceService.RouteCalculation: Idle, Calculating, Calculated, Failed.
+  string route_calculation = 3;
+  // Failed: the error.
+  string route_calculation_error = 4;
+  // Calculated: the backend's route.
+  double route_length_meters = 5;
+  double route_duration_seconds = 6;
+  // GuidanceService.instructions.
+  int32 instructions = 7;
+}
 
 message ResetFakeMailRequest {}
 message ResetFakeMailResponse {}
