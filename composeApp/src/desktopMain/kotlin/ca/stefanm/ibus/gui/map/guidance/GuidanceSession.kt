@@ -74,8 +74,12 @@ class GuidanceSession {
     constructor(session: PersistedGuidanceSession) {
         startPoint = if (session.startIsNull) null else session.start?.let { LatLng(it.first, it.second) }
         endPoint = if (session.endIsNull) null else session.end?.let { LatLng(it.first, it.second) }
+        // The route setter only takes a route in READY_TO_CALCULATE (both
+        // points set, as above), so the saved state is restored after it.
+        if (!session.routeIsNull) {
+            route = session.route?.map { LatLng(it.first, it.second) } ?: listOf()
+        }
         sessionState = SessionState.valueOf(session.sessionState)
-        route = if (session.routeIsNull) null else (session.route?.map { LatLng(it.first, it.second) } ?: listOf())
     }
 
     companion object {
