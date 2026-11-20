@@ -51,6 +51,9 @@ kotlin {
                 // Keep this on the version the app resolves.
                 implementation("org.jetbrains.compose.ui:ui-test:1.10.3")
                 implementation(compose.desktop.currentOs)
+                // runTest, TestScope, virtual time. Tests only: in the app's
+                // runtime it would replace Dispatchers.Main (see composemediaplayer below).
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
 
