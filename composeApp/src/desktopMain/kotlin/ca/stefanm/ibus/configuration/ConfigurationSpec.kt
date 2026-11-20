@@ -286,6 +286,13 @@ object E39Config : ConfigSpec() {
             "default LatLng to open all maps at. Default is in Kanata, ON, Canada."
         )
 
+        val followGpsByDefault by optional(
+            false,
+            "followGpsByDefault",
+            "Should the map follow the GPS when the HMI starts? A pan stops following; " +
+                    "\"Re-center map on current location\" starts it again."
+        )
+
         /** Where the map's raster tiles come from. */
         enum class TileSource {
             /** tile.openstreetmap.org, directly. */

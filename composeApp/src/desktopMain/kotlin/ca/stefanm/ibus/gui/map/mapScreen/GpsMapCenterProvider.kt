@@ -36,6 +36,7 @@ class GpsMapCenterProvider internal constructor(
     coroutineScope: CoroutineScope,
     initialCenter: LatLng,
     initialZoom: MapScale,
+    initialFollow: Boolean,
     private val logger: Logger
 ) {
 
@@ -49,6 +50,7 @@ class GpsMapCenterProvider internal constructor(
         coroutineScope,
         configurationStorage.config[E39Config.MapConfig.defaultMapCenter].let { LatLng(it.first, it.second) },
         MapScale.KILOMETERS_1_6,
+        configurationStorage.config[E39Config.MapConfig.followGpsByDefault],
         logger
     )
 
@@ -86,11 +88,13 @@ class GpsMapCenterProvider internal constructor(
     /** Where the map should be centred. */
     val center: StateFlow<LatLng> = _center.asStateFlow()
 
-    private val _followGps = MutableStateFlow(false)
+    private val _followGps = MutableStateFlow(initialFollow)
     /** Whether [center] follows the GPS. */
     val followGps: StateFlow<Boolean> = _followGps.asStateFlow()
 
     private var zoom: MapScale = initialZoom
+    /** Following without having centred on a fix yet (from [initialFollow]): the first fix centres the map. */
+    private var awaitingFix = initialFollow
     private val lock = Any()
 
     init {
@@ -128,11 +132,18 @@ class GpsMapCenterProvider internal constructor(
         val position = gpsPositions.value ?: return@synchronized false
         _center.value = position
         _followGps.value = true
+        awaitingFix = false
         true
     }
 
     private fun onGpsPosition(position: LatLng) = synchronized(lock) {
-        if (_followGps.value) recentreIfNearEdge(position)
+        if (!_followGps.value) return@synchronized
+        if (awaitingFix) {
+            awaitingFix = false
+            _center.value = position
+        } else {
+            recentreIfNearEdge(position)
+        }
     }
 
     private fun recentreIfNearEdge(position: LatLng) {

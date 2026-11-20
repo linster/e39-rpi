@@ -4,6 +4,7 @@ import ca.stefanm.ibus.gui.map.mapScreen.GpsMapCenterProvider.Companion.EDGE_MAR
 import ca.stefanm.ibus.gui.map.mapScreen.GpsMapCenterProvider.Companion.MAP_HEIGHT_DP
 import ca.stefanm.ibus.gui.map.mapScreen.GpsMapCenterProvider.Companion.MAP_WIDTH_DP
 import ca.stefanm.ibus.gui.map.widget.MapScale
+import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -32,7 +33,17 @@ class GpsMapCenterProviderTest {
     private val nearX = halfW - EDGE_MARGIN_DP + 5
     private val nearY = halfH - EDGE_MARGIN_DP + 5
 
-    private fun TestScope.provider() = GpsMapCenterProvider(gps, backgroundScope, start, zoom).also { runCurrent() }
+    private val logger = object : Logger {
+        override fun v(tag: String, msg: String) {}
+        override fun d(tag: String, msg: String) {}
+        override fun i(tag: String, msg: String) {}
+        override fun w(tag: String, msg: String) {}
+        override fun e(tag: String, msg: String) {}
+        override fun e(tag: String, msg: String, e: Throwable?) {}
+    }
+
+    private fun TestScope.provider(follow: Boolean = false) =
+        GpsMapCenterProvider(gps, backgroundScope, start, zoom, follow, logger).also { runCurrent() }
 
     /** The point [dx] dp right and [dy] dp down of [from] on the map at [scale] (inverse Web Mercator). */
     private fun at(from: LatLng, dx: Double, dy: Double, scale: MapScale = zoom): LatLng {
@@ -76,6 +87,31 @@ class GpsMapCenterProviderTest {
         assertFalse(p.followGps.value)
         drive(at(start, 2000.0, 0.0))
         assertSame(start, p.center.value)
+    }
+
+    @Test
+    fun followingByDefaultCentresOnTheFirstFix() = runTest {
+        val p = provider(follow = true)
+        assertTrue(p.followGps.value)
+        assertSame(start, p.center.value)
+        // Inside the margin, but the map was never on the car: centre on it.
+        val car = at(start, 50.0, 30.0)
+        drive(car)
+        assertTrue(p.followGps.value)
+        assertSame(car, p.center.value)
+        // Then as usual: small moves stay.
+        drive(at(car, 50.0, 20.0))
+        assertSame(car, p.center.value)
+    }
+
+    @Test
+    fun followingByDefaultAPanBeforeTheFirstFixStopsIt() = runTest {
+        val p = provider(follow = true)
+        val panned = at(start, 0.0, -256.0)
+        p.onUserMapCenterChanged(panned, zoom)
+        assertFalse(p.followGps.value)
+        drive(at(start, 50.0, 30.0))
+        assertSame(panned, p.center.value)
     }
 
     @Test
