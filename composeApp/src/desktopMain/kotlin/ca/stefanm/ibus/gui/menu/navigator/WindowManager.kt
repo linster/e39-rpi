@@ -173,7 +173,7 @@ class WindowManager @Inject constructor(
                     hmiWindow.content()()
                     // TODO don't do this once the board is fixed and we don't need tint.
                     val isOnMapScreen by navigatorMapScreenListener.isOnMapScreenFlow().collectAsState(false)
-                    val calculatedTint = if (!isOnMapScreen) {
+                    val calculatedTint = if (tint < 0.1F) tint else if (!isOnMapScreen) {
                         tint
                     } else {
                         (tint + 0.3F).coerceIn(0.5F, 0.95F)
