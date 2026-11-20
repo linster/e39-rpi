@@ -51,10 +51,14 @@ data class OverlayProperties(
 )
 
 //Defines how much of the world we can see
-data class Extents(
-    val center : LatLng,
-    val mapScale: MapScale
-)
+@Stable
+class Extents(
+    center : LatLng,
+    mapScale: MapScale
+) {
+    var centerState : LatLng by mutableStateOf(center)
+    var mapScaleState : MapScale by mutableStateOf(mapScale)
+}
 
 //This is the driving route we want to draw on the map.
 data class Route(
@@ -97,6 +101,9 @@ data class PoiOverlay(
         val icon : @Composable () -> Unit = @Composable {}
     ) {
         companion object Icons {
+
+            //TODO selectable POI overlay item with a hint string box
+
             val ICON_BLUE_CIRCLE = @Composable {
                 Canvas(Modifier.size(16.dp)){
                     drawCircle(

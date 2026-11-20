@@ -58,6 +58,7 @@ class MapScreen @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val poiRepository: PoiRepository,
     private val guidanceService: GuidanceService,
+    private val gpsMapCenterProvider: GpsMapCenterProvider
 ) : NavigationNode<MapScreenResult> {
 
     companion object : MapScreenOpener {
@@ -85,16 +86,26 @@ class MapScreen @Inject constructor(
             )
         ).also { parameters -> logger.d(TAG, "Map Screen Parameters: $parameters") }
 
+        val shouldFollowGps by gpsMapCenterProvider.followGps.collectAsState(false)
 
 
-        val extents = remember { mutableStateOf(
+        var extents = remember {
             Extents(
-            center = parameters.openMode.center,
-            mapScale = MapScale.KILOMETERS_1_6
-        )
-        ) }
+                center = parameters.openMode.center,
+                mapScale = MapScale.KILOMETERS_1_6
+            )
+        }
 
-        val currentCenter = remember { mutableStateOf(extents.value.center) }
+        if (parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection) {
+            LaunchedEffect(shouldFollowGps) {
+                if (shouldFollowGps) {
+                    gpsMapCenterProvider.center.collect { gpsCenter ->
+                        extents.centerState = gpsCenter
+                    }
+                }
+            }
+        }
+
         val currentOverlayState = remember { mutableStateOf<MapOverlayState>(MapOverlayState.NoOverlay) }
 
 
@@ -141,10 +152,11 @@ class MapScreen @Inject constructor(
                             +1
                         }.let { change ->
                             val scales = MapScale.values().toList().sortedBy { it.meters }.circular()
-                            val currentIndex = scales.indexOf(extents.value.mapScale) ?: 0
+                            val currentIndex = scales.indexOf(extents.mapScaleState) ?: 0
                             scales[currentIndex + change]
                         }.let { newZoom ->
-                            extents.value = extents.value.copy(mapScale = newZoom)
+                            extents.mapScaleState = newZoom
+                            //gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
                         }
                     }
                 }
@@ -157,11 +169,11 @@ class MapScreen @Inject constructor(
                             LatLngTool.Bearing.EAST
                         }
 
-                        extents.value = extents.value.copy(
-                            center = ExtentCalculator.newMapCenterOnPan(
-                                oldMapCenter = extents.value.center,
-                                currentZoom = extents.value.mapScale,
-                            bearing = direction))
+                        extents.centerState = ExtentCalculator.newMapCenterOnPan(
+                            oldMapCenter = extents.centerState,
+                            currentZoom = extents.mapScaleState,
+                            bearing = direction)
+                        //gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
                     }
                 }
 
@@ -173,11 +185,11 @@ class MapScreen @Inject constructor(
                             LatLngTool.Bearing.SOUTH
                         }
 
-                        extents.value = extents.value.copy(
-                            center = ExtentCalculator.newMapCenterOnPan(
-                                oldMapCenter = extents.value.center,
-                                currentZoom = extents.value.mapScale,
-                            bearing = direction))
+                        extents.centerState = ExtentCalculator.newMapCenterOnPan(
+                            oldMapCenter = extents.centerState,
+                            currentZoom = extents.mapScaleState,
+                            bearing = direction)
+                        //gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
                     }
                 }
             }
@@ -187,13 +199,15 @@ class MapScreen @Inject constructor(
         LaunchedEffect(parameters.usePersistedStateOnOpen) {
             logger.d(TAG, "usePersistedStateOnOpen: ${parameters.usePersistedStateOnOpen}")
             logger.d(TAG, "usePersistedStateOnOpen launched effect. $browsingState")
-            extents.value = browsingState?.extents ?: return@LaunchedEffect
+            extents = browsingState?.extents ?: return@LaunchedEffect
             currentOverlayState.value = browsingState?.mapOverlayState ?: return@LaunchedEffect
         }
 
-        DisposableEffect(currentOverlayState.value, extents.value) {
+        DisposableEffect(currentOverlayState.value, extents) {
+            //TODO does this get updated when extents zoom and center changes too?
+            logger.d("WAT", "Browsing state update triggered")
             browsingState = BrowsingState(
-                extents = extents.value,
+                extents = extents,
                 mapOverlayState = currentOverlayState.value
             )
             onDispose {
@@ -210,19 +224,10 @@ class MapScreen @Inject constructor(
         LaunchedEffect(currentOverlayState.value) {
             logger.d(TAG, "Overlay State: ${currentOverlayState.value}")
 
-//            when (currentOverlayState.value) {
-//                MapOverlayState.ChangeZoom -> TODO()
-//                MapOverlayState.GuidanceMenu -> TODO()
-//                MapOverlayState.ModifyViewMenu -> TODO()
-//                MapOverlayState.NoOverlay -> TODO()
-//                MapOverlayState.PanLeftRight -> TODO()
-//                MapOverlayState.PanUpDown -> TODO()
-//                MapOverlayState.PoiMenu -> TODO()
-//            }
             if (currentOverlayState.value == MapOverlayState.ModifyViewMenu) {
                 showModifyViewMenu(
                     parameters.openMode,
-                    currentCenterAcessor = { currentCenter.value },
+                    currentCenterAcessor = { extents.centerState },
                     onOverlayStateChanged = { new -> currentOverlayState.value = new }
                 )
             }
@@ -231,7 +236,7 @@ class MapScreen @Inject constructor(
             }
             if (currentOverlayState.value == MapOverlayState.PoiMenu) {
                 showPoiOverlaymenu(
-                    currentCenter.value.let { LatLng(it.latitude, it.longitude) },
+                    currentCenter = extents.centerState,
                     onOverlayStateChanged = { currentOverlayState.value = it }
                 )
             }
@@ -292,9 +297,12 @@ class MapScreen @Inject constructor(
                     )
                 }
             ),
-            extents = extents.value,
-            onCenterPositionUpdated = {
-                currentCenter.value = it
+            extents = extents,
+            onCenterPositionUpdated = { newCenter ->
+                extents.centerState = newCenter
+                // Update the map center provider so it knows where to pan from
+                // if gps tracking is enabled.
+                gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
             }
         )
 
