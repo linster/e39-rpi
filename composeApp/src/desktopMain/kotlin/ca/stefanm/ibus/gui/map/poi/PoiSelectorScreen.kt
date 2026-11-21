@@ -12,7 +12,9 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.BmwSingleLineHeader
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.FullScreenMenu.OneColumnSmoothScreen
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.ScrollMenu
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem.Companion.toCheckBox
 import javax.inject.Inject
@@ -32,6 +34,9 @@ class PoiSelectorScreen @Inject constructor(
     private val poiRepository: PoiRepository
 ) : NavigationNode<PoiSelectorScreen.PoiSelectionResult>{
 
+    companion object {
+        const val TAG = "PoiSelectorScreen"
+    }
     sealed interface PoiSelectionResult {
         object NothingSelected : PoiSelectionResult
         data class PoiSelected(val poi : PoiRepository.Poi) : PoiSelectionResult
@@ -40,26 +45,24 @@ class PoiSelectorScreen @Inject constructor(
     override val thisClass: Class<out NavigationNode<PoiSelectionResult>> = PoiSelectorScreen::class.java
 
     override fun provideMainContent(): @Composable (incomingResult: Navigator.IncomingResult?) -> Unit = {
-        Column {
-            BmwSingleLineHeader("Select POI from Address Book")
+        val context = SmoothScroll.MenuWindowSmoothScrollContext()
 
-            ScrollMenu.OneColumnScroll(
-                onScrollListExitSelected = {
-                    navigationNodeTraverser.setResultAndGoBack(this@PoiSelectorScreen,
-                        PoiSelectionResult.NothingSelected
-                    )
-                },
-                displayOptions = ScrollMenu.ScrollListOptions(
-                    itemsPerPage = 4,
-                    isExitItemOnEveryPage = false,
-                    isPageCountItemVisible = true,
-                    showSpacerRow = false,
-                    exitListItemLabel = "Cancel Selection",
-                ),
-                items = poiRepository.getAllPois().map {
+        //TODO this also needs a search item, that opens a pane, and that filters the list by name
+        context.OneColumnSmoothScreen(
+            header = "Select POI from Address Book",
+            logTag = TAG,
+            prependGoBackEntry = false,
+            items = listOf(
+                TextMenuItem(
+                    "Cancel Selection",
+                    onClicked = {
+                        navigationNodeTraverser.setResultAndGoBack(this@PoiSelectorScreen,
+                            PoiSelectionResult.NothingSelected
+                        )
+                    }
+                )) + poiRepository.getAllPois().map {
                     //The user can't chang the POI list while making a selection, so it's
                     //okay the UI won't live-update.
-
                     TextMenuItem(
                         title = it.name,
                         onClicked = {
@@ -70,7 +73,6 @@ class PoiSelectorScreen @Inject constructor(
                         }
                     )
                 }
-            )
-        }
+        )
     }
 }
