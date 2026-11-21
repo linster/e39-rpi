@@ -148,7 +148,9 @@ data class PoiOverlay(
 fun MapViewer(
     overlayProperties: OverlayProperties,
     extents: Extents,
-    onCenterPositionUpdated : (newCenter : LatLng) -> Unit
+    onCenterPositionUpdated : (newCenter : LatLng) -> Unit,
+    /** The map's size on screen, in dp: what's left of the window (theme, bottom bar). */
+    onViewportSizeChanged : (widthDp : Double, heightDp : Double) -> Unit = { _, _ -> },
 ) {
 
     Box(
@@ -163,6 +165,9 @@ fun MapViewer(
 
             val viewportHeight = this.maxHeight
             val viewportWidth = this.maxWidth
+            LaunchedEffect(viewportWidth, viewportHeight) {
+                onViewportSizeChanged(viewportWidth.value.toDouble(), viewportHeight.value.toDouble())
+            }
 
 
             //TODO have a big-ass box.

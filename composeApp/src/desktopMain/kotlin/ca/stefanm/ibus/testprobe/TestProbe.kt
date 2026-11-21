@@ -2,6 +2,7 @@ package ca.stefanm.ibus.testprobe
 
 import androidx.compose.runtime.snapshots.Snapshot
 import ca.stefanm.e39hmi.test.v1.ClearNotificationRequest
+import ca.stefanm.e39hmi.test.v1.ReopenHmiWindowRequest
 import ca.stefanm.e39hmi.test.v1.ListScreensRequest
 import ca.stefanm.e39hmi.test.v1.ListScreensResponse
 import ca.stefanm.e39hmi.test.v1.backStackEntry
@@ -49,6 +50,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
@@ -135,6 +137,7 @@ class TestProbe @Inject constructor(
     private val addMailAccount: Provider<AddMailAccountRepo>,
     private val guidanceService: Provider<GuidanceService>,
     private val configurationStorage: Provider<ConfigurationStorage>,
+    private val windowManager: Provider<WindowManager>,
     private val logger: Logger,
 ) {
     companion object {
@@ -475,6 +478,19 @@ class TestProbe @Inject constructor(
 
         override suspend fun clearNotification(request: ClearNotificationRequest): HmiState {
             notificationHub.clearNotification()
+            return state()
+        }
+
+        override suspend fun reopenHmiWindow(request: ReopenHmiWindowRequest): HmiState {
+            suspend fun waitForWindow(open: Boolean, what: String) {
+                withTimeoutOrNull(DEFAULT_TIMEOUT_MS.toLong()) {
+                    while (withContext(Dispatchers.Main) { hmiWindow() != null } != open) delay(50)
+                } ?: throw StatusException(Status.DEADLINE_EXCEEDED.withDescription("the HMI window didn't $what"))
+            }
+            withContext(Dispatchers.Main) { windowManager.get().closeHmiMainWindow() }
+            waitForWindow(open = false, what = "close")
+            withContext(Dispatchers.Main) { windowManager.get().openHmiMainWindow() }
+            waitForWindow(open = true, what = "open again")
             return state()
         }
 

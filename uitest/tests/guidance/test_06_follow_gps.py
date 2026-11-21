@@ -7,26 +7,29 @@ the edge), a pan stops it. Following is started by Map Settings -> Follow GPS (w
 from startup: that part is in the unit tests, the HMI isn't restarted here) or, in guidance, by
 "Re-center map on current location".
 
-The map (MapViewer) fills the window's content above the status bar (FOOTER_PX), one pixel a dp on
-this computer: 800 x 427 (less with --show, where a window manager's frame and title bar take some
-of the window); dp offsets are Web Mercator at the scale's zoom level, as in the HMI.
+The map's size on screen depends on the theme (a NormalSize theme's window is half a pixel-doubled
+one's; the bottom bar's height) and, with --show, on the window manager's frame, so the test doesn't
+assume it: where the dot is just after following starts is the map's centre, and the map is
+twice that, from the content's top left. One pixel a dp on this computer; dp offsets are Web
+Mercator at the scale's zoom level (256 dp tiles in every theme), as in the HMI.
 """
 
 import io
 import math
+import re
 
 import pytest
 from PIL import Image
 
 from _guidance import clear_notifications, fresh, set_up_route
 
-MAP_W, MAP_H = 800.0, 427.0  # GpsMapCenterProvider's MAP_WIDTH_DP, MAP_HEIGHT_DP
-FOOTER_PX = 41  # the status bar (clock, date) below the map
 EDGE_MARGIN_DP = 40.0  # GpsMapCenterProvider.EDGE_MARGIN_DP
 ZOOM = {"1.6 km": 13, "800 m": 14}  # MapScale.mapZoomLevel
 TOLERANCE_PX = 4
 
 START = (45.3470, -75.9190)  # Kanata, on the default map.
+
+DOUBLED_THEME = "BMW Blue (2X)"  # the local target's theme (BmwBlueDoubledPixels)
 
 
 def at(point, dx, dy, zoom=ZOOM["1.6 km"]):
@@ -40,7 +43,7 @@ def at(point, dx, dy, zoom=ZOOM["1.6 km"]):
 
 
 def gps_dot(hmi):
-    """The GPS dot's offset from the map's centre in dp (right, down), or None if it isn't on screen."""
+    """Where the GPS dot is in the screenshot (x, y), or None if it isn't on screen."""
     img = Image.open(io.BytesIO(hmi.screenshot_png())).convert("RGB")
     xs, ys = [], []
     px = img.load()
@@ -52,17 +55,33 @@ def gps_dot(hmi):
                 ys.append(y)
     if len(xs) < 20:
         return None
-    return (sum(xs) / len(xs) - img.width / 2, sum(ys) / len(ys) - (img.height - FOOTER_PX) / 2)
+    return (sum(xs) / len(xs), sum(ys) / len(ys))
 
 
-def expect_dot(hmi, dx, dy, what):
-    hmi.wait_idle()
-    dot = gps_dot(hmi)
-    if dot is None or abs(dot[0] - dx) > TOLERANCE_PX or abs(dot[1] - dy) > TOLERANCE_PX:
-        hmi.shot("dot-wrong")
-    assert dot is not None, f"{what}: no GPS dot on the map"
-    assert abs(dot[0] - dx) <= TOLERANCE_PX and abs(dot[1] - dy) <= TOLERANCE_PX, \
-        f"{what}: the dot is at {dot[0]:.1f}, {dot[1]:.1f} dp from the centre, expected {dx}, {dy}"
+class Map:
+    """The map on screen, measured from the dot when it's centred on it."""
+
+    def __init__(self, hmi):
+        hmi.wait_idle()
+        dot = gps_dot(hmi)
+        if dot is None:
+            hmi.shot("no-dot")
+        assert dot is not None, "following: no GPS dot on the map"
+        self.cx, self.cy = dot
+        self.half_w, self.half_h = self.cx, self.cy
+
+    def offset(self, dot):
+        return (dot[0] - self.cx, dot[1] - self.cy)
+
+    def expect_dot(self, hmi, dx, dy, what):
+        hmi.wait_idle()
+        dot = gps_dot(hmi)
+        ok = dot is not None and all(abs(o - e) <= TOLERANCE_PX for o, e in zip(self.offset(dot), (dx, dy)))
+        if not ok:
+            hmi.shot("dot-wrong")
+        assert dot is not None, f"{what}: no GPS dot on the map"
+        ox, oy = self.offset(dot)
+        assert ok, f"{what}: the dot is at {ox:.1f}, {oy:.1f} dp from the centre, expected {dx:.1f}, {dy:.1f}"
 
 
 def drive(hmi, point):
@@ -79,6 +98,16 @@ def set_follow_by_default(hmi, on):
     hmi.expect_text(r"^✓ Follow GPS by default$", present=on)
 
 
+def set_theme(hmi, name):
+    """Theme Selector -> name, then the HMI window closed and opened again: a theme sets the window's
+    size (a NormalSize theme's is half a pixel-doubled one's), which only a new window takes."""
+    hmi.go("ThemeSelectorScreen")
+    hmi.select(rf"^{re.escape(name)}$")
+    hmi.wait_idle()
+    hmi.reopen_window()
+    hmi.go_root()
+
+
 def map_menu(hmi, item):
     hmi.press()
     hmi.wait_for(lambda s: s.modal_menu_open, "the map's menu to open")
@@ -88,39 +117,43 @@ def map_menu(hmi, item):
     hmi.wait_idle()
 
 
-def test_follow_gps_on_the_map(hmi):
+@pytest.mark.parametrize("theme", [DOUBLED_THEME, "BMW Blue"])
+def test_follow_gps_on_the_map(hmi, theme):
     fresh(hmi)
-    drive(hmi, START)
-    set_follow_by_default(hmi, True)
+    set_theme(hmi, theme)
     try:
+        drive(hmi, START)
+        set_follow_by_default(hmi, True)
         hmi.go("MapScreen")
-        expect_dot(hmi, 0, 0, "following: the map is centred on the car")
+        m = Map(hmi)
         hmi.shot("centred")
+        # Where the provider re-centres: past this from the centre.
+        edge_x, edge_y = m.half_w - EDGE_MARGIN_DP, m.half_h - EDGE_MARGIN_DP
 
         # Inside the margin the map stays and the dot moves.
-        x_in = MAP_W / 2 - EDGE_MARGIN_DP - 60
-        y_in = MAP_H / 2 - EDGE_MARGIN_DP - 50
+        x_in, y_in = edge_x * 0.7, edge_y * 0.7
         for dx, dy in [(x_in, 0), (-x_in, 0), (0, -y_in), (x_in, y_in)]:
             drive(hmi, at(START, dx, dy))
-            expect_dot(hmi, dx, dy, f"inside the margin ({dx}, {dy})")
+            m.expect_dot(hmi, dx, dy, f"inside the margin ({dx:.0f}, {dy:.0f})")
         hmi.shot("inside-the-margin")
 
         # Near the edge: the map re-centres on the car.
-        car = at(START, MAP_W / 2 - EDGE_MARGIN_DP + 15, 0)
+        car = at(START, edge_x + 10, 0)
         drive(hmi, car)
-        expect_dot(hmi, 0, 0, "near the right edge: re-centred")
+        m.expect_dot(hmi, 0, 0, "near the right edge: re-centred")
         hmi.shot("recentred")
 
-        # Zoom in: 200 dp out at 1.6 km is 400 dp out at 800 m, near the edge: re-centred.
-        drive(hmi, at(car, 200, 0))
-        expect_dot(hmi, 200, 0, "200 dp right, before zooming")
+        # Zoom in: inside at 1.6 km, twice as far out at 800 m, near the edge: re-centred.
+        d = edge_x * 0.6
+        drive(hmi, at(car, d, 0))
+        m.expect_dot(hmi, d, 0, "before zooming")
         map_menu(hmi, r"^Zoom$")
         hmi.left()
         hmi.press()
         hmi.wait_for(lambda s: not s.modal_menu_open, "zooming to end")
-        expect_dot(hmi, 0, 0, "zoomed in: re-centred")
+        m.expect_dot(hmi, 0, 0, "zoomed in: re-centred")
         hmi.shot("zoomed-in-recentred")
-        car = at(car, 200, 0)
+        car = at(car, d, 0)
 
         # Pan: following stops; the car can drive off the map.
         map_menu(hmi, r"^Pan ⬌$")
@@ -129,12 +162,13 @@ def test_follow_gps_on_the_map(hmi):
         hmi.wait_for(lambda s: not s.modal_menu_open, "panning to end")
         hmi.wait_idle()
         panned = gps_dot(hmi)
-        assert panned is not None and abs(panned[0]) > 50, f"the pan moved the map: dot at {panned}"
-        drive(hmi, at(car, 0, -(MAP_H / 2 + 100), zoom=ZOOM["800 m"]))
+        assert panned is None or abs(m.offset(panned)[0]) > 20, f"the pan moved the map: dot at {panned}"
+        drive(hmi, at(car, 0, -(m.half_h + 100), zoom=ZOOM["800 m"]))
         assert gps_dot(hmi) is None, "panned: the map doesn't follow the car off it"
         hmi.shot("panned-not-following")
     finally:
         set_follow_by_default(hmi, False)
+        set_theme(hmi, DOUBLED_THEME)
 
 
 @pytest.mark.maps_backend
@@ -153,10 +187,13 @@ def test_recenter_from_guidance(hmi):
     clear_notifications(hmi)
     hmi.select(r"^Re-center map on current location$")
     hmi.wait_for_screen("MapScreen")
-    expect_dot(hmi, 0, 0, "re-centred on the car")
+    m = Map(hmi)
+    # Centred on the car: the dot is in the middle of the map, whatever the map's size.
+    img = Image.open(io.BytesIO(hmi.screenshot_png()))
+    assert abs(m.cx - img.width / 2) <= TOLERANCE_PX, f"re-centred: the dot is at x {m.cx}, not mid-width"
     hmi.shot("recentred-from-guidance")
 
     # And following: near the left edge, the map re-centres again.
-    car = at(car, -(MAP_W / 2 - EDGE_MARGIN_DP + 15), 0)
+    car = at(car, -(m.half_w - EDGE_MARGIN_DP + 10), 0)
     drive(hmi, car)
-    expect_dot(hmi, 0, 0, "following after Re-center")
+    m.expect_dot(hmi, 0, 0, "following after Re-center")

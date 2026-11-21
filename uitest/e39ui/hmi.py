@@ -251,6 +251,22 @@ class Hmi:
         r = self.stub.ListScreens(pb2.ListScreensRequest(), timeout=self.timeout_s)
         return list(r.registered), list(r.unregistered)
 
+    def reopen_window(self, still_s=1.0, timeout_s=20):
+        """Closes the HMI window and opens it again (a theme's window size needs a new window), then
+        waits for it to stay put (it moves once after opening) and settle."""
+        self.stub.ReopenHmiWindow(pb2.ReopenHmiWindowRequest(), timeout=self.timeout_s)
+        deadline = time.time() + timeout_s
+        last, since = None, time.time()
+        while time.time() < deadline:
+            s = self.state()
+            where = (s.window_x, s.window_y)
+            if where != last:
+                last, since = where, time.time()
+            elif time.time() - since >= still_s:
+                break
+            time.sleep(0.2)
+        return self.wait_idle(from_now=True)
+
     def close_overlays(self):
         self.stub.CloseOverlays(pb2.CloseOverlaysRequest(), timeout=self.timeout_s)
         return self.wait_idle(from_now=True)

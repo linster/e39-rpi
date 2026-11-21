@@ -1,8 +1,6 @@
 package ca.stefanm.ibus.gui.map.mapScreen
 
 import ca.stefanm.ibus.gui.map.mapScreen.GpsMapCenterProvider.Companion.EDGE_MARGIN_DP
-import ca.stefanm.ibus.gui.map.mapScreen.GpsMapCenterProvider.Companion.MAP_HEIGHT_DP
-import ca.stefanm.ibus.gui.map.mapScreen.GpsMapCenterProvider.Companion.MAP_WIDTH_DP
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
@@ -25,9 +23,13 @@ class GpsMapCenterProviderTest {
     private val zoom = MapScale.KILOMETERS_1_6
     private val gps = MutableStateFlow<LatLng?>(null)
 
+    // The map's size as MapViewer reports it (a pixel-doubled theme's).
+    private val mapW = 800.0
+    private val mapH = 427.0
+
     // Inside the margin, and within it, from the middle of the map.
-    private val halfW = MAP_WIDTH_DP / 2
-    private val halfH = MAP_HEIGHT_DP / 2
+    private val halfW = mapW / 2
+    private val halfH = mapH / 2
     private val insideX = halfW - EDGE_MARGIN_DP - 10
     private val insideY = halfH - EDGE_MARGIN_DP - 10
     private val nearX = halfW - EDGE_MARGIN_DP + 5
@@ -42,8 +44,11 @@ class GpsMapCenterProviderTest {
         override fun e(tag: String, msg: String, e: Throwable?) {}
     }
 
-    private fun TestScope.provider(follow: Boolean = false) =
-        GpsMapCenterProvider(gps, backgroundScope, start, zoom, follow, logger).also { runCurrent() }
+    private fun TestScope.provider(follow: Boolean = false, width: Double = mapW, height: Double = mapH) =
+        GpsMapCenterProvider(gps, backgroundScope, start, zoom, follow, logger).also {
+            it.onMapViewportChanged(width, height)
+            runCurrent()
+        }
 
     /** The point [dx] dp right and [dy] dp down of [from] on the map at [scale] (inverse Web Mercator). */
     private fun at(from: LatLng, dx: Double, dy: Double, scale: MapScale = zoom): LatLng {
@@ -191,6 +196,35 @@ class GpsMapCenterProviderTest {
         assertSame(start, p.center.value)
         // Zooming in twice: the point is 600 dp out at the old centre.
         p.onUserMapCenterChanged(p.center.value, MapScale.METERS_400)
+        assertTrue(p.followGps.value)
+        assertSame(car, p.center.value)
+    }
+
+    @Test
+    fun theEdgeIsTheReportedMapsEdge() = runTest {
+        // A shorter map (a theme with a smaller bottom bar is taller; one that hides it, taller
+        // still): 120 dp down is near its edge, not near the default map's.
+        val short = 300.0
+        val car = at(start, 0.0, 120.0)
+        for ((height, recentres) in listOf(mapH to false, short to true)) {
+            gps.value = null
+            val p = provider(height = height)
+            drive(start)
+            p.followGps(true)
+            drive(car)
+            assertSame(if (recentres) car else start, p.center.value)
+        }
+    }
+
+    @Test
+    fun aSmallerMapWhileFollowingRecentresIfThePointIsNowNearTheEdge() = runTest {
+        val p = provider()
+        drive(start)
+        p.followGps(true)
+        val car = at(start, 0.0, 120.0)
+        drive(car)
+        assertSame(start, p.center.value)
+        p.onMapViewportChanged(mapW, 300.0)
         assertTrue(p.followGps.value)
         assertSame(car, p.center.value)
     }

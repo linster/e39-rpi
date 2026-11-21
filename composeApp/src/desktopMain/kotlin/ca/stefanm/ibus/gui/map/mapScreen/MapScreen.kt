@@ -305,6 +305,9 @@ class MapScreen @Inject constructor(
                 // Update the map center provider so it knows where to pan from
                 // if gps tracking is enabled.
                 gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
+            },
+            onViewportSizeChanged = { widthDp, heightDp ->
+                gpsMapCenterProvider.onMapViewportChanged(widthDp, heightDp)
             }
         )
 

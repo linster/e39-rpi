@@ -37,6 +37,10 @@ service HmiTestProbe {
   // Hides the notification (it covers the top of the screen until it
   // times out).
   rpc ClearNotification(ClearNotificationRequest) returns (HmiState);
+  // Closes the HMI window and opens it again (as the Theme Selector debug
+  // window's Close HMI / Open HMI do): a theme's window size only applies to
+  // a newly opened window. Returns once the new window is showing.
+  rpc ReopenHmiWindow(ReopenHmiWindowRequest) returns (HmiState);
 
   // The mail app as on a fresh start: settings back to their defaults
   // (notifications on, nothing muted, the default quick replies), no
@@ -236,6 +240,7 @@ message NavigateRequest {
 
 message CloseOverlaysRequest {}
 message ClearNotificationRequest {}
+message ReopenHmiWindowRequest {}
 
 message ResetMailAppRequest {}
 message ResetMailAppResponse {}

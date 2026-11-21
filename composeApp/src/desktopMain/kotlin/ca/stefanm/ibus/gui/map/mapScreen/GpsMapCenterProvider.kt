@@ -26,9 +26,9 @@ import kotlin.math.tan
  * point gets within [EDGE_MARGIN_DP] of the map's edge (or leaves it): then it
  * re-centres on the point, so the dot crosses most of the map between pans.
  *
- * The map widget (MapViewer) is always [MAP_WIDTH_DP] x [MAP_HEIGHT_DP] dp of
- * 256 dp Web Mercator tiles at the MapScale's zoom level, so where a point
- * lands on it is plain arithmetic.
+ * The map widget (MapViewer) shows 256 dp Web Mercator tiles at the
+ * MapScale's zoom level and reports its size ([onMapViewportChanged]), so
+ * where a point lands on it is plain arithmetic.
  */
 @ApplicationScope
 class GpsMapCenterProvider internal constructor(
@@ -56,9 +56,14 @@ class GpsMapCenterProvider internal constructor(
 
     companion object {
         const val TAG = "GpsMapCenterProvider"
-        /** MapViewer's size on screen: 800 x 468 asked for, the status bar below it takes 41. */
-        const val MAP_WIDTH_DP = 800.0
-        const val MAP_HEIGHT_DP = 427.0
+        /**
+         * MapViewer's size until it reports its own ([onMapViewportChanged]):
+         * a pixel-doubled theme's, the window's 800 x 468 less the bottom bar.
+         * It depends on the theme (the bottom bar's height) and on whether the
+         * screen hides the bottom bar.
+         */
+        const val DEFAULT_WIDTH_DP = 800.0
+        const val DEFAULT_HEIGHT_DP = 427.0
         /** Following, a GPS point this close to an edge re-centres the map on it. */
         const val EDGE_MARGIN_DP = 40.0
         /** A reported centre within this of [center] isn't a pan (rounding). */
@@ -77,10 +82,13 @@ class GpsMapCenterProvider internal constructor(
             return (x(point) - x(center)) to (y(point) - y(center))
         }
 
-        /** Whether [point] is within [EDGE_MARGIN_DP] of the map's edge, or off it, with the map at [center]. */
-        fun nearEdge(center: LatLng, point: LatLng, zoom: MapScale): Boolean {
+        /**
+         * Whether [point] is within [EDGE_MARGIN_DP] of the edge of a
+         * [widthDp] x [heightDp] map at [center], or off it.
+         */
+        fun nearEdge(center: LatLng, point: LatLng, zoom: MapScale, widthDp: Double, heightDp: Double): Boolean {
             val (dx, dy) = offsetDp(center, point, zoom)
-            return abs(dx) > MAP_WIDTH_DP / 2 - EDGE_MARGIN_DP || abs(dy) > MAP_HEIGHT_DP / 2 - EDGE_MARGIN_DP
+            return abs(dx) > widthDp / 2 - EDGE_MARGIN_DP || abs(dy) > heightDp / 2 - EDGE_MARGIN_DP
         }
     }
 
@@ -93,6 +101,8 @@ class GpsMapCenterProvider internal constructor(
     val followGps: StateFlow<Boolean> = _followGps.asStateFlow()
 
     private var zoom: MapScale = initialZoom
+    private var widthDp = DEFAULT_WIDTH_DP
+    private var heightDp = DEFAULT_HEIGHT_DP
     /** Following without having centred on a fix yet (from [initialFollow]): the first fix centres the map. */
     private var awaitingFix = initialFollow
     private val lock = Any()
@@ -116,6 +126,17 @@ class GpsMapCenterProvider internal constructor(
             _center.value = userPos
             return@synchronized
         }
+        if (_followGps.value) gpsPositions.value?.let { recentreIfNearEdge(it) }
+    }
+
+    /**
+     * The map's size on screen, in dp (MapViewer's viewport: it depends on
+     * the theme and the bottom bar). Following, a smaller map may put the GPS
+     * point near the edge: then it re-centres.
+     */
+    fun onMapViewportChanged(widthDp: Double, heightDp: Double) = synchronized(lock) {
+        this.widthDp = widthDp
+        this.heightDp = heightDp
         if (_followGps.value) gpsPositions.value?.let { recentreIfNearEdge(it) }
     }
 
@@ -147,6 +168,6 @@ class GpsMapCenterProvider internal constructor(
     }
 
     private fun recentreIfNearEdge(position: LatLng) {
-        if (nearEdge(_center.value, position, zoom)) _center.value = position
+        if (nearEdge(_center.value, position, zoom, widthDp, heightDp)) _center.value = position
     }
 }
