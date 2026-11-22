@@ -38,6 +38,18 @@ class BottomBarController @Inject constructor(
                 val autoAdvanceRunning : Boolean
             )
         }
+        data class MapPoiSelection(val mapPoiSelectionInfo : Flow<PoiSelectionInfo>) : BottomBarViewState {
+            data class PoiSelectionInfo(
+                /** What's the current index of the istem selected? */
+                val currentIndex : Int,
+                /** Name of the currently highlighted item */
+                val currentItemName : String,
+                /** How may results are visible? */
+                val totalIndices : Int,
+                /** How many items were returned from the nearby search and could be scrollable if zoomed out far enough? */
+                val resultCount : Int,
+            )
+        }
     }
 
     companion object {
@@ -80,6 +92,20 @@ class BottomBarController @Inject constructor(
                             text = "Slideshow Running ${slideShowInfo.value.let {
                                 "${it.currentFileName.takeLast(20)} : (${it.currentFileNumber}/${it.totalFiles})"
                             }} Auto: ${slideShowInfo.value.autoAdvanceRunning.let { if (it) " ⏵ " else " ⏸ " }}",
+                            fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
+                            fontWeight = FontWeight.Bold,
+                            color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor
+                        )
+                    }
+                    is BottomBarViewState.MapPoiSelection -> {
+                        val mapPoiInfo = (state as BottomBarViewState.MapPoiSelection).mapPoiSelectionInfo.collectAsState(
+                            BottomBarViewState.MapPoiSelection.PoiSelectionInfo(0, "None", 0, 0)
+                        )
+                        Text(
+                            text = "Map Poi Select: " +
+                                    "👁(${mapPoiInfo.value.currentIndex} / ${mapPoiInfo.value.totalIndices})" +
+                                    " ${mapPoiInfo.value.currentItemName.take(15)} " +
+                                    " #Results: ${mapPoiInfo.value.resultCount}",
                             fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                             fontWeight = FontWeight.Bold,
                             color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor

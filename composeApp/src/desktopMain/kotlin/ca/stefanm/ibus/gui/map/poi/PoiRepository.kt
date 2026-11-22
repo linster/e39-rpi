@@ -41,8 +41,10 @@ class PoiRepository @Inject constructor(
         val location : LatLng,
         val icon : PoiIcon,
         val isVisible : Boolean,
-        /** The backend's id; null for a POI that isn't saved yet. */
+        /** The Django backend's id for a user-created POI; null for a POI that isn't saved yet. */
         val id : Long? = null,
+        /** Used for synthetic match on Poi multi-select. This ID is the stable ID from Valhalla */
+        val foundPoiId : Long? = null
     ) {
         sealed class PoiIcon(val type : String) {
             object NoIcon : PoiIcon(type = "NoIcon")
@@ -52,6 +54,7 @@ class PoiRepository @Inject constructor(
     }
 
     private fun inBackground(failureText: String, block: suspend () -> Result<*>) {
+        //TODO make this pattern a thing on NotificationHub. Good idea, wrong place for it.
         coroutineScope.launch(Dispatchers.IO) {
             block().onFailure {
                 notificationHub.postNotification(

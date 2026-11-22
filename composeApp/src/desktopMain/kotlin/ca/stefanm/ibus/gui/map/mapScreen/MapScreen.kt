@@ -2,6 +2,7 @@ package ca.stefanm.ibus.gui.map.mapScreen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
@@ -18,24 +19,30 @@ import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.map.*
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
 import ca.stefanm.ibus.gui.map.mapScreen.MapOverlayState
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
+import ca.stefanm.ibus.gui.map.places.MapPoi
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.widgets.ItemChipOrientation
+import ca.stefanm.ibus.gui.menu.widgets.bottombar.BottomBarController
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -58,7 +65,8 @@ class MapScreen @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val poiRepository: PoiRepository,
     private val guidanceService: GuidanceService,
-    private val gpsMapCenterProvider: GpsMapCenterProvider
+    private val gpsMapCenterProvider: GpsMapCenterProvider,
+    private val bottomBarController: BottomBarController
 ) : NavigationNode<MapScreenResult> {
 
     companion object : MapScreenOpener {
@@ -258,6 +266,80 @@ class MapScreen @Inject constructor(
 
         val routeLatLng by guidanceService.getSessionRoute().collectAsState(null)
 
+        val selectablePois = SnapshotStateList<PoiOverlay.PoiOverlayItem>()
+
+        if (parameters.openMode is MapScreenParameters.MapScreenOpenMode.PoiBrowser) {
+            // TODO Populate the selectable POIs.
+            // TODO Status bar should also show how many pois visible out of how many in result set.
+
+            var poiListenerIsEnabled by remember { mutableStateOf(false) }
+            val knobStatePois = KnobObserverBuilderState.setupEnableableListener(
+                knobListenerService = knobListenerService,
+                isEnabled = poiListenerIsEnabled,
+                logger = logger,
+                tag = TAG
+            )
+
+            val bottombarInfo = MutableStateFlow(BottomBarController.BottomBarViewState.MapPoiSelection.PoiSelectionInfo(
+                0, "None", 0, 0
+            ))
+
+            val poisExistOnScreen by remember { derivedStateOf { selectablePois.isNotEmpty() } }
+            DisposableEffect(poisExistOnScreen) {
+                bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.MapPoiSelection(
+                    mapPoiSelectionInfo = bottombarInfo
+                )
+                onDispose {
+                    bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.DateTime
+                }
+            }
+
+            //TODO this seems like an anti-pattern... maybe have a remember(key)?
+            LaunchedEffect(currentOverlayState.value) {
+                // Only enable the knob listener when none of the overlays are visible
+                val knobListenerShouldBeEnabled = when (currentOverlayState.value) {
+                    MapOverlayState.ChangeZoom,
+                    MapOverlayState.GuidanceMenu,
+                    MapOverlayState.ModifyViewMenu,
+                    MapOverlayState.PanLeftRight,
+                    MapOverlayState.PanUpDown,
+                    MapOverlayState.PoiMenu -> false
+                    MapOverlayState.NoOverlay -> true
+                }
+                poiListenerIsEnabled = knobListenerShouldBeEnabled
+            }
+
+            selectablePois.clear()
+            selectablePois.addAll(buildList {
+                //TODO, filter by what's visible in the map view.
+
+                val list = parameters.openMode.poiById.values
+
+                bottombarInfo.value = bottombarInfo.value.copy(
+                    resultCount = list.size
+                )
+                //TODO filter the list here by whether the poi fits on the map
+                list.forEachIndexed { index, poi ->
+                    add(PoiOverlay.PoiOverlayItem(
+                        label = poi.name,
+                        position = poi.location,
+                        icon = @Composable {
+                            KnobObserverBuilder(knobStatePois) { allocatedIndex, currentIndex ->
+                                bottombarInfo.value = bottombarInfo.value.copy(
+                                    currentIndex = index,
+                                    currentItemName = poi.name,
+                                )
+                                PoiOverlay.PoiOverlayItem.SelectablePoi(poi, index.toString()) {
+                                    poiListenerIsEnabled = false
+                                    showSelectablePoiSideMenu(poi, parameters.openMode)
+                                }.invoke(this, allocatedIndex, currentIndex)
+                            }
+                        }
+                    ))
+                }
+            })
+        }
+
         MapViewer(
             overlayProperties = OverlayProperties(
                 mapScaleVisible = currentOverlayState.value == MapOverlayState.ChangeZoom,
@@ -265,6 +347,7 @@ class MapScreen @Inject constructor(
                     currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
                 gpsReceptionIconVisible = false,
+                //TODO this needs a KnobListener state, and to have the poi overlay be built outside of here.
                 poiOverlay = (poiList + parameters.markers).let { list ->
                     logger.d("POI LIST", list.toString())
                     PoiOverlay(
@@ -288,6 +371,8 @@ class MapScreen @Inject constructor(
                             } else {
                                 list
                             }
+                        }.let { list ->
+                            list + selectablePois
                         }
                     )
                 },
@@ -402,6 +487,36 @@ class MapScreen @Inject constructor(
                                     }
                                 )
                             )
+                        }
+                        is MapScreenParameters.MapScreenOpenMode.PoiBrowser -> {
+                            val poiMode = mapScreenOpenMode.poiMode
+                            when (poiMode) {
+                                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Select -> {
+                                    //You have to select a point to get a point selected result.
+                                    listOf(
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Go Back",
+                                            onClicked = {
+                                                modalMenuService.closeModalMenu()
+                                                navigationNodeTraverser.setResultAndGoBack(
+                                                    this,
+                                                    MapScreenResult.PointSelectedResult(null)
+                                                )
+                                            }
+                                        ),
+                                    )
+                                }
+                                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Browse -> {
+                                    listOf(
+                                        ModalMenu.ModalMenuItem(
+                                            title = "Main Menu",
+                                            onClicked = {
+                                                navigationNodeTraverser.navigateToRoot()
+                                            }
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -533,6 +648,15 @@ class MapScreen @Inject constructor(
     }
 
 
+    private fun showSelectablePoiSideMenu(
+        poi : MapPoi,
+        openMode : MapScreenParameters.MapScreenOpenMode
+    ) {
+
+        //Show all the map POI details
+        // based on the open mode, can select or exit the screen.
+
+    }
 
 
 }

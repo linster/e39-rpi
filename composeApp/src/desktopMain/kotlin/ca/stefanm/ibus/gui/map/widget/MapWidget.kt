@@ -12,8 +12,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.MultiContentMeasurePolicy
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
@@ -29,6 +33,13 @@ import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
 import ca.stefanm.ibus.gui.map.widget.tile.LocalMapTileServices
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.map.places.FoundMapPoi
+import ca.stefanm.ibus.gui.map.places.MapPoi
+import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import kotlin.math.tan
 import kotlin.math.sinh
 import kotlin.math.ln
@@ -100,9 +111,99 @@ data class PoiOverlay(
         val position: LatLng,
         val icon : @Composable () -> Unit = @Composable {}
     ) {
-        companion object Icons {
 
-            //TODO selectable POI overlay item with a hint string box
+
+        //TODO selectable POI overlay item with a hint string box
+
+
+        companion object {
+
+            fun SelectablePoi(
+                poi : MapPoi,
+                indexHint : String,
+                //Open a sidepane with all the POI info.
+                onPoiClicked : (poi : MapPoi) -> Unit
+            ) : @Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit = @Composable { allocatedIndex: Int, currentIndex: Int ->
+
+                //First calculate the size of the overlay.
+                //The way it's layed out in the overlay layer is that the icon gets centered: the center of this box must
+                //also be the location of the icon. We'll have to make a slightly larger fake box
+
+                val boxWidth = 48F.halveIfNotPixelDoubled()
+                val boxHeight = 32F.halveIfNotPixelDoubled()
+                val circleRadius = 16F.halveIfNotPixelDoubled()
+
+                val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
+                val isSelected = allocatedIndex == currentIndex
+                val circleColor = if (isSelected) {
+                    selectedColor
+                } else {
+                    Color.Blue
+                }
+                Box(
+                    Modifier
+                        .width(boxWidth.dp)
+                        .height(boxHeight.dp)
+                        .border(1.dp, Color.Red)
+                        .clickable { onPoiClicked(poi) }
+                ) {
+                    Canvas(Modifier
+                        .size((circleRadius * 2).dp)
+                        .absoluteOffset(
+                            x = (boxWidth / 2).dp,
+                            y = (boxHeight / 2).dp
+                        )
+                    ){
+                        drawCircle(
+                            center = Offset(size.width / 2, size.height / 2),
+                            radius = circleRadius,
+                            color = circleColor
+                        )
+                    }
+                    Text(
+                        text = indexHint,
+                        color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                        modifier = Modifier
+                            .absoluteOffset(
+                                x = (boxWidth / 2).dp,
+                                y = (boxHeight / 2).dp
+                            )
+                    )
+
+                    Box(
+                        Modifier
+                            .height((boxHeight * 0.25).dp)
+                            .width((boxWidth * 0.5).dp)
+                            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+                            .padding((0.6 * ThemeWrapper.ThemeHandle.current.smallItem.chipWidth).dp)
+                            .clickable { onPoiClicked(poi) }
+                    ) {
+                        Text(
+                            text = poi.name,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                            fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (isSelected) {
+                            //Draw the selection
+                            val highlightWidth = ThemeWrapper.ThemeHandle.current.smallItem.highlightWidth
+                            Canvas(
+                                Modifier.fillMaxSize()
+                            ) {
+                                drawRect(
+                                    color = selectedColor,
+                                    style = Stroke(
+                                        width = highlightWidth
+                                    )
+                                )
+                            }
+                        }
+
+                    }
+                }
+            }
 
             val ICON_BLUE_CIRCLE = @Composable {
                 Canvas(Modifier.size(16.dp)){

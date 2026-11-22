@@ -228,6 +228,28 @@ class KnobObserverBuilderState(
             }
             return knobState
         }
+
+        // TODO this might be easily "double-enabled" with duplicated emissions based
+        // TODO On how the LaunchedEffect is setup.
+        @Composable
+        fun setupEnableableListener(
+            knobListenerService: KnobListenerService,
+            isEnabled : Boolean,
+            logger: Logger,
+            tag: String?,
+        ) : KnobObserverBuilderState {
+            val knobState = remember(Unit) { KnobObserverBuilderState(knobListenerService, logger) }
+            val mainListenerEnabled = knobListenerService.listenerEnabled.collectAsState(true)
+            LaunchedEffect(mainListenerEnabled.value, isEnabled) {
+                if (isEnabled) {
+                    logger.d(tag ?: "enableableListener", "Calling subscribe events!! " +
+                            "mainListenerEnabled: ${mainListenerEnabled.value} " +
+                            "isEnabled $isEnabled")
+                    knobState.subscribeEvents(tag)
+                }
+            }
+            return knobState
+        }
     }
 }
 
