@@ -101,11 +101,11 @@ class BottomBarController @Inject constructor(
                         val mapPoiInfo by (state as BottomBarViewState.MapPoiSelection).mapPoiSelectionInfo.collectAsState(
                             BottomBarViewState.MapPoiSelection.PoiSelectionInfo(0, "None", 0, 0)
                         )
+                        logger.d(TAG, "MapPoiSelection: $mapPoiInfo")
+                        val text = "${mapPoiInfo.currentItemName.take(15)} , ${mapPoiInfo.totalIndices} visible of ${mapPoiInfo.resultCount}"
+
                         Text(
-                            text = "Map Poi Select: " +
-                                    "👁(${mapPoiInfo.currentIndex} / ${mapPoiInfo.totalIndices})" +
-                                    " ${mapPoiInfo.currentItemName.take(15)} " +
-                                    " #Results: ${mapPoiInfo.resultCount}",
+                            text = text,
                             fontSize = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontSize,
                             fontWeight = FontWeight.Bold,
                             color = ThemeWrapper.ThemeHandle.current.hmiHeaderFooter.fontColor
