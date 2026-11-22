@@ -16,7 +16,11 @@ import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MultiContentMeasurePolicy
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
@@ -122,6 +126,7 @@ data class PoiOverlay(
                 poi : MapPoi,
                 indexHint : String,
                 showPoiNameBox : Boolean = false,
+                isPreselected : Boolean = false,
                 //Open a sidepane with all the POI info.
                 onPoiClicked : (poi : MapPoi) -> Unit
             ) : @Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit = @Composable { allocatedIndex: Int, currentIndex: Int ->
@@ -139,7 +144,11 @@ data class PoiOverlay(
                 val circleColor = if (isSelected) {
                     selectedColor
                 } else {
-                    Color.Blue
+                    if (isPreselected) {
+                        Color.Red
+                    } else {
+                        Color.Blue
+                    }
                 }
                 Box(
                     Modifier
@@ -148,6 +157,34 @@ data class PoiOverlay(
                         //.border(1.dp, Color.Red)
                         .clickable { onPoiClicked(poi) }
                 ) {
+                    val textMeasurer = rememberTextMeasurer()
+                    val circleIndexStyle = TextStyle(
+                        color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                    )
+                    val circleIndexStyleSelected = TextStyle(
+                        color = Color.Black,
+                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                        fontWeight = FontWeight.Bold
+                    )
+                    //TODO if isPreselected, make the font red so that you
+                    //TODO know which one you're looking for.
+                    val circleIndexStylePreSelectedSelected = TextStyle(
+                        color = Color.Red,
+                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                    )
+                    val circleTextLayout = remember(indexHint, circleIndexStyle, circleIndexStyleSelected, isSelected) {
+                        val style = if (isSelected) {
+                            if (isPreselected) {
+                                circleIndexStylePreSelectedSelected
+                            } else {
+                                circleIndexStyleSelected
+                            }
+                        } else {
+                            circleIndexStyle
+                        }
+                        textMeasurer.measure(indexHint, style)
+                    }
                     Canvas(Modifier
                         .size((circleRadius * 2).dp)
                         .absoluteOffset(
@@ -158,20 +195,16 @@ data class PoiOverlay(
                         drawCircle(
                             center = Offset(size.width / 2, size.height / 2),
                             radius = circleRadius,
-                            color = circleColor
+                            color = circleColor,
+                        )
+                        drawText(
+                            textLayoutResult = circleTextLayout,
+                            topLeft = Offset(
+                                x = center.x - circleTextLayout.size.width / 2f,
+                                y = center.y - circleTextLayout.size.height / 2f,
+                            )
                         )
                     }
-                    //TODO move this in the canvas so it's centered.
-                    Text(
-                        text = indexHint,
-                        color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
-                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
-                        modifier = Modifier
-                            .absoluteOffset(
-                                x = (boxWidth / 2).dp,
-                                y = (boxHeight / 2).dp
-                            )
-                    )
 
                     if (showPoiNameBox) {
                         Box(

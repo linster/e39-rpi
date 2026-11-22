@@ -26,6 +26,7 @@ import ca.stefanm.ibus.gui.map.mapScreen.MapOverlayState
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
 import ca.stefanm.ibus.gui.map.places.MapPoi
+import ca.stefanm.ibus.gui.map.places.MapPoiLabels
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
@@ -38,6 +39,9 @@ import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenu
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
@@ -231,6 +235,7 @@ class MapScreen @Inject constructor(
             }
         }
 
+        val currentlySelectedPoi = remember { mutableStateOf<MapPoi?>(null) }
 
         LaunchedEffect(currentOverlayState.value) {
             logger.d(TAG, "Overlay State: ${currentOverlayState.value}")
@@ -239,6 +244,7 @@ class MapScreen @Inject constructor(
                 showModifyViewMenu(
                     parameters.openMode,
                     currentCenterAcessor = { extents.centerState },
+                    currentPoiAccessor = { currentlySelectedPoi.value },
                     onOverlayStateChanged = { new -> currentOverlayState.value = new }
                 )
             }
@@ -334,11 +340,20 @@ class MapScreen @Inject constructor(
                                             currentIndex = index,
                                             currentItemName = poi.name,
                                         )
+                                        // Set the current POI so that the modify view menu can use it to
+                                        // open the details pane.
+                                        currentlySelectedPoi.value = poi
                                     }
                                 }
-                                PoiOverlay.PoiOverlayItem.SelectablePoi(poi, index.toString()) {
+                                PoiOverlay.PoiOverlayItem.SelectablePoi(
+                                    poi,
+                                    index.toString(),
+                                    isPreselected = poi.id == parameters.openMode.preSelected?.poi?.id
+                                ) {
                                     poiListenerIsEnabled = false
-                                    showSelectablePoiSideMenu(poi, parameters.openMode)
+                                    showSelectablePoiSideMenu(poi, parameters.openMode) {
+                                        currentOverlayState.value = it
+                                    }
                                 }.invoke(this, allocatedIndex, currentIndex)
                             }
                         }
@@ -408,6 +423,7 @@ class MapScreen @Inject constructor(
     private fun showModifyViewMenu(
         mapScreenOpenMode: MapScreenParameters.MapScreenOpenMode,
         currentCenterAcessor : () -> LatLng,
+        currentPoiAccessor : () -> MapPoi?,
         onOverlayStateChanged : (new : MapOverlayState) -> Unit,
     ) {
         modalMenuService.showModalMenu(
@@ -497,12 +513,31 @@ class MapScreen @Inject constructor(
                         }
                         is MapScreenParameters.MapScreenOpenMode.PoiBrowser -> {
                             val poiMode = mapScreenOpenMode.poiMode
-                            when (poiMode) {
+
+                            val currentPoi = currentPoiAccessor()
+
+                            val selectionEntry = if (currentPoi != null) {
+                                listOf(
+                                    ModalMenu.ModalMenuItem(
+                                        title = "View POI details",
+                                        onClicked = {
+                                            modalMenuService.closeModalMenu()
+                                            showSelectablePoiSideMenu(currentPoi, mapScreenOpenMode) {
+                                                onOverlayStateChanged(it)
+                                            }
+                                        }
+                                    )
+                                )
+                            } else {
+                                listOf()
+                            }
+
+                            val closeEntries = when (poiMode) {
                                 MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Select -> {
                                     //You have to select a point to get a point selected result.
                                     listOf(
                                         ModalMenu.ModalMenuItem(
-                                            title = "Go Back",
+                                            title = "Exit Map without selection",
                                             onClicked = {
                                                 modalMenuService.closeModalMenu()
                                                 navigationNodeTraverser.setResultAndGoBack(
@@ -524,6 +559,7 @@ class MapScreen @Inject constructor(
                                     )
                                 }
                             }
+                            selectionEntry + closeEntries
                         }
                     }
 
@@ -657,11 +693,53 @@ class MapScreen @Inject constructor(
 
     private fun showSelectablePoiSideMenu(
         poi : MapPoi,
-        openMode : MapScreenParameters.MapScreenOpenMode
+        openMode : MapScreenParameters.MapScreenOpenMode.PoiBrowser,
+        onOverlayStateChanged : (new : MapOverlayState) -> Unit,
     ) {
 
         //Show all the map POI details
         // based on the open mode, can select or exit the screen.
+
+        //TODO When this closes, it needs to set the browse mode so that scroll still works.
+
+        logger.d(TAG, "showSelectablePoiSideMenu for poi $poi")
+
+        modalMenuService.showSidePaneOverlay(darkenBackground = false) {
+            SidePanelMenu.SidePanelMenu(
+                title = MapPoiLabels.name(poi),
+                text = @Composable {
+                    MapPoiLabels.detailLines(poi).forEach { InfoLabel(it) }
+                },
+                buttons = buildList {
+                    if (openMode.poiMode == MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Select) {
+                        add(
+                            TextMenuItem(
+                                title = "Select this POI",
+                                onClicked = {
+                                    onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
+                                    modalMenuService.closeSidePaneOverlay()
+                                    navigationNodeTraverser.setResultAndGoBack(
+                                        MapScreen::class.java,
+                                        MapScreenResult.PointSelectedResult(
+                                            poi.location
+                                        )
+                                    )
+                                }
+                            )
+                        )
+                    } else {
+                        //TODO maybe someday, buttons to dial the phone number?
+                    }
+                    add(TextMenuItem(
+                        title = "Close Side-pane",
+                        onClicked = {
+                            onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
+                            modalMenuService.closeSidePaneOverlay()
+                        }
+                    ))
+                }
+            )
+        }
 
     }
 

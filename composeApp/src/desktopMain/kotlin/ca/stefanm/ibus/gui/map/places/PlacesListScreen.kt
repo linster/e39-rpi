@@ -148,8 +148,8 @@ class PlacesListScreen @Inject constructor(
                     TextMenuItem("Show on map", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)
                         //Todo change this to showAllOnMap once it's done (selectable).
-                        //showOnMapSelectable(found.poi.location, all, found)
-                        showOnMap(found, all)
+                        showOnMapSelectable(found.poi.location, all, found)
+//                        showOnMap(found, all)
                     }),
                     TextMenuItem("Save as POI", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)
@@ -194,7 +194,8 @@ class PlacesListScreen @Inject constructor(
             MapScreenParameters.PoiBrowser(
                 center,
                 all,
-                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Select //TODO browse needs to go through the pane
+                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Browse,
+                found
             )
         )
     }

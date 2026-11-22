@@ -35,7 +35,8 @@ data class MapScreenParameters(
         data class PoiBrowser(
             override val center: LatLng,
             val poiById : Map<Long, MapPoi>,
-            val poiMode: PoiMode
+            val poiMode: PoiMode,
+            val preSelected: FoundMapPoi? = null
         ) : MapScreenOpenMode(center) {
             enum class PoiMode {
                 /** We're showing users a list of POIs to select one (the MapScree nreturns a LocationSelection result) */
@@ -50,13 +51,15 @@ data class MapScreenParameters(
         fun PoiBrowser(
             center: LatLng,
             pois : List<FoundMapPoi>,
-            poiMode: MapScreenOpenMode.PoiBrowser.PoiMode
+            poiMode: MapScreenOpenMode.PoiBrowser.PoiMode,
+            preSelected: FoundMapPoi? = null,
         ) : MapScreenParameters {
             //MapPoi has information that can be displayed in a side pane.
             val openMode = MapScreenOpenMode.PoiBrowser(
                 center = center,
                 poiById = pois.map { it.poi }.associateBy { it.id },
-                poiMode = poiMode
+                poiMode = poiMode,
+                preSelected = preSelected
             )
             return MapScreenParameters(
                 persistUiStateOnClose = false,

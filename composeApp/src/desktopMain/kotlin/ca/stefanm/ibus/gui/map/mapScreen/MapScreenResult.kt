@@ -4,4 +4,5 @@ import com.javadocmd.simplelatlng.LatLng
 
 sealed class MapScreenResult {
     data class PointSelectedResult(val point : LatLng?) : MapScreenResult()
+    //TODO POI selected result?
 }
