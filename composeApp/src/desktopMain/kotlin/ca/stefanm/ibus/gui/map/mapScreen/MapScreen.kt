@@ -6,6 +6,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
+import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.BackgroundGuidanceSetupTool
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenOpener
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
@@ -71,7 +72,8 @@ class MapScreen @Inject constructor(
     private val poiRepository: PoiRepository,
     private val guidanceService: GuidanceService,
     private val gpsMapCenterProvider: GpsMapCenterProvider,
-    private val bottomBarController: BottomBarController
+    private val bottomBarController: BottomBarController,
+    private val backgroundGuidanceSetupTool: BackgroundGuidanceSetupTool
 ) : NavigationNode<MapScreenResult> {
 
     companion object : MapScreenOpener {
@@ -548,7 +550,8 @@ class MapScreen @Inject constructor(
                                         ),
                                     )
                                 }
-                                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Browse -> {
+                                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Browse,
+                                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.BrowseOfferNavigation-> {
                                     listOf(
                                         ModalMenu.ModalMenuItem(
                                             title = "Main Menu",
@@ -727,9 +730,33 @@ class MapScreen @Inject constructor(
                                 }
                             )
                         )
-                    } else {
-                        //TODO maybe someday, buttons to dial the phone number?
                     }
+
+                    if (openMode.poiMode == MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.BrowseOfferNavigation) {
+                        add(
+                            TextMenuItem(
+                                title = "Set as Guidance start",
+                                onClicked = {
+                                    modalMenuService.closeSidePaneOverlay()
+                                    backgroundGuidanceSetupTool.setPoiAsStart(poi)
+                                    onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
+                                }
+                            )
+                        )
+                        add(
+                            TextMenuItem(
+                                title = "Set as Guidance end",
+                                onClicked = {
+                                    modalMenuService.closeSidePaneOverlay()
+                                    backgroundGuidanceSetupTool.setPoiAsEnd(poi)
+                                    onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
+                                }
+                            )
+                        )
+                    }
+
+                    //TODO maybe someday, buttons to dial the phone number?
+
                     add(TextMenuItem(
                         title = "Close Side-pane",
                         onClicked = {

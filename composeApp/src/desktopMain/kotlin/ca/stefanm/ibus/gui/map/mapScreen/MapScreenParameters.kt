@@ -41,6 +41,12 @@ data class MapScreenParameters(
             enum class PoiMode {
                 /** We're showing users a list of POIs to select one (the MapScree nreturns a LocationSelection result) */
                 Select,
+
+                /** Browse, but also offer buttons to set the POI as a
+                 *  Navigation start or end point, if the GuidanceSession allows
+                 *  modification.
+                 */
+                BrowseOfferNavigation,
                 /** We're showing users a listof POIs for aimless browsing. */
                 Browse
             }

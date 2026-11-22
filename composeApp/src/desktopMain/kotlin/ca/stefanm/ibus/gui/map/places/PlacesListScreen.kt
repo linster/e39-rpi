@@ -187,14 +187,14 @@ class PlacesListScreen @Inject constructor(
     private fun showOnMapSelectable(
         center: LatLng,
         all: List<FoundMapPoi>,
-        found : FoundMapPoi? = null, //Optional, if given, highlight the found one. TODO put an emoji at the start of the found one like a sherlock.
+        found : FoundMapPoi? = null, //Optional, if given, highlight the found one.
         ) {
         navigationNodeTraverser.navigateToNodeWithParameters(
             MapScreen::class.java,
             MapScreenParameters.PoiBrowser(
                 center,
                 all,
-                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.Browse,
+                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.BrowseOfferNavigation,
                 found
             )
         )

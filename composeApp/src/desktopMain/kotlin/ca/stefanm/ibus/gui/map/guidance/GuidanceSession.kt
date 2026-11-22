@@ -65,6 +65,12 @@ class GuidanceSession {
         sessionState = SessionState.TERMINATED
     }
 
+    fun reset() {
+        sessionState = SessionState.SETTING_UP
+        startPoint = null
+        endPoint = null
+    }
+
     override fun toString(): String {
         return "GuidanceSession(sessionState=$sessionState, startPoint=$startPoint, endPoint=$endPoint, route=$route)"
     }
