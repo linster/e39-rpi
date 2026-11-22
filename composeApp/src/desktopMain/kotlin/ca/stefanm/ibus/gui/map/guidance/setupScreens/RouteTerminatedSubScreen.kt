@@ -112,6 +112,7 @@ class RouteTerminatedSubScreen @Inject constructor(
                         TextMenuItem(
                             title = "Go Back",
                             onClicked = {
+                                guidanceService.clearCurrentSession()
                                 navigationNodeTraverser
                                     .setResultAndGoBack(
                                         this@RouteTerminatedSubScreen,
@@ -121,35 +122,35 @@ class RouteTerminatedSubScreen @Inject constructor(
                         )
                     ),
                     rightItems = listOf(
-                        TextMenuItem(
-                            title = "Start New Route...",
-                            onClicked = {
-                                guidanceService.clearCurrentSession()
-                            }
-                        ),
-                        TextMenuItem(
-                            title = "Save Route for Browsing",
-                            onClicked = {
-                                notificationHub.postNotificationBackground(
-                                    Notification(
-                                        Notification.NotificationImage.NONE,
-                                        "Enter Route Name"
-                                    )
-                                )
-                                modalMenuService.showKeyboard(
-                                    Keyboard.KeyboardType.FULL,
-                                    browsableRouteStorage.suggestRouteName()
-                                ) { enteredName ->
-                                    route.value?.let { points ->
-                                        browsableRouteStorage.saveRoute(
-                                            enteredName,
-                                            Route(path = points, Color.Magenta, Stroke(8F))
-                                        )
-                                    }
-                                }
-
-                            }
-                        )
+//                        TextMenuItem(
+//                            title = "Start New Route...",
+//                            onClicked = {
+//                                guidanceService.clearCurrentSession()
+//                            }
+//                        ),
+//                        TextMenuItem(
+//                            title = "Save Route for Browsing",
+//                            onClicked = {
+//                                notificationHub.postNotificationBackground(
+//                                    Notification(
+//                                        Notification.NotificationImage.NONE,
+//                                        "Enter Route Name"
+//                                    )
+//                                )
+//                                modalMenuService.showKeyboard(
+//                                    Keyboard.KeyboardType.FULL,
+//                                    browsableRouteStorage.suggestRouteName()
+//                                ) { enteredName ->
+//                                    route.value?.let { points ->
+//                                        browsableRouteStorage.saveRoute(
+//                                            enteredName,
+//                                            Route(path = points, Color.Magenta, Stroke(8F))
+//                                        )
+//                                    }
+//                                }
+//
+//                            }
+//                        )
                     )
                 )
             }
