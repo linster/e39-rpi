@@ -6,6 +6,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.BackgroundGuidanceSetupTool
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenOpener
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
@@ -30,6 +31,7 @@ import ca.stefanm.ibus.gui.map.places.MapPoi
 import ca.stefanm.ibus.gui.map.places.MapPoiLabels
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
+import ca.stefanm.ibus.gui.map.widget.ZoomCalculator
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
@@ -277,6 +279,10 @@ class MapScreen @Inject constructor(
 
         val selectablePois = SnapshotStateList<PoiOverlay.PoiOverlayItem>()
 
+
+        var viewPortWidth by remember { mutableStateOf(0.dp) }
+        var viewPortHeight by remember { mutableStateOf(0.dp) }
+
         if (parameters.openMode is MapScreenParameters.MapScreenOpenMode.PoiBrowser) {
             // TODO Populate the selectable POIs.
             // TODO Status bar should also show how many pois visible out of how many in result set.
@@ -329,8 +335,26 @@ class MapScreen @Inject constructor(
                 bottombarInfo.value = bottombarInfo.value.copy(
                     resultCount = list.size
                 )
+
+
                 //TODO filter the list here by whether the poi fits on the map
-                list.forEachIndexed { index, poi ->
+
+                val filteredList = remember(extents.centerState, extents.mapScaleState) {
+                    list.filter {
+                        ZoomCalculator.isLatLngInZoom(
+                            it.location,
+                            extents,
+                            viewportWidth = viewPortWidth,
+                            viewportHeight = viewPortHeight
+                        )
+                    }.also {
+                        bottombarInfo.value = bottombarInfo.value.copy(
+                            totalIndices = it.size
+                        )
+                    }
+                }
+
+                filteredList.forEachIndexed { index, poi ->
                     add(PoiOverlay.PoiOverlayItem(
                         label = poi.name,
                         position = poi.location,
@@ -416,6 +440,8 @@ class MapScreen @Inject constructor(
                 gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
             },
             onViewportSizeChanged = { widthDp, heightDp ->
+                viewPortWidth = widthDp
+                viewPortHeight = heightDp
                 gpsMapCenterProvider.onMapViewportChanged(widthDp, heightDp)
             }
         )
