@@ -43,6 +43,7 @@ import com.ginsberg.cirkle.circular
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -280,14 +281,14 @@ class MapScreen @Inject constructor(
                 tag = TAG
             )
 
-            val bottombarInfo = MutableStateFlow(BottomBarController.BottomBarViewState.MapPoiSelection.PoiSelectionInfo(
-                0, "None", 0, 0
-            ))
+            val bottombarInfo = remember {  MutableStateFlow(BottomBarController.BottomBarViewState.MapPoiSelection.PoiSelectionInfo(
+                0, "None1", 0, 0
+            )) }
 
             val poisExistOnScreen by remember { derivedStateOf { selectablePois.isNotEmpty() } }
             DisposableEffect(poisExistOnScreen) {
                 bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.MapPoiSelection(
-                    mapPoiSelectionInfo = bottombarInfo
+                    mapPoiSelectionInfo = bottombarInfo.asStateFlow()
                 )
                 onDispose {
                     bottomBarController.bottomBarViewState.value = BottomBarController.BottomBarViewState.DateTime
@@ -309,6 +310,8 @@ class MapScreen @Inject constructor(
                 poiListenerIsEnabled = knobListenerShouldBeEnabled
             }
 
+            // TODO I think this needs a launched effect here
+
             selectablePois.clear()
             selectablePois.addAll(buildList {
                 //TODO, filter by what's visible in the map view.
@@ -325,11 +328,13 @@ class MapScreen @Inject constructor(
                         position = poi.location,
                         icon = @Composable {
                             KnobObserverBuilder(knobStatePois) { allocatedIndex, currentIndex ->
-                                if (currentIndex == allocatedIndex) {
-                                    bottombarInfo.value = bottombarInfo.value.copy(
-                                        currentIndex = index,
-                                        currentItemName = poi.name,
-                                    )
+                                LaunchedEffect(allocatedIndex, currentIndex) {
+                                    if (currentIndex == allocatedIndex) {
+                                        bottombarInfo.value = bottombarInfo.value.copy(
+                                            currentIndex = index,
+                                            currentItemName = poi.name,
+                                        )
+                                    }
                                 }
                                 PoiOverlay.PoiOverlayItem.SelectablePoi(poi, index.toString()) {
                                     poiListenerIsEnabled = false
