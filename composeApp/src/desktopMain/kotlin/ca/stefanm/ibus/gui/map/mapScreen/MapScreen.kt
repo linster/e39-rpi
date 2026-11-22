@@ -603,6 +603,7 @@ class MapScreen @Inject constructor(
                        },
                         onClicked = {
                             modalMenuService.closeModalMenu()
+                            onOverlayStateChanged(MapOverlayState.NoOverlay)
                             navigationNodeTraverser.navigateToNode(GuidanceSetupScreen::class.java)
                         }
                     ),
@@ -719,7 +720,6 @@ class MapScreen @Inject constructor(
                             TextMenuItem(
                                 title = "Select this POI",
                                 onClicked = {
-                                    onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
                                     modalMenuService.closeSidePaneOverlay()
                                     navigationNodeTraverser.setResultAndGoBack(
                                         MapScreen::class.java,
@@ -727,6 +727,7 @@ class MapScreen @Inject constructor(
                                             poi.location
                                         )
                                     )
+                                    onOverlayStateChanged.invoke(MapOverlayState.NoOverlay)
                                 }
                             )
                         )
@@ -739,7 +740,7 @@ class MapScreen @Inject constructor(
                                 onClicked = {
                                     modalMenuService.closeSidePaneOverlay()
                                     backgroundGuidanceSetupTool.setPoiAsStart(poi)
-                                    onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
+                                    onOverlayStateChanged.invoke(MapOverlayState.NoOverlay)
                                 }
                             )
                         )
@@ -749,7 +750,7 @@ class MapScreen @Inject constructor(
                                 onClicked = {
                                     modalMenuService.closeSidePaneOverlay()
                                     backgroundGuidanceSetupTool.setPoiAsEnd(poi)
-                                    onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
+                                    onOverlayStateChanged.invoke(MapOverlayState.NoOverlay)
                                 }
                             )
                         )
@@ -760,7 +761,7 @@ class MapScreen @Inject constructor(
                     add(TextMenuItem(
                         title = "Close Side-pane",
                         onClicked = {
-                            onOverlayStateChanged.invoke(MapOverlayState.ModifyViewMenu)
+                            onOverlayStateChanged.invoke(MapOverlayState.NoOverlay)
                             modalMenuService.closeSidePaneOverlay()
                         }
                     ))
