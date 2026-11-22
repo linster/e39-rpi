@@ -121,6 +121,7 @@ data class PoiOverlay(
             fun SelectablePoi(
                 poi : MapPoi,
                 indexHint : String,
+                showPoiNameBox : Boolean = false,
                 //Open a sidepane with all the POI info.
                 onPoiClicked : (poi : MapPoi) -> Unit
             ) : @Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit = @Composable { allocatedIndex: Int, currentIndex: Int ->
@@ -129,8 +130,8 @@ data class PoiOverlay(
                 //The way it's layed out in the overlay layer is that the icon gets centered: the center of this box must
                 //also be the location of the icon. We'll have to make a slightly larger fake box
 
-                val boxWidth = 48F.halveIfNotPixelDoubled()
-                val boxHeight = 32F.halveIfNotPixelDoubled()
+                val boxWidth = 384F.halveIfNotPixelDoubled()
+                val boxHeight = 96F.halveIfNotPixelDoubled()
                 val circleRadius = 16F.halveIfNotPixelDoubled()
 
                 val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
@@ -144,7 +145,7 @@ data class PoiOverlay(
                     Modifier
                         .width(boxWidth.dp)
                         .height(boxHeight.dp)
-                        .border(1.dp, Color.Red)
+                        //.border(1.dp, Color.Red)
                         .clickable { onPoiClicked(poi) }
                 ) {
                     Canvas(Modifier
@@ -160,6 +161,7 @@ data class PoiOverlay(
                             color = circleColor
                         )
                     }
+                    //TODO move this in the canvas so it's centered.
                     Text(
                         text = indexHint,
                         color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
@@ -171,36 +173,40 @@ data class PoiOverlay(
                             )
                     )
 
-                    Box(
-                        Modifier
-                            .height((boxHeight * 0.25).dp)
-                            .width((boxWidth * 0.5).dp)
-                            .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
-                            .padding((0.6 * ThemeWrapper.ThemeHandle.current.smallItem.chipWidth).dp)
-                            .clickable { onPoiClicked(poi) }
-                    ) {
-                        Text(
-                            text = poi.name,
-                            modifier = Modifier.fillMaxWidth(),
-                            color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
-                            fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        if (isSelected) {
-                            //Draw the selection
-                            val highlightWidth = ThemeWrapper.ThemeHandle.current.smallItem.highlightWidth
-                            Canvas(
-                                Modifier.fillMaxSize()
-                            ) {
-                                drawRect(
-                                    color = selectedColor,
-                                    style = Stroke(
-                                        width = highlightWidth
+                    if (showPoiNameBox) {
+                        Box(
+                            Modifier
+                                .height((boxHeight * 0.3).dp)
+                                .width((boxWidth * 0.5).dp)
+                                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+
+                                .clickable { onPoiClicked(poi) }
+                        ) {
+                            Text(
+                                text = poi.name,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding((0.6 * ThemeWrapper.ThemeHandle.current.smallItem.chipWidth).dp),
+                                color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                                fontSize = TextUnit.Unspecified,
+//                            fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            if (isSelected) {
+                                //Draw the selection
+                                val highlightWidth = ThemeWrapper.ThemeHandle.current.smallItem.highlightWidth
+                                Canvas(
+                                    Modifier.fillMaxSize()
+                                ) {
+                                    drawRect(
+                                        color = selectedColor,
+                                        style = Stroke(
+                                            width = highlightWidth
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
-
                     }
                 }
             }

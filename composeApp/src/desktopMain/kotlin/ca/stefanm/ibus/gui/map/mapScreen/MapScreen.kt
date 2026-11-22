@@ -325,10 +325,12 @@ class MapScreen @Inject constructor(
                         position = poi.location,
                         icon = @Composable {
                             KnobObserverBuilder(knobStatePois) { allocatedIndex, currentIndex ->
-                                bottombarInfo.value = bottombarInfo.value.copy(
-                                    currentIndex = index,
-                                    currentItemName = poi.name,
-                                )
+                                if (currentIndex == allocatedIndex) {
+                                    bottombarInfo.value = bottombarInfo.value.copy(
+                                        currentIndex = index,
+                                        currentItemName = poi.name,
+                                    )
+                                }
                                 PoiOverlay.PoiOverlayItem.SelectablePoi(poi, index.toString()) {
                                     poiListenerIsEnabled = false
                                     showSelectablePoiSideMenu(poi, parameters.openMode)
