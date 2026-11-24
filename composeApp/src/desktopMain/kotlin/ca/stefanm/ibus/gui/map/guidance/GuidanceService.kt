@@ -6,6 +6,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.map.guidance.GuidanceInstructionTracker.Event
+import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.gui.map.repo.RemoteRouteRepository
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
@@ -13,6 +14,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -30,6 +32,7 @@ class GuidanceService @Inject constructor(
     private val notificationGuidanceInstructionConsumer: NotificationGuidanceInstructionConsumer,
     private val sideBarGuidanceInstructionConsumer: SideBarGuidanceInstructionConsumer,
     private val guidanceSetupScreenInstructionConsumer: GuidanceSetupScreenInstructionConsumer,
+    private val locationRepository: LocationRepository,
     private val coroutineScope: CoroutineScope,
     private val logger: Logger
 ) {
@@ -225,7 +228,7 @@ class GuidanceService @Inject constructor(
     val instructions: StateFlow<List<GuidanceInstruction>> get() = _instructions.asStateFlow()
     private val _instructions = MutableStateFlow<List<GuidanceInstruction>>(emptyList())
 
-    /** Where the car is (GPS, or the guidance debug window's fake positions). */
+    /** Where the car is: the LocationRepository's fixes (gpsd, the fake location service), or [updatePosition]. */
     val position: StateFlow<LatLng?> get() = _position.asStateFlow()
     private val _position = MutableStateFlow<LatLng?>(null)
 
@@ -263,7 +266,6 @@ class GuidanceService @Inject constructor(
         log("Route: ${_instructions.value.size} instructions, ${(route.lengthMeters / 1000).toInt()} km")
     }
 
-    //TODO this needs to be fed from gpsd.
     /** The car is at [position]: show, update or hide instructions (in guidance only). */
     fun updatePosition(position: LatLng) {
         coroutineScope.launch(guidanceThread) {
@@ -326,6 +328,16 @@ class GuidanceService @Inject constructor(
     private fun log(line: String) {
         logger.d(TAG, line)
         _eventLog.value = (_eventLog.value + "${LocalTime.now().truncatedTo(ChronoUnit.SECONDS)} $line").takeLast(200)
+    }
+
+    // Last in the class: the collector may run at once (on another thread), and
+    // updatePosition() needs everything above.
+    init {
+        // Every new fix from the location services. A stale fix isn't a new one:
+        // the position stays where it was.
+        coroutineScope.launch {
+            locationRepository.fix.filterNotNull().collect { fix -> updatePosition(fix.latLng) }
+        }
     }
 }
 
