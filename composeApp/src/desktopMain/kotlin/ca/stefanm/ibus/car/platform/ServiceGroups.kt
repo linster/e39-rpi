@@ -96,3 +96,9 @@ annotation class LongRunningGuiServices
     description = "Services that use the PIM bridge (e39-rpi-pim): new-mail notifications."
 )
 annotation class PimServiceGroup
+
+@PlatformServiceGroup(
+    name = "GpsLocationProviders",
+    description = "Services that tell where the car is: gpsd (a GPS receiver on USB or a UART HAT)."
+)
+annotation class GpsLocationProvidersServiceGroup
