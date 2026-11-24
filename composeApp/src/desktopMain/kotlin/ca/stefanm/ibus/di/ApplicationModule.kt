@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.di
 
+import ca.stefanm.ibus.gui.map.location.LocationModule
 import ca.stefanm.ibus.gui.chat.service.MatrixChatModule
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
@@ -57,6 +58,7 @@ annotation class ApplicationScope
 //    NavigationBindsModule::class,
     MatrixChatModule::class,
     MapModule::class,
+    LocationModule::class,
     MailModule::class,
     ContactsModule::class,
     AccountModule::class,

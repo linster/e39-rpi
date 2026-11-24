@@ -41,7 +41,7 @@ import kotlin.time.Duration.Companion.seconds
  * new one, or as soon as gpsd reports no fix.
  */
 @PlatformServiceInfo(
-    name = "GpsdService",
+    name = GpsdService.NAME,
     description = "Reads the car's position from gpsd (E39Config.GpsConfig: localhost:2947 by default), " +
             "reconnecting when gpsd isn't there."
 )
@@ -76,6 +76,8 @@ class GpsdService internal constructor(
 
     companion object {
         const val TAG = "GpsdService"
+        /** Its name in the car platform's service list (ConfigurablePlatform.findServiceByName). */
+        const val NAME = "GpsdService"
         val MIN_BACKOFF = 1.seconds
         val MAX_BACKOFF = 30.seconds
         val CONNECT_TIMEOUT = 2.seconds
