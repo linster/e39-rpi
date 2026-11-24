@@ -24,7 +24,7 @@ class GpsdLocationRepositoryTest {
     @Test
     fun noPlatformNoServiceNoPosition() {
         // Never run: no platform services.
-        val platform = ConfigurablePlatform(Provider { error("not used before run()") })
+        val platform = ConfigurablePlatform(Provider { error("not used before run()") }, Provider { error("not used before run()") })
         platform.stop()
         val repository = GpsdLocationRepository(platform, logger)
 

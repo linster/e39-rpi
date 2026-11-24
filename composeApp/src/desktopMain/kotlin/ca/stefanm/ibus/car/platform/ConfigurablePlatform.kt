@@ -10,7 +10,7 @@ import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.configuration.LaptopDeviceConfiguration
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.ApplicationScope
-import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.di.ApplicationComponent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -20,7 +20,10 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @ApplicationScope
 class ConfigurablePlatform @Inject constructor(
-    private val configurationStorage: Provider<ConfigurationStorage>
+    private val configurationStorage: Provider<ConfigurationStorage>,
+    // The component this platform belongs to (the GUI's): the car component is
+    // made from it, so the services get the same @ApplicationScope objects.
+    private val applicationComponent: Provider<ApplicationComponent>,
 ) {
 
     private var runStatusViewer : ConfigurablePlatformServiceRunStatusViewer? = null
@@ -80,7 +83,7 @@ class ConfigurablePlatform @Inject constructor(
         //destroy and recreate the Platform.
         stop()
 
-        configuredCarComponent = DaggerApplicationComponent.create()
+        configuredCarComponent = applicationComponent.get()
             .configuredCarComponent(ConfiguredCarModule(configuration))
 
         configurablePlatformServiceRunner =
