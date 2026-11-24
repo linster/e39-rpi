@@ -39,11 +39,15 @@ import ca.stefanm.ibus.gui.menu.widgets.*
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilder
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState.Companion.setupListener
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.toDynamicLambda
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.Keyboard.KeyboardType
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.keyboard.KeyboardViews
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.HalfScreenMenu
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
+import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
+import ca.stefanm.ibus.gui.menu.MenuWindow
 import ca.stefanm.ibus.lib.logging.Logger
 import ca.stefanm.ibus.resources.Res
 import ca.stefanm.ibus.resources.notification_alert_circle
@@ -106,6 +110,39 @@ object SidePanelMenu {
                     items = buttons
                 )
             }
+        }
+    }
+
+    /**
+     * Like [SidePanelMenu] with text and buttons, but for panes whose buttons
+     * don't fit: [text] stays above, and the buttons scroll with the knob
+     * ([SmoothScroll]) below it. A Go Back entry comes first so the pane can
+     * always be left without picking an action.
+     *
+     * Uses the knob listener of where it's shown ([MenuWindow.MenuWindowKnobListener],
+     * the modal one in a side pane).
+     */
+    @Composable
+    fun SmoothScrollSidePanelMenu(
+        title : String? = null,
+        tag : String? = null,
+        onGoBack : () -> Unit,
+        text : @Composable () -> Unit,
+        buttons : List<MenuItem>
+    ) {
+        SidePanelMenu(title) {
+            Column(Modifier.padding(horizontal = 10.dp.halveIfNotPixelDoubled(), vertical = 10.dp.halveIfNotPixelDoubled())) {
+                text()
+            }
+            SmoothScroll.SmoothScroll(
+                modifier = Modifier.fillMaxWidth(),
+                knobListenerService = MenuWindow.MenuWindowKnobListener.current,
+                tag = tag,
+                logger = MenuWindow.MenuWindowLogger.current,
+                prependGoBackEntry = false,
+                items = listOf(TextMenuItem("Go Back", onClicked = onGoBack).toDynamicLambda()) +
+                        buttons.map { it.toDynamicLambda() }
+            )
         }
     }
 
