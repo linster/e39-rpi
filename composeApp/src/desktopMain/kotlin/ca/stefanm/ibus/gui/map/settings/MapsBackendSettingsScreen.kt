@@ -40,7 +40,12 @@ class MapsBackendSettingsScreen @Inject constructor(
     override val thisClass: Class<out NavigationNode<Nothing>>
         get() = MapsBackendSettingsScreen::class.java
 
-    private fun apply(change: () -> Unit) {
+    /**
+     * Runs [change]; a refused value (IllegalArgumentException) becomes a notification.
+     * Not named apply: inside a scope lambda (e.g. Column { }) that resolves to Kotlin's T.apply,
+     * which catches nothing.
+     */
+    private fun tryChange(change: () -> Unit) {
         try {
             change()
         } catch (e: IllegalArgumentException) {
@@ -89,16 +94,17 @@ class MapsBackendSettingsScreen @Inject constructor(
                             TextMenuItem(
                                 title = "Set Host...",
                                 onClicked = {
-                                    modalMenuService.showKeyboard(Keyboard.KeyboardType.FULL, settings.host) {
-                                        apply { settingsRepository.setHost(it) }
+                                    // The current host: the menu keeps its first onClicked.
+                                    modalMenuService.showKeyboard(Keyboard.KeyboardType.FULL, settingsRepository.settings.value.host) {
+                                        tryChange { settingsRepository.setHost(it) }
                                     }
                                 }
                             ),
                             TextMenuItem(
                                 title = "Set Port...",
                                 onClicked = {
-                                    modalMenuService.showKeyboard(Keyboard.KeyboardType.NUMERIC, settings.port.toString()) {
-                                        apply {
+                                    modalMenuService.showKeyboard(Keyboard.KeyboardType.NUMERIC, settingsRepository.settings.value.port.toString()) {
+                                        tryChange {
                                             settingsRepository.setPort(
                                                 requireNotNull(it.trim().toIntOrNull()) { "Invalid port '$it'" }
                                             )
@@ -114,7 +120,7 @@ class MapsBackendSettingsScreen @Inject constructor(
                             ),
                             TextMenuItem(
                                 title = "Reset to ${MapsBackendSettings.DEFAULT.target}",
-                                onClicked = { apply { settingsRepository.resetToDefaults() } }
+                                onClicked = { tryChange { settingsRepository.resetToDefaults() } }
                             ),
                         )
                     )
