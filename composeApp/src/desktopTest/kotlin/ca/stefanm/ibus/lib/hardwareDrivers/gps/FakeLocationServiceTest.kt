@@ -43,14 +43,14 @@ class FakeLocationServiceTest {
 
     @Test
     fun ignoredWhileNotRunning() {
-        service.setLocation(LatLng(45.0, -75.0))
+        assertEquals(false, service.setLocation(LatLng(45.0, -75.0)))
         assertNull(repository.fix.value)
         assertEquals(GpsState.NO_GPSD, repository.state.value)
 
         service.onCreate()
-        service.setLocation(LatLng(45.0, -75.0))
+        assertEquals(true, service.setLocation(LatLng(45.0, -75.0)))
         service.onShutdown()
-        service.setLocation(LatLng(46.0, -76.0))
+        assertEquals(false, service.setLocation(LatLng(46.0, -76.0)))
         // Stopped: no source, last position kept.
         assertEquals(GpsState.NO_GPSD, repository.state.value)
         assertNull(repository.source.value)

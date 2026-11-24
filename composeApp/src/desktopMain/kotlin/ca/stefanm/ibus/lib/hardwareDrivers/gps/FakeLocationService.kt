@@ -48,13 +48,13 @@ class FakeLocationService @Inject constructor(
     /**
      * The car is at [latLng] (optionally moving at [speedMps] towards
      * [trackDeg]): reported to the [LocationRepository] as a current 3D fix.
-     * Ignored while the service isn't running.
+     * Ignored while the service isn't running. Whether it was reported.
      */
-    fun setLocation(latLng: LatLng, speedMps: Double? = null, trackDeg: Double? = null) {
+    fun setLocation(latLng: LatLng, speedMps: Double? = null, trackDeg: Double? = null): Boolean {
         synchronized(lock) {
             if (!running) {
                 logger.w(TAG, "Not running: ignoring location $latLng")
-                return
+                return false
             }
             locationRepository.reportFix(
                 NAME,
@@ -68,6 +68,7 @@ class FakeLocationService @Inject constructor(
                 )
             )
             locationRepository.reportState(NAME, GpsState.FIX)
+            return true
         }
     }
 }

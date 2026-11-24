@@ -7,6 +7,7 @@ import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.map.guidance.GuidanceInstructionTracker.Event
 import ca.stefanm.ibus.gui.map.location.LocationRepository
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsFix
 import ca.stefanm.ibus.gui.map.repo.RemoteRouteRepository
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
@@ -268,14 +269,25 @@ class GuidanceService @Inject constructor(
 
     /** The car is at [position]: show, update or hide instructions (in guidance only). */
     fun updatePosition(position: LatLng) {
-        coroutineScope.launch(guidanceThread) {
-            _position.value = position
-            if (guidanceSessionStorage.currentSession.sessionState != GuidanceSession.SessionState.IN_GUIDANCE) {
-                return@launch
-            }
-            dispatch(tracker.update(position))
-        }
+        coroutineScope.launch(guidanceThread) { handlePosition(position) }
     }
+
+    /** On [guidanceThread]. */
+    private suspend fun handlePosition(position: LatLng) {
+        _position.value = position
+        if (guidanceSessionStorage.currentSession.sessionState != GuidanceSession.SessionState.IN_GUIDANCE) {
+            return
+        }
+        dispatch(tracker.update(position))
+    }
+
+    /**
+     * The last LocationRepository fix guidance has handled (instructions shown,
+     * updated or passed). For the test probe: each fix is a new object (with its
+     * time), so it tells two fixes at the same place apart.
+     */
+    val lastHandledFix: StateFlow<GpsFix?> get() = _lastHandledFix.asStateFlow()
+    private val _lastHandledFix = MutableStateFlow<GpsFix?>(null)
 
     /** Hide the shown (or next) instruction and go on to the one after. */
     fun dismissInstruction() {
@@ -336,7 +348,12 @@ class GuidanceService @Inject constructor(
         // Every new fix from the location services. A stale fix isn't a new one:
         // the position stays where it was.
         coroutineScope.launch {
-            locationRepository.fix.filterNotNull().collect { fix -> updatePosition(fix.latLng) }
+            locationRepository.fix.filterNotNull().collect { fix ->
+                withContext(guidanceThread) {
+                    handlePosition(fix.latLng)
+                    _lastHandledFix.value = fix
+                }
+            }
         }
     }
 }
