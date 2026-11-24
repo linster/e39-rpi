@@ -153,7 +153,7 @@ class InGuidanceSubScreen @Inject constructor(
             notificationHub.postNotificationBackground(Notification(
                 Notification.NotificationImage.MAP_GENERAL,
                 "No GPS position",
-                "There's no GPS fix to centre the map on yet."
+                "There's no GPS fix to center the map on yet."
             ))
             return
         }

@@ -440,8 +440,8 @@ class MapScreen @Inject constructor(
                 gpsMapCenterProvider.onUserMapCenterChanged(extents.centerState, extents.mapScaleState )
             },
             onViewportSizeChanged = { widthDp, heightDp ->
-                viewPortWidth = widthDp
-                viewPortHeight = heightDp
+                viewPortWidth = widthDp.dp
+                viewPortHeight = heightDp.dp
                 gpsMapCenterProvider.onMapViewportChanged(widthDp, heightDp)
             }
         )

@@ -3,6 +3,7 @@ package ca.stefanm.ibus.gui.map.widget
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import ca.stefanm.ibus.gui.map.Extents
+import ca.stefanm.ibus.gui.map.latLngToTile
 import com.javadocmd.simplelatlng.LatLng
 import kotlin.math.abs
 
