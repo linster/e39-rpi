@@ -90,9 +90,13 @@ class EditConnectionScreen @Inject constructor(
 
     private fun openSidebarForConnection(saved : SavedConnection) {
         modalMenuService.showSidePaneOverlay(darkenBackground = true) {
-            SidePanelMenu.SidePanelMenu(
+            // Scrolls, with Go Back first: opening it just to look at a
+            // connection's details is fine.
+            SidePanelMenu.SmoothScrollSidePanelMenu(
                 title = "Connection",
-                @Composable {
+                tag = TAG,
+                onGoBack = { modalMenuService.closeSidePaneOverlay(true) },
+                text = @Composable {
                     InfoLabel("Name: ${saved.id}")
                     InfoLabel("Type: ${SavedConnectionsUseCase.prettyType(saved.type)}")
                     if (saved.ssid != null) {
@@ -102,7 +106,7 @@ class EditConnectionScreen @Inject constructor(
                     InfoLabel("Connect automatically: ${if (saved.autoconnect) "Yes" else "No"}")
                     InfoLabel("UUID: ${saved.uuid ?: "Unknown"}")
                 },
-                listOfNotNull(
+                buttons = listOfNotNull(
                     TextMenuItem("Rename", onClicked = { rename(saved) }),
                     TextMenuItem(
                         if (saved.autoconnect) "Don't Connect Automatically" else "Connect Automatically",
@@ -111,8 +115,7 @@ class EditConnectionScreen @Inject constructor(
                     if (saved.hasWifiPassword) {
                         TextMenuItem("Change Password", onClicked = { changePassword(saved) })
                     } else null,
-                    TextMenuItem("Delete", onClicked = { confirmDelete(saved) }),
-                    TextMenuItem("Go Back", onClicked = { modalMenuService.closeSidePaneOverlay(true) })
+                    TextMenuItem("Delete", onClicked = { confirmDelete(saved) })
                 )
             )
         }
