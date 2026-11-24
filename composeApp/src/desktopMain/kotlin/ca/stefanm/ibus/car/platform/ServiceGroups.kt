@@ -102,3 +102,10 @@ annotation class PimServiceGroup
     description = "Services that tell where the car is: gpsd (a GPS receiver on USB or a UART HAT)."
 )
 annotation class GpsLocationProvidersServiceGroup
+
+@PlatformServiceGroup(
+    name = "GpsLocationProvidersDebug",
+    description = "Location services for the laptop and tests (no receiver): a location they're given goes " +
+            "into the LocationRepository. Not for the car."
+)
+annotation class GpsLocationProvidersDebugServiceGroup

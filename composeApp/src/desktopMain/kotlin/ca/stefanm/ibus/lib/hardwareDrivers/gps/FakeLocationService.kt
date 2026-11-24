@@ -2,7 +2,7 @@ package ca.stefanm.ibus.lib.hardwareDrivers.gps
 
 import ca.stefanm.ibus.annotations.services.PlatformServiceInfo
 import ca.stefanm.ibus.car.di.ConfiguredCarScope
-import ca.stefanm.ibus.car.platform.GpsLocationProvidersServiceGroup
+import ca.stefanm.ibus.car.platform.GpsLocationProvidersDebugServiceGroup
 import ca.stefanm.ibus.car.platform.Service
 import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.lib.logging.Logger
@@ -20,7 +20,7 @@ import javax.inject.Inject
     description = "Puts a location it's given (setLocation) into the LocationRepository, as a fix. " +
             "For the laptop and tests: no receiver."
 )
-@GpsLocationProvidersServiceGroup
+@GpsLocationProvidersDebugServiceGroup
 @ConfiguredCarScope
 class FakeLocationService @Inject constructor(
     private val locationRepository: LocationRepository,

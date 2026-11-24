@@ -598,9 +598,9 @@ class TestProbe @Inject constructor(
         }
 
         /**
-         * The car platform's FakeLocationService, started if it isn't running (the
-         * runner's configuration doesn't start the GpsLocationProviders group, so
-         * GpsdService stays off).
+         * The car platform's FakeLocationService (group GpsLocationProvidersDebug),
+         * started if it isn't running. The runner's configuration doesn't start the
+         * GpsLocationProviders group, so GpsdService stays off.
          */
         private fun fakeLocationService(): FakeLocationService {
             val platform = configurablePlatform.get()

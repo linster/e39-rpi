@@ -12,8 +12,9 @@ import javax.inject.Inject
 
 /**
  * Where the car is, for the map and guidance. The one place the position is
- * kept: the location services (platform service group "GpsLocationProviders",
- * e.g. GpsdService) report into it, and everything else reads it.
+ * kept: the location services (platform service groups "GpsLocationProviders":
+ * GpsdService, and "GpsLocationProvidersDebug": FakeLocationService) report into
+ * it, and everything else reads it. The last report wins.
  *
  * App-wide: the platform's services get this same instance (their component
  * is made from the app's), and it outlives them across platform restarts.
