@@ -1,22 +1,82 @@
 package ca.stefanm.ibus.gui.map.location
 
+import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsFix
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsSatellites
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsState
+import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
 /**
- * Where the car is, for the map and guidance. App-wide: it outlives the car
- * platform's services (a platform restart makes new ones), so screens use
- * this rather than a service.
+ * Where the car is, for the map and guidance. The one place the position is
+ * kept: the location services (platform service group "GpsLocationProviders",
+ * e.g. GpsdService) report into it, and everything else reads it.
+ *
+ * App-wide: the platform's services get this same instance (their component
+ * is made from the app's), and it outlives them across platform restarts.
  */
-interface LocationRepository {
+@ApplicationScope
+class LocationRepository @Inject constructor(
+    private val logger: Logger,
+) {
+    companion object {
+        const val TAG = "LocationRepository"
+    }
+
+    private val lock = Any()
+
+    private val _fix = MutableStateFlow<GpsFix?>(null)
     /** The last fix: current while [state] is [GpsState.FIX], else the last known position (or null). */
-    val fix: StateFlow<GpsFix?>
+    val fix: StateFlow<GpsFix?> = _fix.asStateFlow()
 
-    /** For a reception indicator: no gpsd, no receiver, searching, fix, stale. */
-    val state: StateFlow<GpsState>
+    private val _state = MutableStateFlow(GpsState.NO_GPSD)
+    /** For a reception indicator: no source, no receiver, searching, fix, stale. */
+    val state: StateFlow<GpsState> = _state.asStateFlow()
 
-    /** Satellites used and visible, when known. */
-    val satellites: StateFlow<GpsSatellites?>
+    private val _satellites = MutableStateFlow<GpsSatellites?>(null)
+    /** Satellites used and visible, when the source knows. */
+    val satellites: StateFlow<GpsSatellites?> = _satellites.asStateFlow()
+
+    private val _source = MutableStateFlow<String?>(null)
+    /** The service that reported last (e.g. "GpsdService"); null when none is running. */
+    val source: StateFlow<String?> = _source.asStateFlow()
+
+    // --- For the location services ---------------------------------------
+
+    fun reportFix(source: String, fix: GpsFix) = synchronized(lock) {
+        _source.value = source
+        _fix.value = fix
+    }
+
+    fun reportState(source: String, state: GpsState) = synchronized(lock) {
+        _source.value = source
+        val old = _state.value
+        if (old != state) {
+            _state.value = state
+            logger.i(TAG, "$source: $old -> $state")
+        }
+    }
+
+    fun reportSatellites(source: String, satellites: GpsSatellites?) = synchronized(lock) {
+        _source.value = source
+        _satellites.value = satellites
+    }
+
+    /**
+     * [source] stopped. If it was the one reporting, there's no position
+     * source now: [GpsState.NO_GPSD], no satellites. The last fix is kept as
+     * the last known position.
+     */
+    fun sourceStopped(source: String) = synchronized(lock) {
+        if (_source.value != source) return@synchronized
+        _source.value = null
+        _satellites.value = null
+        if (_state.value != GpsState.NO_GPSD) {
+            logger.i(TAG, "$source stopped: ${_state.value} -> ${GpsState.NO_GPSD}")
+            _state.value = GpsState.NO_GPSD
+        }
+    }
 }

@@ -7,6 +7,7 @@ import ca.stefanm.ibus.car.platform.GpsLocationProvidersServiceGroup
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -15,9 +16,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -31,19 +29,20 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * Reads the car's position from gpsd (JSON over TCP, localhost:2947 on the
- * Pi's image, where gpsd is socket-activated: connecting starts it).
+ * Pi's image, where gpsd is socket-activated: connecting starts it), and
+ * reports it to the [LocationRepository].
  *
- * Connects, sends ?WATCH, and keeps [fix] (the last fix, kept when it goes
- * stale or gpsd goes away), [state], [satellites] and [devices] from gpsd's
- * TPV, SKY, DEVICES and DEVICE messages. When gpsd isn't there or the
- * connection drops, it tries again with backoff ([MIN_BACKOFF] doubling to
+ * Connects, sends ?WATCH, and from gpsd's TPV, SKY, DEVICES and DEVICE
+ * messages reports the fix, the state (no gpsd / no receiver / searching /
+ * fix / stale) and the satellites. When gpsd isn't there or the connection
+ * drops, it tries again with backoff ([MIN_BACKOFF] doubling to
  * [MAX_BACKOFF]). A fix is stale after `GpsConfig.staleAfterSeconds` without a
  * new one, or as soon as gpsd reports no fix.
  */
 @PlatformServiceInfo(
     name = GpsdService.NAME,
-    description = "Reads the car's position from gpsd (E39Config.GpsConfig: localhost:2947 by default), " +
-            "reconnecting when gpsd isn't there."
+    description = "Reads the car's position from gpsd (E39Config.GpsConfig: localhost:2947 by default) " +
+            "into the LocationRepository, reconnecting when gpsd isn't there."
 )
 @GpsLocationProvidersServiceGroup
 @ConfiguredCarScope
@@ -51,6 +50,7 @@ class GpsdService internal constructor(
     private val host: String,
     private val port: Int,
     private val staleAfter: Duration,
+    private val locationRepository: LocationRepository,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
     dispatcher: CoroutineDispatcher,
@@ -62,6 +62,7 @@ class GpsdService internal constructor(
 
     @Inject constructor(
         configurationStorage: ConfigurationStorage,
+        locationRepository: LocationRepository,
         logger: Logger,
         @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) coroutineScope: CoroutineScope,
         @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) dispatcher: CoroutineDispatcher,
@@ -69,6 +70,7 @@ class GpsdService internal constructor(
         host = configurationStorage.config[E39Config.GpsConfig.gpsdHost],
         port = configurationStorage.config[E39Config.GpsConfig.gpsdPort],
         staleAfter = configurationStorage.config[E39Config.GpsConfig.staleAfterSeconds].seconds,
+        locationRepository = locationRepository,
         logger = logger,
         coroutineScope = coroutineScope,
         dispatcher = dispatcher,
@@ -76,37 +78,32 @@ class GpsdService internal constructor(
 
     companion object {
         const val TAG = "GpsdService"
-        /** Its name in the car platform's service list (ConfigurablePlatform.findServiceByName). */
+        /** Its name in the car platform's service list, and as a [LocationRepository] source. */
         const val NAME = "GpsdService"
         val MIN_BACKOFF = 1.seconds
         val MAX_BACKOFF = 30.seconds
         val CONNECT_TIMEOUT = 2.seconds
-        /** How often [state] notices a fix going stale. */
+        /** How often the state is checked for a fix going stale. */
         val STATE_CHECK_INTERVAL = 500.milliseconds
     }
 
-    private val _fix = MutableStateFlow<GpsFix?>(null)
-    /** The last fix: current while [state] is [GpsState.FIX], else the last known position (or null). */
-    val fix: StateFlow<GpsFix?> = _fix.asStateFlow()
-
-    private val _state = MutableStateFlow(GpsState.NO_GPSD)
-    val state: StateFlow<GpsState> = _state.asStateFlow()
-
-    private val _satellites = MutableStateFlow<GpsSatellites?>(null)
-    /** From gpsd's last SKY; null when not connected. */
-    val satellites: StateFlow<GpsSatellites?> = _satellites.asStateFlow()
-
-    private val _devices = MutableStateFlow<Set<String>>(emptySet())
-    /** gpsd's receivers (device paths); empty when not connected. */
-    val devices: StateFlow<Set<String>> = _devices.asStateFlow()
-
     private val lock = Any()
+    /** Between doWork() and onShutdown(): a stopped service reports nothing more. */
+    private var running = false
     private var connected = false
+    /** gpsd's receivers (device paths); empty when not connected. */
+    private var devices: Set<String> = emptySet()
+    /** Whether this service has reported a fix (the repository keeps it as the last known position). */
+    private var hadFix = false
     /** When the last fix arrived ([nowMs]); null when there isn't a current one (gpsd said no fix). */
     private var lastFixAtMs: Long? = null
+    /** The state last reported. */
+    private var reportedState: GpsState? = null
 
     override suspend fun doWork() {
         coroutineScope {
+            synchronized(lock) { running = true }
+            updateState()
             // Notices fixes going stale between messages (gpsd sends nothing without a receiver).
             launch {
                 while (isActive) {
@@ -175,9 +172,9 @@ class GpsdService internal constructor(
             synchronized(lock) {
                 connected = false
                 lastFixAtMs = null
-                _devices.value = emptySet()
-                _satellites.value = null
+                devices = emptySet()
             }
+            if (synchronized(lock) { running }) locationRepository.reportSatellites(NAME, null)
             updateState()
         }
     }
@@ -185,28 +182,33 @@ class GpsdService internal constructor(
     private fun handle(message: GpsdMessage) {
         when (message) {
             is GpsdMessage.Version -> logger.d(TAG, "gpsd ${message.release}")
-            is GpsdMessage.Devices -> _devices.value = message.paths.toSet()
-            is GpsdMessage.Device -> _devices.value = if (message.active) {
-                _devices.value + message.path
-            } else {
-                logger.i(TAG, "Receiver ${message.path} is gone")
-                _devices.value - message.path
+            is GpsdMessage.Devices -> synchronized(lock) { devices = message.paths.toSet() }
+            is GpsdMessage.Device -> synchronized(lock) {
+                devices = if (message.active) {
+                    devices + message.path
+                } else {
+                    logger.i(TAG, "Receiver ${message.path} is gone")
+                    devices - message.path
+                }
             }
             is GpsdMessage.Tpv -> {
-                // A TPV comes from a receiver, even if DEVICES didn't list it yet.
-                message.device?.let { if (it !in _devices.value) _devices.value = _devices.value + it }
                 val fix = message.toFix()
                 synchronized(lock) {
+                    // A TPV comes from a receiver, even if DEVICES didn't list it yet.
+                    message.device?.let { devices = devices + it }
                     if (fix != null) {
-                        _fix.value = fix
+                        hadFix = true
                         lastFixAtMs = nowMs()
                     } else if (message.mode == 1) {
                         // gpsd says there's no fix: the last one isn't current any more.
                         lastFixAtMs = null
                     }
                 }
+                if (fix != null && synchronized(lock) { running }) locationRepository.reportFix(NAME, fix)
             }
-            is GpsdMessage.Sky -> _satellites.value = message.satellites
+            is GpsdMessage.Sky -> if (synchronized(lock) { running }) {
+                locationRepository.reportSatellites(NAME, message.satellites)
+            }
             is GpsdMessage.Other -> {}
         }
         updateState()
@@ -214,27 +216,31 @@ class GpsdService internal constructor(
 
     private fun updateState() {
         val new = synchronized(lock) {
+            if (!running) return
             val fixAt = lastFixAtMs
-            when {
+            val state = when {
                 !connected -> GpsState.NO_GPSD
-                _devices.value.isEmpty() -> GpsState.NO_RECEIVER
+                devices.isEmpty() -> GpsState.NO_RECEIVER
                 fixAt != null && nowMs() - fixAt <= staleAfter.inWholeMilliseconds -> GpsState.FIX
-                _fix.value != null -> GpsState.STALE
+                hadFix -> GpsState.STALE
                 else -> GpsState.SEARCHING
             }
+            if (state == reportedState) return
+            reportedState = state
+            state
         }
-        val old = _state.value
-        if (old != new) {
-            _state.value = new
-            logger.i(TAG, "$old -> $new")
-        }
+        locationRepository.reportState(NAME, new)
     }
 
     override fun onShutdown() {
         super.onShutdown()
-        synchronized(lock) { connected = false }
-        _devices.value = emptySet()
-        _satellites.value = null
-        _state.value = GpsState.NO_GPSD
+        synchronized(lock) {
+            running = false
+            connected = false
+            lastFixAtMs = null
+            devices = emptySet()
+            reportedState = null
+        }
+        locationRepository.sourceStopped(NAME)
     }
 }
