@@ -251,6 +251,22 @@ class Hmi:
         r = self.stub.ListScreens(pb2.ListScreensRequest(), timeout=self.timeout_s)
         return list(r.registered), list(r.unregistered)
 
+    def reopen_window(self, still_s=1.0, timeout_s=20):
+        """Closes the HMI window and opens it again (a theme's window size needs a new window), then
+        waits for it to stay put (it moves once after opening) and settle."""
+        self.stub.ReopenHmiWindow(pb2.ReopenHmiWindowRequest(), timeout=self.timeout_s)
+        deadline = time.time() + timeout_s
+        last, since = None, time.time()
+        while time.time() < deadline:
+            s = self.state()
+            where = (s.window_x, s.window_y)
+            if where != last:
+                last, since = where, time.time()
+            elif time.time() - since >= still_s:
+                break
+            time.sleep(0.2)
+        return self.wait_idle(from_now=True)
+
     def close_overlays(self):
         self.stub.CloseOverlays(pb2.CloseOverlaysRequest(), timeout=self.timeout_s)
         return self.wait_idle(from_now=True)
@@ -263,6 +279,21 @@ class Hmi:
 
     def reset_contacts_app(self):
         self.stub.ResetContactsApp(pb2.ResetContactsAppRequest(), timeout=self.timeout_s)
+
+    def reset_guidance(self):
+        """No guidance and no route: stops guidance if it runs, clears the session."""
+        self.stub.ResetGuidance(pb2.ResetGuidanceRequest(), timeout=self.timeout_s)
+
+    def guidance(self):
+        """The guidance session in memory (`.session`), as saved and read back (`.stored`),
+        and the last route calculation (GuidanceState in probe.proto)."""
+        return self.stub.GetGuidance(pb2.GetGuidanceRequest(), timeout=self.timeout_s)
+
+    def set_position(self, lat, lng):
+        """The car is at (lat, lng) (GuidanceService.updatePosition(), as GPS would); returns the
+        guidance state once guidance has handled it."""
+        return self.stub.SetPosition(pb2.SetPositionRequest(position=pb2.GeoPoint(latitude=lat, longitude=lng)),
+                                     timeout=self.timeout_s)
 
     def deliver_mail(self, subject="", text="", from_name="", from_email=""):
         self.stub.DeliverFakeMail(pb2.DeliverFakeMailRequest(

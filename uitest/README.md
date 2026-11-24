@@ -40,6 +40,7 @@ pytest --input ibus                                          # knob input as rea
 pytest --mail bridge                                         # the PIM bridge's mail (see "Bridge mode")
 pytest --target qemu                                         # a running e39-rpi-yocto scripts/run-qemu.sh
 pytest --target device --device e39-rpi.local                # a Pi
+pytest tests/guidance --maps-backend localhost:50051         # guidance, against this maps backend
 ```
 
 Results: screenshots of each step (`NN-name.png`), on failure
@@ -113,6 +114,17 @@ hmi.type_text("Hi Anna")                # on the open on-screen keyboard, then R
 hmi.wait_for_notification(r"^Mail sent$")   # then hides it (it covers the top of the screen)
 hmi.shot("name")                        # screenshot into the test's folder
 ```
+
+Guidance tests (`tests/guidance/`) set up a route with the knob as a user
+would (Map -> Guidance -> Setup..., start and end via "Select on Map",
+"Calculate Route", "Start Guidance", "Terminate Guidance") and check the
+session through the probe: `hmi.guidance()` gives the session in memory and
+as saved and read back (what the map draws after a save, and what the HMI
+loads at start), and the last route calculation; `hmi.reset_guidance()`
+clears it. They're marked `@pytest.mark.maps_backend`: they need the maps
+backend's gRPC API (e39-rpi-maps `scripts/run-backend.sh`; `--maps-backend`,
+default `localhost:50051`, written into the local target's configuration),
+and are skipped when it isn't reachable.
 
 Mark tests that need sample mail `@pytest.mark.fake_mail`, sample contacts
 `@pytest.mark.fake_contacts`, sample accounts `@pytest.mark.fake_accounts`

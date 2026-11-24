@@ -2,6 +2,7 @@ package ca.stefanm.ibus.testprobe
 
 import androidx.compose.runtime.snapshots.Snapshot
 import ca.stefanm.e39hmi.test.v1.ClearNotificationRequest
+import ca.stefanm.e39hmi.test.v1.ReopenHmiWindowRequest
 import ca.stefanm.e39hmi.test.v1.ListScreensRequest
 import ca.stefanm.e39hmi.test.v1.ListScreensResponse
 import ca.stefanm.e39hmi.test.v1.backStackEntry
@@ -49,6 +50,7 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationModule
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
+import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
@@ -67,6 +69,22 @@ import ca.stefanm.ibus.gui.pim.email.repo.MailSettingsRepository
 import ca.stefanm.ibus.gui.pim.email.repo.api.MailComposeRepo
 import ca.stefanm.ibus.gui.pim.email.repo.api.MessageListRepo
 import ca.stefanm.ibus.lib.logging.Logger
+import ca.stefanm.e39hmi.test.v1.GetGuidanceRequest
+import ca.stefanm.e39hmi.test.v1.GuidanceSessionInfo
+import ca.stefanm.e39hmi.test.v1.GuidanceState
+import ca.stefanm.e39hmi.test.v1.ResetGuidanceRequest
+import ca.stefanm.e39hmi.test.v1.ResetGuidanceResponse
+import ca.stefanm.e39hmi.test.v1.SetPositionRequest
+import ca.stefanm.e39hmi.test.v1.geoPoint
+import ca.stefanm.e39hmi.test.v1.guidanceInstructionInfo
+import ca.stefanm.e39hmi.test.v1.guidanceSessionInfo
+import ca.stefanm.e39hmi.test.v1.guidanceState
+import ca.stefanm.e39hmi.test.v1.resetGuidanceResponse
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
+import com.javadocmd.simplelatlng.LatLng
 import io.grpc.Server
 import io.grpc.Status
 import io.grpc.StatusException
@@ -117,6 +135,9 @@ class TestProbe @Inject constructor(
     private val contactEdit: Provider<ContactEditRepo>,
     private val accountRepository: Provider<AccountRepository>,
     private val addMailAccount: Provider<AddMailAccountRepo>,
+    private val guidanceService: Provider<GuidanceService>,
+    private val configurationStorage: Provider<ConfigurationStorage>,
+    private val windowManager: Provider<WindowManager>,
     private val logger: Logger,
 ) {
     companion object {
@@ -228,7 +249,9 @@ class TestProbe @Inject constructor(
      * them share (the screen, then overlays drawn on top of it).
      */
     private fun screenTexts(window: Window): List<ScreenText> {
-        val origin = window.locationOnScreen
+        // The content's corner, as capture() takes it: a window manager's
+        // frame and title bar (insets; none on Xvfb) aren't in screenshots.
+        val origin = window.locationOnScreen.let { java.awt.Point(it.x + window.insets.left, it.y + window.insets.top) }
         val found = mutableListOf<Pair<List<Int>, ScreenText>>()
         fun walk(a: javax.accessibility.Accessible?, path: List<Int>) {
             if (a == null || path.size > 60) return
@@ -354,6 +377,17 @@ class TestProbe @Inject constructor(
     private fun fakeMail(): FakeMailRepository = mailRepository.get() as? FakeMailRepository
         ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription("the HMI uses the PIM bridge's mail, not sample mail (useFakeData)"))
 
+    private fun sessionInfo(session: GuidanceSession): GuidanceSessionInfo {
+        fun point(p: LatLng) = geoPoint { latitude = p.latitude; longitude = p.longitude }
+        return guidanceSessionInfo {
+            state = session.sessionState.name
+            session.startPoint?.let { start = point(it) }
+            session.endPoint?.let { end = point(it) }
+            hasRoute = session.route != null
+            session.route?.let { r -> route.addAll(r.map(::point)) }
+        }
+    }
+
     private inner class Service : HmiTestProbeGrpcKt.HmiTestProbeCoroutineImplBase() {
 
         override suspend fun getState(request: GetStateRequest): HmiState = state()
@@ -447,6 +481,19 @@ class TestProbe @Inject constructor(
             return state()
         }
 
+        override suspend fun reopenHmiWindow(request: ReopenHmiWindowRequest): HmiState {
+            suspend fun waitForWindow(open: Boolean, what: String) {
+                withTimeoutOrNull(DEFAULT_TIMEOUT_MS.toLong()) {
+                    while (withContext(Dispatchers.Main) { hmiWindow() != null } != open) delay(50)
+                } ?: throw StatusException(Status.DEADLINE_EXCEEDED.withDescription("the HMI window didn't $what"))
+            }
+            withContext(Dispatchers.Main) { windowManager.get().closeHmiMainWindow() }
+            waitForWindow(open = false, what = "close")
+            withContext(Dispatchers.Main) { windowManager.get().openHmiMainWindow() }
+            waitForWindow(open = true, what = "open again")
+            return state()
+        }
+
         override suspend fun resetMailApp(request: ResetMailAppRequest): ResetMailAppResponse {
             withContext(Dispatchers.Main) {
                 mailSettings.get().resetToDefaults()
@@ -472,6 +519,62 @@ class TestProbe @Inject constructor(
                 (accountRepository.get() as? FakeAccountRepository)?.reset()
             }
             return resetAccountsResponse { }
+        }
+
+        override suspend fun resetGuidance(request: ResetGuidanceRequest): ResetGuidanceResponse {
+            val service = guidanceService.get()
+            if (service.getInstantaneousGuidanceSessionState() == GuidanceSession.SessionState.IN_GUIDANCE) {
+                service.stopGuidance()
+            }
+            service.clearCurrentSession()
+            // clearCurrentSession() resets the instructions and the route calculation on the guidance thread.
+            withTimeoutOrNull(5_000) {
+                while (service.instructions.value.isNotEmpty() ||
+                    service.routeCalculation.value != GuidanceService.RouteCalculation.Idle) delay(20)
+            }
+            return resetGuidanceResponse { }
+        }
+
+        override suspend fun getGuidance(request: GetGuidanceRequest): GuidanceState {
+            val service = guidanceService.get()
+            val stored = GuidanceSession(configurationStorage.get().config[E39Config.GuidanceConfig.currentSession])
+            val calculation = service.routeCalculation.value
+            return guidanceState {
+                session = sessionInfo(service.getCurrentSessionInstantaneous())
+                this.stored = sessionInfo(stored)
+                routeCalculation = calculation::class.simpleName ?: ""
+                when (calculation) {
+                    is GuidanceService.RouteCalculation.Failed -> routeCalculationError = calculation.message
+                    is GuidanceService.RouteCalculation.Calculated -> {
+                        routeLengthMeters = calculation.route.lengthMeters
+                        routeDurationSeconds = calculation.route.durationSeconds
+                    }
+                    else -> {}
+                }
+                instructions = service.instructions.value.size
+                instructionList.addAll(service.instructions.value.map { i ->
+                    guidanceInstructionInfo {
+                        index = i.index
+                        kind = i.kind.name
+                        text = i.text
+                        location = geoPoint { latitude = i.location.latitude; longitude = i.location.longitude }
+                        triggerRadiusMeters = i.triggerRadiusMeters
+                        pathIndex = i.pathIndex ?: -1
+                    }
+                })
+                service.trackerState.value.let {
+                    nextIndex = it.nextIndex
+                    shownIndex = it.shownIndex ?: -1
+                }
+            }
+        }
+
+        override suspend fun setPosition(request: SetPositionRequest): GuidanceState {
+            val service = guidanceService.get()
+            service.updatePosition(LatLng(request.position.latitude, request.position.longitude))
+            // Runs on the guidance thread after the position's handling (one thread, in order).
+            service.nextInstruction()
+            return getGuidance(GetGuidanceRequest.getDefaultInstance())
         }
 
         override suspend fun resetFakeMail(request: ResetFakeMailRequest): ResetFakeMailResponse {

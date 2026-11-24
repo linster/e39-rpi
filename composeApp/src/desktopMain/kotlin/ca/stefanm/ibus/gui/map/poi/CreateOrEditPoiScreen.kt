@@ -132,6 +132,7 @@ class CreateOrEditPoiScreen @Inject constructor(
             }
         }
 
+        //TODO This needs to be a smooth scroll.
         Column(Modifier.fillMaxSize()) {
             if (existingPoi == null) {
                 BmwSingleLineHeader("Create POI")

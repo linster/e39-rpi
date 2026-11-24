@@ -81,68 +81,79 @@ class RouteTerminatedSubScreen @Inject constructor(
 
             val route = guidanceService.getCurrentSession().map { it.route }.collectAsState(listOf())
 
-            route.value?.let { points ->
-                if (points.isNotEmpty()) {
-                    Box(
-                        Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        MapViewer(
-                            overlayProperties = OverlayProperties(
-                                mapScaleVisible = true,
-                                route = Route(points, Color.Magenta, Stroke(8F)),
-                                centerCrossHairsVisible = false,
-                                gpsReceptionIconVisible = false
-                            ),
-                            extents = Extents(
-                                center = Route.findCenter(points),
-                                mapScale = Route.findMapScaleForOverview(points)
-                            ),
-                            onCenterPositionUpdated = {}
-                        )
+            Box(modifier = Modifier.fillMaxSize()) {
+                route.value?.let { points ->
+                    if (points.isNotEmpty()) {
+                        Box(
+                            Modifier//.align(Alignment.CenterHorizontally)
+                        ) {
+                            MapViewer(
+                                overlayProperties = OverlayProperties(
+                                    mapScaleVisible = true,
+                                    route = Route(points, Color.Magenta, Stroke(8F)),
+                                    centerCrossHairsVisible = false,
+                                    gpsReceptionIconVisible = false
+                                ),
+                                extents = Extents(
+                                    center = Route.findCenter(points),
+                                    mapScale = Route.findMapScaleForOverview(points)
+                                ),
+                                onCenterPositionUpdated = {}
+                            )
+                        }
+                    } else {
+                        Spacer(Modifier.fillMaxHeight())
                     }
-                } else {
-                    Spacer(Modifier.fillMaxHeight())
                 }
-            }
 
 
-            HalfScreenMenu.BottomHalfTwoColumn(
-                leftItems = listOf(
-                    TextMenuItem(
-                        title = "Go Back",
-                        onClicked = { navigationNodeTraverser
-                            .setResultAndGoBack(this@RouteTerminatedSubScreen,
-                                GuidanceSetupScreen.SubScreenResult.GO_BACK)
-                        }
-                    )
-                ),
-                rightItems = listOf(
-                    TextMenuItem(
-                        title = "Start New Route...",
-                        onClicked = {
-                            guidanceService.clearCurrentSession()
-                        }
-                    ),
-                    TextMenuItem(
-                        title = "Save Route for Browsing",
-                        onClicked = {
-                            notificationHub.postNotificationBackground(Notification(
-                                Notification.NotificationImage.NONE,
-                                "Enter Route Name"
-                            ))
-                            modalMenuService.showKeyboard(
-                                Keyboard.KeyboardType.FULL,
-                                browsableRouteStorage.suggestRouteName()
-                            ) { enteredName ->
-                                route.value?.let { points ->
-                                    browsableRouteStorage.saveRoute(enteredName, Route(path = points, Color.Magenta, Stroke(8F)))
-                                }
+                HalfScreenMenu.TopHalfTwoColumn(
+                    leftItems = listOf(
+                        TextMenuItem(
+                            title = "Go Back",
+                            onClicked = {
+                                guidanceService.clearCurrentSession()
+                                navigationNodeTraverser
+                                    .setResultAndGoBack(
+                                        this@RouteTerminatedSubScreen,
+                                        GuidanceSetupScreen.SubScreenResult.GO_BACK
+                                    )
                             }
-
-                        }
+                        )
+                    ),
+                    rightItems = listOf(
+//                        TextMenuItem(
+//                            title = "Start New Route...",
+//                            onClicked = {
+//                                guidanceService.clearCurrentSession()
+//                            }
+//                        ),
+//                        TextMenuItem(
+//                            title = "Save Route for Browsing",
+//                            onClicked = {
+//                                notificationHub.postNotificationBackground(
+//                                    Notification(
+//                                        Notification.NotificationImage.NONE,
+//                                        "Enter Route Name"
+//                                    )
+//                                )
+//                                modalMenuService.showKeyboard(
+//                                    Keyboard.KeyboardType.FULL,
+//                                    browsableRouteStorage.suggestRouteName()
+//                                ) { enteredName ->
+//                                    route.value?.let { points ->
+//                                        browsableRouteStorage.saveRoute(
+//                                            enteredName,
+//                                            Route(path = points, Color.Magenta, Stroke(8F))
+//                                        )
+//                                    }
+//                                }
+//
+//                            }
+//                        )
                     )
                 )
-            )
+            }
         }
     }
 }

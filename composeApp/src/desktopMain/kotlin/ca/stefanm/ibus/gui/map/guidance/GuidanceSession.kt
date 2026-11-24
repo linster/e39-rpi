@@ -51,6 +51,7 @@ class GuidanceSession {
                 sessionState = SessionState.ROUTE_CALCULATED
             } else {
                 if (route != null) {
+                    //TODO claude did a shitty job of this.
                     StdOutLogger().d("GuidanceSession", "Incorrect state ${sessionState} for setting route $route.")
                 }
             }
@@ -64,6 +65,12 @@ class GuidanceSession {
         sessionState = SessionState.TERMINATED
     }
 
+    fun reset() {
+        sessionState = SessionState.SETTING_UP
+        startPoint = null
+        endPoint = null
+    }
+
     override fun toString(): String {
         return "GuidanceSession(sessionState=$sessionState, startPoint=$startPoint, endPoint=$endPoint, route=$route)"
     }
@@ -73,8 +80,12 @@ class GuidanceSession {
     constructor(session: PersistedGuidanceSession) {
         startPoint = if (session.startIsNull) null else session.start?.let { LatLng(it.first, it.second) }
         endPoint = if (session.endIsNull) null else session.end?.let { LatLng(it.first, it.second) }
+        // The route setter only takes a route in READY_TO_CALCULATE (both
+        // points set, as above), so the saved state is restored after it.
+        if (!session.routeIsNull) {
+            route = session.route?.map { LatLng(it.first, it.second) } ?: listOf()
+        }
         sessionState = SessionState.valueOf(session.sessionState)
-        route = if (session.routeIsNull) null else (session.route?.map { LatLng(it.first, it.second) } ?: listOf())
     }
 
     companion object {

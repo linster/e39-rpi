@@ -67,6 +67,7 @@ import ca.stefanm.ibus.gui.map.poi.PoiManagerScreen
 import ca.stefanm.ibus.gui.map.places.PlacesListScreen
 import ca.stefanm.ibus.gui.map.places.PlacesNearbyScreen
 import ca.stefanm.ibus.gui.map.settings.GuidanceInstructionSettingsScreen
+import ca.stefanm.ibus.gui.map.settings.MapFollowGpsSettingsScreen
 import ca.stefanm.ibus.gui.map.poi.PoiSelectorScreen
 import ca.stefanm.ibus.gui.map.settings.MapSettingsMainScreen
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorScreen
@@ -172,6 +173,7 @@ class NavigationModule {
         placesNearbyScreen: PlacesNearbyScreen,
         placesListScreen: PlacesListScreen,
         guidanceInstructionSettingsScreen: GuidanceInstructionSettingsScreen,
+        mapFollowGpsSettingsScreen: MapFollowGpsSettingsScreen,
         guidanceSetupScreen: GuidanceSetupScreen,
         setupRouteSubScreen: SetupRouteSubScreen,
         inGuidanceSubScreen: InGuidanceSubScreen,
@@ -290,6 +292,7 @@ class NavigationModule {
         placesNearbyScreen,
         placesListScreen,
         guidanceInstructionSettingsScreen,
+        mapFollowGpsSettingsScreen,
         guidanceSetupScreen,
         setupRouteSubScreen,
         inGuidanceSubScreen,

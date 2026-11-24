@@ -41,6 +41,7 @@ class MapSettingsMainScreen @Inject constructor(
                     "Map Tile Source" to { navigateToNode(MapTileSourceScreen::class.java) },
                     "Download Map Tiles" to { navigateToNode(MapTileDownloaderScreen::class.java) },
                     "Set Default Center" to { navigateToNode(MapCenterSettingsScreen::class.java) },
+                    "Follow GPS" to { navigateToNode(MapFollowGpsSettingsScreen::class.java) },
                     "Maps Backend" to { navigateToNode(MapsBackendSettingsScreen::class.java) },
                     "Guidance Instructions" to { navigateToNode(GuidanceInstructionSettingsScreen::class.java) }
                 )

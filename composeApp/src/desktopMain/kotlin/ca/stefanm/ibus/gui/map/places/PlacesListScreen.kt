@@ -6,11 +6,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
 import ca.stefanm.ibus.autoDiscover.AutoDiscover
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters
+import ca.stefanm.ibus.gui.map.poi.PoiRepository
 import ca.stefanm.ibus.gui.map.repo.RemoteMapPoiRepository
 import ca.stefanm.ibus.gui.map.repo.RemoteMapPoiRepository.SearchState
 import ca.stefanm.ibus.gui.map.repo.RemotePoiRepository
@@ -27,6 +29,7 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.MenuItem
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.SmoothScroll
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
+import com.javadocmd.simplelatlng.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,12 +96,21 @@ class PlacesListScreen @Inject constructor(
                 is SearchState.Found -> {
                     if (state.places.isEmpty()) {
                         status("Nothing within ${MapPoiLabels.distance(state.radiusMeters)}")
-                    }
-                    state.places.forEach { found ->
+                    } else {
+                        //TODO a preprend a "show all on selectable map" button.
+
                         add(TextMenuItem(
-                            title = MapPoiLabels.listEntry(found, query.center),
-                            onClicked = { showPlacePane(scope, query, found, state.places) },
+                            title = "Show all on map",
+                            onClicked = { showOnMapSelectable(query.center, state.places)}
                         ))
+                        state.places.forEach { found ->
+                            add(
+                                TextMenuItem(
+                                    title = MapPoiLabels.listEntry(found, query.center),
+                                    onClicked = { showPlacePane(scope, query, found, state.places) },
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -108,7 +120,7 @@ class PlacesListScreen @Inject constructor(
         // results arrive.
         key(items.size, state) {
             SmoothScroll.MenuWindowSmoothScrollContext(TAG).OneColumnSmoothScreen(
-                header = "${query.title} near ${query.centerLabel}",
+                header = "${query.title} near ${query.centerLabel} (${items.size})",
                 prependGoBackEntry = true,
                 items = items,
             )
@@ -135,7 +147,9 @@ class PlacesListScreen @Inject constructor(
                 buttons = listOf(
                     TextMenuItem("Show on map", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)
-                        showOnMap(found, all)
+                        //Todo change this to showAllOnMap once it's done (selectable).
+                        showOnMapSelectable(found.poi.location, all, found)
+//                        showOnMap(found, all)
                     }),
                     TextMenuItem("Save as POI", onClicked = {
                         modalMenuService.closeSidePaneOverlay(true)
@@ -151,14 +165,37 @@ class PlacesListScreen @Inject constructor(
 
     /** The map centred on the place, with the other results around it. */
     private fun showOnMap(found: FoundMapPoi, all: List<FoundMapPoi>) {
+        val allExceptFound = all.filterNot { it.poi.id == found.poi.id }
         navigationNodeTraverser.navigateToNodeWithParameters(
             MapScreen::class.java,
             MapScreenParameters(
-                persistUiStateOnClose = false,
+                persistUiStateOnClose = true, //TODO make selecting a map destination easier?
                 // Not the last browsing position: this place.
                 usePersistedStateOnOpen = false,
                 openMode = MapScreenParameters.MapScreenOpenMode.BrowsingMode(center = found.poi.location),
-                markers = all.map { it.poi.toUserPoi() },
+                markers = buildList {
+                    // We only choose eye-searing presets for the map because that's what's easy :D
+                    add(found.poi.toUserPoi().copy(icon = PoiRepository.Poi.PoiIcon.ColoredCircle(color = Color.Magenta)))
+                    addAll(allExceptFound.map { it.poi.toUserPoi() })
+                },
+            )
+        )
+    }
+
+    //TODO a showAllOnMaps method
+    //TODO show all the POIs on a map, and make them selectable.
+    private fun showOnMapSelectable(
+        center: LatLng,
+        all: List<FoundMapPoi>,
+        found : FoundMapPoi? = null, //Optional, if given, highlight the found one.
+        ) {
+        navigationNodeTraverser.navigateToNodeWithParameters(
+            MapScreen::class.java,
+            MapScreenParameters.PoiBrowser(
+                center,
+                all,
+                MapScreenParameters.MapScreenOpenMode.PoiBrowser.PoiMode.BrowseOfferNavigation,
+                found
             )
         )
     }

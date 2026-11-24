@@ -12,8 +12,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.MultiContentMeasurePolicy
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
@@ -29,6 +37,13 @@ import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
 import ca.stefanm.ibus.gui.map.widget.tile.LocalMapTileServices
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.map.places.FoundMapPoi
+import ca.stefanm.ibus.gui.map.places.MapPoi
+import ca.stefanm.ibus.gui.menu.widgets.CenterGradientWithEdgeHighlight
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderScope
+import ca.stefanm.ibus.gui.menu.widgets.knobListener.dynamic.KnobObserverBuilderState
+import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import kotlin.math.tan
 import kotlin.math.sinh
 import kotlin.math.ln
@@ -51,10 +66,14 @@ data class OverlayProperties(
 )
 
 //Defines how much of the world we can see
-data class Extents(
-    val center : LatLng,
-    val mapScale: MapScale
-)
+@Stable
+class Extents(
+    center : LatLng,
+    mapScale: MapScale
+) {
+    var centerState : LatLng by mutableStateOf(center)
+    var mapScaleState : MapScale by mutableStateOf(mapScale)
+}
 
 //This is the driving route we want to draw on the map.
 data class Route(
@@ -96,7 +115,135 @@ data class PoiOverlay(
         val position: LatLng,
         val icon : @Composable () -> Unit = @Composable {}
     ) {
-        companion object Icons {
+
+
+        //TODO selectable POI overlay item with a hint string box
+
+
+        companion object {
+
+            fun SelectablePoi(
+                poi : MapPoi,
+                indexHint : String,
+                showPoiNameBox : Boolean = false,
+                isPreselected : Boolean = false,
+                //Open a sidepane with all the POI info.
+                onPoiClicked : (poi : MapPoi) -> Unit
+            ) : @Composable KnobObserverBuilderScope.(allocatedIndex: Int, currentIndex: Int) -> Unit = @Composable { allocatedIndex: Int, currentIndex: Int ->
+
+                //First calculate the size of the overlay.
+                //The way it's layed out in the overlay layer is that the icon gets centered: the center of this box must
+                //also be the location of the icon. We'll have to make a slightly larger fake box
+
+                val boxWidth = 384F.halveIfNotPixelDoubled()
+                val boxHeight = 96F.halveIfNotPixelDoubled()
+                val circleRadius = 16F.halveIfNotPixelDoubled()
+
+                val selectedColor = ThemeWrapper.ThemeHandle.current.colors.selectedColor
+                val isSelected = allocatedIndex == currentIndex
+                val circleColor = if (isSelected) {
+                    selectedColor
+                } else {
+                    if (isPreselected) {
+                        Color.Red
+                    } else {
+                        Color.Blue
+                    }
+                }
+                Box(
+                    Modifier
+                        .width(boxWidth.dp)
+                        .height(boxHeight.dp)
+                        //.border(1.dp, Color.Red)
+                        .clickable { onPoiClicked(poi) }
+                ) {
+                    val textMeasurer = rememberTextMeasurer()
+                    val circleIndexStyle = TextStyle(
+                        color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                    )
+                    val circleIndexStyleSelected = TextStyle(
+                        color = Color.Black,
+                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                        fontWeight = FontWeight.Bold
+                    )
+                    //TODO if isPreselected, make the font red so that you
+                    //TODO know which one you're looking for.
+                    val circleIndexStylePreSelectedSelected = TextStyle(
+                        color = Color.Red,
+                        fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                    )
+                    val circleTextLayout = remember(indexHint, circleIndexStyle, circleIndexStyleSelected, isSelected) {
+                        val style = if (isSelected) {
+                            if (isPreselected) {
+                                circleIndexStylePreSelectedSelected
+                            } else {
+                                circleIndexStyleSelected
+                            }
+                        } else {
+                            circleIndexStyle
+                        }
+                        textMeasurer.measure(indexHint, style)
+                    }
+                    Canvas(Modifier
+                        .size((circleRadius * 2).dp)
+                        .absoluteOffset(
+                            x = (boxWidth / 2).dp,
+                            y = (boxHeight / 2).dp
+                        )
+                    ){
+                        drawCircle(
+                            center = Offset(size.width / 2, size.height / 2),
+                            radius = circleRadius,
+                            color = circleColor,
+                        )
+                        drawText(
+                            textLayoutResult = circleTextLayout,
+                            topLeft = Offset(
+                                x = center.x - circleTextLayout.size.width / 2f,
+                                y = center.y - circleTextLayout.size.height / 2f,
+                            )
+                        )
+                    }
+
+                    if (showPoiNameBox) {
+                        Box(
+                            Modifier
+                                .height((boxHeight * 0.3).dp)
+                                .width((boxWidth * 0.5).dp)
+                                .background(ThemeWrapper.ThemeHandle.current.colors.menuBackground)
+
+                                .clickable { onPoiClicked(poi) }
+                        ) {
+                            Text(
+                                text = poi.name,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding((0.6 * ThemeWrapper.ThemeHandle.current.smallItem.chipWidth).dp),
+                                color = ThemeWrapper.ThemeHandle.current.colors.TEXT_WHITE,
+                                fontSize = TextUnit.Unspecified,
+//                            fontSize = ThemeWrapper.ThemeHandle.current.smallItem.fontSize,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            if (isSelected) {
+                                //Draw the selection
+                                val highlightWidth = ThemeWrapper.ThemeHandle.current.smallItem.highlightWidth
+                                Canvas(
+                                    Modifier.fillMaxSize()
+                                ) {
+                                    drawRect(
+                                        color = selectedColor,
+                                        style = Stroke(
+                                            width = highlightWidth
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             val ICON_BLUE_CIRCLE = @Composable {
                 Canvas(Modifier.size(16.dp)){
                     drawCircle(
@@ -141,7 +288,9 @@ data class PoiOverlay(
 fun MapViewer(
     overlayProperties: OverlayProperties,
     extents: Extents,
-    onCenterPositionUpdated : (newCenter : LatLng) -> Unit
+    onCenterPositionUpdated : (newCenter : LatLng) -> Unit,
+    /** The map's size on screen, in dp: what's left of the window (theme, bottom bar). */
+    onViewportSizeChanged : (widthDp : Double, heightDp : Double) -> Unit = { _, _ -> },
 ) {
 
     Box(
@@ -156,6 +305,9 @@ fun MapViewer(
 
             val viewportHeight = this.maxHeight
             val viewportWidth = this.maxWidth
+            LaunchedEffect(viewportWidth, viewportHeight) {
+                onViewportSizeChanged(viewportWidth.value.toDouble(), viewportHeight.value.toDouble())
+            }
 
 
             //TODO have a big-ass box.
@@ -171,15 +323,18 @@ fun MapViewer(
 
             val stateVertical = rememberScrollState(0)
             val stateHorizontal = rememberScrollState(0)
+            // Until the first scroll to the centre, the scroll position (0, 0)
+            // isn't where the map is: its centre isn't reported.
+            var scrolledToCenter by remember { mutableStateOf(false) }
 
             // The tiles: the viewport's, plus one tile on each side. (Was six
             // viewport widths each way, square: 81 tiles for a 400x234 map,
             // 361 at 800x468, where about 2x1 / 4x2 are on the screen.) Panning
             // moves the centre and rebuilds the grid around it.
-            val zoom = extents.mapScale.mapZoomLevel
+            val zoom = extents.mapScaleState.mapZoomLevel
             val centerContainingTile = ExtentCalculator.getTileNumber(
-                extents.center.latitude,
-                extents.center.longitude,
+                extents.centerState.latitude,
+                extents.centerState.longitude,
                 zoom
             )
             val tilesEachSideX = ceil(viewportWidth.value / 2 / 256).toInt() + 1
@@ -210,16 +365,20 @@ fun MapViewer(
                 // pixel on the grid, minus half the viewport. (Was a fraction
                 // of the scroll range, exact only for a point in the middle
                 // of a large grid.)
-                LaunchedEffect(extents.center, extents.mapScale, viewportWidthPx, viewportHeightPx) {
+                LaunchedEffect(extents.centerState, extents.mapScaleState, viewportWidthPx, viewportHeightPx) {
                     withFrameNanos { }   // the grid is laid out: the scroll range is known
-                    val center = latLngToPixels(extents.center, extents, startX, endX, startY, endY, zoom, scaling)
+                    val center = latLngToPixels(extents.centerState, extents, startX, endX, startY, endY, zoom, scaling)
                     stateVertical.scrollTo((center.fromTop - viewportHeightPx / 2).roundToInt())
                     stateHorizontal.scrollTo((center.fromLeft - viewportWidthPx / 2).roundToInt())
+                    scrolledToCenter = true
                 }
 
                 // The map's centre now (the middle of the viewport), for
                 // "New POI on Center", Places Nearby, location selection.
-                LaunchedEffect(stateHorizontal.value, stateVertical.value) {
+                // Keyed on scrolledToCenter too: a centre already in the
+                // middle doesn't scroll, but is reported once scrolled to.
+                LaunchedEffect(stateHorizontal.value, stateVertical.value, scrolledToCenter) {
+                    if (!scrolledToCenter) return@LaunchedEffect
                     onCenterPositionUpdated(
                         pixelsToLatLng(
                             stateHorizontal.value + viewportWidthPx / 2.0,
@@ -255,8 +414,8 @@ fun MapViewer(
                 .padding(start = 16.dp, bottom = 16.dp)
             ) {
                 MapScaleWidget(
-                    extents.mapScale,
-                    extents.center,
+                    extents.mapScaleState,
+                    extents.centerState,
                     isSelected = false
                 )
             }
