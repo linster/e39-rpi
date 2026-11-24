@@ -7,6 +7,8 @@ import ca.stefanm.ibus.car.platform.GpsLocationProvidersServiceGroup
 import ca.stefanm.ibus.car.platform.LongRunningService
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.map.location.GpsdSettings
+import ca.stefanm.ibus.gui.map.location.GpsdSettingsRepository
 import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.lib.logging.Logger
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,8 +18,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -36,19 +41,20 @@ import kotlin.time.Duration.Companion.seconds
  * messages reports the fix, the state (no gpsd / no receiver / searching /
  * fix / stale) and the satellites. When gpsd isn't there or the connection
  * drops, it tries again with backoff ([MIN_BACKOFF] doubling to
- * [MAX_BACKOFF]). A fix is stale after `GpsConfig.staleAfterSeconds` without a
+ * [MAX_BACKOFF]). gpsd's host and port come from [GpsdSettingsRepository]: a
+ * change reconnects at once. A fix is stale after `GpsConfig.staleAfterSeconds` without a
  * new one, or as soon as gpsd reports no fix.
  */
 @PlatformServiceInfo(
     name = GpsdService.NAME,
-    description = "Reads the car's position from gpsd (E39Config.GpsConfig: localhost:2947 by default) " +
-            "into the LocationRepository, reconnecting when gpsd isn't there."
+    description = "Reads the car's position from gpsd (Map Settings -> GPS: localhost:2947 by default) " +
+            "into the LocationRepository, reconnecting when gpsd isn't there or its address changes."
 )
 @GpsLocationProvidersServiceGroup
 @ConfiguredCarScope
 class GpsdService internal constructor(
-    private val host: String,
-    private val port: Int,
+    /** Where gpsd is; a change reconnects. */
+    private val settings: StateFlow<GpsdSettings>,
     private val staleAfter: Duration,
     private val locationRepository: LocationRepository,
     private val logger: Logger,
@@ -62,13 +68,13 @@ class GpsdService internal constructor(
 
     @Inject constructor(
         configurationStorage: ConfigurationStorage,
+        gpsdSettingsRepository: GpsdSettingsRepository,
         locationRepository: LocationRepository,
         logger: Logger,
         @Named(ConfiguredCarModule.SERVICE_COROUTINE_SCOPE) coroutineScope: CoroutineScope,
         @Named(ConfiguredCarModule.SERVICE_COROUTINE_DISPATCHER) dispatcher: CoroutineDispatcher,
     ) : this(
-        host = configurationStorage.config[E39Config.GpsConfig.gpsdHost],
-        port = configurationStorage.config[E39Config.GpsConfig.gpsdPort],
+        settings = gpsdSettingsRepository.settings,
         staleAfter = configurationStorage.config[E39Config.GpsConfig.staleAfterSeconds].seconds,
         locationRepository = locationRepository,
         logger = logger,
@@ -115,35 +121,52 @@ class GpsdService internal constructor(
             var backoff = minBackoff
             var failures = 0
             while (isActive) {
+                val target = settings.value
                 val gotData = try {
-                    session()
+                    session(target)
                 } catch (e: IOException) {
                     currentCoroutineContext().ensureActive()
                     // Logged once per outage, not on every retry.
-                    if (failures == 0) logger.w(TAG, "gpsd at $host:$port: ${e.message}; retrying")
+                    if (failures == 0 && settings.value == target) {
+                        logger.w(TAG, "gpsd at ${target.target}: ${e.message}; retrying")
+                    }
                     false
                 }
                 failures = if (gotData) 0 else failures + 1
                 if (gotData) backoff = minBackoff
-                delay(backoff)
-                backoff = minOf(backoff * 2, maxBackoff)
+                // Wait before trying again, unless gpsd's address changes: then at once.
+                val changed = settings.value != target || withTimeoutOrNull(backoff) {
+                    settings.first { it != target }
+                } != null
+                if (changed) {
+                    logger.i(TAG, "gpsd is now at ${settings.value.target}")
+                    backoff = minBackoff
+                    failures = 0
+                } else {
+                    backoff = minOf(backoff * 2, maxBackoff)
+                }
             }
         }
     }
 
-    /** One connection to gpsd, until it closes. Whether gpsd sent anything. */
-    private suspend fun session(): Boolean = coroutineScope {
+    /** One connection to gpsd at [target], until it closes or the settings change. Whether gpsd sent anything. */
+    private suspend fun session(target: GpsdSettings): Boolean = coroutineScope {
         val socket = Socket()
         // A blocking read doesn't see cancellation: closing the socket ends it.
         val closer = launch {
             try { awaitCancellation() } finally { socket.close() }
         }
+        // gpsd's address changed: end this connection.
+        val settingsWatcher = launch {
+            settings.first { it != target }
+            socket.close()
+        }
         var gotData = false
         try {
-            socket.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT.inWholeMilliseconds.toInt())
+            socket.connect(InetSocketAddress(target.host, target.port), CONNECT_TIMEOUT.inWholeMilliseconds.toInt())
             socket.tcpNoDelay = true
             synchronized(lock) { connected = true }
-            logger.i(TAG, "Connected to gpsd at $host:$port")
+            logger.i(TAG, "Connected to gpsd at ${target.target}")
             updateState()
 
             socket.getOutputStream().apply {
@@ -161,12 +184,13 @@ class GpsdService internal constructor(
         } catch (e: IOException) {
             currentCoroutineContext().ensureActive()
             if (gotData) {
-                logger.w(TAG, "Lost gpsd: ${e.message}")
+                if (settings.value == target) logger.w(TAG, "Lost gpsd: ${e.message}")
                 gotData
             } else {
                 throw e
             }
         } finally {
+            settingsWatcher.cancel()
             closer.cancel()
             socket.close()
             synchronized(lock) {
