@@ -13,13 +13,18 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
+import ca.stefanm.ca.stefanm.ibus.gui.map.widget.GpsReceptionOverlayState
 import ca.stefanm.ibus.di.DaggerApplicationComponent
+import ca.stefanm.ibus.gui.debug.windows.EnumColumn
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
+import ca.stefanm.ibus.gui.debug.windows.NumericTextViewWithSpinnerButtons
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsSatellites
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsState
 
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
@@ -58,7 +63,8 @@ class MapDebug @Inject constructor(
         val overlayProperties = remember { mutableStateOf(OverlayProperties(
             centerCrossHairsVisible = false,
             mapScaleVisible = false,
-            gpsReceptionIconVisible = false
+            gpsReceptionIconVisible = false,
+            gpsReceptionOverlayState = null //Gets overwritten.
         )) }
 
         val extents = remember { mutableStateOf(Extents(
@@ -238,6 +244,10 @@ class MapDebug @Inject constructor(
                 NestingCardHeader("Overlays")
 
                 val showGpsReceptionIndicator = remember { mutableStateOf(false)}
+
+                val satellites = remember { mutableStateOf<GpsSatellites?>(null) }
+                val state = remember { mutableStateOf(GpsState.NO_GPSD) }
+
                 val showMapScale = remember { mutableStateOf(false)}
                 val showMapCrosshairs = remember { mutableStateOf(false)}
 
@@ -245,12 +255,17 @@ class MapDebug @Inject constructor(
                     combine(
                         snapshotFlow { showGpsReceptionIndicator.value },
                         snapshotFlow { showMapScale.value },
-                        snapshotFlow { showMapCrosshairs.value }
-                    ) { showGpsReceptionIndicator, mapScale, showMapCrosshairs ->
+                        snapshotFlow { showMapCrosshairs.value },
+                        snapshotFlow { satellites.value }
+                    ) { showGpsReceptionIndicator, mapScale, showMapCrosshairs, _ ->
                         OverlayProperties(
                             centerCrossHairsVisible = showMapCrosshairs,
                             mapScaleVisible = mapScale,
-                            gpsReceptionIconVisible = showGpsReceptionIndicator
+                            gpsReceptionIconVisible = showGpsReceptionIndicator,
+                            gpsReceptionOverlayState = GpsReceptionOverlayState(
+                                satellites = satellites,
+                                state = state
+                            )
                         )
                     }.collect {
                         onOverlayPropertiesChanged(it)
@@ -260,12 +275,39 @@ class MapDebug @Inject constructor(
                 val mapScaleZoom = remember { mutableStateOf(MapScale.METERS_50) }
 
 
-                Row {
-                    Checkbox(
-                        checked = showGpsReceptionIndicator.value,
-                        onCheckedChange = { showGpsReceptionIndicator.value = it }
-                    )
-                    Text("GpsReception indicator")
+                NestingCard {
+                    NestingCardHeader("GPS Reception Icon")
+                    Row {
+                        Checkbox(
+                            checked = showGpsReceptionIndicator.value,
+                            onCheckedChange = { showGpsReceptionIndicator.value = it }
+                        )
+                        Text("GpsReception indicator visible?")
+                    }
+
+                    NestingCard {
+                        NestingCardHeader("State")
+                        EnumColumn(
+                            currentEntry = state.value,
+                            onEntryChanged = { state.value = it}
+                        )
+                    }
+
+                    NestingCard {
+                        NestingCardHeader("Satelites")
+                        NumericTextViewWithSpinnerButtons(
+                            label = "Used",
+                            onValueChanged = { satellites.value = satellites.value?.copy(
+                                used = it
+                            )}
+                        )
+                        NumericTextViewWithSpinnerButtons(
+                            label = "Visible",
+                            onValueChanged = { satellites.value = satellites.value?.copy(
+                                visible = it
+                            )}
+                        )
+                    }
                 }
 
                 Row {

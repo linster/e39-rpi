@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.BackgroundGuidanceSetupTool
+import ca.stefanm.ca.stefanm.ibus.gui.map.widget.GpsReceptionOverlayState
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenOpener
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
@@ -24,6 +25,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.map.*
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.gui.map.mapScreen.MapOverlayState
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
@@ -75,7 +77,8 @@ class MapScreen @Inject constructor(
     private val guidanceService: GuidanceService,
     private val gpsMapCenterProvider: GpsMapCenterProvider,
     private val bottomBarController: BottomBarController,
-    private val backgroundGuidanceSetupTool: BackgroundGuidanceSetupTool
+    private val backgroundGuidanceSetupTool: BackgroundGuidanceSetupTool,
+    private val locationRepository: LocationRepository
 ) : NavigationNode<MapScreenResult> {
 
     companion object : MapScreenOpener {
@@ -265,6 +268,7 @@ class MapScreen @Inject constructor(
 
         val poiList by poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList())
 
+        //TODO use the locationRepository here.
         val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = guidanceService.position.map { latLng ->
             if (latLng != null) {
                 PoiOverlay.PoiOverlayItem(
@@ -395,6 +399,10 @@ class MapScreen @Inject constructor(
                     currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
                 gpsReceptionIconVisible = false,
+                gpsReceptionOverlayState = GpsReceptionOverlayState(
+                    state = locationRepository.state.collectAsState(),
+                    satellites = locationRepository.satellites.collectAsState()
+                ),
                 //TODO this needs a KnobListener state, and to have the poi overlay be built outside of here.
                 poiOverlay = (poiList + parameters.markers).let { list ->
                     logger.d("POI LIST", list.toString())

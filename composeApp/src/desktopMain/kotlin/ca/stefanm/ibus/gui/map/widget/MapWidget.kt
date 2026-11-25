@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import ca.stefanm.ca.stefanm.ibus.gui.map.widget.GpsReceptionIndicator
+import ca.stefanm.ca.stefanm.ibus.gui.map.widget.GpsReceptionOverlayState
 import ca.stefanm.ibus.gui.map.widget.ExtentCalculator
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.gui.map.widget.MapScaleWidget
@@ -61,6 +63,7 @@ data class OverlayProperties(
     val centerCrossHairsVisible: Boolean,
     val mapScaleVisible : Boolean,
     val gpsReceptionIconVisible : Boolean,
+    val gpsReceptionOverlayState: GpsReceptionOverlayState?,
     val route : Route? = null,
     val poiOverlay: PoiOverlay? = null
 )
@@ -420,6 +423,19 @@ fun MapViewer(
                 )
             }
         }
+
+        if (overlayProperties.gpsReceptionIconVisible && overlayProperties.gpsReceptionOverlayState != null) {
+            Box(Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 16.dp, end = 16.dp)
+            ) {
+                GpsReceptionIndicator(
+                    overlayProperties.gpsReceptionOverlayState
+                )
+            }
+        }
+
+        // TODO add gps overlay indicator
 
         if (overlayProperties.centerCrossHairsVisible) {
             val strokeWidth = 8F.halveIfNotPixelDoubled()

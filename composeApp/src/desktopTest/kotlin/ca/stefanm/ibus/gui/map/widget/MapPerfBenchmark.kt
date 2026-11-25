@@ -64,7 +64,12 @@ internal class MapPerfBenchmark {
             ImageComposeScene(w, h, Density(1F)) {
                 CompositionLocalProvider(ThemeWrapper.ThemeHandle provides Themes.BmwBlueNormalSize) {
                     MapViewer(
-                        overlayProperties = OverlayProperties(false, false, false),
+                        overlayProperties = OverlayProperties(
+                            centerCrossHairsVisible = false,
+                            mapScaleVisible = false,
+                            gpsReceptionIconVisible = false,
+                            gpsReceptionOverlayState = null
+                        ),
                         extents = Extents(LatLng(45.3154699, -75.9194058), MapScale.KILOMETERS_1_6),
                         onCenterPositionUpdated = {},
                     )
