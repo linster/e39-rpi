@@ -268,8 +268,10 @@ class MapScreen @Inject constructor(
 
         val poiList by poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList())
 
-        //TODO use the locationRepository here.
-        val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = guidanceService.position.map { latLng ->
+        // Enable the gps marker when any of the gps services are running.
+        val anyLocationServiceRunning by locationRepository.anyLocationServiceRunning().collectAsState(false)
+
+        val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = locationRepository.getPosition().map { latLng ->
             if (latLng != null) {
                 PoiOverlay.PoiOverlayItem(
                     label = "GPS Location",
@@ -288,9 +290,6 @@ class MapScreen @Inject constructor(
         var viewPortHeight by remember { mutableStateOf(0.dp) }
 
         if (parameters.openMode is MapScreenParameters.MapScreenOpenMode.PoiBrowser) {
-            // TODO Populate the selectable POIs.
-            // TODO Status bar should also show how many pois visible out of how many in result set.
-
             var poiListenerIsEnabled by remember { mutableStateOf(false) }
             val knobStatePois = KnobObserverBuilderState.setupEnableableListener(
                 knobListenerService = knobListenerService,
@@ -398,7 +397,7 @@ class MapScreen @Inject constructor(
                 centerCrossHairsVisible =
                     currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
-                gpsReceptionIconVisible = false,
+                gpsReceptionIconVisible = anyLocationServiceRunning,
                 gpsReceptionOverlayState = GpsReceptionOverlayState(
                     state = locationRepository.state.collectAsState(),
                     satellites = locationRepository.satellites.collectAsState()

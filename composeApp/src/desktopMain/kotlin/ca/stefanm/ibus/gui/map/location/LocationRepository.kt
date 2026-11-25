@@ -1,13 +1,31 @@
 package ca.stefanm.ibus.gui.map.location
 
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.car.platform.PlatformService
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.FakeLocationService
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsFix
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsSatellites
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsState
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsdService
 import ca.stefanm.ibus.lib.logging.Logger
+import com.javadocmd.simplelatlng.LatLng
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.any
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformLatest
 import javax.inject.Inject
 
 /**
@@ -22,6 +40,7 @@ import javax.inject.Inject
 @ApplicationScope
 class LocationRepository @Inject constructor(
     private val logger: Logger,
+    private val configurablePlatform: ConfigurablePlatform
 ) {
     companion object {
         const val TAG = "LocationRepository"
@@ -45,11 +64,21 @@ class LocationRepository @Inject constructor(
     /** The service that reported last (e.g. "GpsdService"); null when none is running. */
     val source: StateFlow<String?> = _source.asStateFlow()
 
+    private val _position = MutableStateFlow<LatLng?>(null)
+
+    fun getPosition() : Flow<LatLng?> {
+        return fix.map { it?.latLng }
+    }
+    fun getPositionStateFlow() : StateFlow<LatLng?> {
+        return _position
+    }
+
     // --- For the location services ---------------------------------------
 
     fun reportFix(source: String, fix: GpsFix) = synchronized(lock) {
         _source.value = source
         _fix.value = fix
+        _position.value = fix.latLng
     }
 
     fun reportState(source: String, state: GpsState) = synchronized(lock) {
@@ -79,5 +108,33 @@ class LocationRepository @Inject constructor(
             logger.i(TAG, "$source stopped: ${_state.value} -> ${GpsState.NO_GPSD}")
             _state.value = GpsState.NO_GPSD
         }
+    }
+
+
+    fun anyLocationServiceRunning() : Flow<Boolean> {
+        val serviceNames = listOf(
+            FakeLocationService.NAME,
+            GpsdService.NAME
+        )
+        return serviceNames
+            .map { isLocationServiceRunning(it) }
+            .let { combine(it) { it.any()} }
+    }
+
+    private fun isLocationServiceRunning (name : String) : Flow<Boolean> {
+        return configurablePlatform.servicesRunning
+            .transformLatest {
+                if (it.isEmpty()) {
+                    emit(false)
+                } else {
+                    val anyRunning = it
+                        .filter { it.name == name }
+                        .flatMap { it.children }
+                        .map { it.runStatus }
+                        .merge()
+                        .map { it == PlatformService.RunStatus.RUNNING }
+                    emitAll(anyRunning)
+                }
+            }
     }
 }
