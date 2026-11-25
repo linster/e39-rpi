@@ -128,8 +128,8 @@ class LocationRepository @Inject constructor(
                     emit(false)
                 } else {
                     val anyRunning = it
-                        .filter { it.name == name }
-                        .flatMap { it.children }
+                        .flatMap { group -> group.children }
+                        .filter { service -> service.name == name }
                         .map { it.runStatus }
                         .merge()
                         .map { it == PlatformService.RunStatus.RUNNING }

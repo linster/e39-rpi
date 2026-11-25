@@ -269,10 +269,12 @@ class MapScreen @Inject constructor(
         val poiList by poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList())
 
         // Enable the gps marker when any of the gps services are running.
-        val anyLocationServiceRunning by locationRepository.anyLocationServiceRunning().collectAsState(false)
+        val anyLocationServiceRunning by remember {
+            locationRepository.anyLocationServiceRunning()
+        }.collectAsState(false)
 
         val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = locationRepository.getPosition().map { latLng ->
-            if (latLng != null) {
+            if (latLng != null && anyLocationServiceRunning) {
                 PoiOverlay.PoiOverlayItem(
                     label = "GPS Location",
                     position = latLng,
