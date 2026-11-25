@@ -255,9 +255,8 @@ class MapDebug @Inject constructor(
                     combine(
                         snapshotFlow { showGpsReceptionIndicator.value },
                         snapshotFlow { showMapScale.value },
-                        snapshotFlow { showMapCrosshairs.value },
-                        snapshotFlow { satellites.value }
-                    ) { showGpsReceptionIndicator, mapScale, showMapCrosshairs, _ ->
+                        snapshotFlow { showMapCrosshairs.value }
+                    ) { showGpsReceptionIndicator, mapScale, showMapCrosshairs ->
                         OverlayProperties(
                             centerCrossHairsVisible = showMapCrosshairs,
                             mapScaleVisible = mapScale,
