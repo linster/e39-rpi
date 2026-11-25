@@ -297,13 +297,13 @@ class MapDebug @Inject constructor(
                         NestingCardHeader("Satelites")
                         NumericTextViewWithSpinnerButtons(
                             label = "Used",
-                            onValueChanged = { satellites.value = satellites.value?.copy(
+                            onValueChanged = { satellites.value = (satellites.value ?: GpsSatellites(0, 0)).copy(
                                 used = it
                             )}
                         )
                         NumericTextViewWithSpinnerButtons(
                             label = "Visible",
-                            onValueChanged = { satellites.value = satellites.value?.copy(
+                            onValueChanged = { satellites.value = (satellites.value ?: GpsSatellites(0, 0)).copy(
                                 visible = it
                             )}
                         )
