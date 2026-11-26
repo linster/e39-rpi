@@ -260,6 +260,7 @@ class GuidanceService @Inject constructor(
             startPoint = start
             endPoint = end
             this.route = route.path
+            maneuvers = route.maneuvers
         }
         _instructions.value = GuidanceInstruction.fromRoute(route.maneuvers)
         tracker = GuidanceInstructionTracker(_instructions.value)
@@ -345,6 +346,10 @@ class GuidanceService @Inject constructor(
     // Last in the class: the collector may run at once (on another thread), and
     // updatePosition() needs everything above.
     init {
+        // A session restored from the config (e.g. in guidance across a restart) brings its instructions.
+        _instructions.value = GuidanceInstruction.fromRoute(guidanceSessionStorage.currentSession.maneuvers)
+        tracker = GuidanceInstructionTracker(_instructions.value)
+
         // Every new fix from the location services. A stale fix isn't a new one:
         // the position stays where it was.
         coroutineScope.launch {

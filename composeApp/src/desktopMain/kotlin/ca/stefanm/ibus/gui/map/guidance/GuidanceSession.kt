@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.map.guidance
 
+import ca.stefanm.ibus.gui.map.repo.RemoteRouteRepository
 import ca.stefanm.ibus.lib.logging.StdOutLogger
 import com.javadocmd.simplelatlng.LatLng
 
@@ -57,6 +58,9 @@ class GuidanceSession {
             }
         }
 
+    /** The route's maneuvers (the maps backend's), kept with the route so guidance survives a restart. */
+    var maneuvers : List<RemoteRouteRepository.Maneuver> = emptyList()
+
     fun startGuidance() {
         sessionState = SessionState.IN_GUIDANCE
     }
@@ -72,7 +76,7 @@ class GuidanceSession {
     }
 
     override fun toString(): String {
-        return "GuidanceSession(sessionState=$sessionState, startPoint=$startPoint, endPoint=$endPoint, route=$route)"
+        return "GuidanceSession(sessionState=$sessionState, startPoint=$startPoint, endPoint=$endPoint, route=$route, maneuvers=${maneuvers.size})"
     }
 
     constructor()
@@ -85,6 +89,7 @@ class GuidanceSession {
         if (!session.routeIsNull) {
             route = session.route?.map { LatLng(it.first, it.second) } ?: listOf()
         }
+        maneuvers = session.maneuvers.map { it.toManeuver() }
         sessionState = SessionState.valueOf(session.sessionState)
     }
 
@@ -100,7 +105,9 @@ data class PersistedGuidanceSession(
     val end : Pair<Double, Double>?,
     val endIsNull : Boolean,
     val route : List<Pair<Double, Double>>?,
-    val routeIsNull : Boolean
+    val routeIsNull : Boolean,
+    /** Defaulted: a session saved before maneuvers were kept loads with none. */
+    val maneuvers : List<PersistedManeuver> = emptyList(),
 ) {
     companion object {
 
@@ -122,9 +129,55 @@ data class PersistedGuidanceSession(
                 end = guidanceSession.endPoint?.let { it.latitude to it.longitude } ?: Pair(0.0, 0.0),
                 endIsNull = guidanceSession.endPoint == null,
                 route = guidanceSession.route?.map { it.latitude to it.longitude } ?: listOf(),
-                routeIsNull = guidanceSession.route == null
+                routeIsNull = guidanceSession.route == null,
+                maneuvers = guidanceSession.maneuvers.map { PersistedManeuver.from(it) },
             )
         }
+    }
+}
+
+/** A Maneuver as the config file keeps it: points as pairs, the path range as two ints. */
+data class PersistedManeuver(
+    val kind: String,
+    val instruction: String,
+    val verbalPreTransition: String,
+    val streetNames: List<String>,
+    val lengthMeters: Double,
+    val durationSeconds: Double,
+    val location: Pair<Double, Double>?,
+    val triggerRadiusMeters: Double,
+    val pathIndexFirst: Int,
+    val pathIndexLast: Int,
+    val roundaboutExit: Int,
+) {
+    fun toManeuver() = RemoteRouteRepository.Maneuver(
+        kind = RemoteRouteRepository.ManeuverKind.entries.firstOrNull { it.name == kind }
+            ?: RemoteRouteRepository.ManeuverKind.UNSPECIFIED,
+        instruction = instruction,
+        verbalPreTransition = verbalPreTransition,
+        streetNames = streetNames,
+        lengthMeters = lengthMeters,
+        durationSeconds = durationSeconds,
+        location = location?.let { LatLng(it.first, it.second) },
+        triggerRadiusMeters = triggerRadiusMeters,
+        pathIndexRange = pathIndexFirst..pathIndexLast,
+        roundaboutExit = roundaboutExit,
+    )
+
+    companion object {
+        fun from(m: RemoteRouteRepository.Maneuver) = PersistedManeuver(
+            kind = m.kind.name,
+            instruction = m.instruction,
+            verbalPreTransition = m.verbalPreTransition,
+            streetNames = m.streetNames,
+            lengthMeters = m.lengthMeters,
+            durationSeconds = m.durationSeconds,
+            location = m.location?.let { it.latitude to it.longitude },
+            triggerRadiusMeters = m.triggerRadiusMeters,
+            pathIndexFirst = m.pathIndexRange.first,
+            pathIndexLast = m.pathIndexRange.last,
+            roundaboutExit = m.roundaboutExit,
+        )
     }
 }
 
