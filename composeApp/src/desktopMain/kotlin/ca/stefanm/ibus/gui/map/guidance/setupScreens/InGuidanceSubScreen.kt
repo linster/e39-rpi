@@ -33,6 +33,7 @@ import ca.stefanm.ibus.gui.menu.Notification
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -56,8 +57,10 @@ import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeWrapper
 import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @ScreenDoc(
     screenName = "InGuidanceSubScreen",
@@ -111,11 +114,11 @@ class InGuidanceSubScreen @Inject constructor(
     @Composable
     fun Contents() {
 
-        val instructions = guidanceService.instructions.collectAsState().value
-        val tracker = guidanceService.trackerState.collectAsState().value
+        val instructions by guidanceService.instructions.collectAsState()
+        val tracker by guidanceService.trackerState.collectAsState()
         //TODO need to setup the list of instructions and whether they are completed
 
-        val toShowInstructions = remember {
+        val toShowInstructions = remember(instructions, tracker) {
             derivedStateOf {
                 instructions.map {
                     it to (it.index < (tracker.shownIndex ?: 0))
@@ -217,6 +220,8 @@ class InGuidanceSubScreen @Inject constructor(
         }
         val title = if (next.isDestination) "Next: Destination" else "Next  ${next.index + 1}/${next.count}"
         sideBarGuidanceInstructionConsumer.show(next, meters, title)
+        delay(5.seconds)
+        sideBarGuidanceInstructionConsumer.dismissInstruction(next)
     }
 
     @Composable
@@ -232,9 +237,7 @@ class InGuidanceSubScreen @Inject constructor(
                 )
             ) {
                 instructionItems.forEach {
-                    Box(Modifier.fillMaxWidth().height(48.dp.halveIfNotPixelDoubled())) {
-                        it()
-                    }
+                    it()
                 }
             }
             VerticalScrollbar(
@@ -261,11 +264,13 @@ class InGuidanceSubScreen @Inject constructor(
         isCompleted : Boolean
     ) : @Composable () -> Unit = {
         if (!isCompleted) {
-            Notification(
-                image = GuidanceIcons.notificationImage(instruction.kind),
-                topText = if (instruction.streets.isNotEmpty()) ": ${instruction.streets}" else "",
-                contentText = instruction.text
-            ).toView()
+            Box(Modifier.fillMaxWidth().height(64.dp.halveIfNotPixelDoubled())) {
+                Notification(
+                    image = GuidanceIcons.notificationImage(instruction.kind),
+                    topText = if (instruction.streets.isNotEmpty()) ": ${instruction.streets}" else "",
+                    contentText = instruction.text
+                ).toView()
+            }
         }
     }
 }
