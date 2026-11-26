@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.gps
 
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.gui.map.location.GpsdSettings
 import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.lib.logging.Logger
@@ -36,7 +37,7 @@ class GpsdServiceTest {
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val repository = LocationRepository(logger)
+    private val repository = LocationRepository(logger, ConfigurablePlatform({ error("not used") }, { error("not used") }))
     private val server = ServerSocket(0)
     private val clients = mutableListOf<Socket>()
 

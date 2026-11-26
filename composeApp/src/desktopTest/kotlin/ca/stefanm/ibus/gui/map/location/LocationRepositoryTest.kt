@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.gui.map.location
 
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsFix
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsSatellites
 import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsState
@@ -24,7 +25,7 @@ class LocationRepositoryTest {
 
     @Test
     fun startsWithNothing() {
-        val repository = LocationRepository(logger)
+        val repository = LocationRepository(logger, ConfigurablePlatform({ error("not used") }, { error("not used") }))
         assertNull(repository.fix.value)
         assertEquals(GpsState.NO_GPSD, repository.state.value)
         assertNull(repository.satellites.value)
@@ -33,7 +34,7 @@ class LocationRepositoryTest {
 
     @Test
     fun reportsFromAService() {
-        val repository = LocationRepository(logger)
+        val repository = LocationRepository(logger, ConfigurablePlatform({ error("not used") }, { error("not used") }))
         repository.reportState("A", GpsState.FIX)
         repository.reportFix("A", fix(45.0))
         repository.reportSatellites("A", GpsSatellites(used = 5, visible = 8))
@@ -45,7 +46,7 @@ class LocationRepositoryTest {
 
     @Test
     fun stoppingKeepsTheLastPosition() {
-        val repository = LocationRepository(logger)
+        val repository = LocationRepository(logger, ConfigurablePlatform({ error("not used") }, { error("not used") }))
         repository.reportState("A", GpsState.FIX)
         repository.reportFix("A", fix(45.0))
         repository.reportSatellites("A", GpsSatellites(used = 5, visible = 8))
@@ -59,7 +60,7 @@ class LocationRepositoryTest {
     @Test
     fun anotherServiceStoppingChangesNothing() {
         // B reported last: A stopping (e.g. a service that was also running) leaves B's position.
-        val repository = LocationRepository(logger)
+        val repository = LocationRepository(logger, ConfigurablePlatform({ error("not used") }, { error("not used") }))
         repository.reportState("A", GpsState.SEARCHING)
         repository.reportState("B", GpsState.FIX)
         repository.reportFix("B", fix(46.0))

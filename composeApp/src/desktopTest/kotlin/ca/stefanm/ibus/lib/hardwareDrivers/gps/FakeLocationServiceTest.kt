@@ -1,5 +1,6 @@
 package ca.stefanm.ibus.lib.hardwareDrivers.gps
 
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
@@ -18,7 +19,7 @@ class FakeLocationServiceTest {
         override fun e(tag: String, msg: String, e: Throwable?) {}
     }
 
-    private val repository = LocationRepository(logger)
+    private val repository = LocationRepository(logger, ConfigurablePlatform({ error("not used") }, { error("not used") }))
     private val service = FakeLocationService(repository, logger)
 
     @Test

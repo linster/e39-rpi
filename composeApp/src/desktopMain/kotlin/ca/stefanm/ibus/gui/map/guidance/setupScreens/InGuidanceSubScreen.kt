@@ -5,9 +5,7 @@ import androidx.compose.foundation.ScrollbarAdapter
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import ca.stefanm.ibus.gui.docs.GuidanceScreenDocPartition
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreen
 import ca.stefanm.ibus.annotations.screenflow.ScreenDoc
@@ -140,6 +140,8 @@ class InGuidanceSubScreen @Inject constructor(
             val scope = rememberCoroutineScope()
 
             val scrollState = rememberScrollState()
+            // The ↑ / ↓ items move the list by one instruction.
+            val rowPx = with(LocalDensity.current) { 64.dp.halveIfNotPixelDoubled().toPx() }
 
             Row {
                 Column(
@@ -178,7 +180,7 @@ class InGuidanceSubScreen @Inject constructor(
                                 title = "↓ Instruction List",
                                 onClicked = {
                                     scope.launch {
-                                        scrollState.scrollBy(30F)
+                                        scrollState.animateScrollBy(rowPx)
                                     }
                                 }
                             ),
@@ -186,7 +188,7 @@ class InGuidanceSubScreen @Inject constructor(
                                 title = "↑ Instruction List",
                                 onClicked = {
                                     scope.launch {
-                                        scrollState.scrollBy(-30F)
+                                        scrollState.animateScrollBy(-rowPx)
                                     }
                                 }
                             )
@@ -230,12 +232,7 @@ class InGuidanceSubScreen @Inject constructor(
         instructionItems : List<@Composable () -> Unit>
     ) {
         Box() {
-            Column(
-                Modifier.scrollable(
-                    scrollState,
-                    orientation = Orientation.Vertical
-                )
-            ) {
+            Column(Modifier.verticalScroll(scrollState)) {
                 instructionItems.forEach {
                     it()
                 }
@@ -264,10 +261,11 @@ class InGuidanceSubScreen @Inject constructor(
         isCompleted : Boolean
     ) : @Composable () -> Unit = {
         if (!isCompleted) {
-            Box(Modifier.fillMaxWidth().height(64.dp.halveIfNotPixelDoubled())) {
+            val size = if (instruction.streets.isEmpty()) 64.dp else 180.dp
+            Box(Modifier.fillMaxWidth().height(size.halveIfNotPixelDoubled())) {
                 Notification(
                     image = GuidanceIcons.notificationImage(instruction.kind),
-                    topText = if (instruction.streets.isNotEmpty()) ": ${instruction.streets}" else "",
+                    topText = if (instruction.streets.isNotEmpty()) "${instruction.streets}" else "",
                     contentText = instruction.text
                 ).toView()
             }
