@@ -508,6 +508,13 @@ class MapDebug @Inject constructor(
                 }) { Text("Add Kanata Loop (Red)")}
             }
         }
+
+        NestingCard {
+            NestingCardHeader("Location Services")
+            //Any running?
+            // Start/stop real + fake
+
+        }
     }
 }
 

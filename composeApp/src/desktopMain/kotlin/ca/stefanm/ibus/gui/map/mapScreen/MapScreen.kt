@@ -49,6 +49,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
+import com.google.protobuf.any
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +79,7 @@ class MapScreen @Inject constructor(
     private val gpsMapCenterProvider: GpsMapCenterProvider,
     private val bottomBarController: BottomBarController,
     private val backgroundGuidanceSetupTool: BackgroundGuidanceSetupTool,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
 ) : NavigationNode<MapScreenResult> {
 
     companion object : MapScreenOpener {
@@ -247,6 +248,14 @@ class MapScreen @Inject constructor(
         val anyLocationServiceRunning by remember {
             locationRepository.anyLocationServiceRunning()
         }.collectAsState(false)
+
+        LaunchedEffect(shouldFollowGps, anyLocationServiceRunning) {
+            if (anyLocationServiceRunning && shouldFollowGps) {
+                gpsMapCenterProvider.center.collect {
+                    extents.centerState = it
+                }
+            }
+        }
 
         val currentlySelectedPoi = remember { mutableStateOf<MapPoi?>(null) }
 
@@ -477,7 +486,7 @@ class MapScreen @Inject constructor(
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                 menuTopLeft = IntOffset(32, 32),
-                menuWidth = 384,
+                menuWidth = 512,
             ).toNormalModalMenuDimensions(),
             autoCloseOnSelect = true,
             menuData = ModalMenu(
@@ -505,9 +514,17 @@ class MapScreen @Inject constructor(
                         if (isLocationServiceRunningAccessor()) {
                             it + listOf(
                                 ModalMenu.ModalMenuItem(
-                                    title = "Recenter on Gps",
+                                    title = "Pan to GPS",
                                     onClicked = {
+                                        onOverlayStateChanged(MapOverlayState.NoOverlay)
                                         onRequestRecenterToLocation()
+                                    }
+                                ),
+                                ModalMenu.ModalMenuItem(
+                                    title = "Keep following GPS",
+                                    onClicked = {
+                                        onOverlayStateChanged(MapOverlayState.NoOverlay)
+                                        gpsMapCenterProvider.followGps(true)
                                     }
                                 )
                             )
@@ -671,12 +688,14 @@ class MapScreen @Inject constructor(
                         onClicked = {
                             modalMenuService.closeModalMenu()
                             guidanceService.stopGuidance()
+                            guidanceService.clearCurrentSession()
                             onOverlayStateChanged(MapOverlayState.NoOverlay)
                         }
                     ),
                     ModalMenu.ModalMenuItem(
                         title = "Repeat Direction",
                         onClicked = {
+                            onOverlayStateChanged(MapOverlayState.NoOverlay)
                             guidanceService.repeatLastDirection()
                         }
                     )
