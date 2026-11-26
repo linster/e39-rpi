@@ -45,7 +45,7 @@ class ThemeDesignerTest {
 
     @Test
     fun hslRoundTripsEveryThemeColour() {
-        Themes.availableThemes.forEach { theme ->
+        Themes.builtInThemes.forEach { theme ->
             ThemeColorRole.colorsOf(theme).forEach { (role, color) ->
                 assertClose(color, Hsl.of(color).toColor(), "${theme.configFileName} $role")
             }

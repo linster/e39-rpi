@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ibus.gui.menu.widgets.themes.Theme
 import ca.stefanm.ibus.gui.menu.widgets.themes.Themes
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeScheme
 
 /**
  * What the Theme Designer is editing: every colour, which are locked, and
@@ -35,12 +36,37 @@ class ThemeDesignerState(start: Theme) {
     /** The preview's sizes, fonts and padding: 2X or 1X. */
     var pixelDoubled: Boolean by mutableStateOf(start.isPixelDoubled)
 
-    /** Start from [theme]'s colours (its background as the base); locks are cleared. */
+    /** What it's saved as ("Jess Purple": themes/JessPurple.conf, [ThemeScheme.nameFor]). */
+    var friendlyName: String by mutableStateOf(start.friendlyName.removeSuffix(TWO_X))
+
+    /** Start from [theme]'s colours (its background as the base) and name; locks are cleared. */
     fun load(theme: Theme) {
-        colors = ThemeColorRole.colorsOf(theme)
+        load(ThemeColorRole.colorsOf(theme), theme.friendlyName.removeSuffix(TWO_X))
+    }
+
+    /** Start from [scheme]'s colours and name; locks are cleared. */
+    fun load(scheme: ThemeScheme) = load(scheme.colors, scheme.friendlyName)
+
+    private fun load(colors: Map<ThemeColorRole, Color>, friendlyName: String) {
+        this.colors = colors
+        this.friendlyName = friendlyName
         base = colors.getValue(ThemeColorRole.MENU_BACKGROUND)
         lightnessShift = 0F
         locked = emptySet()
+    }
+
+    /**
+     * The scheme to save, or null while [friendlyName] has no letters or
+     * digits. A friendly name of one of [existing] (ignoring case, e.g. "BMW
+     * Blue") saves as that one, replacing it; another gets a new name
+     * ([ThemeScheme.nameFor]).
+     */
+    fun scheme(existing: List<ThemeScheme> = Themes.builtInSchemes): ThemeScheme? {
+        val friendly = friendlyName.trim()
+        val name = existing.firstOrNull { it.friendlyName.equals(friendly, ignoreCase = true) }?.name
+            ?: ThemeScheme.nameFor(friendly)
+            ?: return null
+        return ThemeScheme(name, friendly, colors)
     }
 
     /** A colour changed by hand. */
@@ -91,6 +117,7 @@ class ThemeDesignerState(start: Theme) {
 
     companion object {
         const val PREVIEW_CONFIG_NAME = "ThemeDesignerPreview"
+        private const val TWO_X = " (2X)"
 
         val CONTRAST_PAIRS = listOf(
             ThemeColorRole.TEXT_MENU_COLOR_ACCENT to ThemeColorRole.MENU_BACKGROUND,

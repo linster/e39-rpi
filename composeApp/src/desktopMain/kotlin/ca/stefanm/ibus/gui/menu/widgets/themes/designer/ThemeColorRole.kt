@@ -2,23 +2,27 @@ package ca.stefanm.ibus.gui.menu.widgets.themes.designer
 
 import androidx.compose.ui.graphics.Color
 import ca.stefanm.ibus.gui.menu.widgets.themes.Theme
+import ca.stefanm.ibus.gui.menu.widgets.themes.Themes
 
-/** Each colour a theme has, as the Theme Designer edits it. */
-enum class ThemeColorRole(val label: String, val description: String) {
-    MENU_BACKGROUND("menuBackground", "Menu background"),
-    TEXT_MENU_COLOR_ACCENT("textMenuColorAccent", "Accent text"),
-    SELECTED_COLOR("selectedColor", "Highlight on the selected item"),
-    CHIP_COLOR("chipColor", "Menu chips"),
-    CHIP_HIGHLIGHTS("chipHighlights", "Menu chip highlights"),
-    SIDE_MENU_BORDER("sideMenuBorder", "Side pane border"),
-    HEADER_FONT("hmiHeaderFooter.fontColor", "Header and footer text"),
-    GRADIENT_EDGE("gradient edges", "Header/footer gradient, both ends"),
-    GRADIENT_CENTER("gradient center", "Header/footer gradient, middle"),
-    EDGE_HIGHLIGHT("edgeHighlightColor", "Header/footer edge highlight line"),
-    TEXT_WHITE("TEXT_WHITE", "White text"),
-    TEXT_BLUE_LIGHT("TEXT_BLUE_LIGHT", "Light blue text"),
-    TEXT_BLUE_DARK("TEXT_BLUE_DARK", "Dark blue text"),
-    TEXT_RED("TEXT_RED", "Red text");
+/**
+ * Each colour a theme has. [label]: as the Theme Designer shows it; [key]: the
+ * colour's name in a theme file (ThemeFiles).
+ */
+enum class ThemeColorRole(val label: String, val description: String, val key: String) {
+    MENU_BACKGROUND("menuBackground", "Menu background", "menuBackground"),
+    TEXT_MENU_COLOR_ACCENT("textMenuColorAccent", "Accent text", "textMenuColorAccent"),
+    SELECTED_COLOR("selectedColor", "Highlight on the selected item", "selectedColor"),
+    CHIP_COLOR("chipColor", "Menu chips", "chipColor"),
+    CHIP_HIGHLIGHTS("chipHighlights", "Menu chip highlights", "chipHighlights"),
+    SIDE_MENU_BORDER("sideMenuBorder", "Side pane border", "sideMenuBorder"),
+    HEADER_FONT("hmiHeaderFooter.fontColor", "Header and footer text", "headerFontColor"),
+    GRADIENT_EDGE("gradient edges", "Header/footer gradient, both ends", "gradientEdge"),
+    GRADIENT_CENTER("gradient center", "Header/footer gradient, middle", "gradientCenter"),
+    EDGE_HIGHLIGHT("edgeHighlightColor", "Header/footer edge highlight line", "edgeHighlightColor"),
+    TEXT_WHITE("TEXT_WHITE", "White text", "textWhite"),
+    TEXT_BLUE_LIGHT("TEXT_BLUE_LIGHT", "Light blue text", "textBlueLight"),
+    TEXT_BLUE_DARK("TEXT_BLUE_DARK", "Dark blue text", "textBlueDark"),
+    TEXT_RED("TEXT_RED", "Red text", "textRed");
 
     companion object {
         /** [theme]'s colours. */
@@ -44,33 +48,10 @@ enum class ThemeColorRole(val label: String, val description: String) {
         }
 
         /**
-         * [base] (its sizes, fonts and padding) with [colors]; a role missing
-         * from [colors] keeps [base]'s colour.
+         * [base]'s sizes, fonts and padding (1X or 2X) with [colors]; a role
+         * missing from [colors] keeps [base]'s colour.
          */
-        fun applyTo(base: Theme, colors: Map<ThemeColorRole, Color>, configFileName: String, friendlyName: String): Theme {
-            val all = colorsOf(base) + colors
-            fun get(role: ThemeColorRole) = all.getValue(role)
-            return base.copy(
-                configFileName = configFileName,
-                friendlyName = friendlyName,
-                colors = base.colors.copy(
-                    menuBackground = get(MENU_BACKGROUND),
-                    textMenuColorAccent = get(TEXT_MENU_COLOR_ACCENT),
-                    selectedColor = get(SELECTED_COLOR),
-                    chipColor = get(CHIP_COLOR),
-                    chipHighlights = get(CHIP_HIGHLIGHTS),
-                    sideMenuBorder = get(SIDE_MENU_BORDER),
-                    TEXT_WHITE = get(TEXT_WHITE),
-                    TEXT_BLUE_LIGHT = get(TEXT_BLUE_LIGHT),
-                    TEXT_BLUE_DARK = get(TEXT_BLUE_DARK),
-                    TEXT_RED = get(TEXT_RED),
-                ),
-                hmiHeaderFooter = base.hmiHeaderFooter.copy(fontColor = get(HEADER_FONT)),
-                centerGradientWithEdgeHighlight = base.centerGradientWithEdgeHighlight.copy(
-                    backgroundGradientColorList = listOf(get(GRADIENT_EDGE), get(GRADIENT_CENTER), get(GRADIENT_EDGE)),
-                    edgeHighlightColor = get(EDGE_HIGHLIGHT),
-                ),
-            )
-        }
+        fun applyTo(base: Theme, colors: Map<ThemeColorRole, Color>, configFileName: String, friendlyName: String): Theme =
+            Themes.make(configFileName, friendlyName, base.isPixelDoubled, colorsOf(base) + colors)
     }
 }

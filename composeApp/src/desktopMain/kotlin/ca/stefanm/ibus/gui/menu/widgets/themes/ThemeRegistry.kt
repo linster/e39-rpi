@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
-import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
@@ -16,6 +15,9 @@ import com.uchuhimo.konf.source.hocon.toHocon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import ca.stefanm.ibus.lib.logging.Logger
 import java.io.File
 import javax.inject.Inject
 
@@ -46,11 +48,17 @@ object ThemeWrapper {
     }
 }
 
-//TODO We need a way to serialize a theme, and deserialize to Konf
-//TODO for now, just store some preset themes instead of all the params
+/**
+ * The chosen theme (theme.conf's themeName: a configFileName from
+ * [ThemeRepository], built in or from a theme file), and the Theme Designer's
+ * preview. It follows the repository: a changed theme file shows at once.
+ */
 @ApplicationScope
 class ThemeConfigurationStorage @Inject constructor(
-    private val configurationStorage: ConfigurationStorage
+    private val configurationStorage: ConfigurationStorage,
+    private val themeRepository: ThemeRepository,
+    private val logger: Logger,
+    coroutineScope: CoroutineScope,
 ) {
 
     private object ThemeConfigSpec : ConfigSpec() {
@@ -65,7 +73,7 @@ class ThemeConfigurationStorage @Inject constructor(
     private val themeConfig = Config { addSpec(ThemeConfigSpec) }
         .from.hocon.file(themeConfigFile, optional = true)
 
-    private val currentTheme = MutableStateFlow<Theme>(ThemeWrapper.defaultTheme)
+    private val currentTheme = MutableStateFlow(resolve(themeConfig[ThemeConfigSpec.themeName]))
 
     /** The Theme Designer's theme, shown instead of the chosen one while set; never written to theme.conf. */
     private val previewTheme = MutableStateFlow<Theme?>(null)
@@ -74,10 +82,9 @@ class ThemeConfigurationStorage @Inject constructor(
         if (!themeConfigFile.exists()) {
             themeConfig.toHocon.toFile(themeConfigFile)
         }
-        currentTheme.value = themeConfig[ThemeConfigSpec.themeName].toTheme()
         themeConfig.afterSet { item, value ->
             if (item == ThemeConfigSpec.themeName) {
-                val theme = themeConfig[ThemeConfigSpec.themeName].toTheme()
+                val theme = resolve(themeConfig[ThemeConfigSpec.themeName])
                 currentTheme.value = theme
                 if (themeConfig[ThemeConfigSpec.themeOverridesWindowSize]) {
                     configurationStorage.config[E39Config.WindowManagerConfig.hmiWindowSize] =
@@ -90,7 +97,23 @@ class ThemeConfigurationStorage @Inject constructor(
 
             themeConfig.toHocon.toFile(themeConfigFile)
         }
+        // Theme files reloaded: the chosen theme may have new colours (or be gone).
+        coroutineScope.launch {
+            themeRepository.themes.collect {
+                currentTheme.value = resolve(themeConfig[ThemeConfigSpec.themeName])
+            }
+        }
     }
+
+    /**
+     * The theme named [configFileName]; BMW Blue (2X) if there's none (e.g. a
+     * theme file removed or broken), without changing the stored choice, so
+     * it's back once the file is.
+     */
+    private fun resolve(configFileName: String): Theme =
+        themeRepository.find(configFileName) ?: Themes.BmwBlueDoubledPixels.also {
+            logger.w(TAG, "No theme \"$configFileName\"; showing ${it.configFileName}")
+        }
 
     fun isPixelDoubleThemesSelectable() = themeConfig[ThemeConfigSpec.allowSelectPixelDoubledThemes]
 
@@ -115,12 +138,10 @@ class ThemeConfigurationStorage @Inject constructor(
         previewTheme.value = theme
     }
 
-    fun getStoredTheme() : Theme {
-        return try {
-            themeConfig[ThemeConfigSpec.themeName].toTheme()
-        } catch (e : Throwable) {
-            setTheme(Themes.BmwBlueDoubledPixels)
-            getStoredTheme()
-        }
+    /** The chosen theme (BMW Blue (2X) if it isn't there). */
+    fun getStoredTheme() : Theme = resolve(themeConfig[ThemeConfigSpec.themeName])
+
+    companion object {
+        const val TAG = "ThemeConfigurationStorage"
     }
 }

@@ -16,7 +16,8 @@ import javax.inject.Inject
 @AutoDiscover
 class ThemeSelectorScreen @Inject constructor(
     private val navigationNodeTraverser: NavigationNodeTraverser,
-    private val themeConfigurationStorage: ThemeConfigurationStorage
+    private val themeConfigurationStorage: ThemeConfigurationStorage,
+    private val themeRepository: ThemeRepository,
 ) : NavigationNode<Nothing> {
 
     companion object {
@@ -34,7 +35,8 @@ class ThemeSelectorScreen @Inject constructor(
             OneColumnSmoothScreen(
                 header = "Theme Selector",
                 prependGoBackEntry = true,
-                items = Themes.availableThemes.filter {
+                // Built in and from theme files, as when the screen opened.
+                items = themeRepository.themes.value.filter {
                     if (themeConfigurationStorage.isPixelDoubleThemesSelectable()) {
                         true
                     } else {

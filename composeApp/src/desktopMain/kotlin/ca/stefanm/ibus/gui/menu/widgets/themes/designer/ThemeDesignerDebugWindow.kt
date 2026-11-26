@@ -41,6 +41,10 @@ import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeFiles
+import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeRepository
+import ca.stefanm.ibus.configuration.ConfigurationStorage
+import androidx.compose.runtime.collectAsState
 import ca.stefanm.ibus.gui.menu.widgets.themes.Themes
 import ca.stefanm.ibus.di.ApplicationScope
 import javax.inject.Inject
@@ -54,6 +58,7 @@ import javax.inject.Inject
 @ApplicationScope
 class ThemeDesignerDebugWindow @Inject constructor(
     private val themeConfigurationStorage: ThemeConfigurationStorage,
+    private val themeRepository: ThemeRepository,
 ) : WindowManager.E39Window {
 
     override val title: String = "Theme Designer"
@@ -64,6 +69,8 @@ class ThemeDesignerDebugWindow @Inject constructor(
     /** Kept while the app runs, so closing the window doesn't lose the work. */
     private val state = ThemeDesignerState(themeConfigurationStorage.getStoredTheme())
     private var previewOnHmi by mutableStateOf(false)
+    /** What the last Save did. */
+    private var saveResult by mutableStateOf<String?>(null)
 
     override fun content(): @Composable WindowScope.() -> Unit = {
         LaunchedEffect(previewOnHmi, state.theme()) {
@@ -84,6 +91,7 @@ class ThemeDesignerDebugWindow @Inject constructor(
                         PreviewCard()
                     }
                     Column(Modifier.weight(1F)) {
+                        SaveCard()
                         ContrastCard()
                     }
                 }
@@ -101,11 +109,49 @@ class ThemeDesignerDebugWindow @Inject constructor(
     private fun StartFromCard() {
         NestingCard {
             NestingCardHeader("Start from a theme")
-            Themes.availableThemes.filter { it.isPixelDoubled }.forEach { theme ->
-                Button(onClick = { state.load(theme) }) {
-                    Text(theme.friendlyName.removeSuffix(" (2X)"))
+            // Built in and from theme files.
+            themeRepository.schemes.collectAsState().value.forEach { scheme ->
+                Button(onClick = { state.load(scheme) }) {
+                    Text(scheme.friendlyName)
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun SaveCard() {
+        NestingCard {
+            NestingCardHeader("Save as a theme file")
+            OutlinedTextField(
+                value = state.friendlyName,
+                onValueChange = { state.friendlyName = it; saveResult = null },
+                label = { Text("Name") },
+                singleLine = true,
+            )
+            val scheme = state.scheme(themeRepository.schemes.collectAsState().value)
+            if (scheme == null) {
+                Text("The name needs a letter or digit.")
+            } else {
+                val file = ThemeFiles.fileFor(java.io.File(ConfigurationStorage.e39BaseFolder, ThemeRepository.FOLDER), scheme)
+                Text("$file: ${scheme.name}${Themes.DOUBLED_PIXELS} and ${scheme.name}${Themes.NORMAL_SIZE}")
+                Themes.builtInSchemes.firstOrNull { it.name == scheme.name }?.let {
+                    Text("Replaces the built-in ${it.friendlyName}.", fontWeight = FontWeight.Bold)
+                }
+                if (Themes.builtInSchemes.none { it.name == scheme.name } && file.exists()) {
+                    Text("Replaces ${file.name}.", fontWeight = FontWeight.Bold)
+                }
+            }
+            Button(
+                enabled = scheme != null,
+                onClick = {
+                    saveResult = try {
+                        "Saved ${themeRepository.save(scheme!!).name}."
+                    } catch (e: Exception) {
+                        "Not saved: ${e.message ?: e}"
+                    }
+                },
+            ) { Text("Save") }
+            saveResult?.let { Text(it) }
         }
     }
 
