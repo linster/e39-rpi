@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedTextField
@@ -70,18 +74,26 @@ class ThemeDesignerDebugWindow @Inject constructor(
             onDispose { themeConfigurationStorage.setPreviewTheme(null) }
         }
 
-        Column(Modifier.verticalScroll(rememberScrollState()).padding(8.dp)) {
-            Row {
-                Column(Modifier.weight(1F)) {
-                    StartFromCard()
-                    PreviewCard()
+        val scrollState = rememberScrollState()
+        Box(Modifier.fillMaxSize()) {
+            // Room on the right for the scrollbar.
+            Column(Modifier.verticalScroll(scrollState).padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 20.dp)) {
+                Row {
+                    Column(Modifier.weight(1F)) {
+                        StartFromCard()
+                        PreviewCard()
+                    }
+                    Column(Modifier.weight(1F)) {
+                        ContrastCard()
+                    }
                 }
-                Column(Modifier.weight(1F)) {
-                    ContrastCard()
-                }
+                GenerateCard()
+                ColorsCard()
             }
-            GenerateCard()
-            ColorsCard()
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(scrollState),
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            )
         }
     }
 
