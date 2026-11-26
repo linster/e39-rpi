@@ -115,6 +115,19 @@ hmi.wait_for_notification(r"^Mail sent$")   # then hides it (it covers the top o
 hmi.shot("name")                        # screenshot into the test's folder
 ```
 
+Debug windows (the Debug Launchpad's, by title) can be opened, read,
+clicked and screenshotted too. The probe raises a window before a
+screenshot or a click, since on the hidden display they open over each other:
+
+```python
+hmi.open_debug_window("Theme Designer")
+hmi.window_text("Theme Designer")       # its texts, one per line
+hmi.click("Theme Designer", "Goose Green")   # the item with exactly that text (index= for the nth)
+hmi.shot("designer", window="Theme Designer")
+hmi.close_debug_window("Theme Designer")
+hmi.state().theme                       # the theme the HMI shows ("ThemeDesignerPreview" while previewing)
+```
+
 Guidance tests (`tests/guidance/`) set up a route with the knob as a user
 would (Map -> Guidance -> Setup..., start and end via "Select on Map",
 "Calculate Route", "Start Guidance", "Terminate Guidance") and check the

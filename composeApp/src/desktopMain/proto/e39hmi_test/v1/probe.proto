@@ -20,7 +20,7 @@ service HmiTestProbe {
   // would), one at a time; with wait_for_idle, waits for the HMI to settle
   // before each event and after the last.
   rpc SendInput(SendInputRequest) returns (SendInputResponse);
-  // A PNG of the HMI window.
+  // A PNG of the HMI window (or an open debug window, by its title).
   rpc Screenshot(ScreenshotRequest) returns (ScreenshotResponse);
   // The texts on screen (from Compose's accessibility tree), top to
   // bottom, with where they are in the window. Clickable items without
@@ -41,6 +41,19 @@ service HmiTestProbe {
   // window's Close HMI / Open HMI do): a theme's window size only applies to
   // a newly opened window. Returns once the new window is showing.
   rpc ReopenHmiWindow(ReopenHmiWindowRequest) returns (HmiState);
+
+  // Opens a debug window by its title (e.g. "Theme Designer"): the Debug
+  // Launchpad's windows, or the launchpad itself. Returns once it's showing;
+  // NOT_FOUND (listing the titles) for any other title.
+  rpc OpenDebugWindow(OpenDebugWindowRequest) returns (OpenDebugWindowResponse);
+  // Closes a debug window opened by title (as its close button does).
+  // Returns once it's gone.
+  rpc CloseDebugWindow(CloseDebugWindowRequest) returns (CloseDebugWindowResponse);
+  // Clicks the item in an open debug window whose text is exactly `text`
+  // (as GetTexts reports it; the nth one with index), with the pointer, in
+  // the middle of its bounds. For buttons and checkboxes in debug windows;
+  // the HMI window takes knob input (SendInput).
+  rpc ClickText(ClickTextRequest) returns (ClickTextResponse);
 
   // The mail app as on a fresh start: settings back to their defaults
   // (notifications on, nothing muted, the default quick replies), no
@@ -128,6 +141,11 @@ message HmiState {
   // opening: wait for it to settle before screenshots).
   int32 window_x = 20;
   int32 window_y = 21;
+  // The theme the HMI window shows: its configFileName (e.g.
+  // "BmwBlueDoubledPixels"; "ThemeDesignerPreview" while the Theme Designer
+  // previews), and its menu background as "#RRGGBBAA".
+  string theme = 23;
+  string theme_menu_background = 24;
 }
 
 message BackStackEntry {
@@ -195,7 +213,11 @@ message SendInputResponse {
   HmiState state = 2;
 }
 
-message GetTextsRequest {}
+message GetTextsRequest {
+  // An open debug window's title; empty: the HMI window. A debug window's
+  // texts are never `selected` (no knob there).
+  string window = 1;
+}
 
 message ScreenText {
   string text = 1;
@@ -222,7 +244,10 @@ message GetTextsResponse {
   repeated ScreenText texts = 1;
 }
 
-message ScreenshotRequest {}
+message ScreenshotRequest {
+  // An open debug window's title; empty: the HMI window.
+  string window = 1;
+}
 
 message ScreenshotResponse {
   bytes png = 1;
@@ -242,6 +267,25 @@ message NavigateRequest {
 message CloseOverlaysRequest {}
 message ClearNotificationRequest {}
 message ReopenHmiWindowRequest {}
+
+message OpenDebugWindowRequest {
+  string title = 1;
+}
+message OpenDebugWindowResponse {}
+
+message CloseDebugWindowRequest {
+  string title = 1;
+}
+message CloseDebugWindowResponse {}
+
+message ClickTextRequest {
+  // An open debug window's title.
+  string window = 1;
+  string text = 2;
+  // Which one, top to bottom, when several have the text; 0 = the first.
+  int32 index = 3;
+}
+message ClickTextResponse {}
 
 message ResetMailAppRequest {}
 message ResetMailAppResponse {}

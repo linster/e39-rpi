@@ -15,6 +15,7 @@ import com.uchuhimo.konf.source.hocon
 import com.uchuhimo.konf.source.hocon.toHocon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import java.io.File
 import javax.inject.Inject
 
@@ -66,6 +67,9 @@ class ThemeConfigurationStorage @Inject constructor(
 
     private val currentTheme = MutableStateFlow<Theme>(ThemeWrapper.defaultTheme)
 
+    /** The Theme Designer's theme, shown instead of the chosen one while set; never written to theme.conf. */
+    private val previewTheme = MutableStateFlow<Theme?>(null)
+
     init {
         if (!themeConfigFile.exists()) {
             themeConfig.toHocon.toFile(themeConfigFile)
@@ -98,8 +102,17 @@ class ThemeConfigurationStorage @Inject constructor(
         themeConfig[ThemeConfigSpec.themeName] = theme.configFileName
     }
 
+    /** The theme to show: the Theme Designer's preview while there is one, else the chosen theme. */
     fun getTheme() : Flow<Theme> {
-        return currentTheme
+        return combine(currentTheme, previewTheme) { chosen, preview -> preview ?: chosen }
+    }
+
+    /** What [getTheme] gives now. */
+    fun shownTheme(): Theme = previewTheme.value ?: currentTheme.value
+
+    /** Show [theme] instead of the chosen one, until set back to null. Not stored. */
+    fun setPreviewTheme(theme: Theme?) {
+        previewTheme.value = theme
     }
 
     fun getStoredTheme() : Theme {

@@ -3,6 +3,15 @@ package ca.stefanm.ibus.testprobe
 import androidx.compose.runtime.snapshots.Snapshot
 import ca.stefanm.e39hmi.test.v1.ClearNotificationRequest
 import ca.stefanm.e39hmi.test.v1.ReopenHmiWindowRequest
+import ca.stefanm.e39hmi.test.v1.OpenDebugWindowRequest
+import ca.stefanm.e39hmi.test.v1.OpenDebugWindowResponse
+import ca.stefanm.e39hmi.test.v1.openDebugWindowResponse
+import ca.stefanm.e39hmi.test.v1.CloseDebugWindowRequest
+import ca.stefanm.e39hmi.test.v1.CloseDebugWindowResponse
+import ca.stefanm.e39hmi.test.v1.closeDebugWindowResponse
+import ca.stefanm.e39hmi.test.v1.ClickTextRequest
+import ca.stefanm.e39hmi.test.v1.ClickTextResponse
+import ca.stefanm.e39hmi.test.v1.clickTextResponse
 import ca.stefanm.e39hmi.test.v1.ListScreensRequest
 import ca.stefanm.e39hmi.test.v1.ListScreensResponse
 import ca.stefanm.e39hmi.test.v1.backStackEntry
@@ -55,6 +64,8 @@ import ca.stefanm.ibus.gui.menu.navigator.NavigationNode
 import ca.stefanm.ibus.gui.menu.navigator.NavigationNodeTraverser
 import ca.stefanm.ibus.gui.menu.navigator.Navigator
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.debug.windows.DebugLaunchpad
+import ca.stefanm.ibus.gui.menu.widgets.themes.designer.ThemeColorMath
 import ca.stefanm.ibus.gui.menu.notifications.NotificationHub
 import ca.stefanm.ibus.gui.menu.widgets.knobListener.KnobListenerService
 import ca.stefanm.ibus.gui.menu.widgets.modalMenu.ModalMenuService
@@ -146,6 +157,7 @@ class TestProbe @Inject constructor(
     private val locationRepository: Provider<LocationRepository>,
     private val configurationStorage: Provider<ConfigurationStorage>,
     private val windowManager: Provider<WindowManager>,
+    private val debugLaunchpad: Provider<DebugLaunchpad>,
     private val logger: Logger,
 ) {
     companion object {
@@ -228,6 +240,10 @@ class TestProbe @Inject constructor(
             fakeMail = mailRepository.get() is FakeMailRepository
             fakeContacts = contactsRepository.get() is FakeContactsRepository
             fakeAccounts = accountRepository.get() is FakeAccountRepository
+            themeStorage.get().shownTheme().let { shown ->
+                theme = shown.configFileName
+                themeMenuBackground = ThemeColorMath.toHex(shown.colors.menuBackground)
+            }
         }
     }
 
@@ -291,13 +307,37 @@ class TestProbe @Inject constructor(
             .sortedWith(compareBy({ it.y }, { it.x }))
     }
 
-    private fun hmiWindow(): Window? =
-        Window.getWindows().firstOrNull { it.isShowing && it is Frame && it.title == HMI_WINDOW_TITLE }
+    private fun hmiWindow(): Window? = shownFrame(HMI_WINDOW_TITLE)
 
-    /** The HMI window's contents, without a hovering pointer. */
-    private suspend fun capture(): java.awt.image.BufferedImage {
+    private fun shownFrame(title: String): Window? =
+        Window.getWindows().firstOrNull { it.isShowing && it is Frame && it.title == title }
+
+    /** One launchpad for the probe's life, so a window it opened is the one it closes. */
+    private val launchpad by lazy { debugLaunchpad.get() }
+
+    private fun debugWindowNamed(title: String): WindowManager.E39Window =
+        launchpad.windows.firstOrNull { it.title == title }
+            ?: throw StatusException(Status.NOT_FOUND.withDescription(
+                "no debug window \"$title\"; there are: " + launchpad.windows.joinToString { "\"${it.title}\"" }
+            ))
+
+    /** On the main thread: the HMI window ([name] empty), or the open debug window titled [name]. */
+    private fun windowNamed(name: String): Window =
+        if (name.isEmpty()) {
+            hmiWindow() ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription("the HMI window isn't open"))
+        } else {
+            shownFrame(name) ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription("no open window \"$name\""))
+        }
+
+    /**
+     * The window's ([windowNamed]) contents, without a hovering pointer. It's
+     * raised first: a screenshot is of the screen, and a debug window may be
+     * over the HMI window (or the other way round).
+     */
+    private suspend fun capture(name: String = ""): java.awt.image.BufferedImage {
         withContext(Dispatchers.Main) {
-            val window = hmiWindow() ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription("the HMI window isn't open"))
+            val window = windowNamed(name)
+            window.toFront()
             val origin = window.locationOnScreen
             // A pointer over the window shows as a hovered row.
             java.awt.MouseInfo.getPointerInfo()?.location?.let { p ->
@@ -308,7 +348,7 @@ class TestProbe @Inject constructor(
         }
         delay(150)
         return withContext(Dispatchers.Main) {
-            val window = hmiWindow() ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription("the HMI window isn't open"))
+            val window = windowNamed(name)
             val origin = window.locationOnScreen
             val insets = window.insets
             Robot().createScreenCapture(Rectangle(
@@ -425,7 +465,7 @@ class TestProbe @Inject constructor(
         }
 
         override suspend fun screenshot(request: ScreenshotRequest): ScreenshotResponse {
-            val image = capture()
+            val image = capture(request.window)
             val png = ByteArrayOutputStream().also { ImageIO.write(image, "png", it) }.toByteArray()
             return screenshotResponse {
                 this.png = com.google.protobuf.ByteString.copyFrom(png)
@@ -435,12 +475,16 @@ class TestProbe @Inject constructor(
         }
 
         override suspend fun getTexts(request: GetTextsRequest): GetTextsResponse {
+            if (request.window.isNotEmpty()) {
+                // A debug window: no knob, so nothing is selected.
+                val texts = withContext(Dispatchers.Main) { screenTexts(windowNamed(request.window)) }
+                return getTextsResponse { this.texts.addAll(texts) }
+            }
             val shot = capture()
             val c = themeStorage.get().getTheme().first().colors
             val selected = listOf(c.selectedColor, c.chipColor, c.chipHighlights)
             val texts = withContext(Dispatchers.Main) {
-                val window = hmiWindow() ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription("the HMI window isn't open"))
-                screenTexts(window)
+                screenTexts(windowNamed(""))
             }.map { t ->
                 if (t.clickable && isHighlighted(shot, t, selected)) t.toBuilder().setSelected(true).build() else t
             }
@@ -500,6 +544,54 @@ class TestProbe @Inject constructor(
             withContext(Dispatchers.Main) { windowManager.get().openHmiMainWindow() }
             waitForWindow(open = true, what = "open again")
             return state()
+        }
+
+        override suspend fun openDebugWindow(request: OpenDebugWindowRequest): OpenDebugWindowResponse {
+            val window = debugWindowNamed(request.title)
+            withContext(Dispatchers.Main) { windowManager.get().openDebugWindow(window) }
+            waitForFrame(request.title, showing = true)
+            return openDebugWindowResponse { }
+        }
+
+        override suspend fun closeDebugWindow(request: CloseDebugWindowRequest): CloseDebugWindowResponse {
+            val window = debugWindowNamed(request.title)
+            withContext(Dispatchers.Main) { windowManager.get().closeDebugWindow(window) }
+            waitForFrame(request.title, showing = false)
+            return closeDebugWindowResponse { }
+        }
+
+        override suspend fun clickText(request: ClickTextRequest): ClickTextResponse {
+            if (request.window.isEmpty()) {
+                throw StatusException(Status.INVALID_ARGUMENT.withDescription("ClickText is for debug windows; the HMI takes knob input"))
+            }
+            // Raised first, so the click lands on it and not on a window over it.
+            withContext(Dispatchers.Main) { windowNamed(request.window).toFront() }
+            delay(150)
+            withContext(Dispatchers.Main) {
+                val window = windowNamed(request.window)
+                val matches = screenTexts(window).filter { it.text == request.text }
+                val target = matches.getOrNull(request.index) ?: throw StatusException(Status.NOT_FOUND.withDescription(
+                    "${matches.size} item(s) \"${request.text}\" in \"${request.window}\", no #${request.index}"
+                ))
+                // Screen texts are in content pixels, from the content's corner.
+                val origin = window.locationOnScreen
+                val x = origin.x + window.insets.left + target.x + target.width / 2
+                val y = origin.y + window.insets.top + target.y + target.height / 2
+                Robot().apply {
+                    mouseMove(x, y)
+                    mousePress(java.awt.event.InputEvent.BUTTON1_DOWN_MASK)
+                    mouseRelease(java.awt.event.InputEvent.BUTTON1_DOWN_MASK)
+                }
+            }
+            return clickTextResponse { }
+        }
+
+        private suspend fun waitForFrame(title: String, showing: Boolean) {
+            withTimeoutOrNull(DEFAULT_TIMEOUT_MS.toLong()) {
+                while (withContext(Dispatchers.Main) { shownFrame(title) != null } != showing) delay(50)
+            } ?: throw StatusException(Status.DEADLINE_EXCEEDED.withDescription(
+                "\"$title\" didn't " + if (showing) "open" else "close"
+            ))
         }
 
         override suspend fun resetMailApp(request: ResetMailAppRequest): ResetMailAppResponse {

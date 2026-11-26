@@ -124,9 +124,10 @@ class Hmi:
 
     # --- what's on screen ---------------------------------------------------
 
-    def texts(self):
-        """Everything with text on screen, top to bottom (ScreenText: text, x, y, width, height, clickable, selected)."""
-        return list(self.stub.GetTexts(pb2.GetTextsRequest(), timeout=self.timeout_s).texts)
+    def texts(self, window=""):
+        """Everything with text on screen, top to bottom (ScreenText: text, x, y, width, height, clickable, selected).
+        `window`: an open debug window's title instead of the HMI window."""
+        return list(self.stub.GetTexts(pb2.GetTextsRequest(window=window), timeout=self.timeout_s).texts)
 
     def items(self):
         """The knob's positions: clickable texts, in order. With an overlay open (side pane,
@@ -295,21 +296,39 @@ class Hmi:
         return self.stub.SetPosition(pb2.SetPositionRequest(position=pb2.GeoPoint(latitude=lat, longitude=lng)),
                                      timeout=self.timeout_s)
 
+    # --- debug windows -------------------------------------------------------
+
+    def open_debug_window(self, title):
+        """Opens a debug window (the Debug Launchpad's, by title, e.g. "Theme Designer"); returns once it shows."""
+        self.stub.OpenDebugWindow(pb2.OpenDebugWindowRequest(title=title), timeout=self.timeout_s)
+
+    def close_debug_window(self, title):
+        self.stub.CloseDebugWindow(pb2.CloseDebugWindowRequest(title=title), timeout=self.timeout_s)
+
+    def click(self, window, text, index=0):
+        """Clicks the item whose text is exactly `text` in the open debug window `window` (the nth with `index`)."""
+        self.stub.ClickText(pb2.ClickTextRequest(window=window, text=text, index=index), timeout=self.timeout_s)
+
+    def window_text(self, window):
+        """An open debug window's texts, one per line."""
+        return "\n".join(t.text for t in self.texts(window))
+
     def deliver_mail(self, subject="", text="", from_name="", from_email=""):
         self.stub.DeliverFakeMail(pb2.DeliverFakeMailRequest(
             subject=subject, text=text, from_name=from_name, from_email=from_email), timeout=self.timeout_s)
 
     # --- screenshots -------------------------------------------------------
 
-    def screenshot_png(self):
-        return self.stub.Screenshot(pb2.ScreenshotRequest(), timeout=self.timeout_s).png
+    def screenshot_png(self, window=""):
+        return self.stub.Screenshot(pb2.ScreenshotRequest(window=window), timeout=self.timeout_s).png
 
-    def shot(self, name):
-        """Saves a screenshot as NN-name.png in this test's output folder; returns its path."""
+    def shot(self, name, window=""):
+        """Saves a screenshot (of the HMI, or the open debug window `window`) as NN-name.png in this
+        test's output folder; returns its path."""
         self._shots += 1
         path = os.path.join(self.out_dir or ".", f"{self._shots:02d}-{name}.png")
         with open(path, "wb") as f:
-            f.write(self.screenshot_png())
+            f.write(self.screenshot_png(window))
         return path
 
     def start_test(self, out_dir):
