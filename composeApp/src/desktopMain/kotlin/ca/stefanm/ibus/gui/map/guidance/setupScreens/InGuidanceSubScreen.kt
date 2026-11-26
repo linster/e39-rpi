@@ -121,8 +121,10 @@ class InGuidanceSubScreen @Inject constructor(
 
         val toShowInstructions = remember(instructions, tracker) {
             derivedStateOf {
-                instructions.map {
-                    it to (it.index < (tracker.shownIndex ?: 0))
+                // Passed: before the tracker's next instruction (positions in the list,
+                // as the tracker counts them; not the maneuver's index).
+                instructions.mapIndexed { position, instruction ->
+                    instruction to (position < tracker.nextIndex)
                 }
             }
         }
