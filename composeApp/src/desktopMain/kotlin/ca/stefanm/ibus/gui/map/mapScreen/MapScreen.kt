@@ -242,6 +242,12 @@ class MapScreen @Inject constructor(
             }
         }
 
+
+        // Enable the gps marker when any of the gps services are running.
+        val anyLocationServiceRunning by remember {
+            locationRepository.anyLocationServiceRunning()
+        }.collectAsState(false)
+
         val currentlySelectedPoi = remember { mutableStateOf<MapPoi?>(null) }
 
         LaunchedEffect(currentOverlayState.value) {
@@ -252,7 +258,14 @@ class MapScreen @Inject constructor(
                     parameters.openMode,
                     currentCenterAcessor = { extents.centerState },
                     currentPoiAccessor = { currentlySelectedPoi.value },
-                    onOverlayStateChanged = { new -> currentOverlayState.value = new }
+                    onOverlayStateChanged = { new -> currentOverlayState.value = new },
+                    isLocationServiceRunningAccessor = { anyLocationServiceRunning },
+                    onRequestRecenterToLocation = {
+                        val currentPosition = locationRepository.getPositionStateFlow().value
+                        if (currentPosition != null) {
+                            extents.centerState = currentPosition
+                        }
+                    }
                 )
             }
             if (currentOverlayState.value == MapOverlayState.GuidanceMenu) {
@@ -268,10 +281,6 @@ class MapScreen @Inject constructor(
 
         val poiList by poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList())
 
-        // Enable the gps marker when any of the gps services are running.
-        val anyLocationServiceRunning by remember {
-            locationRepository.anyLocationServiceRunning()
-        }.collectAsState(false)
 
         val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = locationRepository.getPosition().map { latLng ->
             if (latLng != null && anyLocationServiceRunning) {
@@ -462,6 +471,8 @@ class MapScreen @Inject constructor(
         currentCenterAcessor : () -> LatLng,
         currentPoiAccessor : () -> MapPoi?,
         onOverlayStateChanged : (new : MapOverlayState) -> Unit,
+        isLocationServiceRunningAccessor : () -> Boolean,
+        onRequestRecenterToLocation : () -> Unit,
     ) {
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
@@ -490,7 +501,20 @@ class MapScreen @Inject constructor(
                             title = "Pan ⬍",
                             onClicked = { onOverlayStateChanged(MapOverlayState.PanUpDown) }
                         )
-                    )
+                    ).let {
+                        if (isLocationServiceRunningAccessor()) {
+                            it + listOf(
+                                ModalMenu.ModalMenuItem(
+                                    title = "Recenter on Gps",
+                                    onClicked = {
+                                        onRequestRecenterToLocation()
+                                    }
+                                )
+                            )
+                        } else {
+                            it
+                        }
+                    }
 
                     val browsingEntries = if (mapScreenOpenMode is MapScreenParameters.MapScreenOpenMode.BrowsingMode) {
                         listOf(
