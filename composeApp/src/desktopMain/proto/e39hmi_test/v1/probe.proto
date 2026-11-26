@@ -59,9 +59,10 @@ service HmiTestProbe {
   rpc ResetGuidance(ResetGuidanceRequest) returns (ResetGuidanceResponse);
   // The guidance session and the last route calculation (GuidanceService).
   rpc GetGuidance(GetGuidanceRequest) returns (GuidanceState);
-  // The car is here: GuidanceService.updatePosition(), as gpsd (or the
-  // guidance debug window's fake GPS) would. Returns once guidance has
-  // handled it (instructions shown, updated or passed).
+  // The car is here: through the car platform's FakeLocationService (started
+  // if needed) into the LocationRepository, which GuidanceService follows, as
+  // a location service would. Returns once guidance has handled it
+  // (instructions shown, updated or passed).
   rpc SetPosition(SetPositionRequest) returns (GuidanceState);
 
   // Sample mail (E39Config.PimConfig.Mail.useFakeData) only;

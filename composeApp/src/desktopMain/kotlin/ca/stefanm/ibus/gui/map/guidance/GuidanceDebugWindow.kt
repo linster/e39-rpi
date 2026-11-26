@@ -31,15 +31,20 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowScope
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.car.platform.PlatformService
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.configuration.E39Config.GuidanceConfig.SidePanelInstructionEnablementState
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.map.Kanata_path
+import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.gui.map.places.MapPoiLabels
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.FakeLocationService
 import com.javadocmd.simplelatlng.LatLng
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
@@ -49,15 +54,19 @@ import javax.inject.Inject
  * the way the HMI's guidance screens do (set start and end, calculate the
  * route, start and stop guidance, clear the session), so what it shows is
  * what the HMI gets. It shares the session with the HMI's screens: a route
- * set up in either shows in both. Then it feeds fake GPS positions: drive
+ * set up in either shows in both. Then it feeds fake GPS positions (through
+ * the car platform's FakeLocationService into the LocationRepository): drive
  * along the session's route, or jump to a maneuver's approach (its trigger
  * radius), the maneuver itself or just past it; dismiss instructions. The
  * instruction consumers (notification, side panel) react as they would in
  * the car; the event log says what the tracker decided.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class GuidanceDebugWindow @Inject constructor(
     private val configurationStorage: ConfigurationStorage,
     private val guidanceService: GuidanceService,
+    private val configurablePlatform: ConfigurablePlatform,
+    private val locationRepository: LocationRepository,
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -261,9 +270,19 @@ class GuidanceDebugWindow @Inject constructor(
         }
     }
 
+    /**
+     * The platform's FakeLocationService, or null: the platform isn't running, or
+     * has no such service (findService uses first {}, which throws).
+     */
+    private fun fakeLocationPlatformService(): PlatformService? = try {
+        configurablePlatform.findServiceByName(FakeLocationService.NAME)
+    } catch (e: NoSuchElementException) {
+        null
+    }
+
     private fun feed(meters: Double) {
         val path = routePath.value ?: return
-        guidanceService.updatePosition(path.at(meters))
+        (fakeLocationPlatformService()?.baseService as? FakeLocationService)?.setLocation(path.at(meters))
     }
 
     private fun jump(meters: Double) {
@@ -274,13 +293,27 @@ class GuidanceDebugWindow @Inject constructor(
 
     @Composable
     private fun FakeGpsCard() {
-        val position = guidanceService.position.collectAsState().value
+        val fix = locationRepository.fix.collectAsState().value
+        val source = locationRepository.source.collectAsState().value
+        val locationState = locationRepository.state.collectAsState().value
+        val fakeService = fakeLocationPlatformService()
+        val fakeRunStatus = fakeService?.runStatusFlow?.collectAsState(PlatformService.RunStatus.STOPPED)?.value
         val tracker = guidanceService.trackerState.collectAsState().value
         val instructions = guidanceService.instructions.collectAsState().value
         val path = routePath.value
         NestingCard {
             NestingCardHeader("Fake GPS")
-            Text("Position: ${position?.let(::format) ?: "none"}")
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("${FakeLocationService.NAME}: " + when {
+                    fakeService == null -> "not found (is the car platform running?)"
+                    else -> fakeRunStatus.toString()
+                })
+                if (fakeService != null && fakeRunStatus != PlatformService.RunStatus.RUNNING) {
+                    Button(onClick = { configurablePlatform.startServiceByName(FakeLocationService.NAME) }) { Text("Start") }
+                }
+            }
+            Text("LocationRepository: ${fix?.latLng?.let(::format) ?: "no position"}, $locationState" +
+                    (source?.let { " (from $it)" } ?: ""))
             Text("Next: #${instructions.getOrNull(tracker.nextIndex)?.index ?: "-"}, shown: " +
                     (tracker.shownIndex?.let { "#${instructions.getOrNull(it)?.index}" } ?: "none") +
                     (tracker.distanceMeters?.let { ", ${MapPoiLabels.distance(it)}" } ?: ""))

@@ -1,0 +1,241 @@
+package ca.stefanm.ibus.lib.hardwareDrivers.gps
+
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.gui.map.location.GpsdSettings
+import ca.stefanm.ibus.gui.map.location.LocationRepository
+import ca.stefanm.ibus.lib.logging.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+import java.io.BufferedReader
+import java.io.PrintWriter
+import java.net.ServerSocket
+import java.net.Socket
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * GpsdService against a fake gpsd: a local ServerSocket that reads the WATCH and sends
+ * canned lines; checks what it reports into the LocationRepository. Real time and
+ * sockets, with short stale and backoff times.
+ */
+class GpsdServiceTest {
+
+    private val logger = object : Logger {
+        override fun v(tag: String, msg: String) {}
+        override fun d(tag: String, msg: String) {}
+        override fun i(tag: String, msg: String) {}
+        override fun w(tag: String, msg: String) {}
+        override fun e(tag: String, msg: String) {}
+        override fun e(tag: String, msg: String, e: Throwable?) {}
+    }
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val repository = LocationRepository(logger, ConfigurablePlatform({ error("not used") }, { error("not used") }))
+    private val server = ServerSocket(0)
+    private val clients = mutableListOf<Socket>()
+
+    private val settings = MutableStateFlow(GpsdSettings("127.0.0.1", server.localPort))
+
+    private val service = GpsdService(
+        settings = settings,
+        staleAfter = 400.milliseconds,
+        locationRepository = repository,
+        logger = logger,
+        coroutineScope = scope,
+        dispatcher = Dispatchers.IO,
+        minBackoff = 50.milliseconds,
+        maxBackoff = 200.milliseconds,
+        stateCheckInterval = 50.milliseconds,
+    )
+
+    @After
+    fun tearDown() {
+        service.onShutdown()
+        scope.cancel()
+        clients.forEach { it.close() }
+        server.close()
+    }
+
+    /** Accepts the service's connection; returns its WATCH line and a writer to send gpsd lines. */
+    private fun accept(): Pair<String?, PrintWriter> {
+        server.soTimeout = 5000
+        val client = server.accept().also { clients += it }
+        client.soTimeout = 5000
+        val watch = BufferedReader(client.getInputStream().reader()).readLine()
+        val out = PrintWriter(client.getOutputStream().writer(), true)
+        out.println("""{"class":"VERSION","release":"3.25","rev":"3.25","proto_major":3,"proto_minor":15}""")
+        return watch to out
+    }
+
+    private fun waitFor(what: String, timeoutMs: Long = 3000, check: () -> Boolean) {
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs)
+        while (!check()) {
+            if (System.nanoTime() > deadline) throw AssertionError("Timed out waiting for $what; state ${repository.state.value}")
+            Thread.sleep(10)
+        }
+    }
+
+    private fun tpv(lat: Double, lon: Double, mode: Int = 3) =
+        """{"class":"TPV","device":"/dev/ttyACM0","mode":$mode,"lat":$lat,"lon":$lon,"speed":10.0,"track":90.0,"eph":5.0}"""
+
+    @Test
+    fun fixThenStaleThenNoFix() {
+        service.onCreate()
+        val (watch, gpsd) = accept()
+        assertEquals(GpsdMessage.WATCH.trimEnd('\n'), watch)
+
+        gpsd.println("""{"class":"DEVICES","devices":[]}""")
+        waitFor("no receiver") { repository.state.value == GpsState.NO_RECEIVER }
+
+        gpsd.println("""{"class":"DEVICES","devices":[{"class":"DEVICE","path":"/dev/ttyACM0","activated":"2026-11-23T20:00:00.000Z"}]}""")
+        waitFor("searching") { repository.state.value == GpsState.SEARCHING }
+        assertEquals(GpsdService.NAME, repository.source.value)
+
+        gpsd.println(tpv(45.347, -75.919))
+        waitFor("a fix") { repository.state.value == GpsState.FIX }
+        val fix = repository.fix.value!!
+        assertEquals(45.347, fix.latLng.latitude, 1e-9)
+        assertEquals(-75.919, fix.latLng.longitude, 1e-9)
+        assertEquals(5.0, fix.accuracyM!!, 1e-9)
+
+        gpsd.println("""{"class":"SKY","nSat":9,"uSat":6}""")
+        waitFor("satellites") { repository.satellites.value == GpsSatellites(used = 6, visible = 9) }
+
+        // Nothing more from gpsd: stale, keeping the last position.
+        waitFor("stale") { repository.state.value == GpsState.STALE }
+        assertEquals(45.347, repository.fix.value!!.latLng.latitude, 1e-9)
+
+        // A new fix is current again; gpsd saying "no fix" makes it stale at once.
+        gpsd.println(tpv(45.35, -75.92))
+        waitFor("a fix again") { repository.state.value == GpsState.FIX }
+        assertEquals(45.35, repository.fix.value!!.latLng.latitude, 1e-9)
+        gpsd.println("""{"class":"TPV","device":"/dev/ttyACM0","mode":1}""")
+        waitFor("stale after no fix", timeoutMs = 300) { repository.state.value == GpsState.STALE }
+        assertEquals(45.35, repository.fix.value!!.latLng.latitude, 1e-9)
+
+        // Receiver unplugged.
+        gpsd.println("""{"class":"DEVICE","path":"/dev/ttyACM0","activated":0}""")
+        waitFor("no receiver after unplug") { repository.state.value == GpsState.NO_RECEIVER }
+    }
+
+    @Test
+    fun noGpsdThenGpsdAppearsAndReconnects() {
+        // Nothing listening yet: refuse connections by not accepting until later.
+        val port = server.localPort
+        server.close()
+        val service = GpsdService(
+            settings = MutableStateFlow(GpsdSettings("127.0.0.1", port)), staleAfter = 400.milliseconds,
+            locationRepository = repository, logger = logger,
+            coroutineScope = scope, dispatcher = Dispatchers.IO,
+            minBackoff = 50.milliseconds, maxBackoff = 200.milliseconds, stateCheckInterval = 50.milliseconds,
+        )
+        try {
+            service.onCreate()
+            Thread.sleep(300)
+            assertEquals(GpsState.NO_GPSD, repository.state.value)
+
+            // gpsd starts (socket activation): the service connects within its backoff.
+            val gpsdServer = ServerSocket(port)
+            try {
+                gpsdServer.soTimeout = 5000
+                val first = gpsdServer.accept()
+                PrintWriter(first.getOutputStream().writer(), true).println(tpv(45.0, -75.0))
+                waitFor("a fix from the new gpsd") {
+                    repository.state.value == GpsState.FIX
+                }
+
+                // gpsd goes away: no gpsd, last position kept; then it reconnects.
+                first.close()
+                waitFor("no gpsd") { repository.state.value == GpsState.NO_GPSD }
+                assertEquals(45.0, repository.fix.value!!.latLng.latitude, 1e-9)
+                assertNull(repository.satellites.value)
+
+                val second = gpsdServer.accept()
+                PrintWriter(second.getOutputStream().writer(), true).println(tpv(46.0, -76.0))
+                waitFor("a fix after reconnecting") {
+                    repository.state.value == GpsState.FIX && repository.fix.value?.latLng?.latitude == 46.0
+                }
+                second.close()
+            } finally {
+                gpsdServer.close()
+            }
+        } finally {
+            service.onShutdown()
+        }
+    }
+
+    @Test
+    fun shutdownStops() {
+        service.onCreate()
+        val (_, gpsd) = accept()
+        gpsd.println(tpv(45.0, -75.0))
+        waitFor("a fix") { repository.state.value == GpsState.FIX }
+        service.onShutdown()
+        assertEquals(GpsState.NO_GPSD, repository.state.value)
+        assertNull(repository.source.value)
+        // The last position stays, as the last known one.
+        assertEquals(45.0, repository.fix.value!!.latLng.latitude, 1e-9)
+        // The connection is closed: gpsd's next read sees the end.
+        val client = clients.single()
+        assertEquals(-1, client.getInputStream().read())
+    }
+
+    @Test
+    fun newAddressReconnectsAtOnce() {
+        service.onCreate()
+        val (_, first) = accept()
+        first.println(tpv(45.0, -75.0))
+        waitFor("a fix from the first gpsd") { repository.state.value == GpsState.FIX }
+
+        // gpsd moves: the service leaves the first one and connects to the new one, without a backoff wait.
+        val second = ServerSocket(0)
+        try {
+            second.soTimeout = 2000
+            settings.value = GpsdSettings("127.0.0.1", second.localPort)
+            val client = second.accept().also { clients += it }
+            client.soTimeout = 5000
+            assertEquals(GpsdMessage.WATCH.trimEnd('\n'), BufferedReader(client.getInputStream().reader()).readLine())
+            // The first connection was closed.
+            assertEquals(-1, clients.first().getInputStream().read())
+
+            PrintWriter(client.getOutputStream().writer(), true).println(tpv(46.0, -76.0))
+            waitFor("a fix from the new gpsd") {
+                repository.state.value == GpsState.FIX && repository.fix.value?.latLng?.latitude == 46.0
+            }
+        } finally {
+            second.close()
+        }
+    }
+
+    @Test
+    fun newAddressWhileWaitingToRetry() {
+        // Nothing at the first address: the service waits (backoff) between tries.
+        val nowhere = ServerSocket(0).apply { close() }.localPort
+        settings.value = GpsdSettings("127.0.0.1", nowhere)
+        val slowRetry = GpsdService(
+            settings = settings, staleAfter = 400.milliseconds, locationRepository = repository, logger = logger,
+            coroutineScope = scope, dispatcher = Dispatchers.IO,
+            minBackoff = 10_000.milliseconds, maxBackoff = 10_000.milliseconds, stateCheckInterval = 50.milliseconds,
+        )
+        try {
+            slowRetry.onCreate()
+            Thread.sleep(300)
+            assertEquals(GpsState.NO_GPSD, repository.state.value)
+            // A 10 s backoff, but the new address is tried at once.
+            settings.value = GpsdSettings("127.0.0.1", server.localPort)
+            server.soTimeout = 2000
+            val client = server.accept().also { clients += it }
+            PrintWriter(client.getOutputStream().writer(), true).println(tpv(45.0, -75.0))
+            waitFor("a fix at the new address") { repository.state.value == GpsState.FIX }
+        } finally {
+            slowRetry.onShutdown()
+        }
+    }
+}

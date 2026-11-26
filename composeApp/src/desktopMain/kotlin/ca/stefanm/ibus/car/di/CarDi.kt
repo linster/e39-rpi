@@ -33,6 +33,8 @@ import kotlinx.coroutines.*
 import ca.stefanm.ibus.gui.pim.email.notifier.MailNotifierService
 import ca.stefanm.ibus.lib.system.FirstBootNotifierService
 import ca.stefanm.ibus.lib.audio.BluetoothAudioRoleService
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.FakeLocationService
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.GpsdService
 import javax.inject.Named
 import javax.inject.Scope
 import kotlin.coroutines.CoroutineContext
@@ -90,6 +92,9 @@ interface ConfiguredCarComponent {
     fun discoveredServiceMailNotifierService() : MailNotifierService
     fun discoveredServiceFirstBootNotifierService() : FirstBootNotifierService
     fun discoveredServiceBluetoothAudioRoleService() : BluetoothAudioRoleService
+
+    fun discoveredServiceGpsdService() : GpsdService
+    fun discoveredServiceFakeLocationService() : FakeLocationService
 }
 
 @Module

@@ -189,6 +189,7 @@ object SidePanelMenu {
                             centerCrossHairsVisible = centerCrossHairsVisible,
                             mapScaleVisible = false,
                             gpsReceptionIconVisible = false,
+                            gpsReceptionOverlayState = null,
                             route = null,
                             poiOverlay = PoiOverlay(listOf(
                                 poi.let {

@@ -1,5 +1,7 @@
 package ca.stefanm.ibus.di
 
+import ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.gui.chat.service.MatrixChatModule
 import ca.stefanm.ibus.lib.hardwareDrivers.ibus.IbusCommsDebugMessage
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeConfigurationStorage
@@ -92,6 +94,8 @@ interface ApplicationComponent {
 
     fun modalMenuService() : ModalMenuService
     fun notificationHub() : NotificationHub
+    fun guidanceService() : GuidanceService
+    fun locationRepository() : LocationRepository
 //    @Named(ApplicationModule.INPUT_EVENTS) fun inputEvents() : SharedFlow<InputEvent>
 
 

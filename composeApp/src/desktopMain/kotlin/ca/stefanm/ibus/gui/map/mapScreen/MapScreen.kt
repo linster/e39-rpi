@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ca.stefanm.ca.stefanm.ibus.gui.map.guidance.setupScreens.BackgroundGuidanceSetupTool
+import ca.stefanm.ca.stefanm.ibus.gui.map.widget.GpsReceptionOverlayState
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenOpener
 import ca.stefanm.ibus.gui.map.guidance.GuidanceSession
 import ca.stefanm.ibus.gui.map.guidance.setupScreens.GuidanceSetupScreen
@@ -24,6 +25,7 @@ import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.apps.pdfViewer.PdfViewerScreen
 import ca.stefanm.ibus.gui.map.*
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.gui.map.mapScreen.MapOverlayState
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenParameters
 import ca.stefanm.ibus.gui.map.mapScreen.MapScreenResult
@@ -47,6 +49,7 @@ import ca.stefanm.ibus.gui.menu.widgets.modalMenu.SidePanelMenu.InfoLabel
 import ca.stefanm.ibus.gui.menu.widgets.screenMenu.TextMenuItem
 import ca.stefanm.ibus.lib.logging.Logger
 import com.ginsberg.cirkle.circular
+import com.google.protobuf.any
 import com.javadocmd.simplelatlng.LatLng
 import com.javadocmd.simplelatlng.LatLngTool
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,7 +78,8 @@ class MapScreen @Inject constructor(
     private val guidanceService: GuidanceService,
     private val gpsMapCenterProvider: GpsMapCenterProvider,
     private val bottomBarController: BottomBarController,
-    private val backgroundGuidanceSetupTool: BackgroundGuidanceSetupTool
+    private val backgroundGuidanceSetupTool: BackgroundGuidanceSetupTool,
+    private val locationRepository: LocationRepository,
 ) : NavigationNode<MapScreenResult> {
 
     companion object : MapScreenOpener {
@@ -239,6 +243,20 @@ class MapScreen @Inject constructor(
             }
         }
 
+
+        // Enable the gps marker when any of the gps services are running.
+        val anyLocationServiceRunning by remember {
+            locationRepository.anyLocationServiceRunning()
+        }.collectAsState(false)
+
+        LaunchedEffect(shouldFollowGps, anyLocationServiceRunning) {
+            if (anyLocationServiceRunning && shouldFollowGps) {
+                gpsMapCenterProvider.center.collect {
+                    extents.centerState = it
+                }
+            }
+        }
+
         val currentlySelectedPoi = remember { mutableStateOf<MapPoi?>(null) }
 
         LaunchedEffect(currentOverlayState.value) {
@@ -249,7 +267,14 @@ class MapScreen @Inject constructor(
                     parameters.openMode,
                     currentCenterAcessor = { extents.centerState },
                     currentPoiAccessor = { currentlySelectedPoi.value },
-                    onOverlayStateChanged = { new -> currentOverlayState.value = new }
+                    onOverlayStateChanged = { new -> currentOverlayState.value = new },
+                    isLocationServiceRunningAccessor = { anyLocationServiceRunning },
+                    onRequestRecenterToLocation = {
+                        val currentPosition = locationRepository.getPositionStateFlow().value
+                        if (currentPosition != null) {
+                            extents.centerState = currentPosition
+                        }
+                    }
                 )
             }
             if (currentOverlayState.value == MapOverlayState.GuidanceMenu) {
@@ -265,8 +290,9 @@ class MapScreen @Inject constructor(
 
         val poiList by poiRepository.getAllVisiblePoisFlow().collectAsState(emptyList())
 
-        val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = guidanceService.position.map { latLng ->
-            if (latLng != null) {
+
+        val gpsMarker : State<PoiOverlay.PoiOverlayItem?> = locationRepository.getPosition().map { latLng ->
+            if (latLng != null && anyLocationServiceRunning) {
                 PoiOverlay.PoiOverlayItem(
                     label = "GPS Location",
                     position = latLng,
@@ -284,9 +310,6 @@ class MapScreen @Inject constructor(
         var viewPortHeight by remember { mutableStateOf(0.dp) }
 
         if (parameters.openMode is MapScreenParameters.MapScreenOpenMode.PoiBrowser) {
-            // TODO Populate the selectable POIs.
-            // TODO Status bar should also show how many pois visible out of how many in result set.
-
             var poiListenerIsEnabled by remember { mutableStateOf(false) }
             val knobStatePois = KnobObserverBuilderState.setupEnableableListener(
                 knobListenerService = knobListenerService,
@@ -394,7 +417,11 @@ class MapScreen @Inject constructor(
                 centerCrossHairsVisible =
                     currentOverlayState.value in listOf(MapOverlayState.PanUpDown,  MapOverlayState.PanLeftRight) ||
                     parameters.openMode is MapScreenParameters.MapScreenOpenMode.LocationSelection,
-                gpsReceptionIconVisible = false,
+                gpsReceptionIconVisible = anyLocationServiceRunning,
+                gpsReceptionOverlayState = GpsReceptionOverlayState(
+                    state = locationRepository.state.collectAsState(),
+                    satellites = locationRepository.satellites.collectAsState()
+                ),
                 //TODO this needs a KnobListener state, and to have the poi overlay be built outside of here.
                 poiOverlay = (poiList + parameters.markers).let { list ->
                     logger.d("POI LIST", list.toString())
@@ -453,11 +480,13 @@ class MapScreen @Inject constructor(
         currentCenterAcessor : () -> LatLng,
         currentPoiAccessor : () -> MapPoi?,
         onOverlayStateChanged : (new : MapOverlayState) -> Unit,
+        isLocationServiceRunningAccessor : () -> Boolean,
+        onRequestRecenterToLocation : () -> Unit,
     ) {
         modalMenuService.showModalMenu(
             dimensions = ModalMenuService.PixelDoubledModalMenuDimensions(
                 menuTopLeft = IntOffset(32, 32),
-                menuWidth = 384,
+                menuWidth = 512,
             ).toNormalModalMenuDimensions(),
             autoCloseOnSelect = true,
             menuData = ModalMenu(
@@ -481,7 +510,28 @@ class MapScreen @Inject constructor(
                             title = "Pan ⬍",
                             onClicked = { onOverlayStateChanged(MapOverlayState.PanUpDown) }
                         )
-                    )
+                    ).let {
+                        if (isLocationServiceRunningAccessor()) {
+                            it + listOf(
+                                ModalMenu.ModalMenuItem(
+                                    title = "Pan to GPS",
+                                    onClicked = {
+                                        onOverlayStateChanged(MapOverlayState.NoOverlay)
+                                        onRequestRecenterToLocation()
+                                    }
+                                ),
+                                ModalMenu.ModalMenuItem(
+                                    title = "Keep following GPS",
+                                    onClicked = {
+                                        onOverlayStateChanged(MapOverlayState.NoOverlay)
+                                        gpsMapCenterProvider.followGps(true)
+                                    }
+                                )
+                            )
+                        } else {
+                            it
+                        }
+                    }
 
                     val browsingEntries = if (mapScreenOpenMode is MapScreenParameters.MapScreenOpenMode.BrowsingMode) {
                         listOf(
@@ -638,12 +688,14 @@ class MapScreen @Inject constructor(
                         onClicked = {
                             modalMenuService.closeModalMenu()
                             guidanceService.stopGuidance()
+                            guidanceService.clearCurrentSession()
                             onOverlayStateChanged(MapOverlayState.NoOverlay)
                         }
                     ),
                     ModalMenu.ModalMenuItem(
                         title = "Repeat Direction",
                         onClicked = {
+                            onOverlayStateChanged(MapOverlayState.NoOverlay)
                             guidanceService.repeatLastDirection()
                         }
                     )

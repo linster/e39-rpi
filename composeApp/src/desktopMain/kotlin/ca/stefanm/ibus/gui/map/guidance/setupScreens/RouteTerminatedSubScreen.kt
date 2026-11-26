@@ -92,7 +92,8 @@ class RouteTerminatedSubScreen @Inject constructor(
                                     mapScaleVisible = true,
                                     route = Route(points, Color.Magenta, Stroke(8F)),
                                     centerCrossHairsVisible = false,
-                                    gpsReceptionIconVisible = false
+                                    gpsReceptionIconVisible = false,
+                                    gpsReceptionOverlayState = null
                                 ),
                                 extents = Extents(
                                     center = Route.findCenter(points),

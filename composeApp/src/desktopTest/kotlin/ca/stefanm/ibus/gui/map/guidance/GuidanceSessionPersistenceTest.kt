@@ -1,7 +1,13 @@
 package ca.stefanm.ibus.gui.map.guidance
 
+import ca.stefanm.ibus.configuration.E39Config
+import ca.stefanm.ibus.gui.map.repo.RemoteRouteRepository
 import com.javadocmd.simplelatlng.LatLng
+import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.hocon
+import com.uchuhimo.konf.source.hocon.toHocon
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -56,6 +62,75 @@ class GuidanceSessionPersistenceTest {
         val back = roundTrip(session)
         assertEquals(GuidanceSession.SessionState.READY_TO_CALCULATE, back.sessionState)
         assertNull(back.route)
+    }
+
+    private val maneuvers = listOf(
+        RemoteRouteRepository.Maneuver(
+            kind = RemoteRouteRepository.ManeuverKind.START,
+            instruction = "Drive west on Wellington Street.",
+            verbalPreTransition = "Drive west on Wellington Street.",
+            streetNames = listOf("Wellington Street"),
+            lengthMeters = 1200.0,
+            durationSeconds = 90.0,
+            location = start,
+            triggerRadiusMeters = 100.0,
+            pathIndexRange = 0..1,
+            roundaboutExit = 0,
+        ),
+        RemoteRouteRepository.Maneuver(
+            kind = RemoteRouteRepository.ManeuverKind.DESTINATION,
+            instruction = "You have arrived.",
+            verbalPreTransition = "",
+            streetNames = emptyList(),
+            lengthMeters = 0.0,
+            durationSeconds = 0.0,
+            location = end,
+            triggerRadiusMeters = 50.0,
+            pathIndexRange = 2..2,
+            roundaboutExit = 0,
+        ),
+    )
+
+    private fun inGuidanceWithManeuvers() = calculated().apply {
+        maneuvers = this@GuidanceSessionPersistenceTest.maneuvers
+        startGuidance()
+    }
+
+    @Test
+    fun maneuversAreKept() {
+        val back = roundTrip(inGuidanceWithManeuvers())
+        assertEquals(maneuvers, back.maneuvers)
+        assertEquals(GuidanceInstruction.fromRoute(maneuvers), GuidanceInstruction.fromRoute(back.maneuvers))
+    }
+
+    /** Through konf's HOCON, as config.conf is written and read. */
+    private fun hocon(session: PersistedGuidanceSession): String =
+        Config { addSpec(E39Config.GuidanceConfig) }
+            .apply { this[E39Config.GuidanceConfig.currentSession] = session }
+            .toHocon.toText()
+
+    private fun fromHocon(text: String): GuidanceSession =
+        Config { addSpec(E39Config.GuidanceConfig) }.from.hocon.string(text)
+            .let { GuidanceSession(it[E39Config.GuidanceConfig.currentSession]) }
+
+    @Test
+    fun maneuversAreKeptInTheConfigFile() {
+        val session = inGuidanceWithManeuvers()
+        val back = fromHocon(hocon(PersistedGuidanceSession.fromSession(session)))
+        assertSame(session, back)
+        assertEquals(maneuvers, back.maneuvers)
+    }
+
+    @Test
+    fun aSessionSavedBeforeManeuversLoadsWithNone() {
+        val text = hocon(PersistedGuidanceSession.fromSession(calculated().apply { startGuidance() }))
+        val withoutManeuvers = text.lines().filterNot { it.trim().startsWith("maneuvers") }.joinToString("\n")
+        assertNotEquals(text, withoutManeuvers)
+
+        val back = fromHocon(withoutManeuvers)
+        assertEquals(GuidanceSession.SessionState.IN_GUIDANCE, back.sessionState)
+        assertEquals(path, back.route)
+        assertEquals(emptyList<RemoteRouteRepository.Maneuver>(), back.maneuvers)
     }
 
     @Test

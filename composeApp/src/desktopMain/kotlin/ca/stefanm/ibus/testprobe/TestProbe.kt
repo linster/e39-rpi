@@ -43,6 +43,10 @@ import ca.stefanm.e39hmi.test.v1.resetFakeMailResponse
 import ca.stefanm.e39hmi.test.v1.screenshotResponse
 import ca.stefanm.e39hmi.test.v1.sendInputResponse
 import ca.stefanm.ibus.car.bordmonitor.input.InputEvent
+import ca.stefanm.ibus.car.platform.ConfigurablePlatform
+import ca.stefanm.ibus.car.platform.PlatformService
+import ca.stefanm.ibus.gui.map.location.LocationRepository
+import ca.stefanm.ibus.lib.hardwareDrivers.gps.FakeLocationService
 import ca.stefanm.ibus.di.ApplicationModule
 import ca.stefanm.ibus.di.AutoDiscoveredNodesRegistry
 import ca.stefanm.ibus.di.ApplicationScope
@@ -90,6 +94,7 @@ import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -114,6 +119,7 @@ import javax.inject.Provider
  * overlays, knob listeners), feeds the input stream like the IBus parser,
  * and screenshots the HMI window. Nothing in the UI knows about it.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @ApplicationScope
 class TestProbe @Inject constructor(
     private val navigator: Provider<Navigator>,
@@ -136,6 +142,8 @@ class TestProbe @Inject constructor(
     private val accountRepository: Provider<AccountRepository>,
     private val addMailAccount: Provider<AddMailAccountRepo>,
     private val guidanceService: Provider<GuidanceService>,
+    private val configurablePlatform: Provider<ConfigurablePlatform>,
+    private val locationRepository: Provider<LocationRepository>,
     private val configurationStorage: Provider<ConfigurationStorage>,
     private val windowManager: Provider<WindowManager>,
     private val logger: Logger,
@@ -571,10 +579,41 @@ class TestProbe @Inject constructor(
 
         override suspend fun setPosition(request: SetPositionRequest): GuidanceState {
             val service = guidanceService.get()
-            service.updatePosition(LatLng(request.position.latitude, request.position.longitude))
-            // Runs on the guidance thread after the position's handling (one thread, in order).
-            service.nextInstruction()
+            val fake = fakeLocationService()
+            val position = LatLng(request.position.latitude, request.position.longitude)
+            // As a location service would: into the LocationRepository, which GuidanceService follows.
+            // A service just started starts on another thread: until then it ignores locations.
+            withTimeoutOrNull(5_000) {
+                while (!fake.setLocation(position)) delay(20)
+            } ?: throw StatusException(Status.DEADLINE_EXCEEDED.withDescription(
+                "${FakeLocationService.NAME} didn't start"))
+            // The fix it reported (a new object each time, even at the same place).
+            val fix = locationRepository.get().fix.value
+            // Returns once guidance has handled that fix.
+            withTimeoutOrNull(10_000) {
+                service.lastHandledFix.first { it === fix }
+            } ?: throw StatusException(Status.DEADLINE_EXCEEDED.withDescription(
+                "GuidanceService didn't handle the position from the LocationRepository"))
             return getGuidance(GetGuidanceRequest.getDefaultInstance())
+        }
+
+        /**
+         * The car platform's FakeLocationService (group GpsLocationProvidersDebug),
+         * started if it isn't running. The runner's configuration doesn't start the
+         * GpsLocationProviders group, so GpsdService stays off.
+         */
+        private fun fakeLocationService(): FakeLocationService {
+            val platform = configurablePlatform.get()
+            val platformService = try {
+                platform.findServiceByName(FakeLocationService.NAME)
+            } catch (e: NoSuchElementException) {
+                null
+            } ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription(
+                "no ${FakeLocationService.NAME}: is the car platform running?"))
+            if (platformService.runStatus != PlatformService.RunStatus.RUNNING) {
+                platform.startServiceByName(FakeLocationService.NAME)
+            }
+            return platformService.baseService as FakeLocationService
         }
 
         override suspend fun resetFakeMail(request: ResetFakeMailRequest): ResetFakeMailResponse {

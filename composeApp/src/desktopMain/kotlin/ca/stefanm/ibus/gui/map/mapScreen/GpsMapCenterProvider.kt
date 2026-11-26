@@ -4,6 +4,7 @@ import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
+import ca.stefanm.ibus.gui.map.location.LocationRepository
 import ca.stefanm.ibus.gui.map.widget.MapScale
 import ca.stefanm.ibus.lib.logging.Logger
 import com.javadocmd.simplelatlng.LatLng
@@ -11,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.PI
@@ -41,12 +43,12 @@ class GpsMapCenterProvider internal constructor(
 ) {
 
     @Inject constructor(
-        guidanceService: GuidanceService,
+        locationRepository: LocationRepository,
         configurationStorage: ConfigurationStorage,
         coroutineScope: CoroutineScope,
         logger: Logger
     ) : this(
-        guidanceService.position,
+        locationRepository.getPositionStateFlow(),
         coroutineScope,
         configurationStorage.config[E39Config.MapConfig.defaultMapCenter].let { LatLng(it.first, it.second) },
         MapScale.KILOMETERS_1_6,

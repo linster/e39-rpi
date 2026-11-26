@@ -337,6 +337,24 @@ object E39Config : ConfigSpec() {
         }
     }
 
+    object GpsConfig : ConfigSpec() {
+        val gpsdHost by optional(
+            "localhost",
+            "gpsdHost",
+            "Where gpsd listens (GpsdService). The Pi's image runs it on localhost."
+        )
+        val gpsdPort by optional(
+            2947,
+            "gpsdPort",
+            "gpsd's port (its default is 2947)."
+        )
+        val staleAfterSeconds by optional(
+            5,
+            "staleAfterSeconds",
+            "A fix older than this (no new position from gpsd) is stale: the last known position, not the current one."
+        )
+    }
+
     object GuidanceConfig : ConfigSpec() {
         val currentSession by optional(PersistedGuidanceSession.DEFAULT,
             "guidanceSession",
