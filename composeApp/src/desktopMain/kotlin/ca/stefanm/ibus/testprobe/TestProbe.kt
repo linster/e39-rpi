@@ -9,6 +9,10 @@ import ca.stefanm.e39hmi.test.v1.openDebugWindowResponse
 import ca.stefanm.e39hmi.test.v1.CloseDebugWindowRequest
 import ca.stefanm.e39hmi.test.v1.CloseDebugWindowResponse
 import ca.stefanm.e39hmi.test.v1.closeDebugWindowResponse
+import ca.stefanm.e39hmi.test.v1.CrashHmiRequest
+import ca.stefanm.e39hmi.test.v1.CrashHmiResponse
+import ca.stefanm.e39hmi.test.v1.crashHmiResponse
+import ca.stefanm.ibus.gui.crash.HmiCrashHandler
 import ca.stefanm.e39hmi.test.v1.ClickTextRequest
 import ca.stefanm.e39hmi.test.v1.ClickTextResponse
 import ca.stefanm.e39hmi.test.v1.clickTextResponse
@@ -158,6 +162,7 @@ class TestProbe @Inject constructor(
     private val configurationStorage: Provider<ConfigurationStorage>,
     private val windowManager: Provider<WindowManager>,
     private val debugLaunchpad: Provider<DebugLaunchpad>,
+    private val crashHandler: Provider<HmiCrashHandler>,
     private val logger: Logger,
 ) {
     companion object {
@@ -558,6 +563,18 @@ class TestProbe @Inject constructor(
             withContext(Dispatchers.Main) { windowManager.get().closeDebugWindow(window) }
             waitForFrame(request.title, showing = false)
             return closeDebugWindowResponse { }
+        }
+
+        override suspend fun crashHmi(request: CrashHmiRequest): CrashHmiResponse {
+            if (withContext(Dispatchers.Main) { hmiWindow() } == null) {
+                throw StatusException(Status.FAILED_PRECONDITION.withDescription("the HMI window isn't open"))
+            }
+            crashHandler.get().requestCrash()
+            // Thrown at the HMI window's next composition.
+            withTimeoutOrNull(DEFAULT_TIMEOUT_MS.toLong()) {
+                while (crashHandler.get().crashRequested.value) delay(20)
+            } ?: throw StatusException(Status.DEADLINE_EXCEEDED.withDescription("the HMI window didn't crash"))
+            return crashHmiResponse { }
         }
 
         override suspend fun clickText(request: ClickTextRequest): ClickTextResponse {

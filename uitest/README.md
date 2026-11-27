@@ -128,6 +128,12 @@ hmi.close_debug_window("Theme Designer")
 hmi.state().theme                       # the theme the HMI shows ("ThemeDesignerPreview" while previewing)
 ```
 
+`hmi.crash_hmi()` makes the HMI window throw, as a bug would. With the
+error screen on (#78: `errorScreen=true`, or on the Pi), "E39 HMI Error"
+shows, and can be read like a debug window (`hmi.window_text("E39 HMI Error")`).
+`tests/errorScreen/` runs an HMI of its own for this, because a second crash
+exits it.
+
 Guidance tests (`tests/guidance/`) set up a route with the knob as a user
 would (Map -> Guidance -> Setup..., start and end via "Select on Map",
 "Calculate Route", "Start Guidance", "Terminate Guidance") and check the
