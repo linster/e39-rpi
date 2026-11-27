@@ -71,8 +71,8 @@ object ErrorScreenWindow {
         }
 
         Column(
-            Modifier.fillMaxSize().background(Color(0xFF101014)).padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            Modifier.fillMaxSize().background(Color(0xFF101014)).padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 if (crash.then == HmiCrashHandler.Then.EXIT && crash.window == HmiCrashHandler.CrashedWindow.HMI) {
@@ -80,19 +80,19 @@ object ErrorScreenWindow {
                 } else {
                     "The HMI crashed"
                 },
-                color = Color(0xFFFF8A80), fontSize = 28.sp, fontWeight = FontWeight.Bold
+                color = Color(0xFFFF8A80), fontSize = 16.sp, fontWeight = FontWeight.Bold
             )
             Text(
                 when (crash.then) {
                     HmiCrashHandler.Then.REOPEN_HMI -> "Back to the main menu in $secondsLeft s"
                     HmiCrashHandler.Then.EXIT -> "Restarting the HMI app in $secondsLeft s"
                 },
-                color = Color(0xFFE0E0E0), fontSize = 20.sp
+                color = Color(0xFFE0E0E0), fontSize = 12.sp
             )
-            Text(crash.throwable.toString(), color = Color(0xFFE0E0E0), fontSize = 16.sp)
+            Text(crash.throwable.toString(), color = Color(0xFFE0E0E0), fontSize = 10.sp)
             Text(
                 crash.throwable.stackTrace.take(6).joinToString("\n") { "  at $it" },
-                color = Color(0xFF9E9E9E), fontSize = 12.sp, fontFamily = FontFamily.Monospace
+                color = Color(0xFF9E9E9E), fontSize = 8.sp, fontFamily = FontFamily.Monospace
             )
         }
     }
