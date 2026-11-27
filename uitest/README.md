@@ -87,6 +87,21 @@ drops a message into the inbox and waits (the bridge reports new mail after
 pytest -m bridge_mail --mail bridge --bridge-maildir ~/.local/share/e39pim-dev/share/local-mail
 ```
 
+### Probe panel (by hand)
+
+`tools/probe-panel.py` is a Tk window of buttons for the same probe: the
+knob, Back/Root/Go to a screen, Crash the HMI (#78), Reopen window, the
+resets, a GPS position, typing on the on-screen keyboard, sample mail, debug
+windows, and a live picture of the HMI window with its state. It connects
+as the remote target does (adding `E39_TEST_PROBE` and tunnelling over ssh);
+**Probe off** removes it again and restarts the HMI.
+
+```sh
+uitest/tools/probe-panel.py --device e39pi.local      # a Pi, ssh as root
+uitest/tools/probe-panel.py --qemu                    # run-qemu.sh's QEMU
+uitest/tools/probe-panel.py --address 127.0.0.1:50199 # a probe already reachable
+```
+
 ### Input
 
 - **probe** (default): events go into the HMI's input stream, one at a time,
