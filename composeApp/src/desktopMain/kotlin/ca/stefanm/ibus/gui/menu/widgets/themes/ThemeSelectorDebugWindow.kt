@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import ca.stefanm.ibus.configuration.ConfigurationStorage
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import ca.stefanm.ibus.gui.menu.widgets.themes.Themes.toTheme
 import ca.stefanm.ibus.gui.debug.windows.NestingCard
 import ca.stefanm.ibus.gui.debug.windows.NestingCardHeader
 import ca.stefanm.ibus.gui.menu.Notification
@@ -21,7 +22,8 @@ import javax.inject.Provider
 class ThemeSelectorDebugWindow @Inject constructor(
     private val themeConfigurationStorage: ThemeConfigurationStorage,
     private val windowManager: Provider<WindowManager>,
-    private val notificationHub: NotificationHub
+    private val notificationHub: NotificationHub,
+    private val themeRepository: ThemeRepository,
 ): WindowManager.E39Window {
 
     override val title: String = "Theme Selector"
@@ -45,10 +47,22 @@ class ThemeSelectorDebugWindow @Inject constructor(
 
                 NestingCard {
                     NestingCardHeader("Select Theme Preset")
-                    Themes.availableThemes.forEach {
+                    themeRepository.themes.collectAsState().value.forEach {
                         Button(onClick = {
                             themeConfigurationStorage.setTheme(it)
                         }) { Text(it.friendlyName) }
+                    }
+                }
+
+                NestingCard {
+                    NestingCardHeader("Theme files")
+                    Text("${ConfigurationStorage.e39BaseFolder}/${ThemeRepository.FOLDER}/*.${ThemeFiles.EXTENSION}")
+                    Button(onClick = { themeRepository.reload() }) { Text("Reload themes") }
+                    val problems = themeRepository.problems.collectAsState().value
+                    if (problems.isEmpty()) {
+                        Text("No problems.")
+                    } else {
+                        problems.forEach { Text("Skipped ${it.file}: ${it.message}") }
                     }
                 }
 

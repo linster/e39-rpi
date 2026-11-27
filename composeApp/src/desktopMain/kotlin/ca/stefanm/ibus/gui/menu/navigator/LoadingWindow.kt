@@ -22,6 +22,7 @@ import ca.stefanm.ibus.gui.debug.windows.HmiNavigatorDebugWindow
 import ca.stefanm.ibus.gui.debug.windows.KeyEventSimulator
 import ca.stefanm.ibus.gui.debug.windows.commsDebug.PicoCommsDebugWindow
 import ca.stefanm.ibus.gui.menu.widgets.themes.ThemeSelectorDebugWindow
+import ca.stefanm.ibus.gui.menu.widgets.themes.designer.ThemeDesignerDebugWindow
 import ca.stefanm.ibus.gui.platformConfig.PlatformConfigSetupWindow
 import ca.stefanm.ibus.gui.platformConfig.WindowManagerConfigSetupWindow
 import ca.stefanm.ibus.car.platform.ConfigurablePlatform
@@ -54,6 +55,7 @@ class LoadingWindow @Inject constructor(
     private val platformConfigSetupWindow: PlatformConfigSetupWindow,
     private val windowManagerConfigSetupWindow: WindowManagerConfigSetupWindow,
     private val themeSelectorDebugWindow: ThemeSelectorDebugWindow,
+    private val themeDesignerDebugWindow: ThemeDesignerDebugWindow,
     private val picoCommsDebugWindow: PicoCommsDebugWindow,
     private val matrixServiceDebugWindow: MatrixServiceDebugWindow,
     private val agendaPartsDebugWindow: AgendaPartsDebugWindow,
@@ -150,6 +152,10 @@ class LoadingWindow @Inject constructor(
                     Item(
                         "Theme Selector",
                         onClick = { windowManager.get().openDebugWindow(themeSelectorDebugWindow)}
+                    )
+                    Item(
+                        "Theme Designer",
+                        onClick = { windowManager.get().openDebugWindow(themeDesignerDebugWindow)}
                     )
                     Item(
                         "Pico Comms Debug",

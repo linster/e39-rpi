@@ -19,6 +19,7 @@ import ca.stefanm.ibus.gui.pim.calendar.debug.CalendarDebugWindow
 import ca.stefanm.ibus.gui.pim.email.debug.MailDebugWindow
 import ca.stefanm.ibus.gui.pim.contacts.debug.ContactsDebugWindow
 import ca.stefanm.ibus.gui.menu.navigator.WindowManager
+import ca.stefanm.ibus.gui.menu.widgets.themes.designer.ThemeDesignerDebugWindow
 import javax.inject.Inject
 
 
@@ -45,10 +46,21 @@ class DebugLaunchpad @Inject constructor(
     private val calendarDebugWindow: CalendarDebugWindow,
     private val mailDebugWindow: MailDebugWindow,
     private val contactsDebugWindow: ContactsDebugWindow,
+
+    private val themeDesignerDebugWindow: ThemeDesignerDebugWindow,
 ) : WindowManager.E39Window {
 
     override val tag: Any
         get() = this
+
+    /** The windows it opens, and itself (e.g. for the test probe to open them by title). */
+    val windows: List<WindowManager.E39Window>
+        get() = listOf(
+            this, keyEventSimulator, mapDebug, menuDebug, paneManagerDebug, serviceStatusViewer,
+            notificationSpammerDebug, hmiNavigatorDebugWindow, logViewerWindow, guidanceDebugWindow,
+            picoCommsDebugWindow, matrixServiceDebugWindow, calendarDebugWindow, mailDebugWindow,
+            contactsDebugWindow, themeDesignerDebugWindow,
+        )
 
     override val title = "Debug Launchpad"
     override val size = DpSize(300.dp, 800.dp)
@@ -107,6 +119,10 @@ class DebugLaunchpad @Inject constructor(
 
             Button(onClick = { windowManager.openDebugWindow(contactsDebugWindow)}) {
                 Text("Contacts (PIM Bridge) Debug")
+            }
+
+            Button(onClick = { windowManager.openDebugWindow(themeDesignerDebugWindow)}) {
+                Text("Theme Designer")
             }
         }
     }

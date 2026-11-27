@@ -133,6 +133,8 @@ class LocalTarget:
         self.workdir = tempfile.mkdtemp(prefix="e39ui-")
         config_dir = os.path.join(self.workdir, "config")
         os.makedirs(config_dir)
+        # The HMI's configuration folder (E39_CONFIG_DIR), e.g. for tests to add theme files.
+        self.config_dir = config_dir
 
         # A pty pair stands in for the IBus adapter. The HMI opens its port
         # even without the SerialInterface services (and fails for a path

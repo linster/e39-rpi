@@ -213,4 +213,9 @@ class WindowManager @Inject constructor(
     fun openDebugWindow(debugWindow: E39Window) {
         windowManagerState.value.openWindow(debugWindow)
     }
+
+    /** As the window's close button does. */
+    fun closeDebugWindow(debugWindow: E39Window) {
+        windowManagerState.value.closeWindow(debugWindow)
+    }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlin.enums.enumEntries
+import androidx.compose.foundation.selection.toggleable
 
 @Composable
 fun NestingCard(
@@ -87,10 +88,16 @@ fun NumericTextViewWithSpinnerButtons(
 
 @Composable
 fun CheckBoxWithLabel(isChecked : Boolean, onCheckChanged : (new : Boolean) -> Unit, label : String) {
-    Row(Modifier.wrapContentHeight(), verticalAlignment = Alignment.CenterVertically) {
+    // The whole row toggles, the label too (one clickable item, named by the label).
+    Row(
+        Modifier
+            .wrapContentHeight()
+            .toggleable(value = isChecked, onValueChange = onCheckChanged, role = Role.Checkbox),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Checkbox(
             checked = isChecked,
-            onCheckedChange = { onCheckChanged(it)}
+            onCheckedChange = null
         )
         Text(label)
     }
