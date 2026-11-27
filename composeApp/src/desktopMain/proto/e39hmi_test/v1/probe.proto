@@ -41,6 +41,10 @@ service HmiTestProbe {
   // window's Close HMI / Open HMI do): a theme's window size only applies to
   // a newly opened window. Returns once the new window is showing.
   rpc ReopenHmiWindow(ReopenHmiWindowRequest) returns (HmiState);
+  // Makes the HMI window throw, as a bug would (HMI Navigator Debug's Crash
+  // the HMI). With the error screen on (#78) it shows "E39 HMI Error";
+  // otherwise Compose's error dialog. Returns once it's thrown.
+  rpc CrashHmi(CrashHmiRequest) returns (CrashHmiResponse);
 
   // Opens a debug window by its title (e.g. "Theme Designer"): the Debug
   // Launchpad's windows, or the launchpad itself. Returns once it's showing;
@@ -277,6 +281,9 @@ message CloseDebugWindowRequest {
   string title = 1;
 }
 message CloseDebugWindowResponse {}
+
+message CrashHmiRequest {}
+message CrashHmiResponse {}
 
 message ClickTextRequest {
   // An open debug window's title.

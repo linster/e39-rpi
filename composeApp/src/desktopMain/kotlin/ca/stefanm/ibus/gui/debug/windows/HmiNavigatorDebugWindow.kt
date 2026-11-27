@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowSize
+import ca.stefanm.ibus.gui.crash.HmiCrashHandler
 import ca.stefanm.ibus.gui.debug.hmiScreens.SmoothScrollToolbarTest
 import ca.stefanm.ibus.gui.apps.fileManager.impl.debug.screens.FilePaneDebugScreen
 import ca.stefanm.ibus.car.desktop.input.griffinPowermate.NavigatorMapScreenListener
@@ -45,7 +46,8 @@ class HmiNavigatorDebugWindow @Inject constructor(
     private val navigationNodeTraverser: Provider<NavigationNodeTraverser>,
     @Named(NavigationModule.ALL_NODES) private val allNodes : Provider<Set<NavigationNode<*>>>,
     private val modalMenuService: ModalMenuService,
-    private val navigatorMapScreenListener: NavigatorMapScreenListener
+    private val navigatorMapScreenListener: NavigatorMapScreenListener,
+    private val crashHandler: HmiCrashHandler,
 ) : WindowManager.E39Window {
 
     override val tag: Any
@@ -66,6 +68,11 @@ class HmiNavigatorDebugWindow @Inject constructor(
 
         NestingCard {
             NestingCardHeader("Back stack")
+            NestingCard {
+                NestingCardHeader("Crash")
+                // The HMI window throws, as on a bug: the error screen (#78), or Compose's error dialog.
+                Button(onClick = { crashHandler.requestCrash() }) { Text("Crash the HMI") }
+            }
             NestingCard {
                 NestingCardHeader("Registered Node")
                 NavigateToNode()

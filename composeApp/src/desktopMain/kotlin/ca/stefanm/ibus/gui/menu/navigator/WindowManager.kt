@@ -15,6 +15,8 @@ import ca.stefanm.ibus.car.platform.ConfigurablePlatform
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.di.ApplicationScope
+import ca.stefanm.ibus.gui.crash.ErrorScreenWindow.ErrorScreen
+import ca.stefanm.ibus.gui.crash.HmiCrashHandler
 import ca.stefanm.ibus.gui.menu.MenuWindow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -28,7 +30,8 @@ class WindowManager @Inject constructor(
     private val hmiWindow : MenuWindow,
     private val configurablePlatform: ConfigurablePlatform,
     private val configurationStorage: ConfigurationStorage,
-    private val navigatorMapScreenListener: NavigatorMapScreenListener
+    private val navigatorMapScreenListener: NavigatorMapScreenListener,
+    private val crashHandler: HmiCrashHandler,
 ) {
 
     companion object {
@@ -89,6 +92,7 @@ class WindowManager @Inject constructor(
     }
 
     //Invoke from Main
+    @OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
     fun runApplication() = application {
         // Currently we use Swing's menu under the hood, so we need to set this property to change the look and feel of the menu on Windows/Linux
         System.setProperty("skiko.rendering.laf.global", "true")
@@ -106,6 +110,10 @@ class WindowManager @Inject constructor(
 
         val isPi = configurationStorage.config[E39Config.CarPlatformConfigSpec._isPi]
 
+        // #78: on a crash, the error screen instead of the HMI window (and of Compose's error dialog).
+        val crash by crashHandler.crash.collectAsState()
+        crash?.let { ErrorScreen(crashHandler, it) }
+
         val mainWindowState = rememberWindowState(
             size = DEFAULT_SIZE,
             placement = if (isPi) {
@@ -116,71 +124,82 @@ class WindowManager @Inject constructor(
         )
 
 
-        Window(
-            title = "BMW E39 Nav Loading",
-            state = mainWindowState,
-            onCloseRequest = {
-                configurablePlatform.stop()
-                exitApplication()
-            },
-            resizable = false,
-            visible = true,
-            undecorated = isPi
+        CompositionLocalProvider(
+            LocalWindowExceptionHandlerFactory provides crashHandler.exceptionHandlerFactory(HmiCrashHandler.CrashedWindow.LOADING)
         ) {
-            loadingWindow.get().contents()()
+            Window(
+                title = "BMW E39 Nav Loading",
+                state = mainWindowState,
+                onCloseRequest = {
+                    configurablePlatform.stop()
+                    exitApplication()
+                },
+                resizable = false,
+                visible = true,
+                undecorated = isPi
+            ) {
+                loadingWindow.get().contents()()
+            }
         }
 
 
 
-        if (hmiWindowState.value.isHmiWindowOpen) {
-            Window(
-                state = rememberWindowState(
-                    position = mainWindowState.position.let {
-                        if (configurationStorage.config[E39Config.WindowManagerConfig.hmiShiftRight]) {
-                            //This blows up on Matthias' machine, and I'm not sure why yet.
-                            //> Task :run
-                            //Exception in thread "main" java.lang.IllegalArgumentException: Cannot round NaN value.
-                            //at kotlin.math.MathKt__MathJVMKt.roundToInt(MathJVM.kt:1132)
-                            //at androidx.compose.ui.util.Windows_desktopKt.setPositionSafely(Windows.desktop.kt:102)
-                            //at androidx.compose.ui.util.Windows_desktopKt.setPositionSafely(Windows.desktop.kt:57)
-                            //at
-                            WindowPosition(it.x + 900.dp, it.y)
-                        } else {
-                            it
-                        }
-                    },
-                    size = hmiWindow.size,
-                    placement = if (isPi) {
-                        WindowPlacement.Maximized
-                    } else {
-                        WindowPlacement.Floating
-                    }
-                ),
-                title = "E39 Menu",
-                undecorated = isPi,
-                resizable = !isPi,
-                alwaysOnTop = true,
-                enabled = true,
-                onCloseRequest = {
-                    closeHmiMainWindow()
-                }
+        if (hmiWindowState.value.isHmiWindowOpen && crash == null) {
+            CompositionLocalProvider(
+                LocalWindowExceptionHandlerFactory provides crashHandler.exceptionHandlerFactory(HmiCrashHandler.CrashedWindow.HMI)
             ) {
-
-                //1F means fully bright (because white on black in calibration)
-                val tint = configurationStorage.config[E39Config.WindowManagerConfig.brightnessCompensation]
-
-                Box {
-                    hmiWindow.content()()
-                    // TODO don't do this once the board is fixed and we don't need tint.
-                    val isOnMapScreen by navigatorMapScreenListener.isOnMapScreenFlow().collectAsState(false)
-                    val calculatedTint = if (tint < 0.1F) tint else if (!isOnMapScreen) {
-                        tint
-                    } else {
-                        (tint + 0.3F).coerceIn(0.5F, 0.95F)
+                Window(
+                    state = rememberWindowState(
+                        position = mainWindowState.position.let {
+                            if (configurationStorage.config[E39Config.WindowManagerConfig.hmiShiftRight]) {
+                                //This blows up on Matthias' machine, and I'm not sure why yet.
+                                //> Task :run
+                                //Exception in thread "main" java.lang.IllegalArgumentException: Cannot round NaN value.
+                                //at kotlin.math.MathKt__MathJVMKt.roundToInt(MathJVM.kt:1132)
+                                //at androidx.compose.ui.util.Windows_desktopKt.setPositionSafely(Windows.desktop.kt:102)
+                                //at androidx.compose.ui.util.Windows_desktopKt.setPositionSafely(Windows.desktop.kt:57)
+                                //at
+                                WindowPosition(it.x + 900.dp, it.y)
+                            } else {
+                                it
+                            }
+                        },
+                        size = hmiWindow.size,
+                        placement = if (isPi) {
+                            WindowPlacement.Maximized
+                        } else {
+                            WindowPlacement.Floating
+                        }
+                    ),
+                    title = "E39 Menu",
+                    undecorated = isPi,
+                    resizable = !isPi,
+                    alwaysOnTop = true,
+                    enabled = true,
+                    onCloseRequest = {
+                        closeHmiMainWindow()
                     }
-                    Box(Modifier.fillMaxSize().background(
-                        color = Color(0F, 0F, 0F, calculatedTint)
-                    ))
+                ) {
+
+                    //1F means fully bright (because white on black in calibration)
+                    val tint = configurationStorage.config[E39Config.WindowManagerConfig.brightnessCompensation]
+
+                    Box {
+                        // HMI Navigator Debug's "Crash the HMI".
+                        val crashRequested by crashHandler.crashRequested.collectAsState()
+                        if (crashRequested) crashHandler.throwIfRequested()
+                        hmiWindow.content()()
+                        // TODO don't do this once the board is fixed and we don't need tint.
+                        val isOnMapScreen by navigatorMapScreenListener.isOnMapScreenFlow().collectAsState(false)
+                        val calculatedTint = if (tint < 0.1F) tint else if (!isOnMapScreen) {
+                            tint
+                        } else {
+                            (tint + 0.3F).coerceIn(0.5F, 0.95F)
+                        }
+                        Box(Modifier.fillMaxSize().background(
+                            color = Color(0F, 0F, 0F, calculatedTint)
+                        ))
+                    }
                 }
             }
         }

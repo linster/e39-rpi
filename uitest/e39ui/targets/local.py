@@ -33,6 +33,7 @@ CONFIG = """e39Config {{
             second=468
         }}
         brightnessCompensation=0
+{window_manager_config}
     }}
     pimConfig {{
         backend {{
@@ -111,7 +112,7 @@ class LocalTarget:
     the runner writes to."""
 
     def __init__(self, out_dir, jar=None, fake_mail=True, bridge="localhost:50052", ibus=False,
-                 show=False, startup_timeout_s=120, maps_backend="localhost:50051"):
+                 show=False, startup_timeout_s=120, maps_backend="localhost:50051", window_manager_config=None):
         self.out_dir = out_dir
         self.jar = jar or default_jar()
         if not self.jar or not os.path.exists(self.jar):
@@ -121,6 +122,8 @@ class LocalTarget:
         self.fake_mail = fake_mail
         self.bridge = bridge
         self.maps_backend = maps_backend
+        # Extra windowManagerConfig settings, e.g. {"errorScreen": "true"}.
+        self.window_manager_config = window_manager_config or {}
         self.want_ibus = ibus
         self.show = show
         self.startup_timeout_s = startup_timeout_s
@@ -155,7 +158,9 @@ class LocalTarget:
         with open(os.path.join(config_dir, "config.conf"), "w") as f:
             f.write(CONFIG.format(ibus_uri=ibus_uri, service_groups=", ".join(groups), bridge_host=host,
                                   bridge_port=int(port or 50052), fake_mail="true" if self.fake_mail else "false",
-                                  maps_host=maps_host, maps_port=int(maps_port or 50051)))
+                                  maps_host=maps_host, maps_port=int(maps_port or 50051),
+                                  window_manager_config="\n".join(
+                                      f"        {k}={v}" for k, v in self.window_manager_config.items())))
         with open(os.path.join(config_dir, "theme.conf"), "w") as f:
             f.write(THEME)
 

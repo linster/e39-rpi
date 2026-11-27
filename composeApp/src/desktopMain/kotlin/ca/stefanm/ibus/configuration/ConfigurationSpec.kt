@@ -139,6 +139,19 @@ object E39Config : ConfigSpec() {
             "brightnessCompensation",
             "Tint HMI to work around failing BMBT."
         )
+
+        val errorScreen by optional(
+            false,
+            "errorScreen",
+            "On a crash, show a dark error screen and restart the HMI, instead of an error dialog " +
+                    "(which the knob can't close). Always on on the Pi (isPi)."
+        )
+
+        val errorScreenSeconds by optional(
+            10,
+            "errorScreenSeconds",
+            "How long the error screen shows before the HMI restarts."
+        )
     }
 
     object LoadingWindowConfig : ConfigSpec() {

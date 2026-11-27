@@ -296,6 +296,10 @@ class Hmi:
         return self.stub.SetPosition(pb2.SetPositionRequest(position=pb2.GeoPoint(latitude=lat, longitude=lng)),
                                      timeout=self.timeout_s)
 
+    def crash_hmi(self):
+        """Makes the HMI window throw, as a bug would; returns once it has."""
+        self.stub.CrashHmi(pb2.CrashHmiRequest(), timeout=self.timeout_s)
+
     # --- debug windows -------------------------------------------------------
 
     def open_debug_window(self, title):

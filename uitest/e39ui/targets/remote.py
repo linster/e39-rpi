@@ -15,8 +15,8 @@ import time
 from .local import free_port, wait_window_settled
 
 ENV_FILE = "/etc/default/e39rpi-hmi"
-RESTART = ("runuser -u hmi -- env XDG_RUNTIME_DIR=/run/user/$(id -u hmi) "
-           "systemctl --user restart e39rpi-hmi.service")
+# As root, in hmi's user manager (as e39-rpi-yocto's qemu-utility.py does; the image has no runuser).
+RESTART = "systemctl --user -M hmi@ restart e39rpi-hmi.service"
 
 
 class RemoteTarget:
