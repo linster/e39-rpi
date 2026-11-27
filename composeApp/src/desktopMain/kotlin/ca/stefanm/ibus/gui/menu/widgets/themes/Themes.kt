@@ -104,7 +104,20 @@ object Themes {
         EDGE_HIGHLIGHT to Color(0, 84, 44, 255),
     ))
 
-    val builtInSchemes = listOf(BmwBlue, RevolutionOrange, GooseGreen)
+    /**
+     * Themes made in the Theme Designer and shipped in the jar, as theme files
+     * (resources/themes/), so a fresh install has them. Edit them in the
+     * designer and save over the file here.
+     */
+    private val bundledFiles = listOf("JessPurple", "FormulaBrown", "CheyenneTeal")
+
+    val bundledSchemes: List<ThemeScheme> = bundledFiles.map { name ->
+        val path = "/themes/$name.${ThemeFiles.EXTENSION}"
+        val text = Themes::class.java.getResource(path)?.readText() ?: error("No $path in the jar")
+        ThemeFiles.parse(text).also { require(it.name == name) { "$path is the theme ${it.name}" } }
+    }
+
+    val builtInSchemes = listOf(BmwBlue, RevolutionOrange, GooseGreen) + bundledSchemes
 
     val BmwBlueDoubledPixels = BmwBlue.doubledPixels
     val BmwBlueNormalSize = BmwBlue.normalSize

@@ -6,6 +6,7 @@ import ca.stefanm.ibus.gui.menu.widgets.themes.designer.ThemeColorMath
 import ca.stefanm.ibus.gui.menu.widgets.themes.designer.ThemeColorRole
 import ca.stefanm.ibus.gui.menu.widgets.themes.designer.ThemeColorRole.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** The built-in themes' colours and sizes, as they were when every theme was written out by hand. */
@@ -99,6 +100,32 @@ class BuiltInThemesTest {
         assertDoubledPixels(Themes.RevolutionOrangeDoubledPixels)
         assertEquals("RevolutionOrangeNormalSize" to "Revolution Orange", Themes.RevolutionOrangeNormalSize.let { it.configFileName to it.friendlyName })
         assertEquals("RevolutionOrangeDoubledPixels" to "Revolution Orange (2X)", Themes.RevolutionOrangeDoubledPixels.let { it.configFileName to it.friendlyName })
+    }
+
+    /** The themes made in the Theme Designer and shipped in the jar (resources/themes/). */
+    @Test
+    fun bundledThemes() {
+        assertEquals(
+            listOf("BmwBlue", "RevolutionOrange", "GooseGreen", "JessPurple", "FormulaBrown", "CheyenneTeal"),
+            Themes.builtInSchemes.map { it.name }
+        )
+        val expected = mapOf(
+            "JessPurple" to ("Jess Purple" to "#3A015CFF"),
+            "FormulaBrown" to ("Formula Brown" to "#4D2A1CFF"),
+            "CheyenneTeal" to ("Cheyenne Teal" to "#225550FF"),
+        )
+        Themes.bundledSchemes.forEach { scheme ->
+            val (friendly, background) = expected.getValue(scheme.name)
+            assertEquals(friendly, scheme.friendlyName)
+            assertEquals(background, ThemeColorMath.toHex(scheme.colors.getValue(MENU_BACKGROUND)))
+            assertNormalSize(scheme.normalSize)
+            assertDoubledPixels(scheme.doubledPixels)
+            assertEquals("${scheme.name}DoubledPixels" to "$friendly (2X)", scheme.doubledPixels.let { it.configFileName to it.friendlyName })
+        }
+        // Both sizes of each are offered.
+        Themes.builtInSchemes.forEach { scheme ->
+            assertTrue(scheme.name, Themes.builtInThemes.containsAll(scheme.themes))
+        }
     }
 
     @Test

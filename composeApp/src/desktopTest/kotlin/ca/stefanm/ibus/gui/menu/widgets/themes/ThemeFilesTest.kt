@@ -18,7 +18,7 @@ import java.nio.file.Files
 class ThemeFilesTest {
 
     private val purple = Color(82, 41, 100, 255)
-    private val jessPurple = ThemeScheme("JessPurple", "Jess Purple", ThemeGenerator.generate(purple, ThemeGenerator.LIGHT))
+    private val testPurple = ThemeScheme("TestPurple", "Test Purple", ThemeGenerator.generate(purple, ThemeGenerator.LIGHT))
 
     private val logger = object : Logger {
         val errors = mutableListOf<String>()
@@ -54,8 +54,8 @@ class ThemeFilesTest {
 
     @Test
     fun writeThenParseGivesTheScheme() {
-        val text = ThemeFiles.write(jessPurple)
-        assertEquals(jessPurple, ThemeFiles.parse(text))
+        val text = ThemeFiles.write(testPurple)
+        assertEquals(testPurple, ThemeFiles.parse(text))
         // Every colour, in the designer's order, named by its key.
         val keys = Regex("""^ {2}(\w+) = "#[0-9A-F]{8}"$""", RegexOption.MULTILINE).findAll(text).map { it.groupValues[1] }.toList()
         assertEquals(ThemeColorRole.entries.map { it.key }, keys)
@@ -68,7 +68,7 @@ class ThemeFilesTest {
 
     @Test
     fun aFriendlyNameWithQuotesRoundTrips() {
-        val scheme = jessPurple.copy(friendlyName = "Jess's \"Purple\" # 1")
+        val scheme = testPurple.copy(friendlyName = "Jess's \"Purple\" # 1")
         assertEquals(scheme, ThemeFiles.parse(ThemeFiles.write(scheme)))
     }
 
@@ -111,11 +111,11 @@ class ThemeFilesTest {
 
     @Test
     fun aSchemeMakesBothSizes() {
-        assertEquals("JessPurpleNormalSize" to "Jess Purple", jessPurple.normalSize.let { it.configFileName to it.friendlyName })
-        assertEquals("JessPurpleDoubledPixels" to "Jess Purple (2X)", jessPurple.doubledPixels.let { it.configFileName to it.friendlyName })
-        assertEquals(purple, jessPurple.normalSize.colors.menuBackground)
-        assertEquals(Themes.BmwBlueNormalSize.bigItem, jessPurple.normalSize.bigItem)
-        assertEquals(Themes.BmwBlueDoubledPixels.bigItem, jessPurple.doubledPixels.bigItem)
+        assertEquals("TestPurpleNormalSize" to "Test Purple", testPurple.normalSize.let { it.configFileName to it.friendlyName })
+        assertEquals("TestPurpleDoubledPixels" to "Test Purple (2X)", testPurple.doubledPixels.let { it.configFileName to it.friendlyName })
+        assertEquals(purple, testPurple.normalSize.colors.menuBackground)
+        assertEquals(Themes.BmwBlueNormalSize.bigItem, testPurple.normalSize.bigItem)
+        assertEquals(Themes.BmwBlueDoubledPixels.bigItem, testPurple.doubledPixels.bigItem)
     }
 
     @Test
@@ -136,18 +136,19 @@ class ThemeFilesTest {
     @Test
     fun savedThemesAreAddedInBothSizes() {
         val repo = repository()
-        val file = repo.save(jessPurple)
-        assertEquals(File(folder, "JessPurple.conf"), file)
-        assertEquals(jessPurple, ThemeFiles.parse(file.readText()))
+        val file = repo.save(testPurple)
+        assertEquals(File(folder, "TestPurple.conf"), file)
+        assertEquals(testPurple, ThemeFiles.parse(file.readText()))
 
-        assertEquals(Themes.builtInSchemes + jessPurple, repo.schemes.value)
-        assertEquals(jessPurple.doubledPixels, repo.find("JessPurpleDoubledPixels"))
-        assertEquals(jessPurple.normalSize, repo.find("JessPurpleNormalSize"))
+        assertEquals(Themes.builtInSchemes + testPurple, repo.schemes.value)
+        assertEquals(testPurple.doubledPixels, repo.find("TestPurpleDoubledPixels"))
+        assertEquals(testPurple.normalSize, repo.find("TestPurpleNormalSize"))
         // 2X themes first, as the lists show them.
-        assertEquals(listOf(true, true, true, true, false, false, false, false), repo.themes.value.map { it.isPixelDoubled })
+        val count = Themes.builtInSchemes.size + 1
+        assertEquals(List(count) { true } + List(count) { false }, repo.themes.value.map { it.isPixelDoubled })
 
         // A new repository (the next start) reads it too.
-        assertEquals(jessPurple.doubledPixels, repository().find("JessPurpleDoubledPixels"))
+        assertEquals(testPurple.doubledPixels, repository().find("TestPurpleDoubledPixels"))
     }
 
     @Test
@@ -155,7 +156,7 @@ class ThemeFilesTest {
         val bluer = Themes.BmwBlue.copy(colors = Themes.BmwBlue.colors + (ThemeColorRole.MENU_BACKGROUND to Color(0, 0, 128, 255)))
         val repo = repository()
         repo.save(bluer)
-        assertEquals(listOf("BmwBlue", "RevolutionOrange", "GooseGreen"), repo.schemes.value.map { it.name })
+        assertEquals(Themes.builtInSchemes.map { it.name }, repo.schemes.value.map { it.name })
         assertEquals(Color(0, 0, 128, 255), repo.find("BmwBlueDoubledPixels")!!.colors.menuBackground)
         assertEquals(Color(0, 0, 128, 255), repo.find("BmwBlueNormalSize")!!.colors.menuBackground)
     }
@@ -164,9 +165,9 @@ class ThemeFilesTest {
     fun badFilesAreSkippedAndListed() {
         File(folder, "broken.conf").writeText("this { isn't")
         File(folder, "notes.txt").writeText("not a theme file, not read")
-        File(folder, "JessPurple.conf").writeText(ThemeFiles.write(jessPurple))
+        File(folder, "TestPurple.conf").writeText(ThemeFiles.write(testPurple))
         val repo = repository()
-        assertEquals(Themes.builtInSchemes + jessPurple, repo.schemes.value)
+        assertEquals(Themes.builtInSchemes + testPurple, repo.schemes.value)
         assertEquals(listOf("broken.conf"), repo.problems.value.map { it.file })
         assertTrue(logger.errors.single().contains("broken.conf"))
     }
@@ -174,23 +175,23 @@ class ThemeFilesTest {
     @Test
     fun reloadPicksUpChangesAndRemovals() {
         val repo = repository()
-        val file = File(folder, "JessPurple.conf").apply { writeText(ThemeFiles.write(jessPurple)) }
-        assertNull(repo.find("JessPurpleNormalSize"))
+        val file = File(folder, "TestPurple.conf").apply { writeText(ThemeFiles.write(testPurple)) }
+        assertNull(repo.find("TestPurpleNormalSize"))
         repo.reload()
-        assertNotNull(repo.find("JessPurpleNormalSize"))
+        assertNotNull(repo.find("TestPurpleNormalSize"))
         file.delete()
         repo.reload()
-        assertNull(repo.find("JessPurpleNormalSize"))
+        assertNull(repo.find("TestPurpleNormalSize"))
     }
 
     @Test
     fun theFolderIsWatched() {
         folder.mkdirs()
         val repo = repository(watch = true)
-        File(folder, "JessPurple.conf").writeText(ThemeFiles.write(jessPurple))
+        File(folder, "TestPurple.conf").writeText(ThemeFiles.write(testPurple))
         val deadline = System.currentTimeMillis() + 10_000
-        while (repo.find("JessPurpleNormalSize") == null && System.currentTimeMillis() < deadline) Thread.sleep(50)
-        assertNotNull("picked up without reload()", repo.find("JessPurpleNormalSize"))
+        while (repo.find("TestPurpleNormalSize") == null && System.currentTimeMillis() < deadline) Thread.sleep(50)
+        assertNotNull("picked up without reload()", repo.find("TestPurpleNormalSize"))
     }
 
     // --- The designer's Save ---------------------------------------------------
@@ -200,15 +201,15 @@ class ThemeFilesTest {
         val state = ThemeDesignerState(Themes.BmwBlueDoubledPixels)
         assertEquals("BMW Blue", state.friendlyName)
         state.changeBase(purple)
-        state.friendlyName = "Jess Purple"
+        state.friendlyName = "Test Purple"
         val scheme = state.scheme()!!
-        assertEquals("JessPurple", scheme.name)
+        assertEquals("TestPurple", scheme.name)
         assertEquals(state.colors, scheme.colors)
 
         val repo = repository()
         repo.save(scheme)
         val loaded = ThemeDesignerState(Themes.BmwBlueDoubledPixels).apply { load(repo.schemes.value.last()) }
-        assertEquals("Jess Purple", loaded.friendlyName)
+        assertEquals("Test Purple", loaded.friendlyName)
         assertEquals(state.colors, loaded.colors)
 
         state.friendlyName = " ?! "
@@ -217,7 +218,7 @@ class ThemeFilesTest {
         // An existing theme's friendly name saves as that theme (replacing it).
         state.friendlyName = "BMW Blue"
         assertEquals("BmwBlue", state.scheme()!!.name)
-        state.friendlyName = "jess purple"
-        assertEquals("JessPurple", state.scheme(repo.schemes.value)!!.name)
+        state.friendlyName = "test purple"
+        assertEquals("TestPurple", state.scheme(repo.schemes.value)!!.name)
     }
 }
