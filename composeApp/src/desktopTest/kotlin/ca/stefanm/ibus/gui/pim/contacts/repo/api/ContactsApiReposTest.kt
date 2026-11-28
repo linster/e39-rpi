@@ -24,7 +24,7 @@ internal class ContactsApiReposTest {
     fun pagesAndLetters() = runBlocking {
         val pager = lists.pager(null)
         var s = pager.state.first()
-        assertEquals("1–100 of 259", s.rangeLabel)
+        assertEquals("1–100 of 260", s.rangeLabel)
         assertEquals("All", s.bookLabel)
         assertFalse(s.hasPrevious)
         assertTrue(s.hasNext)
@@ -38,7 +38,7 @@ internal class ContactsApiReposTest {
 
         pager.next(); pager.next()
         s = pager.state.first()
-        assertEquals("201–259 of 259", s.rangeLabel)
+        assertEquals("201–260 of 260", s.rangeLabel)
         pager.next()
         assertEquals(200, pager.state.first().offset)
 

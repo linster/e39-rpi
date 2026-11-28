@@ -74,6 +74,10 @@ service HmiTestProbe {
   // Guidance with no route: stops guidance if it runs, then clears the
   // session (GuidanceService.clearCurrentSession(), as "Clear Route").
   rpc ResetGuidance(ResetGuidanceRequest) returns (ResetGuidanceResponse);
+  // The sample geocoder (FakeGeocodeRepository, mapConfig.geocode.useFakeData):
+  // no_geocoding_data makes it fail as a map without geocoding data does.
+  // FAILED_PRECONDITION with the maps backend's geocoder.
+  rpc SetFakeGeocoding(SetFakeGeocodingRequest) returns (SetFakeGeocodingResponse);
   // The guidance session and the last route calculation (GuidanceService).
   rpc GetGuidance(GetGuidanceRequest) returns (GuidanceState);
   // The car is here: through the car platform's FakeLocationService (started
@@ -150,6 +154,8 @@ message HmiState {
   // previews), and its menu background as "#RRGGBBAA".
   string theme = 23;
   string theme_menu_background = 24;
+  // Addresses are looked up in sample places (FakeGeocodeRepository).
+  bool fake_geocode = 25;
 }
 
 message BackStackEntry {
@@ -305,6 +311,11 @@ message ResetAccountsResponse {}
 
 message ResetGuidanceRequest {}
 message ResetGuidanceResponse {}
+
+message SetFakeGeocodingRequest {
+  bool no_geocoding_data = 1;
+}
+message SetFakeGeocodingResponse {}
 
 message GetGuidanceRequest {}
 

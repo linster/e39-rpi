@@ -99,6 +99,11 @@ import ca.stefanm.e39hmi.test.v1.guidanceInstructionInfo
 import ca.stefanm.e39hmi.test.v1.guidanceSessionInfo
 import ca.stefanm.e39hmi.test.v1.guidanceState
 import ca.stefanm.e39hmi.test.v1.resetGuidanceResponse
+import ca.stefanm.e39hmi.test.v1.SetFakeGeocodingRequest
+import ca.stefanm.e39hmi.test.v1.SetFakeGeocodingResponse
+import ca.stefanm.e39hmi.test.v1.setFakeGeocodingResponse
+import ca.stefanm.ibus.gui.map.repo.FakeGeocodeRepository
+import ca.stefanm.ibus.gui.map.repo.GeocodeRepository
 import ca.stefanm.ibus.configuration.ConfigurationStorage
 import ca.stefanm.ibus.configuration.E39Config
 import ca.stefanm.ibus.gui.map.guidance.GuidanceService
@@ -163,6 +168,7 @@ class TestProbe @Inject constructor(
     private val windowManager: Provider<WindowManager>,
     private val debugLaunchpad: Provider<DebugLaunchpad>,
     private val crashHandler: Provider<HmiCrashHandler>,
+    private val geocodeRepository: Provider<GeocodeRepository>,
     private val logger: Logger,
 ) {
     companion object {
@@ -245,6 +251,7 @@ class TestProbe @Inject constructor(
             fakeMail = mailRepository.get() is FakeMailRepository
             fakeContacts = contactsRepository.get() is FakeContactsRepository
             fakeAccounts = accountRepository.get() is FakeAccountRepository
+            fakeGeocode = geocodeRepository.get() is FakeGeocodeRepository
             themeStorage.get().shownTheme().let { shown ->
                 theme = shown.configFileName
                 themeMenuBackground = ThemeColorMath.toHex(shown.colors.menuBackground)
@@ -636,6 +643,14 @@ class TestProbe @Inject constructor(
                 (accountRepository.get() as? FakeAccountRepository)?.reset()
             }
             return resetAccountsResponse { }
+        }
+
+        override suspend fun setFakeGeocoding(request: SetFakeGeocodingRequest): SetFakeGeocodingResponse {
+            val fake = geocodeRepository.get() as? FakeGeocodeRepository
+                ?: throw StatusException(Status.FAILED_PRECONDITION.withDescription(
+                    "addresses are looked up by the maps backend (mapConfig.geocode.useFakeData is off)"))
+            fake.noGeocodingData = request.noGeocodingData
+            return setFakeGeocodingResponse { }
         }
 
         override suspend fun resetGuidance(request: ResetGuidanceRequest): ResetGuidanceResponse {

@@ -50,6 +50,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "bridge_mail: needs the PIM bridge's mail (skipped otherwise)")
     config.addinivalue_line("markers", "fake_contacts: needs sample contacts (skipped otherwise)")
     config.addinivalue_line("markers", "fake_accounts: needs sample accounts (skipped otherwise)")
+    config.addinivalue_line("markers", "fake_geocode: needs the sample geocoder (skipped otherwise)")
     config.addinivalue_line("markers", "maps_backend: needs the maps backend (local target: --maps-backend reachable)")
 
 
@@ -128,6 +129,8 @@ def hmi(request, hmi_session, out_dir):
         pytest.skip("needs the PIM bridge's mail (--mail bridge)")
     if request.node.get_closest_marker("fake_contacts") and not state.fake_contacts:
         pytest.skip("needs sample contacts (useFakeData)")
+    if request.node.get_closest_marker("fake_geocode") and not state.fake_geocode:
+        pytest.skip("needs the sample geocoder (mapConfig.geocode.useFakeData)")
     if request.node.get_closest_marker("fake_accounts") and not state.fake_accounts:
         pytest.skip("needs sample accounts (useFakeData)")
     if request.node.get_closest_marker("maps_backend") and request.config.getoption("--target") == "local":
@@ -141,6 +144,8 @@ def hmi(request, hmi_session, out_dir):
     h.reset_mail_app()
     h.reset_contacts_app()
     h.reset_accounts()
+    if state.fake_geocode:
+        h.set_fake_geocoding(no_geocoding_data=False)
     yield h
     rep = getattr(request.node, "rep_call", None)
     if rep is not None and rep.failed:

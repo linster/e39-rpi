@@ -265,6 +265,9 @@ class FakeContactsRepository @Inject constructor() : ContactsRepository {
             contact("b2", "Carl", "Carlson", phones = listOf("+1 780 555 0161" to PhoneNumber.Type.MOBILE),
                 address = home("9 Jasper Ave", "Edmonton", "AB", "T5J 0A1")),
             contact("b2", "", "", email = "someone@example.org"),
+            // Only a street, no town: the fake geocoder finds Main Street in two towns (#59).
+            contact("b2", "", "", organization = "Main Street Diner", phones = listOf("306-555-0155" to PhoneNumber.Type.WORK),
+                address = PostalAddress(PostalAddress.Type.WORK, "Main St", "", "", "", "", "Main St", "")),
             contact("b3", "", "", organization = "IT Help Desk", phones = listOf("+1 403 555 0100" to PhoneNumber.Type.WORK)),
         ) + clubMembers().map { (given, family, n) ->
             contact("b4", given, family, phones = listOf("+1 306 555 %04d".format(1000 + n) to PhoneNumber.Type.MOBILE),

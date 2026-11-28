@@ -25,14 +25,14 @@ internal class FakeContactsRepositoryTest {
     @Test
     fun addressBooksAndOrder() = runBlocking {
         val books = repo.addressBooks().first()
-        assertEquals(listOf(4L, 4L, 1L, 250L), books.map { it.contactCount })
+        assertEquals(listOf(4L, 5L, 1L, 250L), books.map { it.contactCount })
         assertTrue(books[2].readOnly)
         val all = repo.allContacts().first()
-        assertEquals(259L, all.totalCount)
-        assertEquals(259, all.contacts.size)
+        assertEquals(260L, all.totalCount)
+        assertEquals(260, all.contacts.size)
         // The sample people, by name (the club's members in between).
         assertEquals(
-            listOf("Zoë Adams", "Carl Carlson", "IT Help Desk", "Anna Kowalski", "René Lévesque", "Bob Ng",
+            listOf("Zoë Adams", "Carl Carlson", "IT Help Desk", "Anna Kowalski", "René Lévesque", "Main Street Diner", "Bob Ng",
                 "Prairie Euro Garage", "someone@example.org", "Dana Whitford"),
             all.contacts.filter { it.addressBookId != "b4" }.map { it.displayName },
         )
@@ -96,7 +96,7 @@ internal class FakeContactsRepositoryTest {
         assertEquals("+13065550144", saved.phones.single().e164)
         assertEquals(1L, saved.summary.revision)
         assertEquals("Tow Truck", repo.findByPhoneNumber("306 555 0144").getOrThrow().single().contact.displayName)
-        assertEquals(260L, repo.contacts(100).first().totalCount)
+        assertEquals(261L, repo.contacts(100).first().totalCount)
 
         // Only the nickname; the number stays.
         val edited = repo.updateContact(saved.summary, ContactInput(nickname = "Tow guy", givenName = "ignored"), setOf(ContactField.NICKNAME)).getOrThrow()

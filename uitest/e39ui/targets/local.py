@@ -55,6 +55,9 @@ CONFIG = """e39Config {{
         }}
     }}
     mapConfig {{
+        geocode {{
+            useFakeData=true
+        }}
         backend {{
             host="{maps_host}"
             port={maps_port}

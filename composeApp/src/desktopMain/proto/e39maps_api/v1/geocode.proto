@@ -1,0 +1,76 @@
+// Geocoding: an address to positions on the map, offline, from the
+// addresses, streets, places and postal codes the map toolkit extracts from
+// OpenStreetMap into the map database (mapdata.geocode). For a contact's
+// address (navigate there), a typed destination, an event's location.
+syntax = "proto3";
+
+package e39maps.v1;
+
+import "e39maps_api/v1/common.proto";
+
+option java_package = "ca.stefanm.e39maps.v1";
+option java_multiple_files = true;
+
+service GeocodeService {
+  // Candidates for an address, best first. Give free text (query), the
+  // address's parts (address; e.g. a contact card's fields), or both (the
+  // parts win). INVALID_ARGUMENT when neither is given; UNAVAILABLE when the
+  // installed map has no geocoding data (built before it). No match is an
+  // empty list, not an error.
+  rpc Geocode(GeocodeRequest) returns (GeocodeResponse);
+}
+
+// An address in parts, as a vCard ADR has them. All optional.
+message StructuredAddress {
+  // "123 Bank Street" (the number may be here or in house_number).
+  string street = 1;
+  string house_number = 2;
+  // City, town or village ("Ottawa", "Kanata").
+  string locality = 3;
+  // Province or state ("ON"); only used to tell it apart from a locality.
+  string region = 4;
+  string postal_code = 5;
+  string country = 6;
+}
+
+message GeocodeRequest {
+  // Free text, e.g. "123 Bank St, Ottawa, ON K1P 1J1" or "K1P 1J1".
+  string query = 1;
+  StructuredAddress address = 2;
+  // Prefer candidates near here (e.g. the car's position).
+  optional LatLng near = 3;
+  // At most this many candidates; 0 = 5. At most 50.
+  int32 limit = 4;
+}
+
+enum GeocodePrecision {
+  GEOCODE_PRECISION_UNSPECIFIED = 0;
+  // The address itself (an OSM address point or building).
+  GEOCODE_PRECISION_ADDRESS = 1;
+  // Between the street's known house numbers on the same side.
+  GEOCODE_PRECISION_INTERPOLATED = 2;
+  // The street (the house number is unknown, or none was given).
+  GEOCODE_PRECISION_STREET = 3;
+  // A city, town, village or neighbourhood.
+  GEOCODE_PRECISION_PLACE = 4;
+  // The centre of a postal code's addresses.
+  GEOCODE_PRECISION_POSTCODE = 5;
+}
+
+message GeocodeCandidate {
+  // For showing, e.g. "123 Bank Street, Ottawa".
+  string label = 1;
+  LatLng location = 2;
+  GeocodePrecision precision = 3;
+  // Relative: higher is better; only for comparing candidates of one answer.
+  double score = 4;
+  string street = 5;
+  string house_number = 6;
+  string locality = 7;
+  // Formatted ("K1S 3V8"), when known.
+  string postal_code = 8;
+}
+
+message GeocodeResponse {
+  repeated GeocodeCandidate candidates = 1;
+}
