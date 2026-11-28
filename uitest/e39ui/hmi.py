@@ -281,6 +281,11 @@ class Hmi:
     def reset_contacts_app(self):
         self.stub.ResetContactsApp(pb2.ResetContactsAppRequest(), timeout=self.timeout_s)
 
+    def set_fake_geocoding(self, no_geocoding_data=False):
+        """The sample geocoder: no_geocoding_data=True makes it answer as a map without geocoding data."""
+        self.stub.SetFakeGeocoding(pb2.SetFakeGeocodingRequest(no_geocoding_data=no_geocoding_data),
+                                   timeout=self.timeout_s)
+
     def reset_guidance(self):
         """No guidance and no route: stops guidance if it runs, clears the session."""
         self.stub.ResetGuidance(pb2.ResetGuidanceRequest(), timeout=self.timeout_s)

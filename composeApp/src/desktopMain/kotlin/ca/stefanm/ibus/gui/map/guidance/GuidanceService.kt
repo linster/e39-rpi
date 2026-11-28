@@ -74,6 +74,23 @@ class GuidanceService @Inject constructor(
         guidanceSessionStorage.updateWithCurrent()
     }
 
+    enum class RoutePoint { START, END }
+
+    /**
+     * Sets the start or end ([which]) to [at], keeping the other point, in any
+     * state: a calculated route is dropped, and running guidance stopped. (The
+     * session only takes points while SETTING_UP, so this starts a new one.)
+     */
+    fun replacePoint(which: RoutePoint, at: LatLng) {
+        val old = guidanceSessionStorage.currentSession
+        if (old.sessionState == GuidanceSession.SessionState.IN_GUIDANCE) stopGuidance()
+        val start = if (which == RoutePoint.START) at else old.startPoint
+        val end = if (which == RoutePoint.END) at else old.endPoint
+        clearCurrentSession()
+        start?.let { setStartPoint(it) }
+        end?.let { setEndPoint(it) }
+    }
+
     /** Where the last [calculateRoute] got to. */
     sealed interface RouteCalculation {
         data object Idle : RouteCalculation

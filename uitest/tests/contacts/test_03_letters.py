@@ -16,7 +16,7 @@ def test_jump_to_letter(hmi):
     hmi.shot("letters")
 
     hmi.select(r"^K · ")
-    hmi.expect_text(r"^Contacts · All · 104–203 of 259$")
+    hmi.expect_text(r"^Contacts · All · 104–203 of 260$")
     first = [t.text for t in hmi.items()][5]
     assert first == "K, Alex Klein, +1 306 555 1100", first
     hmi.shot("k")

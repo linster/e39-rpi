@@ -341,6 +341,15 @@ object E39Config : ConfigSpec() {
             )
         }
 
+        /** Addresses to positions (#59): the maps backend's GeocodeService, or sample places. */
+        object Geocode : ConfigSpec() {
+            val useFakeData by optional(
+                false,
+                "useFakeData",
+                "Look addresses up in a few sample places instead of the maps backend (for working on the screens). Takes effect after a restart."
+            )
+        }
+
         object GuidanceService : ConfigSpec() {
             val hereMapsApiToken by optional(
                 "",

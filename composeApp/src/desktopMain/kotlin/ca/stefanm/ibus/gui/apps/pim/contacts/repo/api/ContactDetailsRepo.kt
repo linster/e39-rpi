@@ -19,6 +19,8 @@ data class DetailRow(
     val value: String,
     /** For e-mail rows: the address (to write to). */
     val email: EmailAddress? = null,
+    /** For address rows: the address (to navigate to). */
+    val address: PostalAddress? = null,
 ) {
     enum class Kind { PHONE, EMAIL, ADDRESS, BIRTHDAY, ORGANIZATION, NICKNAME, NOTE, URL }
 }
@@ -99,7 +101,7 @@ class ContactDetailsRepo @Inject constructor(
         fun rowsOf(c: Contact): List<DetailRow> = buildList {
             c.phones.forEach { add(DetailRow(DetailRow.Kind.PHONE, phoneLabel(it), it.number)) }
             c.emails.forEach { add(DetailRow(DetailRow.Kind.EMAIL, emailLabel(it), it.address, email = it)) }
-            c.addresses.forEach { add(DetailRow(DetailRow.Kind.ADDRESS, addressLabel(it), addressText(it))) }
+            c.addresses.forEach { add(DetailRow(DetailRow.Kind.ADDRESS, addressLabel(it), addressText(it), address = it)) }
             c.birthday?.let { add(DetailRow(DetailRow.Kind.BIRTHDAY, "Birthday", birthdayText(it))) }
             if (c.nickname.isNotBlank()) add(DetailRow(DetailRow.Kind.NICKNAME, "Nickname", c.nickname))
             c.urls.forEach { add(DetailRow(DetailRow.Kind.URL, "Web", it)) }

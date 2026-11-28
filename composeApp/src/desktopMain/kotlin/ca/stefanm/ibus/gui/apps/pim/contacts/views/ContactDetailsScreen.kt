@@ -35,6 +35,9 @@ import ca.stefanm.ibus.gui.pim.email.views.parts.MailInfoText
 import ca.stefanm.ibus.gui.pim.email.views.parts.MailListItem
 import ca.stefanm.ibus.gui.pim.email.views.parts.SidePaneItem
 import ca.stefanm.ibus.gui.pim.email.views.parts.showMailSidePane
+import ca.stefanm.ibus.gui.map.guidance.NavigateToAddress
+import ca.stefanm.ibus.gui.map.repo.GeocodeRepository
+import ca.stefanm.ibus.gui.pim.contacts.repo.PostalAddress
 import ca.stefanm.ibus.lib.logging.Logger
 import javax.inject.Inject
 
@@ -43,8 +46,9 @@ import javax.inject.Inject
  * e-mail addresses (select one to write mail), addresses, birthday,
  * nickname, web pages, note.
  *
- * TODO calling (the Bluetooth code has no hands-free calls yet) and
- *  navigating to an address (needs geocoding: linster/e39-rpi-maps#4).
+ * Select an address to navigate there (#59, [NavigateToAddress]).
+ *
+ * TODO calling (the Bluetooth code has no hands-free calls yet).
  */
 @ScreenDoc(
     screenName = "ContactDetailsScreen",
@@ -64,6 +68,7 @@ class ContactDetailsScreen @Inject constructor(
     private val composeRepo: MailComposeRepo,
     private val editRepo: ContactEditRepo,
     private val notificationHub: NotificationHub,
+    private val navigateToAddress: NavigateToAddress,
 ) : NavigationNode<Nothing> {
     override val thisClass: Class<out NavigationNode<Nothing>> = this::class.java
 
@@ -105,7 +110,7 @@ class ContactDetailsScreen @Inject constructor(
         val d = details.value
         val scope = rememberCoroutineScope()
         val items: List<MailListItem> = when {
-            d != null -> listOf(header(d, photo.value)) + d.rows.map { row(d, it) } +
+            d != null -> listOf(header(d, photo.value)) + d.rows.map { row(d, it, scope) } +
                 if (d.addressBook?.readOnly == false) listOf(action("✎ Edit Contact") { edit(scope, d) }, action("🗑 Delete Contact...") { confirmDelete(scope, d) })
                 else emptyList()
             error.value != null -> listOf(info("Couldn't open this contact: ${error.value}"))
@@ -124,7 +129,7 @@ class ContactDetailsScreen @Inject constructor(
         ContactHeaderView(d, photo, isSelected = allocatedIndex == currentIndex, onClicked = CallWhen(currentIndexIs = allocatedIndex) {})
     }
 
-    private fun row(d: ContactDetails, row: DetailRow): MailListItem = { allocatedIndex, currentIndex ->
+    private fun row(d: ContactDetails, row: DetailRow, scope: CoroutineScope): MailListItem = { allocatedIndex, currentIndex ->
         ComposeFieldRow(
             label = row.label,
             value = row.value,
@@ -132,6 +137,7 @@ class ContactDetailsScreen @Inject constructor(
             valueLines = if (row.kind == DetailRow.Kind.ADDRESS || row.kind == DetailRow.Kind.NOTE) 4 else 1,
             onClicked = CallWhen(currentIndexIs = allocatedIndex) {
                 if (row.kind == DetailRow.Kind.EMAIL && row.email != null) showEmailActions(d, row)
+                if (row.kind == DetailRow.Kind.ADDRESS && row.address != null) showAddressActions(scope, d, row.address)
             },
         )
     }
@@ -189,6 +195,24 @@ class ContactDetailsScreen @Inject constructor(
             SidePaneItem("Write Mail") {
                 composeRepo.startNew(to = listOf(detailsRepo.mailRecipient(d, row.email!!)))
                 MailComposeScreen.open(navigationNodeTraverser)
+            },
+        ))
+    }
+
+    private fun showAddressActions(scope: CoroutineScope, d: ContactDetails, address: PostalAddress) {
+        modalMenuService.showMailSidePane(logger, "$TAG address", address.formatted, listOf(d.name), listOf(
+            SidePaneItem("Navigate") {
+                navigateToAddress.navigate(
+                    scope,
+                    GeocodeRepository.Address(
+                        street = address.street,
+                        locality = address.locality,
+                        region = address.region,
+                        postalCode = address.postalCode,
+                        country = address.country,
+                    ),
+                    shownAs = address.formatted,
+                )
             },
         ))
     }

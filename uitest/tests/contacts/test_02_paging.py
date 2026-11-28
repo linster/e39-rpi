@@ -7,18 +7,18 @@ import pytest
 def test_contact_paging(hmi):
     hmi.go("ContactsScreen")
     hmi.select(r"^▶$")
-    hmi.expect_text(r"· 101–200 of 259$")
+    hmi.expect_text(r"· 101–200 of 260$")
     hmi.select(r"^▶$")
-    hmi.expect_text(r"· 201–259 of 259$")
+    hmi.expect_text(r"· 201–260 of 260$")
     # The last page: ▶ does nothing.
     hmi.select(r"^▶$")
-    hmi.expect_text(r"· 201–259 of 259$")
+    hmi.expect_text(r"· 201–260 of 260$")
     hmi.shot("last-page")
 
     hmi.select(r"Zimmer|Young|Xu")
     hmi.wait_for_screen("ContactDetailsScreen")
     hmi.back()
     hmi.wait_for_screen("ContactsScreen")
-    hmi.expect_text(r"· 201–259 of 259$")
+    hmi.expect_text(r"· 201–260 of 260$")
     hmi.select(r"^◀$")
-    hmi.expect_text(r"· 101–200 of 259$")
+    hmi.expect_text(r"· 101–200 of 260$")

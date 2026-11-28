@@ -36,6 +36,7 @@ import dagger.Component
 import ca.stefanm.ibus.gui.pim.calendar.repo.backend.AccountModule
 import ca.stefanm.ibus.gui.pim.contacts.repo.ContactsModule
 import ca.stefanm.ibus.gui.pim.email.repo.MailModule
+import ca.stefanm.ibus.gui.map.repo.GeocodeModule
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.*
@@ -60,6 +61,7 @@ annotation class ApplicationScope
     MatrixChatModule::class,
     MapModule::class,
     MailModule::class,
+    GeocodeModule::class,
     ContactsModule::class,
     AccountModule::class,
 ])

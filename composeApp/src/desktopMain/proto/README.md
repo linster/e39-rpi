@@ -25,9 +25,10 @@ grpc-kotlin 1.5.0): change them together. Which API folders it compiles:
 | --- | --- |
 | `MapsBackendSettingsRepository` | backend host/port, in `config.conf` (`E39Config.MapConfig.Backend`, default `localhost:50051`); editable in Map Settings → Maps Backend |
 | `MapsBackendChannel` | the gRPC connection, rebuilt when the settings change; `MapsBackendException` for errors |
-| `PoiGrpcClient`, `RouteGrpcClient` | transport: one method per RPC, protobuf messages in and out |
+| `PoiGrpcClient`, `RouteGrpcClient`, `GeocodeGrpcClient` | transport: one method per RPC, protobuf messages in and out |
 | `PoiMapper` | protobuf ⇄ HMI types (`PoiRepository.Poi`, simplelatlng `LatLng`, icons) |
 | `RemotePoiRepository`, `RemoteRouteRepository` | HMI types, `Result`s; POIs as a cached `StateFlow`, refreshed every 30 s, after changes and on settings changes |
+| `GeocodeRepository` | an address to positions (#59): `RemoteGeocodeRepository` (GeocodeService, offline from the installed map) or `FakeGeocodeRepository` (sample places), picked by `E39Config.MapConfig.Geocode.useFakeData` at startup (`GeocodeModule`). `NoGeocodingData` when the map can't look addresses up (the backend's UNAVAILABLE), apart from the backend being unreachable |
 
 `gui.map.poi.PoiRepository` keeps the screens' API on top of
 `RemotePoiRepository`. Routing answers `UNIMPLEMENTED` until the backend has

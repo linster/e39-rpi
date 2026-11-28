@@ -8,7 +8,7 @@ def test_contact_list(hmi):
     hmi.go("BMWMainMenu")
     hmi.select(r"^Contacts$")
     hmi.wait_for_screen("ContactsScreen")
-    hmi.expect_text(r"^Contacts · All · 1–100 of 259$")
+    hmi.expect_text(r"^Contacts · All · 1–100 of 260$")
     names = [t.text for t in hmi.items()]
     assert names[:5] == ["Back", "◀", "A–Z", "▶", "☰"], names
     # The letter rides on its first contact; the others have none.
